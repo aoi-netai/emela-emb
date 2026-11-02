@@ -2,7 +2,7 @@
   "schema_version": 1,
   "legacy_revision": "c34c0aeefdd966d854371b3110db00a47798751d",
   "fixture_manifest_sha256": "ea5c9837539b20f9d0c639ae55c6b59c11d5bf3189c8be4d7d7f75776a6a9923",
-  "review_sha256": "b7136d338b876de33e1914ab3d768100599ebbbcaed24cc76793095af196a849",
+  "review_sha256": "cf45bc44df619e9b6206847a0a6047d974a50acb0478b0ef691a7eb83e101f27",
   "reach_snapshot": {
     "path": "docs/compiler-p6-source-reach.json",
     "sha256": "8efeee39e1ebf0c88e1fa37e4ae49cd79a4a25407a41835e9a551d6ea32fc8cd",
@@ -400,7 +400,11 @@
       "sha256": "ec9af29b6dbb7c195b6ec64bfd25d6e61c66ec84722bb833290b22e77e21e5f2"
     }
   ],
-  "final_integrated_verification": "required",
+  "final_integrated_verification": {
+    "status": "passed",
+    "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+    "report": "docs/reports/p7-final-validation.json"
+  },
   "additional_nonruntime_legacy_cases": [
     {
       "legacy_test": "frontend::embedded_backend_does_not_supply_the_old_std_namespace",
@@ -651,7 +655,11 @@
           ]
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "emit::bytes::bytes_dynamic_capacity_is_independent_of_string_capacity",
@@ -804,7 +812,11 @@
           ]
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "emit::bytes::bytes_external_adapters_snapshot_borrowed_data_and_transfer_owned_data",
@@ -959,7 +971,11 @@
           ]
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "emit::bytes::bytes_external_tasks_snapshot_arguments_and_results_and_release_cancelled_contexts",
@@ -1104,7 +1120,11 @@
           ]
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "emit::bytes::bytes_list_round_trips_and_invalid_elements_reclaim_every_allocation",
@@ -1258,7 +1278,11 @@
           ]
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "emit::bytes::bytes_require_a_fixed_heap_and_defect_when_its_capacity_is_exhausted",
@@ -1422,7 +1446,11 @@
           ]
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "emit::bytes::bytes_returns_lists_and_aliases_preserve_ownership_and_release_the_heap",
@@ -1645,7 +1673,11 @@
           ]
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "emit::bytes::bytes_size_and_get_are_heapless_and_keep_lengths_above_u16",
@@ -1775,7 +1807,11 @@
           ]
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "emit::bytes::bytes_std_corpus_matches_other_targets_including_const_traits_and_invalid_utf8",
@@ -1936,7 +1972,11 @@
           ]
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "emit::bytes::bytes_survive_suspension_and_release_on_completion_and_cancellation",
@@ -2085,7 +2125,11 @@
           ]
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "emit::bytes::discarded_bytes_still_check_capacity_and_release_owned_results",
@@ -2248,7 +2292,11 @@
           ]
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "emit::captured_sync_string_producers_return_owned_bytes_with_inferred_scratch",
@@ -2411,7 +2459,11 @@
           ]
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "emit::captures_runtime_values_in_a_fixed_heap_closure_environment",
@@ -2555,7 +2607,11 @@
           ]
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "emit::cell::shared_cells_keep_string_updates_alive_across_capture_suspend_and_cancellation",
@@ -2781,7 +2837,11 @@
           ]
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "emit::completion_types::derived::nested_generic_error_payloads_have_finite_display_functions",
@@ -2932,7 +2992,11 @@
           ]
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "emit::completion_types::finite_changing_recursive_enum_arguments_run_with_owned_back_edges",
@@ -3108,7 +3172,11 @@
           ]
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "emit::const_runtime::caches_runtime_const_external_results_and_discards_without_reinitializing",
@@ -3257,7 +3325,11 @@
           ]
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "emit::const_runtime::canonical_const_roots_include_dependency_specializations_until_they_reach_a_fixed_point",
@@ -3349,7 +3421,11 @@
           "concrete_roots": []
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "emit::const_runtime::canonical_dependency_consts_initialize_once_across_nested_specializations",
@@ -3453,7 +3529,11 @@
           "concrete_roots": []
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "emit::const_runtime::evaluates_branch_loop_recursive_helper_and_closure_const_once",
@@ -3586,7 +3666,11 @@
           ]
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "emit::const_runtime::external::adapter_contract_defects_are_memoized_with_the_source_const_name",
@@ -3718,7 +3802,11 @@
           ]
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "emit::const_runtime::external::pure_external_aggregate_const_owns_string_and_list_fields_after_board_release",
@@ -3886,7 +3974,11 @@
           ]
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "emit::const_runtime::external::pure_external_opaque_const_memoizes_the_board_handle_without_heap",
@@ -4019,7 +4111,11 @@
           ]
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "emit::const_runtime::external::pure_external_string_const_caches_borrowed_owned_and_caller_buffer_values_across_public_flow_and_gc",
@@ -4197,7 +4293,11 @@
           ]
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "emit::const_runtime::generic_function_references_returned_by_consts_keep_their_source_family",
@@ -4302,7 +4402,11 @@
           "concrete_roots": []
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "emit::const_runtime::heap_exhaustion_during_const_initialization_keeps_its_name_and_cached_defect",
@@ -4433,7 +4537,11 @@
           ]
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "emit::const_runtime::keeps_list_tuple_enum_and_option_string_const_values_alive",
@@ -4565,7 +4673,11 @@
           ]
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "emit::const_runtime::memoizes_nested_const_defects_and_retries_self_reference_without_prefix",
@@ -4713,7 +4825,11 @@
           ]
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "emit::const_runtime::oversized_static_string_growth_falls_back_before_unbounded_compiler_allocation",
@@ -4844,7 +4960,11 @@
           ]
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "emit::const_runtime::persistent_const_roots_survive_cycle_collection_and_caller_release",
@@ -4977,7 +5097,11 @@
           ]
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "emit::const_runtime::polymorphic_const_bridge_capacity_defects_use_the_source_name_once_and_are_cached",
@@ -5080,7 +5204,11 @@
           "concrete_roots": []
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "emit::const_runtime::polymorphic_const_callable_families_preserve_failure_evidence_and_selected_origins",
@@ -5195,7 +5323,11 @@
           "concrete_roots": []
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "emit::const_runtime::polymorphic_const_defects_have_one_source_context_and_self_reference_retries",
@@ -5352,7 +5484,11 @@
           "concrete_roots": []
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "emit::const_runtime::polymorphic_const_opaque_handles_forward_one_pointer_abi_and_one_initialization",
@@ -5466,7 +5602,11 @@
           "concrete_roots": []
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "emit::const_runtime::polymorphic_empty_list_const_keeps_the_heapless_representation",
@@ -5569,7 +5709,11 @@
           "concrete_roots": []
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "emit::const_runtime::rejects_runtime_const_reachable_from_isr_but_preserves_static_fold",
@@ -5792,7 +5936,11 @@
           ]
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "emit::const_runtime::source_polymorphic_const_origins_keep_a_canonical_value_and_typed_members_in_verified_flow",
@@ -5878,7 +6026,11 @@
           "concrete_roots": []
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "emit::const_runtime::source_polymorphic_consts_share_initialization_and_specialize_callable_families",
@@ -5981,7 +6133,11 @@
           "concrete_roots": []
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "emit::deferred::await_preserves_string_and_list_results_past_frame_and_scope_reuse",
@@ -6176,7 +6332,11 @@
           ]
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "emit::deferred::await_resumes_all_waiters_in_fifo_order_after_completer_finishes",
@@ -6315,7 +6475,11 @@
           "concrete_roots": []
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "emit::deferred::complete_copies_borrowed_string_and_poll_retains_it_past_scope_end",
@@ -6475,7 +6639,11 @@
           ]
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "emit::deferred::complete_stores_once_and_scope_end_breaks_cycles_through_captured_deferreds",
@@ -6648,7 +6816,11 @@
           ]
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "emit::deferred::deferred_constructor_reuses_slots_and_scope_only_programs_omit_the_pool",
@@ -6910,7 +7082,11 @@
           ]
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "emit::deferred::deferred_pool_exhaustion_uses_the_defined_defect",
@@ -7063,7 +7239,11 @@
           ]
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "emit::deferred::deferred_round_trips_int64_and_float_bits_through_await_and_poll",
@@ -7236,7 +7416,11 @@
           ]
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "emit::deferred::deferred_transfers_tuple_values_and_boolean_flags",
@@ -7409,7 +7593,11 @@
           ]
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "emit::deferred::deferred_wait_is_a_real_resume_boundary_and_root_end_reclaims_pending_operation",
@@ -7564,7 +7752,11 @@
           ]
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "emit::deferred::ended_deferred_poll_and_await_reject_leaked_callbacks_after_slot_reuse",
@@ -7844,7 +8036,11 @@
           ]
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "emit::deferred::leaked_complete_callback_checks_scope_before_recycled_slot",
@@ -8000,7 +8196,11 @@
           ]
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "emit::deferred::nested_scope_cancellation_unlinks_middle_tail_and_head_waiters_and_ready_deliveries",
@@ -8142,7 +8342,11 @@
           "concrete_roots": []
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "emit::deferred::poll_observes_empty_and_first_value_for_scalar_and_unit_without_yielding",
@@ -8302,7 +8506,11 @@
           ]
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "emit::dynamically_dispatches_through_a_fixed_heap_evidence_table",
@@ -8446,7 +8654,11 @@
           ]
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "emit::embedded_peripherals::clock::clock_sleep_notifies_then_resumes_through_the_main_scheduler",
@@ -8559,7 +8771,11 @@
           "concrete_roots": []
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "emit::embedded_peripherals::standard_handlers_preserve_values_errors_and_owned_receive_lists",
@@ -8672,7 +8888,11 @@
           "concrete_roots": []
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "emit::external_scalar::source_handler_can_call_native_external_int64_and_float_with_mixed_arguments",
@@ -8799,7 +9019,11 @@
           ]
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "emit::fiber::aggregate::deferred_complete_poll_and_await_share_owned_string_aggregates_past_scope_end",
@@ -8958,7 +9182,11 @@
           ]
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "emit::fiber::aggregate::native_closure_captures_string_tuple_enum_and_list_after_factory_stack_returns",
@@ -9153,7 +9381,11 @@
           ]
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "emit::fiber::aggregate::native_string_enum_producers_use_owned_backing_and_heapless_borrowed_tuples_stay_borrowed",
@@ -9386,7 +9618,11 @@
           ]
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "emit::fiber::aggregate::string_aggregates_own_borrowed_inputs_and_native_results_across_suspend_and_cancellation",
@@ -9581,7 +9817,11 @@
           ]
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "emit::fiber::aggregate::suspended_child_captures_and_scope_results_keep_string_aggregates_until_last_release",
@@ -9776,7 +10016,11 @@
           ]
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "emit::fiber::aggregate_abi::both_propagates_managed_failure_from_aggregate_callbacks_and_reclaims_its_sibling",
@@ -9956,7 +10200,11 @@
           ]
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "emit::fiber::aggregate_abi::both_returns_nested_string_aggregates_and_cancels_pending_children_without_leaks",
@@ -10118,7 +10366,11 @@
           ]
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "emit::fiber::aggregate_abi::handler_resume_accepts_a_string_enum_and_reclaims_it_when_cancelled_in_either_wait",
@@ -10280,7 +10532,11 @@
           ]
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "emit::fiber::aggregate_abi::scope_returns_string_enum_exits_after_success_or_interruption_and_frame_reuse",
@@ -10447,7 +10703,11 @@
           ]
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "emit::fiber::attempt::attempt_captures_sync_failure_and_returns_owned_cause",
@@ -10605,7 +10865,11 @@
           ]
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "emit::fiber::attempt::attempt_keeps_the_embedded_policy_of_stopping_immediately_on_defect",
@@ -10758,7 +11022,11 @@
           ]
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "emit::fiber::attempt::attempt_owns_managed_success_and_releases_discarded_results",
@@ -10911,7 +11179,11 @@
           ]
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "emit::fiber::attempt::attempt_waits_for_async_cleanup_before_catching_failure",
@@ -11065,7 +11337,11 @@
           ]
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "emit::fiber::await_::a_direct_suspend_call_can_return_an_inline_exit_into_its_caller_frame",
@@ -11220,7 +11496,11 @@
           ]
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "emit::fiber::await_::await_and_join_share_fifo_waiters_and_transfer_each_result",
@@ -11367,7 +11647,11 @@
           "concrete_roots": []
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "emit::fiber::await_::await_keeps_owned_list_results_after_the_scope_ends",
@@ -11538,7 +11822,11 @@
           ]
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "emit::fiber::await_::await_preserves_int64_float_bits_and_bool_payloads",
@@ -11730,7 +12018,11 @@
           ]
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "emit::fiber::await_::await_returns_success_and_can_mix_with_repeated_join_without_yielding",
@@ -11928,7 +12220,11 @@
           ]
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "emit::fiber::await_::await_with_a_string_exit_keeps_owned_backing_after_scope_and_frame_reuse",
@@ -12083,7 +12379,11 @@
           ]
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "emit::fiber::await_::child_wait_is_a_resume_boundary_and_scope_end_reclaims_the_operation_tail",
@@ -12344,7 +12644,11 @@
           ]
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "emit::fiber::await_::closing_a_scope_drops_ready_join_and_await_frames_before_result_delivery",
@@ -12481,7 +12785,11 @@
           "concrete_roots": []
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "emit::fiber::await_::leaked_await_callback_checks_the_ended_scope_before_using_the_child_result",
@@ -12654,7 +12962,11 @@
           ]
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "emit::fiber::await_::returning_await_exit_through_scope_owns_the_exit_after_scope_end",
@@ -12809,7 +13121,11 @@
           ]
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "emit::fiber::await_::scope_end_breaks_cycles_when_a_child_result_closure_captures_its_own_handle",
@@ -12963,7 +13279,11 @@
           ]
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "emit::fiber::cause::cause_kind_reads_failure_without_consuming_the_cause",
@@ -13121,7 +13441,11 @@
           ]
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "emit::fiber::cause::cause_raise_preserves_the_error_and_runs_native_cleanup_before_escape",
@@ -13279,7 +13603,11 @@
           ]
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "emit::fiber::cause::cause_to_string_uses_error_show_and_caller_output_buffer",
@@ -13454,7 +13782,11 @@
           ]
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "emit::fiber::cause::failed_empty_cause_raised_in_cleanup_returns_to_its_failing_scope",
@@ -13617,7 +13949,11 @@
           ]
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "emit::fiber::cause::interruption_raised_by_cleanup_replaces_a_body_failure",
@@ -14073,7 +14409,11 @@
           ]
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "emit::fiber::cause::raised_interruption_crosses_sync_calls_and_attempt_without_becoming_a_value",
@@ -14263,7 +14603,11 @@
           ]
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "emit::fiber::child_reclaim::discarded_completed_children_release_results_before_scope_end_and_survive_cancellation",
@@ -14386,7 +14730,11 @@
           "concrete_roots": []
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "emit::fiber::child_reclaim::failed_handleless_children_release_records_while_scope_waits_for_sibling_cleanup",
@@ -14512,7 +14860,11 @@
           "concrete_roots": []
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "emit::fiber::child_reclaim::live_handles_keep_completed_results_for_repeated_join_await_after_execution_slot_reuse",
@@ -14635,7 +14987,11 @@
           "concrete_roots": []
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "emit::fiber::child_reclaim::long_lived_scope_reclaims_completed_children_with_copied_handles_and_repeated_join_await",
@@ -14758,7 +15114,11 @@
           "concrete_roots": []
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "emit::fiber::children_can_fork_siblings_and_inherit_the_scope_call_evidence",
@@ -14869,7 +15229,11 @@
           "concrete_roots": []
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "emit::fiber::closing_outer_scope_reclaims_nested_scopes_and_their_tasks",
@@ -14998,7 +15362,11 @@
           ]
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "emit::fiber::completed_children_and_queued_events_do_not_leak_across_scope_reuse",
@@ -15127,7 +15495,11 @@
           ]
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "emit::fiber::failure::child_failure_closes_scope_and_waits_for_sibling_release_before_escape",
@@ -15269,7 +15641,11 @@
           "concrete_roots": []
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "emit::fiber::failure::delayed_failure_after_resume_formats_owned_error_after_the_call_frame_returns",
@@ -15423,7 +15799,11 @@
           ]
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "emit::fiber::failure::failing_and_infallible_scopes_share_the_fork_operation_abi",
@@ -15610,7 +15990,11 @@
           ]
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "emit::fiber::failure::failing_suspend_closure_keeps_error_through_suspending_release",
@@ -15768,7 +16152,11 @@
           ]
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "emit::fiber::failure::masked_cleanup_can_await_the_failed_child_before_scope_error_propagates",
@@ -15913,7 +16301,11 @@
           ]
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "emit::fiber::failure::operation_failure_after_resume_stops_without_writing_a_stale_error_pointer",
@@ -16064,7 +16456,11 @@
           ]
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "emit::fiber::failure::suspend_failures_cross_calls_and_preserve_cleanup_before_escape",
@@ -16220,7 +16616,11 @@
           ]
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "emit::fiber::failure::suspend_operation_failure_before_resume_reaches_its_call_edge",
@@ -16373,7 +16773,11 @@
           ]
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "emit::fiber::failure::uncaught_suspend_failure_stops_at_public_boundary_after_release",
@@ -16527,7 +16931,11 @@
           ]
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "emit::fiber::fork_exhaustion_is_a_fixed_pool_defect_before_children_start",
@@ -16655,7 +17063,11 @@
           ]
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "emit::fiber::function_aggregate::failing_indirect_aggregate_calls_release_discarded_successes_and_preserve_string_errors",
@@ -16780,7 +17192,11 @@
           ]
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "emit::fiber::function_aggregate::heapless_callbacks_accept_and_return_aggregates_containing_function_values",
@@ -16905,7 +17321,11 @@
           ]
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "emit::fiber::function_aggregate::native_aggregate_callbacks_own_results_after_captures_and_arguments_are_released",
@@ -17047,7 +17467,11 @@
           ]
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "emit::fiber::integration::managed_task_success_values_share_state_child_and_deferred_ownership_with_and_without_gc",
@@ -17196,7 +17620,11 @@
           "concrete_roots": []
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "emit::fiber::integration::shared_state_child_reclamation_deferreds_and_external_failure_share_owned_edges_with_and_without_gc",
@@ -17352,7 +17780,11 @@
           "concrete_roots": []
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "emit::fiber::interrupt::await_of_interrupted_children_returns_owned_failures_repeatedly_and_for_unit",
@@ -17503,7 +17935,11 @@
           ]
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "emit::fiber::interrupt::await_waiters_receive_failure_after_interrupt_cleanup_before_interrupt_waiters",
@@ -17656,7 +18092,11 @@
           ]
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "emit::fiber::interrupt::interrupt_cancels_unstarted_children_and_does_not_yield_for_ended_children",
@@ -17808,7 +18248,11 @@
           ]
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "emit::fiber::interrupt::interrupt_waits_for_suspending_cleanup_and_ignores_old_task_notifications",
@@ -17973,7 +18417,11 @@
           ]
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "emit::fiber::interrupt::interrupted_cleanup_can_close_a_nested_scope_and_wait_for_its_child_release",
@@ -18102,7 +18550,11 @@
           "concrete_roots": []
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "emit::fiber::interrupt::interrupted_cleanup_can_wait_on_a_deferred_completed_by_a_sibling",
@@ -18243,7 +18695,11 @@
           ]
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "emit::fiber::interrupt::interruption_causes_survive_scope_and_heap_reuse_and_can_be_released_by_the_caller",
@@ -18415,7 +18871,11 @@
           ]
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "emit::fiber::interrupt::join_of_an_interrupted_child_is_the_defined_panic_defect",
@@ -18565,7 +19025,11 @@
           ]
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "emit::fiber::interrupt::leaked_interrupt_callback_reports_ended_scope_after_slot_reuse",
@@ -18735,7 +19199,11 @@
           ]
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "emit::fiber::interrupt::multiple_interrupt_waiters_resume_fifo_after_release_finishes",
@@ -18874,7 +19342,11 @@
           "concrete_roots": []
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "emit::fiber::interrupt::operation_tails_do_not_keep_a_copy_of_an_expired_cleanup_mask",
@@ -19027,7 +19499,11 @@
           ]
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "emit::fiber::interrupt::self_interrupt_unwinds_the_body_and_is_deferred_inside_cleanup",
@@ -19168,7 +19644,11 @@
           ]
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "emit::fiber::join::closing_nested_scopes_unlinks_join_waiters_before_the_target_completes",
@@ -19308,7 +19788,11 @@
           "concrete_roots": []
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "emit::fiber::join::join_preserves_int64_float_bits_and_bool",
@@ -19500,7 +19984,11 @@
           ]
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "emit::fiber::join::join_results_own_strings_and_lists_after_scope_and_frame_reuse",
@@ -19695,7 +20183,11 @@
           ]
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "emit::fiber::join::join_reuses_completed_results_without_yielding_and_waits_for_discarded_unit",
@@ -19874,7 +20366,11 @@
           ]
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "emit::fiber::join::join_wakes_multiple_waiters_in_fifo_after_the_childs_last_breath",
@@ -20021,7 +20517,11 @@
           "concrete_roots": []
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "emit::fiber::join::leaked_join_callback_rejects_an_ended_scope_after_reusing_execution_slots",
@@ -20194,7 +20694,11 @@
           ]
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "emit::fiber::notes::later_failures_are_ordered_owned_notes_shared_by_rethrown_causes",
@@ -20409,7 +20913,11 @@
           ]
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "emit::fiber::notes::note_display_checks_the_callers_remaining_capacity",
@@ -20619,7 +21127,11 @@
           ]
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "emit::fiber::overlap::failures_from_cancelled_nested_scopes_become_notes_of_the_outer_first_failure",
@@ -20755,7 +21267,11 @@
           "concrete_roots": []
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "emit::fiber::overlap::nested_scope_failure_survives_external_interruption_before_and_after_failure",
@@ -20903,7 +21419,11 @@
           ]
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "emit::fiber::overlap::settled_nested_scope_failures_keep_their_notes_when_cleanup_raises_interrupt",
@@ -21090,7 +21610,11 @@
           ]
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "emit::fiber::payload::list_error_payloads_survive_suspending_cleanup_and_are_dropped_on_cancellation",
@@ -21252,7 +21776,11 @@
           ]
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "emit::fiber::payload::native_failure_channels_own_formatted_parse_errors_and_list_payloads",
@@ -21477,7 +22005,11 @@
           ]
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "emit::fiber::payload::operation_failure_before_resume_transfers_and_releases_its_string_payload",
@@ -21631,7 +22163,11 @@
           ]
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "emit::fiber::payload::scope_causes_and_notes_keep_string_payloads_after_frames_and_scopes_end",
@@ -21845,7 +22381,11 @@
           ]
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "emit::fiber::protect::a_root_waits_for_cleanup_of_its_resumed_operation_tail",
@@ -22002,7 +22542,11 @@
           ]
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "emit::fiber::protect::cancellation_preserves_a_suspending_release_and_its_pending_task",
@@ -22163,7 +22707,11 @@
           ]
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "emit::fiber::protect::defects_in_suspend_protect_keep_the_configured_immediate_stop_policy",
@@ -22313,7 +22861,11 @@
           ]
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "emit::fiber::protect::scope_cancellation_runs_nested_releases_before_the_parent_continues",
@@ -22469,7 +23021,11 @@
           ]
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "emit::fiber::scope_cancels_unstarted_children_before_running_their_function",
@@ -22597,7 +23153,11 @@
           ]
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "emit::fiber::scope_keeps_managed_captures_and_boxes_reference_results_without_leaks",
@@ -22726,7 +23286,11 @@
           ]
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "emit::fiber::scope_starts_children_at_real_suspension_and_reclaims_waiting_tasks",
@@ -22855,7 +23419,11 @@
           ]
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "emit::fiber::task_failure::external_failure_payload_survives_suspending_cleanup_and_later_interruption",
@@ -23093,7 +23661,11 @@
           ]
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "emit::fiber::task_failure::external_failures_own_borrowed_strings_and_lists_across_escape_attempt_scope_and_cancel",
@@ -23354,7 +23926,11 @@
           ]
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "emit::lifts_nested_closures_that_capture_outer_closure_values",
@@ -23498,7 +24074,11 @@
           ]
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "emit::owned::returned_list_owns_formatted_strings_after_the_producer_stack_returns",
@@ -23659,7 +24239,11 @@
           ]
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "emit::passes_dynamic_effect_evidence_to_a_captured_closure",
@@ -23803,7 +24387,11 @@
           ]
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "emit::release_0_24::debug_and_error_display_respect_written_derived_and_missing_show",
@@ -24079,7 +24667,11 @@
           ]
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "emit::release_0_24::derived_and_written_traits_keep_static_dispatch_and_escaped_display",
@@ -24355,7 +24947,11 @@
           ]
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "emit::release_0_24::lambda_patterns_and_new_core_helpers_keep_dynamic_semantics",
@@ -24588,7 +25184,11 @@
           ]
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "emit::release_0_24::ordered_maps_sets_and_rotations_reclaim_persistent_values",
@@ -24736,7 +25336,11 @@
           ]
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "emit::release_0_24::public_failure_entry_keeps_the_embedded_immediate_defect_contract",
@@ -25012,7 +25616,11 @@
           ]
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "emit::state_run_shares_owned_cell_storage_with_its_handler",
@@ -25156,7 +25764,11 @@
           ]
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "emit::string_append::literal_prefixes_are_copied_without_treating_readonly_bytes_as_writable_output",
@@ -25263,7 +25875,11 @@
           ]
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "emit::string_comparison::owned_string_views_compare_without_allocating_or_changing_ownership",
@@ -25544,7 +26160,11 @@
           ]
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "emit::string_comparison::source_comparisons_are_heapless_and_allow_isr_and_constant_space_tail_loops",
@@ -25787,7 +26407,11 @@
           ]
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "emit::string_comparison::suspend_source_comparisons_preserve_captured_bytes_and_release_on_completion_and_cancel",
@@ -25931,7 +26555,11 @@
           ]
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "emit::suspend::completed_roots_release_waiting_operation_tasks_and_ignore_their_queued_events",
@@ -26069,7 +26697,11 @@
           ]
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "emit::suspend::delayed_resume_runs_the_caller_until_its_next_suspension",
@@ -26207,7 +26839,11 @@
           ]
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "emit::suspend::duplicate_resume_reports_the_operation_and_handler",
@@ -26344,7 +26980,11 @@
           ]
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "emit::suspend::immediate_resume_finishes_the_operation_body_before_the_caller_continues",
@@ -26480,7 +27120,11 @@
           ]
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "emit::suspend::suspend_handler_source_waits_and_resumes_into_the_callers_result",
@@ -26618,7 +27262,11 @@
           ]
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "emit::sync_external::source_string_adapters_snapshot_borrowed_results_and_board_held_arguments",
@@ -26782,7 +27430,11 @@
           ]
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "emit::sync_external::values::source_tuple_and_list_external_values_keep_all_managed_fields_alive",
@@ -26927,7 +27579,11 @@
           ]
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "emit::synchronous_exhaustive_matches_and_list_loops_accept_unreachable_terminators",
@@ -27093,7 +27749,11 @@
           ]
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "emit::task_values::managed::source_tasks_own_packet_arguments_and_successes_through_scope_deferred_cancel_and_null_results",
@@ -27294,7 +27954,11 @@
           ]
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "emit::task_values::managed::string_successes_snapshot_nul_bytes_before_the_context_is_released",
@@ -27495,7 +28159,11 @@
           ]
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "emit::value_audit::changing_recursive_type_arguments_with_a_finite_type_graph_are_supported",
@@ -27633,7 +28301,11 @@
           ]
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "frontend::backend_board_handlers_resolve_typecheck_and_lower_with_the_default_frontend",
@@ -27717,7 +28389,11 @@
           "concrete_roots": []
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "frontend::unrelated_project_modules_under_embedded_remain_available",
@@ -27812,7 +28488,11 @@
           ]
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "lib::compiler::separation_tests::common_closure_lowering_is_shared_and_native_managed_values_run",
@@ -27966,7 +28646,11 @@
           ]
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "lib::compiler::separation_tests::shared_string_helpers_support_multiple_consumers_in_one_translation_unit",
@@ -28145,7 +28829,11 @@
           ]
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "lib::compiler::separation_tests::string_plans_preserve_aliases_while_other_buffers_and_calls_are_live",
@@ -28295,7 +28983,11 @@
           ]
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "platform::native_clock_console_and_timer_use_common_standard_service_glue",
@@ -28401,7 +29093,11 @@
           "concrete_roots": []
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     },
     {
       "legacy_test": "platform::native_timer_slots_survive_cancellation_and_repeated_reuse",
@@ -28507,7 +29203,11 @@
           "concrete_roots": []
         }
       },
-      "final_integrated_verification": "required"
+      "final_integrated_verification": {
+        "status": "passed",
+        "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+        "report": "docs/reports/p7-final-validation.json"
+      }
     }
   ]
 }

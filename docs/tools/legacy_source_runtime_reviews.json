@@ -427,5 +427,10 @@
       "original_report_revision": "88677b6"
     }
   ],
-  "report_reference_policy": "Executable audit references use committed ancestors on the official P7 branch. Original feature revisions are provenance only; a fresh clone does not need orphaned subagent commits."
+  "report_reference_policy": "Executable audit references use committed ancestors on the official P7 branch. Original feature revisions are provenance only; a fresh clone does not need orphaned subagent commits.",
+  "final_integrated_verification": {
+    "status": "passed",
+    "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+    "report": "docs/reports/p7-final-validation.json"
+  }
 }
