@@ -34,6 +34,62 @@ pub(crate) fn infer(
     modes: &HashMap<ir::DefinitionId, Mode>,
     catalog: &mut Catalog,
 ) -> Result<(), Vec<Diagnostic>> {
+    infer_phase(program, modes, catalog, None, None, true)
+}
+/// Run while value metas are still live, before an SCC is generalized. This supplies
+/// inferred failure payload types to escape patterns and includes error-only metas
+/// in the same signature scheme as the function's value types.
+pub(crate) fn constrain(
+    program: &mut ir::Program,
+    modes: &HashMap<ir::DefinitionId, Mode>,
+    catalog: &mut Catalog,
+    solver: &mut super::infer::Solver,
+    parameters: &[Vec<TypeId>],
+) -> Result<(), Vec<Diagnostic>> {
+    infer_phase(
+        program,
+        modes,
+        catalog,
+        Some(solver),
+        Some(parameters),
+        false,
+    )
+}
+pub(crate) fn incoming(
+    expression: &ir::Expr,
+    functions: &[ir::Function],
+    registry: &super::traits::Registry,
+    catalog: &mut Catalog,
+    solver: &mut super::infer::Solver,
+    parameters: &[Vec<TypeId>],
+    source: &str,
+) -> Result<Vec<TypeId>, Diagnostic> {
+    let index = functions
+        .iter()
+        .enumerate()
+        .map(|(index, function)| (function.id, index))
+        .collect();
+    let mut context = Context {
+        catalog,
+        functions,
+        index: &index,
+        source,
+        registry,
+        solver: Some(solver),
+        parameters: Some(parameters),
+    };
+    Ok(sorted(
+        context.expression(expression, &HashSet::new())?.errors,
+    ))
+}
+fn infer_phase(
+    program: &mut ir::Program,
+    modes: &HashMap<ir::DefinitionId, Mode>,
+    catalog: &mut Catalog,
+    mut solver: Option<&mut super::infer::Solver>,
+    parameters: Option<&[Vec<TypeId>]>,
+    validate: bool,
+) -> Result<(), Vec<Diagnostic>> {
     let index: HashMap<_, _> = program
         .functions
         .iter()
@@ -50,6 +106,8 @@ pub(crate) fn infer(
                 index: &index,
                 source: &function.source_name,
                 registry: &program.registry,
+                solver: solver.as_deref_mut(),
+                parameters,
             };
             let analysis = match &function.body {
                 Some(body) => context.block(body, &HashSet::new()),
@@ -80,6 +138,10 @@ pub(crate) fn infer(
             )]);
         }
     }
+    if !validate {
+        program.core = catalog.core.clone();
+        return Ok(());
+    }
     let mut errors = Vec::new();
     for function in &program.functions {
         let mut context = Context {
@@ -88,6 +150,8 @@ pub(crate) fn infer(
             index: &index,
             source: &function.source_name,
             registry: &program.registry,
+            solver: None,
+            parameters: None,
         };
         let analysis = match &function.body {
             Some(body) => context.block(body, &HashSet::new()),
@@ -118,8 +182,78 @@ struct Context<'a> {
     index: &'a HashMap<ir::DefinitionId, usize>,
     source: &'a str,
     registry: &'a super::traits::Registry,
+    solver: Option<&'a mut super::infer::Solver>,
+    parameters: Option<&'a [Vec<TypeId>]>,
 }
 impl Context<'_> {
+    fn resolve(&mut self, ty: TypeId, span: Span) -> Result<TypeId, Diagnostic> {
+        if let Some(solver) = self.solver.as_deref_mut() {
+            solver
+                .resolve(&mut self.catalog.core.types, ty)
+                .map_err(|error| {
+                    Diagnostic::new(DiagnosticKind::Type, span, error.message)
+                        .in_source(self.source)
+                })
+        } else {
+            Ok(ty)
+        }
+    }
+    fn instantiate(
+        &mut self,
+        target: ir::DefinitionId,
+        ty: TypeId,
+        arguments: &[TypeId],
+        span: Span,
+    ) -> Result<TypeId, Diagnostic> {
+        if let (Some(solver), Some(parameters)) = (self.solver.as_deref_mut(), self.parameters) {
+            let parameters = &parameters[target.0];
+            if arguments.len() > parameters.len() {
+                return Err(self.error(
+                    span,
+                    "call has more type arguments than its signature scheme",
+                ));
+            }
+            // A recursive call made before the SCC closes shares its inferred metas.
+            let substitutions = parameters
+                .iter()
+                .copied()
+                .zip(
+                    arguments
+                        .iter()
+                        .copied()
+                        .chain(parameters[arguments.len()..].iter().copied()),
+                )
+                .collect();
+            solver
+                .substitute(&mut self.catalog.core.types, ty, &substitutions)
+                .map_err(|error| {
+                    Diagnostic::new(DiagnosticKind::Type, span, error.message)
+                        .in_source(self.source)
+                })
+        } else {
+            Ok(self.catalog.core.types.subst(ty, arguments))
+        }
+    }
+    fn constrain_pattern(
+        &mut self,
+        pattern: &ir::Pattern,
+        error: TypeId,
+        span: Span,
+    ) -> Result<(), Diagnostic> {
+        let pattern_type = self.resolve(backend_type(pattern.ty), span)?;
+        let same_tag = matches!((self.catalog.core.ty(pattern_type),self.catalog.core.ty(error)),(Type::Enum(left,_),Type::Enum(right,_)) if left==right);
+        if same_tag {
+            if let Some(solver) = self.solver.as_deref_mut() {
+                solver
+                    .unify(&mut self.catalog.core.types, error, pattern_type)
+                    .map_err(|error| {
+                        Diagnostic::new(DiagnosticKind::Type, span, error.message)
+                            .in_source(self.source)
+                    })?;
+            }
+        }
+        Ok(())
+    }
     fn error(&self, span: Span, message: &str) -> Diagnostic {
         Diagnostic::new(DiagnosticKind::Type, span, message).in_source(self.source)
     }
@@ -204,6 +338,7 @@ impl Context<'_> {
                                     let mut arguments = vec![*self_type];
                                     arguments.extend_from_slice(method_type_arguments);
                                     let error = self.catalog.core.types.subst(error, &arguments);
+                                    let error = self.resolve(error, expression.span)?;
                                     self.require_error(error, expression.span)?;
                                     analysis.errors.insert(error);
                                     analysis.constraints.insert(error);
@@ -224,6 +359,11 @@ impl Context<'_> {
                     analysis.merge(self.expression(arg, dynamic)?);
                 }
                 let Some(&index) = self.index.get(target) else {
+                    if self.solver.is_some() {
+                        // A reference into the active SCC can precede that member's body.
+                        // Its errors are shared at the SCC fixed point before generalization.
+                        return Ok(analysis);
+                    }
                     return Err(self.error(
                         expression.span,
                         "call references an unknown definition while inferring failures",
@@ -231,13 +371,15 @@ impl Context<'_> {
                 };
                 let signature = self.functions[index].signature.clone();
                 for error in signature.sets.errors {
-                    let error = self.catalog.core.types.subst(error, type_arguments);
+                    let error =
+                        self.instantiate(*target, error, type_arguments, expression.span)?;
                     self.require_error(error, expression.span)?;
                     analysis.errors.insert(error);
                     analysis.constraints.insert(error);
                 }
                 for constraint in signature.sets.error_constraints {
-                    let constraint = self.catalog.core.types.subst(constraint, type_arguments);
+                    let constraint =
+                        self.instantiate(*target, constraint, type_arguments, expression.span)?;
                     self.require_error(constraint, expression.span)?;
                     analysis.constraints.insert(constraint);
                 }
@@ -263,7 +405,7 @@ impl Context<'_> {
             }
             E::Fail(value) => {
                 analysis.merge(self.expression(value, dynamic)?);
-                let ty = backend_type(value.ty);
+                let ty = self.resolve(backend_type(value.ty), value.span)?;
                 if ty == TypeId::ANY {
                     analysis.errors.extend(dynamic);
                     analysis.constraints.extend(dynamic);
@@ -278,27 +420,28 @@ impl Context<'_> {
                 let incoming = analysis.errors.clone();
                 let mut handled = HashSet::new();
                 for &error in &incoming {
-                    let covering: Vec<_> = arms
-                        .iter()
-                        .filter(|arm| arm.guard.is_none())
-                        .filter_map(|arm| {
-                            if matches!(
-                                arm.pattern.kind,
-                                ir::PatternKind::Any | ir::PatternKind::Bind(_)
-                            ) {
-                                let mut pattern = arm.pattern.clone();
-                                pattern.ty = super::data::frontend_type(error);
-                                Some(pattern)
-                            } else if backend_type(arm.pattern.ty) == error {
-                                Some(arm.pattern.clone())
-                            } else {
-                                None
-                            }
-                        })
-                        .collect();
+                    let mut resolved = self.resolve(error, expression.span)?;
+                    for arm in arms {
+                        self.constrain_pattern(&arm.pattern, resolved, arm.pattern.span)?;
+                        resolved = self.resolve(error, expression.span)?;
+                    }
+                    let mut covering = Vec::new();
+                    for arm in arms.iter().filter(|arm| arm.guard.is_none()) {
+                        let pattern_type =
+                            self.resolve(backend_type(arm.pattern.ty), arm.pattern.span)?;
+                        if matches!(
+                            arm.pattern.kind,
+                            ir::PatternKind::Any | ir::PatternKind::Bind(_)
+                        ) || pattern_type == resolved
+                        {
+                            let mut pattern = arm.pattern.clone();
+                            pattern.ty = super::data::frontend_type(resolved);
+                            covering.push(pattern);
+                        }
+                    }
                     if patterns::exhaustive(
                         &covering,
-                        super::data::frontend_type(error),
+                        super::data::frontend_type(resolved),
                         self.catalog,
                     ) {
                         handled.insert(error);
@@ -312,7 +455,9 @@ impl Context<'_> {
                     ) {
                         incoming.clone()
                     } else {
-                        HashSet::from([backend_type(arm.pattern.ty)])
+                        HashSet::from([
+                            self.resolve(backend_type(arm.pattern.ty), arm.pattern.span)?
+                        ])
                     };
                     if let Some(guard) = &arm.guard {
                         analysis.merge(self.expression(guard, &narrowed)?);

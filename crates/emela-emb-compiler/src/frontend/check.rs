@@ -685,6 +685,12 @@ impl Checker {
         let component = self.schemes.finish(id);
         let ret = result?;
         if !component.is_empty() {
+            self.constrain_errors().map_err(|errors| {
+                errors
+                    .into_iter()
+                    .next()
+                    .expect("failure inference reports a diagnostic")
+            })?;
             let signatures = self
                 .definitions
                 .iter()
@@ -726,6 +732,33 @@ impl Checker {
             }
         }
         Ok(ret)
+    }
+    fn constrain_errors(&mut self) -> Result<(), Vec<Diagnostic>> {
+        let modes = self
+            .definitions
+            .iter()
+            .enumerate()
+            .map(|(index, definition)| (DefinitionId(index), definition.error_mode.clone()))
+            .collect();
+        let mut program = ir::Program {
+            core: self.catalog.core.clone(),
+            registry: self.traits.registry.clone(),
+            functions: self.checked.iter().flatten().cloned().collect(),
+        };
+        super::errors::constrain(
+            &mut program,
+            &modes,
+            &mut self.catalog,
+            &mut self.solver,
+            &self.schemes.parameters,
+        )?;
+        for function in program.functions {
+            self.definitions[function.id.0].signature.sets = function.signature.sets.clone();
+            if let Some(checked) = &mut self.checked[function.id.0] {
+                checked.signature.sets = function.signature.sets;
+            }
+        }
+        Ok(())
     }
     fn function_body(&mut self, id: DefinitionId) -> Result<Ty, Diagnostic> {
         let definition = self.definitions[id.0].clone();
@@ -1055,34 +1088,42 @@ impl Checker {
                     ty: Ty::Any,
                 };
                 locals.next += 1;
-                let known = self.known_errors(&value);
+                let known = self.known_errors(module, &value)?;
                 let mut checked = Vec::new();
                 for arm in arms {
                     let saved = locals.names.clone();
                     let pattern_type = if let ast::PatternKind::Constructor { path, .. } =
                         &arm.pattern.kind
                     {
-                        let Symbol::Constructor(ctor) = self.resolve(module, path)? else {
-                            return Err(self.error(
-                                module,
-                                DK::Type,
-                                arm.pattern.span,
-                                "escape requires error patterns",
-                            ));
-                        };
-                        if !self.catalog.core.enums[ctor.enum_id].error {
-                            return Err(self.error(
-                                module,
-                                DK::Type,
-                                arm.pattern.span,
-                                "escape constructor is not an error",
-                            ));
-                        }
-                        if let Some(&ty)=known.iter().find(|&&ty|matches!(self.catalog.core.ty(ty),crate::contract::ir::Type::Enum(id,_) if *id==ctor.enum_id)) {data::frontend_type(ty)}
+                        match self.resolve(module, path)? {
+                            Symbol::Constructor(ctor) => {
+                                if !self.catalog.core.enums[ctor.enum_id].error {
+                                    return Err(self.error(
+                                        module,
+                                        DK::Type,
+                                        arm.pattern.span,
+                                        "escape constructor is not an error",
+                                    ));
+                                }
+                                if let Some(&ty)=known.iter().find(|&&ty|matches!(self.catalog.core.ty(ty),crate::contract::ir::Type::Enum(id,_) if *id==ctor.enum_id)) {data::frontend_type(ty)}
                         else if self.catalog.core.enums[ctor.enum_id].params==0 {Ty::Compound(self.catalog.core.types.enum_type(ctor.enum_id,vec![]))}
-                        else {return Err(self.error(module,DK::Type,arm.pattern.span,"generic error payload type cannot be inferred from this escape target"));}
+                        else {
+                            let arguments=(0..self.catalog.core.enums[ctor.enum_id].params).map(|_|self.solver.try_fresh(&mut self.catalog.core.types,super::infer::Constraint::Any)).collect::<Result<Vec<_>,_>>()
+                                .map_err(|e|self.error(module,DK::Type,arm.pattern.span,e.message))?;
+                            Ty::Compound(self.catalog.core.types.enum_type(ctor.enum_id,arguments))
+                        }
+                            }
+                            _ => {
+                                return Err(self.error(
+                                    module,
+                                    DK::Type,
+                                    arm.pattern.span,
+                                    "escape requires error patterns",
+                                ));
+                            }
+                        }
                     } else {
-                        Ty::Any
+                        return Err(self.error(module,DK::Type,arm.pattern.span,"escape arms require error constructors; wildcards and bindings are not allowed here"));
                     };
                     let pattern = self.pattern(
                         module,
@@ -1666,37 +1707,21 @@ impl Checker {
         self.validate_type_bounds(module, data::backend_type(ty), &self.current_bounds, span)?;
         Ok(ir::Expr { kind, ty, span })
     }
-    fn known_errors(&mut self, value: &ir::Expr) -> Vec<crate::contract::ir::TypeId> {
-        let mut result = Vec::new();
-        match &value.kind {
-            ir::ExprKind::Fail(payload) => result.push(data::backend_type(payload.ty)),
-            ir::ExprKind::Call {
-                target,
-                type_arguments,
-                args,
-                ..
-            } => {
-                for error in self.definitions[target.0].signature.sets.errors.clone() {
-                    result.push(self.catalog.core.types.subst(error, type_arguments));
-                }
-                for arg in args {
-                    result.extend(self.known_errors(arg));
-                }
-            }
-            ir::ExprKind::Block(body) => {
-                for statement in &body.statements {
-                    result.extend(self.known_errors(match statement {
-                        ir::Statement::Pattern { value, .. } | ir::Statement::Expr(value) => value,
-                    }));
-                }
-            }
-            ir::ExprKind::Binary { left, right, .. } => {
-                result.extend(self.known_errors(left));
-                result.extend(self.known_errors(right));
-            }
-            _ => {}
-        }
-        result
+    fn known_errors(
+        &mut self,
+        module: usize,
+        value: &ir::Expr,
+    ) -> Result<Vec<crate::contract::ir::TypeId>, Diagnostic> {
+        let functions = self.checked.iter().flatten().cloned().collect::<Vec<_>>();
+        super::errors::incoming(
+            value,
+            &functions,
+            &self.traits.registry,
+            &mut self.catalog,
+            &mut self.solver,
+            &self.schemes.parameters,
+            &self.modules.modules[module].source_name,
+        )
     }
 
     fn resolve_type(&mut self, module: usize, ty: Ty, span: Span) -> Result<Ty, Diagnostic> {
