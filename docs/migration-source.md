@@ -567,3 +567,9 @@ P7の`p7_payload_compat.rs`は固定旧`tests/fiber/payload.rs`のsource3入力�
 同じfailure handlerを複数箇所へ出力するとevidence検索のgoto labelが重複するため、検索をlocal scope内のwhile・NULL診断・代入へ適応した。中断frameの値fieldへ所有flagを交互に挟むpaddingも除き、error/guard/各値のflagをまとめた。field名・型と所有処理は保持し、旧List error入力のframeは544 byteから512 byteとなる。frame容量を増やす代用はせず、C両最適化の旧上限assertと1000回のheap回収を通す。
 
 `p7_failure_compat.rs`、`p7_interrupt_compat.rs`、`p7_protect_compat.rs`は、同じ固定版のfailure/interrupt/protect source21試験も旧C期待値とresource budgetで実行する。親子の失敗伝播・release待機・resume前後のfailure・error表示・古いtask通知・待機列順序・中断Causeの所有・未開始child・operation tailと中断cleanupの停止方針を観測する。P6のinterrupt FIFO入力も旧512 byte/frameのbudgetで再実行する。payloadを含むsource API側24試験は、この対応表でsource後のIR変更なしと明記する。旧試験がHold/Protect cleanup移動/失敗external置換を行う別12件は`p7-cleanup-source-seams.json`へ分離して担当間で検証し、これら24件の成功へ混ぜない。
+
+## P7: aggregateと関数値の旧source境界
+
+固定旧 `tests/fiber/{aggregate,aggregate_abi,function_aggregate}.rs` の正常source12試験を13個のC実行へ接続した。[対応表](reports/p7-aggregate-source-compat.json) は元本文、C assertion、旧heap/frame/pool設定を記録する。sourceには明示C exportだけを加え、C型・関数・release名は生成headerから解決する。String/Option/List/tuple/enum/functionのnative・suspend・Scope/Deferred・handler resume・失敗・取消・NULL出力をC両最適化で確認し、所有経路は1000回の全heap回収を維持する。heaplessな借用tupleと関数aggregate、heap未指定時の所有producer拒否も元の観測どおり検証する。
+
+Deferred aggregateの768byte frame不足は、所有flagを値fieldの後ろへ配置する修正によって旧容量のまま解消した。P5中断6試験とP7payload3試験を併せて実行し、frame配置の変更後も成功した。

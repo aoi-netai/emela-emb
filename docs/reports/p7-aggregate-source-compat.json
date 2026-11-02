@@ -1,0 +1,315 @@
+{
+  "schema_version": 1,
+  "baseline_revision": "c34c0aeefdd966d854371b3110db00a47798751d",
+  "entries": [
+    {
+      "program": "program:c3c4cdd26e1efbbfdf88",
+      "legacy_tests": [
+        "emit::fiber::aggregate::deferred_complete_poll_and_await_share_owned_string_aggregates_past_scope_end"
+      ],
+      "files": [
+        {
+          "name": "main.emel",
+          "fixture": "sources/1c66cf6c203900e6de10d8d9b74c11b37969b2e32049fca9061f2d183f46a85b.emel",
+          "source_id": "source:1c66cf6c203900e6de10",
+          "sha256": "1c66cf6c203900e6de10d8d9b74c11b37969b2e32049fca9061f2d183f46a85b"
+        }
+      ],
+      "route": "original-source",
+      "new_test": {
+        "kind": "source_test",
+        "path": "crates/emela-emb-compiler/tests/p7_aggregate_compat.rs",
+        "symbol": "deferred_complete_poll_and_await_share_owned_string_aggregates_past_scope_end"
+      },
+      "C_harness": "crates/emela-emb-compiler/tests/compat/p7/concurrency/deferred_complete_poll_and_await_share_owned_string_aggregates_past_scope_end.c",
+      "options": "Options::default().with_heap_bytes(4096).with_fiber_capacity(8).with_frame_capacity(24).with_frame_bytes(768).with_string_capacity(64).with_deferred_capacity(1)",
+      "adaptation": "Original body with explicit C exports only. Original C observations and capacities preserved; C symbol/type/release IDs follow the generated header. No post-lowering IR mutation."
+    },
+    {
+      "program": "program:ac90e395370d309144f0",
+      "legacy_tests": [
+        "emit::fiber::aggregate::native_closure_captures_string_tuple_enum_and_list_after_factory_stack_returns"
+      ],
+      "files": [
+        {
+          "name": "main.emel",
+          "fixture": "sources/6e217956a92c6d580a5da2910491763ceed736050638565bd1c381109d65636e.emel",
+          "source_id": "source:6e217956a92c6d580a5d",
+          "sha256": "6e217956a92c6d580a5da2910491763ceed736050638565bd1c381109d65636e"
+        }
+      ],
+      "route": "original-source",
+      "new_test": {
+        "kind": "source_test",
+        "path": "crates/emela-emb-compiler/tests/p7_aggregate_compat.rs",
+        "symbol": "native_closure_captures_string_tuple_enum_and_list_after_factory_stack_returns"
+      },
+      "C_harness": "crates/emela-emb-compiler/tests/compat/p7/concurrency/native_closure_captures_string_tuple_enum_and_list_after_factory_stack_returns.c",
+      "options": "options().with_string_capacity(64).with_frame_bytes(768)",
+      "adaptation": "Original body with explicit C exports only. Original C observations and capacities preserved; C symbol/type/release IDs follow the generated header. No post-lowering IR mutation."
+    },
+    {
+      "program": "program:ac90e395370d309144f0",
+      "legacy_tests": [
+        "emit::fiber::aggregate::string_aggregates_own_borrowed_inputs_and_native_results_across_suspend_and_cancellation"
+      ],
+      "files": [
+        {
+          "name": "main.emel",
+          "fixture": "sources/6e217956a92c6d580a5da2910491763ceed736050638565bd1c381109d65636e.emel",
+          "source_id": "source:6e217956a92c6d580a5d",
+          "sha256": "6e217956a92c6d580a5da2910491763ceed736050638565bd1c381109d65636e"
+        }
+      ],
+      "route": "original-source",
+      "new_test": {
+        "kind": "source_test",
+        "path": "crates/emela-emb-compiler/tests/p7_aggregate_compat.rs",
+        "symbol": "string_aggregates_own_borrowed_inputs_and_native_results_across_suspend_and_cancellation"
+      },
+      "C_harness": "crates/emela-emb-compiler/tests/compat/p7/concurrency/string_aggregates_own_borrowed_inputs_and_native_results_across_suspend_and_cancellation.c",
+      "options": "options().with_string_capacity(64).with_frame_bytes(768)",
+      "adaptation": "Original body with explicit C exports only. Original C observations and capacities preserved; C symbol/type/release IDs follow the generated header. No post-lowering IR mutation."
+    },
+    {
+      "program": "program:ac90e395370d309144f0",
+      "legacy_tests": [
+        "emit::fiber::aggregate::suspended_child_captures_and_scope_results_keep_string_aggregates_until_last_release"
+      ],
+      "files": [
+        {
+          "name": "main.emel",
+          "fixture": "sources/6e217956a92c6d580a5da2910491763ceed736050638565bd1c381109d65636e.emel",
+          "source_id": "source:6e217956a92c6d580a5d",
+          "sha256": "6e217956a92c6d580a5da2910491763ceed736050638565bd1c381109d65636e"
+        }
+      ],
+      "route": "original-source",
+      "new_test": {
+        "kind": "source_test",
+        "path": "crates/emela-emb-compiler/tests/p7_aggregate_compat.rs",
+        "symbol": "suspended_child_captures_and_scope_results_keep_string_aggregates_until_last_release"
+      },
+      "C_harness": "crates/emela-emb-compiler/tests/compat/p7/concurrency/suspended_child_captures_and_scope_results_keep_string_aggregates_until_last_release.c",
+      "options": "options().with_string_capacity(64).with_frame_bytes(768)",
+      "adaptation": "Original body with explicit C exports only. Original C observations and capacities preserved; C symbol/type/release IDs follow the generated header. No post-lowering IR mutation."
+    },
+    {
+      "program": "program:01353e00d829543bae73",
+      "legacy_tests": [
+        "emit::fiber::aggregate_abi::both_returns_nested_string_aggregates_and_cancels_pending_children_without_leaks"
+      ],
+      "files": [
+        {
+          "name": "main.emel",
+          "fixture": "sources/7710f3c6bd1e3c1edc220dbae0685309889da0c2f81f9b2a7d9ae8bdaf6bce75.emel",
+          "source_id": "source:7710f3c6bd1e3c1edc22",
+          "sha256": "7710f3c6bd1e3c1edc220dbae0685309889da0c2f81f9b2a7d9ae8bdaf6bce75"
+        }
+      ],
+      "route": "original-source",
+      "new_test": {
+        "kind": "source_test",
+        "path": "crates/emela-emb-compiler/tests/p7_aggregate_compat.rs",
+        "symbol": "both_returns_nested_string_aggregates_and_cancels_pending_children_without_leaks"
+      },
+      "C_harness": "crates/emela-emb-compiler/tests/compat/p7/concurrency/both_returns_nested_string_aggregates_and_cancels_pending_children_without_leaks.c",
+      "options": "options().with_heap_bytes(4096).with_string_capacity(64).with_frame_bytes(1024)",
+      "adaptation": "Original body with explicit C exports only. Original C observations and capacities preserved; C symbol/type/release IDs follow the generated header. No post-lowering IR mutation."
+    },
+    {
+      "program": "program:01353e00d829543bae73",
+      "legacy_tests": [
+        "emit::fiber::aggregate_abi::scope_returns_string_enum_exits_after_success_or_interruption_and_frame_reuse"
+      ],
+      "files": [
+        {
+          "name": "main.emel",
+          "fixture": "sources/7710f3c6bd1e3c1edc220dbae0685309889da0c2f81f9b2a7d9ae8bdaf6bce75.emel",
+          "source_id": "source:7710f3c6bd1e3c1edc22",
+          "sha256": "7710f3c6bd1e3c1edc220dbae0685309889da0c2f81f9b2a7d9ae8bdaf6bce75"
+        }
+      ],
+      "route": "original-source",
+      "new_test": {
+        "kind": "source_test",
+        "path": "crates/emela-emb-compiler/tests/p7_aggregate_compat.rs",
+        "symbol": "scope_returns_string_enum_exits_after_success_or_interruption_and_frame_reuse"
+      },
+      "C_harness": "crates/emela-emb-compiler/tests/compat/p7/concurrency/scope_returns_string_enum_exits_after_success_or_interruption_and_frame_reuse.c",
+      "options": "options().with_heap_bytes(4096).with_string_capacity(64).with_frame_bytes(1024)",
+      "adaptation": "Original body with explicit C exports only. Original C observations and capacities preserved; C symbol/type/release IDs follow the generated header. No post-lowering IR mutation."
+    },
+    {
+      "program": "program:01353e00d829543bae73",
+      "legacy_tests": [
+        "emit::fiber::aggregate_abi::handler_resume_accepts_a_string_enum_and_reclaims_it_when_cancelled_in_either_wait"
+      ],
+      "files": [
+        {
+          "name": "main.emel",
+          "fixture": "sources/7710f3c6bd1e3c1edc220dbae0685309889da0c2f81f9b2a7d9ae8bdaf6bce75.emel",
+          "source_id": "source:7710f3c6bd1e3c1edc22",
+          "sha256": "7710f3c6bd1e3c1edc220dbae0685309889da0c2f81f9b2a7d9ae8bdaf6bce75"
+        }
+      ],
+      "route": "original-source",
+      "new_test": {
+        "kind": "source_test",
+        "path": "crates/emela-emb-compiler/tests/p7_aggregate_compat.rs",
+        "symbol": "handler_resume_accepts_a_string_enum_and_reclaims_it_when_cancelled_in_either_wait"
+      },
+      "C_harness": "crates/emela-emb-compiler/tests/compat/p7/concurrency/handler_resume_accepts_a_string_enum_and_reclaims_it_when_cancelled_in_either_wait.c",
+      "options": "options().with_heap_bytes(4096).with_string_capacity(64).with_frame_bytes(1024)",
+      "adaptation": "Original body with explicit C exports only. Original C observations and capacities preserved; C symbol/type/release IDs follow the generated header. No post-lowering IR mutation."
+    },
+    {
+      "program": "program:314587c327ffac8b616b",
+      "legacy_tests": [
+        "emit::fiber::aggregate_abi::both_propagates_managed_failure_from_aggregate_callbacks_and_reclaims_its_sibling"
+      ],
+      "files": [
+        {
+          "name": "main.emel",
+          "fixture": "sources/d00810d2a37cfc12139834e1f85353e2c751f9ea43a4692eb3e8a0f74c081e38.emel",
+          "source_id": "source:d00810d2a37cfc121398",
+          "sha256": "d00810d2a37cfc12139834e1f85353e2c751f9ea43a4692eb3e8a0f74c081e38"
+        }
+      ],
+      "route": "original-source",
+      "new_test": {
+        "kind": "source_test",
+        "path": "crates/emela-emb-compiler/tests/p7_aggregate_compat.rs",
+        "symbol": "both_propagates_managed_failure_from_aggregate_callbacks_and_reclaims_its_sibling"
+      },
+      "C_harness": "crates/emela-emb-compiler/tests/compat/p7/concurrency/both_propagates_managed_failure_from_aggregate_callbacks_and_reclaims_its_sibling.c",
+      "options": "options().with_heap_bytes(4096).with_string_capacity(64).with_frame_bytes(2048)",
+      "adaptation": "Original body with explicit C exports only. Original C observations and capacities preserved; C symbol/type/release IDs follow the generated header. No post-lowering IR mutation."
+    },
+    {
+      "program": "program:4be591d3835e38a1021a",
+      "legacy_tests": [
+        "emit::fiber::function_aggregate::native_aggregate_callbacks_own_results_after_captures_and_arguments_are_released"
+      ],
+      "files": [
+        {
+          "name": "main.emel",
+          "fixture": "sources/bdf84c1e344ddf3c033ffead31e1ce3d17f7e8b663de07145ae1e574856cb1e0.emel",
+          "source_id": "source:bdf84c1e344ddf3c033f",
+          "sha256": "bdf84c1e344ddf3c033ffead31e1ce3d17f7e8b663de07145ae1e574856cb1e0"
+        }
+      ],
+      "route": "original-source",
+      "new_test": {
+        "kind": "source_test",
+        "path": "crates/emela-emb-compiler/tests/p7_aggregate_compat.rs",
+        "symbol": "native_aggregate_callbacks_own_results_after_captures_and_arguments_are_released"
+      },
+      "C_harness": "crates/emela-emb-compiler/tests/compat/p7/concurrency/native_aggregate_callbacks_own_results_after_captures_and_arguments_are_released.c",
+      "options": "Options::default().with_heap_bytes(2048).with_string_capacity(64)",
+      "adaptation": "Original body with explicit C exports only. Original C observations and capacities preserved; C symbol/type/release IDs follow the generated header. No post-lowering IR mutation."
+    },
+    {
+      "program": "program:927b8a0eea79b7bd9ced",
+      "legacy_tests": [
+        "emit::fiber::function_aggregate::heapless_callbacks_accept_and_return_aggregates_containing_function_values"
+      ],
+      "files": [
+        {
+          "name": "main.emel",
+          "fixture": "sources/bfe30e768dac89a8ba13f0eb2313c239d96abfd8e275d322448346782af78ce2.emel",
+          "source_id": "source:bfe30e768dac89a8ba13",
+          "sha256": "bfe30e768dac89a8ba13f0eb2313c239d96abfd8e275d322448346782af78ce2"
+        }
+      ],
+      "route": "original-source",
+      "new_test": {
+        "kind": "source_test",
+        "path": "crates/emela-emb-compiler/tests/p7_aggregate_compat.rs",
+        "symbol": "heapless_callbacks_accept_and_return_aggregates_containing_function_values"
+      },
+      "C_harness": "crates/emela-emb-compiler/tests/compat/p7/concurrency/heapless_callbacks_accept_and_return_aggregates_containing_function_values.c",
+      "options": "Options::default()",
+      "adaptation": "Original body with explicit C exports only. Original C observations and capacities preserved; C symbol/type/release IDs follow the generated header. No post-lowering IR mutation."
+    },
+    {
+      "program": "program:fce8a13404a3ab9ab16c",
+      "legacy_tests": [
+        "emit::fiber::function_aggregate::failing_indirect_aggregate_calls_release_discarded_successes_and_preserve_string_errors"
+      ],
+      "files": [
+        {
+          "name": "main.emel",
+          "fixture": "sources/78f5011bf4d6bdd30c21ff6ca0fa6917d464de08a160263b258981074816ac10.emel",
+          "source_id": "source:78f5011bf4d6bdd30c21",
+          "sha256": "78f5011bf4d6bdd30c21ff6ca0fa6917d464de08a160263b258981074816ac10"
+        }
+      ],
+      "route": "original-source",
+      "new_test": {
+        "kind": "source_test",
+        "path": "crates/emela-emb-compiler/tests/p7_aggregate_compat.rs",
+        "symbol": "failing_indirect_aggregate_calls_release_discarded_successes_and_preserve_string_errors"
+      },
+      "C_harness": "crates/emela-emb-compiler/tests/compat/p7/concurrency/failing_indirect_aggregate_calls_release_discarded_successes_and_preserve_string_errors.c",
+      "options": "Options::default().with_heap_bytes(2048).with_string_capacity(64)",
+      "adaptation": "Original body with explicit C exports only. Original C observations and capacities preserved; C symbol/type/release IDs follow the generated header. No post-lowering IR mutation."
+    },
+    {
+      "program": "program:158234f97251d7d95674",
+      "legacy_tests": [
+        "emit::fiber::aggregate::native_string_enum_producers_use_owned_backing_and_heapless_borrowed_tuples_stay_borrowed"
+      ],
+      "files": [
+        {
+          "name": "main.emel",
+          "fixture": "sources/9a48456f66628af164d66b50108a1b45082e125e3efaa1b17500e976c7084f0a.emel",
+          "source_id": "source:9a48456f66628af164d6",
+          "sha256": "9a48456f66628af164d66b50108a1b45082e125e3efaa1b17500e976c7084f0a"
+        }
+      ],
+      "route": "original-source",
+      "new_test": {
+        "kind": "source_test",
+        "path": "crates/emela-emb-compiler/tests/p7_aggregate_compat.rs",
+        "symbol": "native_string_enum_producers_use_owned_backing_and_heapless_borrowed_tuples_stay_borrowed_borrowed"
+      },
+      "C_harness": "crates/emela-emb-compiler/tests/compat/p7/concurrency/native_string_enum_producers_use_owned_backing_and_heapless_borrowed_tuples_stay_borrowed_borrowed.c",
+      "options": "Options::default()",
+      "adaptation": "Original body with explicit C exports only. Original C observations and capacities preserved; C symbol/type/release IDs follow the generated header. No post-lowering IR mutation."
+    },
+    {
+      "program": "program:660953efd0834142cd9a",
+      "legacy_tests": [
+        "emit::fiber::aggregate::native_string_enum_producers_use_owned_backing_and_heapless_borrowed_tuples_stay_borrowed"
+      ],
+      "files": [
+        {
+          "name": "main.emel",
+          "fixture": "sources/60b8f7825488de8a053c173acaea6c39e1223d415ab79cecd18f251e03d24acb.emel",
+          "source_id": "source:60b8f7825488de8a053c",
+          "sha256": "60b8f7825488de8a053c173acaea6c39e1223d415ab79cecd18f251e03d24acb"
+        }
+      ],
+      "route": "original-source",
+      "new_test": {
+        "kind": "source_test",
+        "path": "crates/emela-emb-compiler/tests/p7_aggregate_compat.rs",
+        "symbol": "native_string_enum_producers_use_owned_backing_and_heapless_borrowed_tuples_stay_borrowed_owned"
+      },
+      "C_harness": "crates/emela-emb-compiler/tests/compat/p7/concurrency/native_string_enum_producers_use_owned_backing_and_heapless_borrowed_tuples_stay_borrowed_owned.c",
+      "options": "Options::default().with_heap_bytes(256)",
+      "adaptation": "Original body with explicit C exports only. Original C observations and capacities preserved; C symbol/type/release IDs follow the generated header. No post-lowering IR mutation."
+    }
+  ],
+  "validation": {
+    "status": "passed",
+    "legacy_test_count": 12,
+    "new_test_count": 13,
+    "C_optimizations": [
+      "-O0",
+      "-O2"
+    ],
+    "notes": "13 original-source C variants passed with the exact legacy heap/frame/pool budgets after ownership flags were packed; P5 suspend6 and P7 payload3 also passed on the integrated revision."
+  }
+}
