@@ -375,11 +375,21 @@ impl Catalog {
             return Ok(frontend_type(ty));
         }
         let Some(id) = self.lookup_type(modules, module, head) else {
-            let effect =
-                self.resolve_effect(modules, module, &ast::Text::new(text, span), params)?;
-            return Ok(Ty::Compound(
-                self.core.types.intern(b::Type::Handler(effect)),
-            ));
+            return Err(
+                if self
+                    .effects
+                    .named_declaration(modules, module, &ast::Text::new(head, span))
+                    .is_ok()
+                {
+                    Diagnostic::new(
+                        DK::Type,
+                        span,
+                        "an effect cannot be written as a value type; obtain its capability with use",
+                    )
+                } else {
+                    Diagnostic::new(DK::Name, span, format!("undefined type '{head}'"))
+                },
+            );
         };
         let declaration = self.declaration(id);
         if declaration.module != module && !declaration.ast.public {

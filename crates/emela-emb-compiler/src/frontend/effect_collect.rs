@@ -482,6 +482,15 @@ impl EffectRegistry {
             .get(&id)
             .map(|&index| &self.declarations[index])
     }
+    pub fn named_declaration(
+        &self,
+        modules: &Modules,
+        module: usize,
+        name: &ast::Text,
+    ) -> Result<&EffectDeclaration, Diagnostic> {
+        self.find_declaration(modules, module, name)
+            .map(|index| &self.declarations[index])
+    }
 }
 
 fn declaration_name(module: &str, name: &str) -> String {
@@ -1820,15 +1829,13 @@ mod tests {
         let modules = modules(&[(
             "Main",
             "error Missing(value:Int)\neffect State[S,E] { fn get()->S fails E }\n\
-             effect Hits of State[Int,Missing]\ntype Saved(cap:State[Int,Missing])",
+             effect Hits of State[Int,Missing]",
             false,
         )]);
         let mut catalog = Catalog::collect(&modules).unwrap();
-        let saved = catalog.type_id(0, "Saved").unwrap();
-        let cap = catalog.core.enums[saved].variants[0].tys[0];
-        let b::Type::Handler(instance) = *catalog.core.ty(cap) else {
-            panic!("capability has no nominal effect instance")
-        };
+        let instance = catalog
+            .resolve_effect(&modules, 0, &text("State[Int,Missing]"), &HashMap::new())
+            .unwrap();
         assert!(catalog.core.effects[instance].ops.is_empty());
         fill_operations(&modules, &mut catalog).unwrap();
         let operation = &catalog.core.effects[instance].ops[0];
@@ -1901,16 +1908,51 @@ mod tests {
     }
 
     #[test]
-    fn effect_argument_substitution_rebuilds_nested_and_recursive_capabilities() {
+    fn internal_capability_substitution_rebuilds_nested_and_recursive_instances() {
         let modules = modules(&[(
             "Main",
             "effect State[S] { fn get()->S }\n\
-             effect Carry[T] { fn carry(callback:fn(State[T])->State[T])->State[T] }\n\
-             effect Loop[T] { fn next()->Loop[T] }",
+             effect Carry[T] { fn carry()->T }\n\
+             effect Loop[T] { fn next()->T }",
             false,
         )]);
         let mut catalog = Catalog::collect(&modules).unwrap();
         fill_operations(&modules, &mut catalog).unwrap();
+        // Capabilities occur in inferred/internal metadata, never in writable value types.
+        let params = HashMap::from([("T".into(), 0)]);
+        let generic_state = catalog
+            .resolve_effect(&modules, 0, &text("State[T]"), &params)
+            .unwrap();
+        let state_type = catalog.core.types.intern(b::Type::Handler(generic_state));
+        let callback = catalog.core.types.intern(b::Type::Fn(b::FnType {
+            params: vec![state_type],
+            ret: state_type,
+            fails: false,
+            suspends: false,
+            ev: false,
+            sets: None,
+        }));
+        let carry_template = catalog
+            .effects
+            .declarations
+            .iter()
+            .find(|declaration| declaration.ast.name.value == "Carry")
+            .unwrap()
+            .id;
+        catalog.core.effects[carry_template].ops[0].params = vec![callback];
+        catalog.core.effects[carry_template].ops[0].ret = state_type;
+        let generic_loop = catalog
+            .resolve_effect(&modules, 0, &text("Loop[T]"), &params)
+            .unwrap();
+        let loop_type = catalog.core.types.intern(b::Type::Handler(generic_loop));
+        let loop_template = catalog
+            .effects
+            .declarations
+            .iter()
+            .find(|declaration| declaration.ast.name.value == "Loop")
+            .unwrap()
+            .id;
+        catalog.core.effects[loop_template].ops[0].ret = loop_type;
         let carry = catalog
             .resolve_effect(&modules, 0, &text("Carry[Int]"), &HashMap::new())
             .unwrap();
@@ -1934,6 +1976,22 @@ mod tests {
             catalog.core.ty(catalog.core.effects[recursive].ops[0].ret),
             &b::Type::Handler(recursive)
         );
+    }
+
+    #[test]
+    fn effects_are_not_writable_value_types() {
+        for source in [
+            "effect Read { fn read()->Int }\ntype Saved(cap:Read)",
+            "effect State[S] { fn get()->S }\ntype Saved(cap:State[Int])",
+        ] {
+            let modules = modules(&[("Main", source, false)]);
+            let errors = Catalog::collect(&modules).err().unwrap();
+            assert!(
+                errors
+                    .iter()
+                    .any(|error| error.kind == DK::Type && error.message.contains("value type"))
+            );
+        }
     }
 
     #[test]
