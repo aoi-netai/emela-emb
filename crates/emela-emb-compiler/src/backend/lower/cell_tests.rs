@@ -193,3 +193,34 @@ fn cell_references_in_error_payloads_outlive_the_failing_frame() {
     p.functions.alloc(f);
     execute_cells(p, "assert(answer()==42&&test_heap_empty());");
 }
+
+#[test]
+fn erased_cell_cycles_remain_alive_until_the_last_external_root_is_released() {
+    let mut p = program(vec![]);
+    let ty = p.core.types.intern(Type::Cell(TypeId::ANY));
+    let mut f = simple();
+    f.ret = ty;
+    let number = variable(&mut f, TypeId::INT);
+    let initial = cell_variable(&mut f, TypeId::ANY);
+    let cell = cell_variable(&mut f, ty);
+    let boxed = cell_variable(&mut f, TypeId::ANY);
+    let literal = binding(&mut f, Some(number), Value::Const(Const::Int(42)));
+    let erase = binding(&mut f, Some(initial), Value::Coerce(number));
+    let make = cell_binding(&mut f, Some(cell), Builtin::CellNew, vec![initial.into()]);
+    let self_reference = binding(&mut f, Some(boxed), Value::Coerce(cell));
+    let cycle = cell_binding(
+        &mut f,
+        None,
+        Builtin::CellSet,
+        vec![cell.into(), boxed.into()],
+    );
+    f.seqs[f.body.unwrap()] = Seq {
+        stmts: vec![literal, erase, make, self_reference, cycle],
+        term: Term::Return(Some(cell.into())),
+    };
+    p.functions.alloc(f);
+    execute_cells(
+        p,
+        "void*value=answer();assert(value&&!test_heap_empty());emela_embedded_retain(value);emela_embedded_release(value);assert(!test_heap_empty());emela_embedded_release(value);assert(test_heap_empty());",
+    );
+}
