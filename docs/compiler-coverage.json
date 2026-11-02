@@ -3233,8 +3233,8 @@
       "id": "emela_core::FiberOp",
       "relation": "shared_declaration",
       "legacy_role": "schema",
-      "phase": null,
-      "status": "mapped",
+      "phase": "P6",
+      "status": "verified",
       "source_scope": "schema",
       "new_implementation": [
         {
@@ -3252,17 +3252,101 @@
         {
           "kind": "review",
           "path": "docs/migration-source.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_concurrency.rs",
+          "symbol": "source_concurrency_preserves_handles_values_causes_and_unit_results"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_concurrency_advanced.rs",
+          "symbol": "source_scope_evidence_nested_scopes_and_standard_combinators_preserve_ownership"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "scope_fork_and_join_reclaim_children_and_their_erased_values"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "deferred_complete_poll_and_await_share_one_typed_value_until_scope_closes"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "attempts_preserve_success_and_typed_cause_failures_across_raise"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "interruption_waits_for_nested_suspending_cleanup_before_await_reports_its_cause"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_scope_tests.rs",
+          "symbol": "scope_handlers_merge_callback_failure_abis_and_box_typed_child_results"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_scope_tests.rs",
+          "symbol": "calling_the_generated_scope_deferred_operation_requires_its_pool"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_deferred_tests.rs",
+          "symbol": "deferred_wakes_fifo_waiters_with_owned_strings_and_releases_the_scope_value"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_unit_tests.rs",
+          "symbol": "unit_deferred_distinguishes_empty_and_full_without_payload_storage"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_lifecycle.rs",
+          "symbol": "closing_a_source_scope_drops_ready_join_and_await_deliveries"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_lifecycle.rs",
+          "symbol": "cancelling_nested_source_scopes_unlinks_all_deferred_waiters"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_lifecycle.rs",
+          "symbol": "source_interrupt_waiters_resume_fifo_after_suspending_cleanup"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_lifecycle.rs",
+          "symbol": "source_scopes_reclaim_completed_children_and_preserve_live_copied_handles"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_child_waiters.rs",
+          "symbol": "child_await_and_join_waiters_resume_fifo_after_the_child_finishes"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_child_waiters.rs",
+          "symbol": "failed_handleless_children_release_records_during_sibling_cleanup"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p6.md"
         }
       ],
-      "reason": "固定revisionの独立backend入口を採用。source・全実行文脈・所有権等の完了は個別の実行証拠が揃うまで判定しない。"
+      "reason": "Scope/Fiber/Deferred/Causeを独立sourceと内部IRからCへ接続。typed値・Unit・FIFO・失敗分類/表示/再送出、取消時の中断cleanup完了、完了child/handleなしchild/待機リンクの回収をC両最適化で検証。旧全source/IR観測の照合はP7で別途判定する。"
     },
     {
       "id": "emela_core::FiberOp::Attempt",
       "relation": "variant_entry",
       "legacy_role": "emit",
-      "phase": null,
-      "status": "mapped",
-      "source_scope": "unclassified",
+      "phase": "P6",
+      "status": "verified",
+      "source_scope": "source",
       "new_implementation": [
         {
           "kind": "implementation",
@@ -3279,16 +3363,100 @@
         {
           "kind": "review",
           "path": "docs/migration-source.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_concurrency.rs",
+          "symbol": "source_concurrency_preserves_handles_values_causes_and_unit_results"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_concurrency_advanced.rs",
+          "symbol": "source_scope_evidence_nested_scopes_and_standard_combinators_preserve_ownership"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "scope_fork_and_join_reclaim_children_and_their_erased_values"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "deferred_complete_poll_and_await_share_one_typed_value_until_scope_closes"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "attempts_preserve_success_and_typed_cause_failures_across_raise"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "interruption_waits_for_nested_suspending_cleanup_before_await_reports_its_cause"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_scope_tests.rs",
+          "symbol": "scope_handlers_merge_callback_failure_abis_and_box_typed_child_results"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_scope_tests.rs",
+          "symbol": "calling_the_generated_scope_deferred_operation_requires_its_pool"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_deferred_tests.rs",
+          "symbol": "deferred_wakes_fifo_waiters_with_owned_strings_and_releases_the_scope_value"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_unit_tests.rs",
+          "symbol": "unit_deferred_distinguishes_empty_and_full_without_payload_storage"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_lifecycle.rs",
+          "symbol": "closing_a_source_scope_drops_ready_join_and_await_deliveries"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_lifecycle.rs",
+          "symbol": "cancelling_nested_source_scopes_unlinks_all_deferred_waiters"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_lifecycle.rs",
+          "symbol": "source_interrupt_waiters_resume_fifo_after_suspending_cleanup"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_lifecycle.rs",
+          "symbol": "source_scopes_reclaim_completed_children_and_preserve_live_copied_handles"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_child_waiters.rs",
+          "symbol": "child_await_and_join_waiters_resume_fifo_after_the_child_finishes"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_child_waiters.rs",
+          "symbol": "failed_handleless_children_release_records_during_sibling_cleanup"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p6.md"
         }
       ],
-      "reason": "固定revisionの独立backend入口を採用。source・全実行文脈・所有権等の完了は個別の実行証拠が揃うまで判定しない。"
+      "reason": "Scope/Fiber/Deferred/Causeを独立sourceと内部IRからCへ接続。typed値・Unit・FIFO・失敗分類/表示/再送出、取消時の中断cleanup完了、完了child/handleなしchild/待機リンクの回収をC両最適化で検証。旧全source/IR観測の照合はP7で別途判定する。"
     },
     {
       "id": "emela_core::FiberOp::Attempt.exit",
       "relation": "member_of_variant",
       "legacy_role": "emit",
-      "phase": null,
-      "status": "mapped",
+      "phase": "P6",
+      "status": "verified",
       "source_scope": "schema",
       "new_implementation": [
         {
@@ -3301,16 +3469,100 @@
         {
           "kind": "review",
           "path": "docs/migration-source.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_concurrency.rs",
+          "symbol": "source_concurrency_preserves_handles_values_causes_and_unit_results"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_concurrency_advanced.rs",
+          "symbol": "source_scope_evidence_nested_scopes_and_standard_combinators_preserve_ownership"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "scope_fork_and_join_reclaim_children_and_their_erased_values"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "deferred_complete_poll_and_await_share_one_typed_value_until_scope_closes"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "attempts_preserve_success_and_typed_cause_failures_across_raise"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "interruption_waits_for_nested_suspending_cleanup_before_await_reports_its_cause"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_scope_tests.rs",
+          "symbol": "scope_handlers_merge_callback_failure_abis_and_box_typed_child_results"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_scope_tests.rs",
+          "symbol": "calling_the_generated_scope_deferred_operation_requires_its_pool"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_deferred_tests.rs",
+          "symbol": "deferred_wakes_fifo_waiters_with_owned_strings_and_releases_the_scope_value"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_unit_tests.rs",
+          "symbol": "unit_deferred_distinguishes_empty_and_full_without_payload_storage"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_lifecycle.rs",
+          "symbol": "closing_a_source_scope_drops_ready_join_and_await_deliveries"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_lifecycle.rs",
+          "symbol": "cancelling_nested_source_scopes_unlinks_all_deferred_waiters"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_lifecycle.rs",
+          "symbol": "source_interrupt_waiters_resume_fifo_after_suspending_cleanup"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_lifecycle.rs",
+          "symbol": "source_scopes_reclaim_completed_children_and_preserve_live_copied_handles"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_child_waiters.rs",
+          "symbol": "child_await_and_join_waiters_resume_fifo_after_the_child_finishes"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_child_waiters.rs",
+          "symbol": "failed_handleless_children_release_records_during_sibling_cleanup"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p6.md"
         }
       ],
-      "reason": "固定revisionの独立backend入口を採用。source・全実行文脈・所有権等の完了は個別の実行証拠が揃うまで判定しない。"
+      "reason": "Scope/Fiber/Deferred/Causeを独立sourceと内部IRからCへ接続。typed値・Unit・FIFO・失敗分類/表示/再送出、取消時の中断cleanup完了、完了child/handleなしchild/待機リンクの回収をC両最適化で検証。旧全source/IR観測の照合はP7で別途判定する。"
     },
     {
       "id": "emela_core::FiberOp::Attempt.suspends",
       "relation": "member_of_variant",
       "legacy_role": "emit",
-      "phase": null,
-      "status": "mapped",
+      "phase": "P6",
+      "status": "verified",
       "source_scope": "schema",
       "new_implementation": [
         {
@@ -3323,17 +3575,101 @@
         {
           "kind": "review",
           "path": "docs/migration-source.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_concurrency.rs",
+          "symbol": "source_concurrency_preserves_handles_values_causes_and_unit_results"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_concurrency_advanced.rs",
+          "symbol": "source_scope_evidence_nested_scopes_and_standard_combinators_preserve_ownership"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "scope_fork_and_join_reclaim_children_and_their_erased_values"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "deferred_complete_poll_and_await_share_one_typed_value_until_scope_closes"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "attempts_preserve_success_and_typed_cause_failures_across_raise"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "interruption_waits_for_nested_suspending_cleanup_before_await_reports_its_cause"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_scope_tests.rs",
+          "symbol": "scope_handlers_merge_callback_failure_abis_and_box_typed_child_results"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_scope_tests.rs",
+          "symbol": "calling_the_generated_scope_deferred_operation_requires_its_pool"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_deferred_tests.rs",
+          "symbol": "deferred_wakes_fifo_waiters_with_owned_strings_and_releases_the_scope_value"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_unit_tests.rs",
+          "symbol": "unit_deferred_distinguishes_empty_and_full_without_payload_storage"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_lifecycle.rs",
+          "symbol": "closing_a_source_scope_drops_ready_join_and_await_deliveries"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_lifecycle.rs",
+          "symbol": "cancelling_nested_source_scopes_unlinks_all_deferred_waiters"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_lifecycle.rs",
+          "symbol": "source_interrupt_waiters_resume_fifo_after_suspending_cleanup"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_lifecycle.rs",
+          "symbol": "source_scopes_reclaim_completed_children_and_preserve_live_copied_handles"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_child_waiters.rs",
+          "symbol": "child_await_and_join_waiters_resume_fifo_after_the_child_finishes"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_child_waiters.rs",
+          "symbol": "failed_handleless_children_release_records_during_sibling_cleanup"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p6.md"
         }
       ],
-      "reason": "固定revisionの独立backend入口を採用。source・全実行文脈・所有権等の完了は個別の実行証拠が揃うまで判定しない。"
+      "reason": "Scope/Fiber/Deferred/Causeを独立sourceと内部IRからCへ接続。typed値・Unit・FIFO・失敗分類/表示/再送出、取消時の中断cleanup完了、完了child/handleなしchild/待機リンクの回収をC両最適化で検証。旧全source/IR観測の照合はP7で別途判定する。"
     },
     {
       "id": "emela_core::FiberOp::Await",
       "relation": "variant_entry",
       "legacy_role": "emit",
-      "phase": null,
-      "status": "mapped",
-      "source_scope": "unclassified",
+      "phase": "P6",
+      "status": "verified",
+      "source_scope": "source",
       "new_implementation": [
         {
           "kind": "implementation",
@@ -3350,16 +3686,100 @@
         {
           "kind": "review",
           "path": "docs/migration-source.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_concurrency.rs",
+          "symbol": "source_concurrency_preserves_handles_values_causes_and_unit_results"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_concurrency_advanced.rs",
+          "symbol": "source_scope_evidence_nested_scopes_and_standard_combinators_preserve_ownership"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "scope_fork_and_join_reclaim_children_and_their_erased_values"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "deferred_complete_poll_and_await_share_one_typed_value_until_scope_closes"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "attempts_preserve_success_and_typed_cause_failures_across_raise"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "interruption_waits_for_nested_suspending_cleanup_before_await_reports_its_cause"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_scope_tests.rs",
+          "symbol": "scope_handlers_merge_callback_failure_abis_and_box_typed_child_results"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_scope_tests.rs",
+          "symbol": "calling_the_generated_scope_deferred_operation_requires_its_pool"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_deferred_tests.rs",
+          "symbol": "deferred_wakes_fifo_waiters_with_owned_strings_and_releases_the_scope_value"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_unit_tests.rs",
+          "symbol": "unit_deferred_distinguishes_empty_and_full_without_payload_storage"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_lifecycle.rs",
+          "symbol": "closing_a_source_scope_drops_ready_join_and_await_deliveries"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_lifecycle.rs",
+          "symbol": "cancelling_nested_source_scopes_unlinks_all_deferred_waiters"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_lifecycle.rs",
+          "symbol": "source_interrupt_waiters_resume_fifo_after_suspending_cleanup"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_lifecycle.rs",
+          "symbol": "source_scopes_reclaim_completed_children_and_preserve_live_copied_handles"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_child_waiters.rs",
+          "symbol": "child_await_and_join_waiters_resume_fifo_after_the_child_finishes"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_child_waiters.rs",
+          "symbol": "failed_handleless_children_release_records_during_sibling_cleanup"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p6.md"
         }
       ],
-      "reason": "固定revisionの独立backend入口を採用。source・全実行文脈・所有権等の完了は個別の実行証拠が揃うまで判定しない。"
+      "reason": "Scope/Fiber/Deferred/Causeを独立sourceと内部IRからCへ接続。typed値・Unit・FIFO・失敗分類/表示/再送出、取消時の中断cleanup完了、完了child/handleなしchild/待機リンクの回収をC両最適化で検証。旧全source/IR観測の照合はP7で別途判定する。"
     },
     {
       "id": "emela_core::FiberOp::Await.exit",
       "relation": "member_of_variant",
       "legacy_role": "emit",
-      "phase": null,
-      "status": "mapped",
+      "phase": "P6",
+      "status": "verified",
       "source_scope": "schema",
       "new_implementation": [
         {
@@ -3372,17 +3792,101 @@
         {
           "kind": "review",
           "path": "docs/migration-source.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_concurrency.rs",
+          "symbol": "source_concurrency_preserves_handles_values_causes_and_unit_results"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_concurrency_advanced.rs",
+          "symbol": "source_scope_evidence_nested_scopes_and_standard_combinators_preserve_ownership"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "scope_fork_and_join_reclaim_children_and_their_erased_values"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "deferred_complete_poll_and_await_share_one_typed_value_until_scope_closes"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "attempts_preserve_success_and_typed_cause_failures_across_raise"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "interruption_waits_for_nested_suspending_cleanup_before_await_reports_its_cause"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_scope_tests.rs",
+          "symbol": "scope_handlers_merge_callback_failure_abis_and_box_typed_child_results"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_scope_tests.rs",
+          "symbol": "calling_the_generated_scope_deferred_operation_requires_its_pool"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_deferred_tests.rs",
+          "symbol": "deferred_wakes_fifo_waiters_with_owned_strings_and_releases_the_scope_value"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_unit_tests.rs",
+          "symbol": "unit_deferred_distinguishes_empty_and_full_without_payload_storage"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_lifecycle.rs",
+          "symbol": "closing_a_source_scope_drops_ready_join_and_await_deliveries"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_lifecycle.rs",
+          "symbol": "cancelling_nested_source_scopes_unlinks_all_deferred_waiters"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_lifecycle.rs",
+          "symbol": "source_interrupt_waiters_resume_fifo_after_suspending_cleanup"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_lifecycle.rs",
+          "symbol": "source_scopes_reclaim_completed_children_and_preserve_live_copied_handles"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_child_waiters.rs",
+          "symbol": "child_await_and_join_waiters_resume_fifo_after_the_child_finishes"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_child_waiters.rs",
+          "symbol": "failed_handleless_children_release_records_during_sibling_cleanup"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p6.md"
         }
       ],
-      "reason": "固定revisionの独立backend入口を採用。source・全実行文脈・所有権等の完了は個別の実行証拠が揃うまで判定しない。"
+      "reason": "Scope/Fiber/Deferred/Causeを独立sourceと内部IRからCへ接続。typed値・Unit・FIFO・失敗分類/表示/再送出、取消時の中断cleanup完了、完了child/handleなしchild/待機リンクの回収をC両最適化で検証。旧全source/IR観測の照合はP7で別途判定する。"
     },
     {
       "id": "emela_core::FiberOp::CauseKind",
       "relation": "variant_entry",
       "legacy_role": "emit",
-      "phase": null,
-      "status": "mapped",
-      "source_scope": "unclassified",
+      "phase": "P6",
+      "status": "verified",
+      "source_scope": "source",
       "new_implementation": [
         {
           "kind": "implementation",
@@ -3394,16 +3898,100 @@
         {
           "kind": "review",
           "path": "docs/migration-source.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_concurrency.rs",
+          "symbol": "source_concurrency_preserves_handles_values_causes_and_unit_results"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_concurrency_advanced.rs",
+          "symbol": "source_scope_evidence_nested_scopes_and_standard_combinators_preserve_ownership"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "scope_fork_and_join_reclaim_children_and_their_erased_values"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "deferred_complete_poll_and_await_share_one_typed_value_until_scope_closes"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "attempts_preserve_success_and_typed_cause_failures_across_raise"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "interruption_waits_for_nested_suspending_cleanup_before_await_reports_its_cause"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_scope_tests.rs",
+          "symbol": "scope_handlers_merge_callback_failure_abis_and_box_typed_child_results"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_scope_tests.rs",
+          "symbol": "calling_the_generated_scope_deferred_operation_requires_its_pool"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_deferred_tests.rs",
+          "symbol": "deferred_wakes_fifo_waiters_with_owned_strings_and_releases_the_scope_value"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_unit_tests.rs",
+          "symbol": "unit_deferred_distinguishes_empty_and_full_without_payload_storage"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_lifecycle.rs",
+          "symbol": "closing_a_source_scope_drops_ready_join_and_await_deliveries"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_lifecycle.rs",
+          "symbol": "cancelling_nested_source_scopes_unlinks_all_deferred_waiters"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_lifecycle.rs",
+          "symbol": "source_interrupt_waiters_resume_fifo_after_suspending_cleanup"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_lifecycle.rs",
+          "symbol": "source_scopes_reclaim_completed_children_and_preserve_live_copied_handles"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_child_waiters.rs",
+          "symbol": "child_await_and_join_waiters_resume_fifo_after_the_child_finishes"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_child_waiters.rs",
+          "symbol": "failed_handleless_children_release_records_during_sibling_cleanup"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p6.md"
         }
       ],
-      "reason": "固定revisionの独立backend入口を採用。source・全実行文脈・所有権等の完了は個別の実行証拠が揃うまで判定しない。"
+      "reason": "Scope/Fiber/Deferred/Causeを独立sourceと内部IRからCへ接続。typed値・Unit・FIFO・失敗分類/表示/再送出、取消時の中断cleanup完了、完了child/handleなしchild/待機リンクの回収をC両最適化で検証。旧全source/IR観測の照合はP7で別途判定する。"
     },
     {
       "id": "emela_core::FiberOp::CauseKind.kind",
       "relation": "member_of_variant",
       "legacy_role": "emit",
-      "phase": null,
-      "status": "mapped",
+      "phase": "P6",
+      "status": "verified",
       "source_scope": "schema",
       "new_implementation": [
         {
@@ -3416,17 +4004,101 @@
         {
           "kind": "review",
           "path": "docs/migration-source.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_concurrency.rs",
+          "symbol": "source_concurrency_preserves_handles_values_causes_and_unit_results"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_concurrency_advanced.rs",
+          "symbol": "source_scope_evidence_nested_scopes_and_standard_combinators_preserve_ownership"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "scope_fork_and_join_reclaim_children_and_their_erased_values"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "deferred_complete_poll_and_await_share_one_typed_value_until_scope_closes"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "attempts_preserve_success_and_typed_cause_failures_across_raise"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "interruption_waits_for_nested_suspending_cleanup_before_await_reports_its_cause"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_scope_tests.rs",
+          "symbol": "scope_handlers_merge_callback_failure_abis_and_box_typed_child_results"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_scope_tests.rs",
+          "symbol": "calling_the_generated_scope_deferred_operation_requires_its_pool"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_deferred_tests.rs",
+          "symbol": "deferred_wakes_fifo_waiters_with_owned_strings_and_releases_the_scope_value"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_unit_tests.rs",
+          "symbol": "unit_deferred_distinguishes_empty_and_full_without_payload_storage"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_lifecycle.rs",
+          "symbol": "closing_a_source_scope_drops_ready_join_and_await_deliveries"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_lifecycle.rs",
+          "symbol": "cancelling_nested_source_scopes_unlinks_all_deferred_waiters"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_lifecycle.rs",
+          "symbol": "source_interrupt_waiters_resume_fifo_after_suspending_cleanup"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_lifecycle.rs",
+          "symbol": "source_scopes_reclaim_completed_children_and_preserve_live_copied_handles"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_child_waiters.rs",
+          "symbol": "child_await_and_join_waiters_resume_fifo_after_the_child_finishes"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_child_waiters.rs",
+          "symbol": "failed_handleless_children_release_records_during_sibling_cleanup"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p6.md"
         }
       ],
-      "reason": "固定revisionの独立backend入口を採用。source・全実行文脈・所有権等の完了は個別の実行証拠が揃うまで判定しない。"
+      "reason": "Scope/Fiber/Deferred/Causeを独立sourceと内部IRからCへ接続。typed値・Unit・FIFO・失敗分類/表示/再送出、取消時の中断cleanup完了、完了child/handleなしchild/待機リンクの回収をC両最適化で検証。旧全source/IR観測の照合はP7で別途判定する。"
     },
     {
       "id": "emela_core::FiberOp::CauseRaise",
       "relation": "variant_entry",
       "legacy_role": "emit",
-      "phase": null,
-      "status": "mapped",
-      "source_scope": "unclassified",
+      "phase": "P6",
+      "status": "verified",
+      "source_scope": "source",
       "new_implementation": [
         {
           "kind": "implementation",
@@ -3438,16 +4110,100 @@
         {
           "kind": "review",
           "path": "docs/migration-source.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_concurrency.rs",
+          "symbol": "source_concurrency_preserves_handles_values_causes_and_unit_results"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_concurrency_advanced.rs",
+          "symbol": "source_scope_evidence_nested_scopes_and_standard_combinators_preserve_ownership"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "scope_fork_and_join_reclaim_children_and_their_erased_values"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "deferred_complete_poll_and_await_share_one_typed_value_until_scope_closes"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "attempts_preserve_success_and_typed_cause_failures_across_raise"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "interruption_waits_for_nested_suspending_cleanup_before_await_reports_its_cause"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_scope_tests.rs",
+          "symbol": "scope_handlers_merge_callback_failure_abis_and_box_typed_child_results"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_scope_tests.rs",
+          "symbol": "calling_the_generated_scope_deferred_operation_requires_its_pool"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_deferred_tests.rs",
+          "symbol": "deferred_wakes_fifo_waiters_with_owned_strings_and_releases_the_scope_value"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_unit_tests.rs",
+          "symbol": "unit_deferred_distinguishes_empty_and_full_without_payload_storage"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_lifecycle.rs",
+          "symbol": "closing_a_source_scope_drops_ready_join_and_await_deliveries"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_lifecycle.rs",
+          "symbol": "cancelling_nested_source_scopes_unlinks_all_deferred_waiters"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_lifecycle.rs",
+          "symbol": "source_interrupt_waiters_resume_fifo_after_suspending_cleanup"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_lifecycle.rs",
+          "symbol": "source_scopes_reclaim_completed_children_and_preserve_live_copied_handles"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_child_waiters.rs",
+          "symbol": "child_await_and_join_waiters_resume_fifo_after_the_child_finishes"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_child_waiters.rs",
+          "symbol": "failed_handleless_children_release_records_during_sibling_cleanup"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p6.md"
         }
       ],
-      "reason": "固定revisionの独立backend入口を採用。source・全実行文脈・所有権等の完了は個別の実行証拠が揃うまで判定しない。"
+      "reason": "Scope/Fiber/Deferred/Causeを独立sourceと内部IRからCへ接続。typed値・Unit・FIFO・失敗分類/表示/再送出、取消時の中断cleanup完了、完了child/handleなしchild/待機リンクの回収をC両最適化で検証。旧全source/IR観測の照合はP7で別途判定する。"
     },
     {
       "id": "emela_core::FiberOp::CauseRaise.fails",
       "relation": "member_of_variant",
       "legacy_role": "emit",
-      "phase": null,
-      "status": "mapped",
+      "phase": "P6",
+      "status": "verified",
       "source_scope": "schema",
       "new_implementation": [
         {
@@ -3460,17 +4216,101 @@
         {
           "kind": "review",
           "path": "docs/migration-source.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_concurrency.rs",
+          "symbol": "source_concurrency_preserves_handles_values_causes_and_unit_results"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_concurrency_advanced.rs",
+          "symbol": "source_scope_evidence_nested_scopes_and_standard_combinators_preserve_ownership"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "scope_fork_and_join_reclaim_children_and_their_erased_values"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "deferred_complete_poll_and_await_share_one_typed_value_until_scope_closes"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "attempts_preserve_success_and_typed_cause_failures_across_raise"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "interruption_waits_for_nested_suspending_cleanup_before_await_reports_its_cause"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_scope_tests.rs",
+          "symbol": "scope_handlers_merge_callback_failure_abis_and_box_typed_child_results"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_scope_tests.rs",
+          "symbol": "calling_the_generated_scope_deferred_operation_requires_its_pool"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_deferred_tests.rs",
+          "symbol": "deferred_wakes_fifo_waiters_with_owned_strings_and_releases_the_scope_value"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_unit_tests.rs",
+          "symbol": "unit_deferred_distinguishes_empty_and_full_without_payload_storage"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_lifecycle.rs",
+          "symbol": "closing_a_source_scope_drops_ready_join_and_await_deliveries"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_lifecycle.rs",
+          "symbol": "cancelling_nested_source_scopes_unlinks_all_deferred_waiters"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_lifecycle.rs",
+          "symbol": "source_interrupt_waiters_resume_fifo_after_suspending_cleanup"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_lifecycle.rs",
+          "symbol": "source_scopes_reclaim_completed_children_and_preserve_live_copied_handles"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_child_waiters.rs",
+          "symbol": "child_await_and_join_waiters_resume_fifo_after_the_child_finishes"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_child_waiters.rs",
+          "symbol": "failed_handleless_children_release_records_during_sibling_cleanup"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p6.md"
         }
       ],
-      "reason": "固定revisionの独立backend入口を採用。source・全実行文脈・所有権等の完了は個別の実行証拠が揃うまで判定しない。"
+      "reason": "Scope/Fiber/Deferred/Causeを独立sourceと内部IRからCへ接続。typed値・Unit・FIFO・失敗分類/表示/再送出、取消時の中断cleanup完了、完了child/handleなしchild/待機リンクの回収をC両最適化で検証。旧全source/IR観測の照合はP7で別途判定する。"
     },
     {
       "id": "emela_core::FiberOp::CauseToString",
       "relation": "variant_entry",
       "legacy_role": "emit",
-      "phase": null,
-      "status": "mapped",
-      "source_scope": "unclassified",
+      "phase": "P6",
+      "status": "verified",
+      "source_scope": "source",
       "new_implementation": [
         {
           "kind": "implementation",
@@ -3487,17 +4327,101 @@
         {
           "kind": "review",
           "path": "docs/migration-source.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_concurrency.rs",
+          "symbol": "source_concurrency_preserves_handles_values_causes_and_unit_results"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_concurrency_advanced.rs",
+          "symbol": "source_scope_evidence_nested_scopes_and_standard_combinators_preserve_ownership"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "scope_fork_and_join_reclaim_children_and_their_erased_values"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "deferred_complete_poll_and_await_share_one_typed_value_until_scope_closes"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "attempts_preserve_success_and_typed_cause_failures_across_raise"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "interruption_waits_for_nested_suspending_cleanup_before_await_reports_its_cause"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_scope_tests.rs",
+          "symbol": "scope_handlers_merge_callback_failure_abis_and_box_typed_child_results"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_scope_tests.rs",
+          "symbol": "calling_the_generated_scope_deferred_operation_requires_its_pool"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_deferred_tests.rs",
+          "symbol": "deferred_wakes_fifo_waiters_with_owned_strings_and_releases_the_scope_value"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_unit_tests.rs",
+          "symbol": "unit_deferred_distinguishes_empty_and_full_without_payload_storage"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_lifecycle.rs",
+          "symbol": "closing_a_source_scope_drops_ready_join_and_await_deliveries"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_lifecycle.rs",
+          "symbol": "cancelling_nested_source_scopes_unlinks_all_deferred_waiters"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_lifecycle.rs",
+          "symbol": "source_interrupt_waiters_resume_fifo_after_suspending_cleanup"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_lifecycle.rs",
+          "symbol": "source_scopes_reclaim_completed_children_and_preserve_live_copied_handles"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_child_waiters.rs",
+          "symbol": "child_await_and_join_waiters_resume_fifo_after_the_child_finishes"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_child_waiters.rs",
+          "symbol": "failed_handleless_children_release_records_during_sibling_cleanup"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p6.md"
         }
       ],
-      "reason": "固定revisionの独立backend入口を採用。source・全実行文脈・所有権等の完了は個別の実行証拠が揃うまで判定しない。"
+      "reason": "Scope/Fiber/Deferred/Causeを独立sourceと内部IRからCへ接続。typed値・Unit・FIFO・失敗分類/表示/再送出、取消時の中断cleanup完了、完了child/handleなしchild/待機リンクの回収をC両最適化で検証。旧全source/IR観測の照合はP7で別途判定する。"
     },
     {
       "id": "emela_core::FiberOp::Complete",
       "relation": "variant_entry",
       "legacy_role": "emit",
-      "phase": null,
-      "status": "mapped",
-      "source_scope": "unclassified",
+      "phase": "P6",
+      "status": "verified",
+      "source_scope": "source",
       "new_implementation": [
         {
           "kind": "implementation",
@@ -3509,17 +4433,101 @@
         {
           "kind": "review",
           "path": "docs/migration-source.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_concurrency.rs",
+          "symbol": "source_concurrency_preserves_handles_values_causes_and_unit_results"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_concurrency_advanced.rs",
+          "symbol": "source_scope_evidence_nested_scopes_and_standard_combinators_preserve_ownership"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "scope_fork_and_join_reclaim_children_and_their_erased_values"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "deferred_complete_poll_and_await_share_one_typed_value_until_scope_closes"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "attempts_preserve_success_and_typed_cause_failures_across_raise"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "interruption_waits_for_nested_suspending_cleanup_before_await_reports_its_cause"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_scope_tests.rs",
+          "symbol": "scope_handlers_merge_callback_failure_abis_and_box_typed_child_results"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_scope_tests.rs",
+          "symbol": "calling_the_generated_scope_deferred_operation_requires_its_pool"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_deferred_tests.rs",
+          "symbol": "deferred_wakes_fifo_waiters_with_owned_strings_and_releases_the_scope_value"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_unit_tests.rs",
+          "symbol": "unit_deferred_distinguishes_empty_and_full_without_payload_storage"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_lifecycle.rs",
+          "symbol": "closing_a_source_scope_drops_ready_join_and_await_deliveries"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_lifecycle.rs",
+          "symbol": "cancelling_nested_source_scopes_unlinks_all_deferred_waiters"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_lifecycle.rs",
+          "symbol": "source_interrupt_waiters_resume_fifo_after_suspending_cleanup"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_lifecycle.rs",
+          "symbol": "source_scopes_reclaim_completed_children_and_preserve_live_copied_handles"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_child_waiters.rs",
+          "symbol": "child_await_and_join_waiters_resume_fifo_after_the_child_finishes"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_child_waiters.rs",
+          "symbol": "failed_handleless_children_release_records_during_sibling_cleanup"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p6.md"
         }
       ],
-      "reason": "固定revisionの独立backend入口を採用。source・全実行文脈・所有権等の完了は個別の実行証拠が揃うまで判定しない。"
+      "reason": "Scope/Fiber/Deferred/Causeを独立sourceと内部IRからCへ接続。typed値・Unit・FIFO・失敗分類/表示/再送出、取消時の中断cleanup完了、完了child/handleなしchild/待機リンクの回収をC両最適化で検証。旧全source/IR観測の照合はP7で別途判定する。"
     },
     {
       "id": "emela_core::FiberOp::Deferred",
       "relation": "variant_entry",
       "legacy_role": "emit",
-      "phase": null,
-      "status": "mapped",
-      "source_scope": "unclassified",
+      "phase": "P6",
+      "status": "verified",
+      "source_scope": "source",
       "new_implementation": [
         {
           "kind": "implementation",
@@ -3531,17 +4539,101 @@
         {
           "kind": "review",
           "path": "docs/migration-source.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_concurrency.rs",
+          "symbol": "source_concurrency_preserves_handles_values_causes_and_unit_results"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_concurrency_advanced.rs",
+          "symbol": "source_scope_evidence_nested_scopes_and_standard_combinators_preserve_ownership"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "scope_fork_and_join_reclaim_children_and_their_erased_values"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "deferred_complete_poll_and_await_share_one_typed_value_until_scope_closes"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "attempts_preserve_success_and_typed_cause_failures_across_raise"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "interruption_waits_for_nested_suspending_cleanup_before_await_reports_its_cause"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_scope_tests.rs",
+          "symbol": "scope_handlers_merge_callback_failure_abis_and_box_typed_child_results"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_scope_tests.rs",
+          "symbol": "calling_the_generated_scope_deferred_operation_requires_its_pool"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_deferred_tests.rs",
+          "symbol": "deferred_wakes_fifo_waiters_with_owned_strings_and_releases_the_scope_value"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_unit_tests.rs",
+          "symbol": "unit_deferred_distinguishes_empty_and_full_without_payload_storage"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_lifecycle.rs",
+          "symbol": "closing_a_source_scope_drops_ready_join_and_await_deliveries"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_lifecycle.rs",
+          "symbol": "cancelling_nested_source_scopes_unlinks_all_deferred_waiters"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_lifecycle.rs",
+          "symbol": "source_interrupt_waiters_resume_fifo_after_suspending_cleanup"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_lifecycle.rs",
+          "symbol": "source_scopes_reclaim_completed_children_and_preserve_live_copied_handles"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_child_waiters.rs",
+          "symbol": "child_await_and_join_waiters_resume_fifo_after_the_child_finishes"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_child_waiters.rs",
+          "symbol": "failed_handleless_children_release_records_during_sibling_cleanup"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p6.md"
         }
       ],
-      "reason": "固定revisionの独立backend入口を採用。source・全実行文脈・所有権等の完了は個別の実行証拠が揃うまで判定しない。"
+      "reason": "Scope/Fiber/Deferred/Causeを独立sourceと内部IRからCへ接続。typed値・Unit・FIFO・失敗分類/表示/再送出、取消時の中断cleanup完了、完了child/handleなしchild/待機リンクの回収をC両最適化で検証。旧全source/IR観測の照合はP7で別途判定する。"
     },
     {
       "id": "emela_core::FiberOp::DeferredAwait",
       "relation": "variant_entry",
       "legacy_role": "emit",
-      "phase": null,
-      "status": "mapped",
-      "source_scope": "unclassified",
+      "phase": "P6",
+      "status": "verified",
+      "source_scope": "source",
       "new_implementation": [
         {
           "kind": "implementation",
@@ -3558,17 +4650,101 @@
         {
           "kind": "review",
           "path": "docs/migration-source.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_concurrency.rs",
+          "symbol": "source_concurrency_preserves_handles_values_causes_and_unit_results"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_concurrency_advanced.rs",
+          "symbol": "source_scope_evidence_nested_scopes_and_standard_combinators_preserve_ownership"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "scope_fork_and_join_reclaim_children_and_their_erased_values"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "deferred_complete_poll_and_await_share_one_typed_value_until_scope_closes"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "attempts_preserve_success_and_typed_cause_failures_across_raise"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "interruption_waits_for_nested_suspending_cleanup_before_await_reports_its_cause"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_scope_tests.rs",
+          "symbol": "scope_handlers_merge_callback_failure_abis_and_box_typed_child_results"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_scope_tests.rs",
+          "symbol": "calling_the_generated_scope_deferred_operation_requires_its_pool"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_deferred_tests.rs",
+          "symbol": "deferred_wakes_fifo_waiters_with_owned_strings_and_releases_the_scope_value"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_unit_tests.rs",
+          "symbol": "unit_deferred_distinguishes_empty_and_full_without_payload_storage"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_lifecycle.rs",
+          "symbol": "closing_a_source_scope_drops_ready_join_and_await_deliveries"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_lifecycle.rs",
+          "symbol": "cancelling_nested_source_scopes_unlinks_all_deferred_waiters"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_lifecycle.rs",
+          "symbol": "source_interrupt_waiters_resume_fifo_after_suspending_cleanup"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_lifecycle.rs",
+          "symbol": "source_scopes_reclaim_completed_children_and_preserve_live_copied_handles"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_child_waiters.rs",
+          "symbol": "child_await_and_join_waiters_resume_fifo_after_the_child_finishes"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_child_waiters.rs",
+          "symbol": "failed_handleless_children_release_records_during_sibling_cleanup"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p6.md"
         }
       ],
-      "reason": "固定revisionの独立backend入口を採用。source・全実行文脈・所有権等の完了は個別の実行証拠が揃うまで判定しない。"
+      "reason": "Scope/Fiber/Deferred/Causeを独立sourceと内部IRからCへ接続。typed値・Unit・FIFO・失敗分類/表示/再送出、取消時の中断cleanup完了、完了child/handleなしchild/待機リンクの回収をC両最適化で検証。旧全source/IR観測の照合はP7で別途判定する。"
     },
     {
       "id": "emela_core::FiberOp::Fork",
       "relation": "variant_entry",
       "legacy_role": "emit",
-      "phase": null,
-      "status": "mapped",
-      "source_scope": "unclassified",
+      "phase": "P6",
+      "status": "verified",
+      "source_scope": "source",
       "new_implementation": [
         {
           "kind": "implementation",
@@ -3580,17 +4756,101 @@
         {
           "kind": "review",
           "path": "docs/migration-source.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_concurrency.rs",
+          "symbol": "source_concurrency_preserves_handles_values_causes_and_unit_results"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_concurrency_advanced.rs",
+          "symbol": "source_scope_evidence_nested_scopes_and_standard_combinators_preserve_ownership"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "scope_fork_and_join_reclaim_children_and_their_erased_values"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "deferred_complete_poll_and_await_share_one_typed_value_until_scope_closes"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "attempts_preserve_success_and_typed_cause_failures_across_raise"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "interruption_waits_for_nested_suspending_cleanup_before_await_reports_its_cause"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_scope_tests.rs",
+          "symbol": "scope_handlers_merge_callback_failure_abis_and_box_typed_child_results"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_scope_tests.rs",
+          "symbol": "calling_the_generated_scope_deferred_operation_requires_its_pool"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_deferred_tests.rs",
+          "symbol": "deferred_wakes_fifo_waiters_with_owned_strings_and_releases_the_scope_value"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_unit_tests.rs",
+          "symbol": "unit_deferred_distinguishes_empty_and_full_without_payload_storage"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_lifecycle.rs",
+          "symbol": "closing_a_source_scope_drops_ready_join_and_await_deliveries"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_lifecycle.rs",
+          "symbol": "cancelling_nested_source_scopes_unlinks_all_deferred_waiters"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_lifecycle.rs",
+          "symbol": "source_interrupt_waiters_resume_fifo_after_suspending_cleanup"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_lifecycle.rs",
+          "symbol": "source_scopes_reclaim_completed_children_and_preserve_live_copied_handles"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_child_waiters.rs",
+          "symbol": "child_await_and_join_waiters_resume_fifo_after_the_child_finishes"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_child_waiters.rs",
+          "symbol": "failed_handleless_children_release_records_during_sibling_cleanup"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p6.md"
         }
       ],
-      "reason": "固定revisionの独立backend入口を採用。source・全実行文脈・所有権等の完了は個別の実行証拠が揃うまで判定しない。"
+      "reason": "Scope/Fiber/Deferred/Causeを独立sourceと内部IRからCへ接続。typed値・Unit・FIFO・失敗分類/表示/再送出、取消時の中断cleanup完了、完了child/handleなしchild/待機リンクの回収をC両最適化で検証。旧全source/IR観測の照合はP7で別途判定する。"
     },
     {
       "id": "emela_core::FiberOp::Interrupt",
       "relation": "variant_entry",
       "legacy_role": "emit",
-      "phase": null,
-      "status": "mapped",
-      "source_scope": "unclassified",
+      "phase": "P6",
+      "status": "verified",
+      "source_scope": "source",
       "new_implementation": [
         {
           "kind": "implementation",
@@ -3607,17 +4867,101 @@
         {
           "kind": "review",
           "path": "docs/migration-source.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_concurrency.rs",
+          "symbol": "source_concurrency_preserves_handles_values_causes_and_unit_results"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_concurrency_advanced.rs",
+          "symbol": "source_scope_evidence_nested_scopes_and_standard_combinators_preserve_ownership"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "scope_fork_and_join_reclaim_children_and_their_erased_values"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "deferred_complete_poll_and_await_share_one_typed_value_until_scope_closes"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "attempts_preserve_success_and_typed_cause_failures_across_raise"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "interruption_waits_for_nested_suspending_cleanup_before_await_reports_its_cause"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_scope_tests.rs",
+          "symbol": "scope_handlers_merge_callback_failure_abis_and_box_typed_child_results"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_scope_tests.rs",
+          "symbol": "calling_the_generated_scope_deferred_operation_requires_its_pool"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_deferred_tests.rs",
+          "symbol": "deferred_wakes_fifo_waiters_with_owned_strings_and_releases_the_scope_value"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_unit_tests.rs",
+          "symbol": "unit_deferred_distinguishes_empty_and_full_without_payload_storage"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_lifecycle.rs",
+          "symbol": "closing_a_source_scope_drops_ready_join_and_await_deliveries"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_lifecycle.rs",
+          "symbol": "cancelling_nested_source_scopes_unlinks_all_deferred_waiters"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_lifecycle.rs",
+          "symbol": "source_interrupt_waiters_resume_fifo_after_suspending_cleanup"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_lifecycle.rs",
+          "symbol": "source_scopes_reclaim_completed_children_and_preserve_live_copied_handles"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_child_waiters.rs",
+          "symbol": "child_await_and_join_waiters_resume_fifo_after_the_child_finishes"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_child_waiters.rs",
+          "symbol": "failed_handleless_children_release_records_during_sibling_cleanup"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p6.md"
         }
       ],
-      "reason": "固定revisionの独立backend入口を採用。source・全実行文脈・所有権等の完了は個別の実行証拠が揃うまで判定しない。"
+      "reason": "Scope/Fiber/Deferred/Causeを独立sourceと内部IRからCへ接続。typed値・Unit・FIFO・失敗分類/表示/再送出、取消時の中断cleanup完了、完了child/handleなしchild/待機リンクの回収をC両最適化で検証。旧全source/IR観測の照合はP7で別途判定する。"
     },
     {
       "id": "emela_core::FiberOp::Join",
       "relation": "variant_entry",
       "legacy_role": "emit",
-      "phase": null,
-      "status": "mapped",
-      "source_scope": "unclassified",
+      "phase": "P6",
+      "status": "verified",
+      "source_scope": "source",
       "new_implementation": [
         {
           "kind": "implementation",
@@ -3634,17 +4978,101 @@
         {
           "kind": "review",
           "path": "docs/migration-source.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_concurrency.rs",
+          "symbol": "source_concurrency_preserves_handles_values_causes_and_unit_results"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_concurrency_advanced.rs",
+          "symbol": "source_scope_evidence_nested_scopes_and_standard_combinators_preserve_ownership"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "scope_fork_and_join_reclaim_children_and_their_erased_values"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "deferred_complete_poll_and_await_share_one_typed_value_until_scope_closes"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "attempts_preserve_success_and_typed_cause_failures_across_raise"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "interruption_waits_for_nested_suspending_cleanup_before_await_reports_its_cause"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_scope_tests.rs",
+          "symbol": "scope_handlers_merge_callback_failure_abis_and_box_typed_child_results"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_scope_tests.rs",
+          "symbol": "calling_the_generated_scope_deferred_operation_requires_its_pool"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_deferred_tests.rs",
+          "symbol": "deferred_wakes_fifo_waiters_with_owned_strings_and_releases_the_scope_value"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_unit_tests.rs",
+          "symbol": "unit_deferred_distinguishes_empty_and_full_without_payload_storage"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_lifecycle.rs",
+          "symbol": "closing_a_source_scope_drops_ready_join_and_await_deliveries"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_lifecycle.rs",
+          "symbol": "cancelling_nested_source_scopes_unlinks_all_deferred_waiters"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_lifecycle.rs",
+          "symbol": "source_interrupt_waiters_resume_fifo_after_suspending_cleanup"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_lifecycle.rs",
+          "symbol": "source_scopes_reclaim_completed_children_and_preserve_live_copied_handles"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_child_waiters.rs",
+          "symbol": "child_await_and_join_waiters_resume_fifo_after_the_child_finishes"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_child_waiters.rs",
+          "symbol": "failed_handleless_children_release_records_during_sibling_cleanup"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p6.md"
         }
       ],
-      "reason": "固定revisionの独立backend入口を採用。source・全実行文脈・所有権等の完了は個別の実行証拠が揃うまで判定しない。"
+      "reason": "Scope/Fiber/Deferred/Causeを独立sourceと内部IRからCへ接続。typed値・Unit・FIFO・失敗分類/表示/再送出、取消時の中断cleanup完了、完了child/handleなしchild/待機リンクの回収をC両最適化で検証。旧全source/IR観測の照合はP7で別途判定する。"
     },
     {
       "id": "emela_core::FiberOp::Poll",
       "relation": "variant_entry",
       "legacy_role": "emit",
-      "phase": null,
-      "status": "mapped",
-      "source_scope": "unclassified",
+      "phase": "P6",
+      "status": "verified",
+      "source_scope": "source",
       "new_implementation": [
         {
           "kind": "implementation",
@@ -3656,17 +5084,101 @@
         {
           "kind": "review",
           "path": "docs/migration-source.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_concurrency.rs",
+          "symbol": "source_concurrency_preserves_handles_values_causes_and_unit_results"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_concurrency_advanced.rs",
+          "symbol": "source_scope_evidence_nested_scopes_and_standard_combinators_preserve_ownership"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "scope_fork_and_join_reclaim_children_and_their_erased_values"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "deferred_complete_poll_and_await_share_one_typed_value_until_scope_closes"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "attempts_preserve_success_and_typed_cause_failures_across_raise"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "interruption_waits_for_nested_suspending_cleanup_before_await_reports_its_cause"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_scope_tests.rs",
+          "symbol": "scope_handlers_merge_callback_failure_abis_and_box_typed_child_results"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_scope_tests.rs",
+          "symbol": "calling_the_generated_scope_deferred_operation_requires_its_pool"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_deferred_tests.rs",
+          "symbol": "deferred_wakes_fifo_waiters_with_owned_strings_and_releases_the_scope_value"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_unit_tests.rs",
+          "symbol": "unit_deferred_distinguishes_empty_and_full_without_payload_storage"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_lifecycle.rs",
+          "symbol": "closing_a_source_scope_drops_ready_join_and_await_deliveries"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_lifecycle.rs",
+          "symbol": "cancelling_nested_source_scopes_unlinks_all_deferred_waiters"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_lifecycle.rs",
+          "symbol": "source_interrupt_waiters_resume_fifo_after_suspending_cleanup"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_lifecycle.rs",
+          "symbol": "source_scopes_reclaim_completed_children_and_preserve_live_copied_handles"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_child_waiters.rs",
+          "symbol": "child_await_and_join_waiters_resume_fifo_after_the_child_finishes"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_child_waiters.rs",
+          "symbol": "failed_handleless_children_release_records_during_sibling_cleanup"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p6.md"
         }
       ],
-      "reason": "固定revisionの独立backend入口を採用。source・全実行文脈・所有権等の完了は個別の実行証拠が揃うまで判定しない。"
+      "reason": "Scope/Fiber/Deferred/Causeを独立sourceと内部IRからCへ接続。typed値・Unit・FIFO・失敗分類/表示/再送出、取消時の中断cleanup完了、完了child/handleなしchild/待機リンクの回収をC両最適化で検証。旧全source/IR観測の照合はP7で別途判定する。"
     },
     {
       "id": "emela_core::FiberOp::Scope",
       "relation": "variant_entry",
       "legacy_role": "emit",
-      "phase": null,
-      "status": "mapped",
-      "source_scope": "unclassified",
+      "phase": "P6",
+      "status": "verified",
+      "source_scope": "source",
       "new_implementation": [
         {
           "kind": "implementation",
@@ -3683,16 +5195,100 @@
         {
           "kind": "review",
           "path": "docs/migration-source.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_concurrency.rs",
+          "symbol": "source_concurrency_preserves_handles_values_causes_and_unit_results"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_concurrency_advanced.rs",
+          "symbol": "source_scope_evidence_nested_scopes_and_standard_combinators_preserve_ownership"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "scope_fork_and_join_reclaim_children_and_their_erased_values"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "deferred_complete_poll_and_await_share_one_typed_value_until_scope_closes"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "attempts_preserve_success_and_typed_cause_failures_across_raise"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "interruption_waits_for_nested_suspending_cleanup_before_await_reports_its_cause"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_scope_tests.rs",
+          "symbol": "scope_handlers_merge_callback_failure_abis_and_box_typed_child_results"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_scope_tests.rs",
+          "symbol": "calling_the_generated_scope_deferred_operation_requires_its_pool"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_deferred_tests.rs",
+          "symbol": "deferred_wakes_fifo_waiters_with_owned_strings_and_releases_the_scope_value"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_unit_tests.rs",
+          "symbol": "unit_deferred_distinguishes_empty_and_full_without_payload_storage"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_lifecycle.rs",
+          "symbol": "closing_a_source_scope_drops_ready_join_and_await_deliveries"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_lifecycle.rs",
+          "symbol": "cancelling_nested_source_scopes_unlinks_all_deferred_waiters"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_lifecycle.rs",
+          "symbol": "source_interrupt_waiters_resume_fifo_after_suspending_cleanup"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_lifecycle.rs",
+          "symbol": "source_scopes_reclaim_completed_children_and_preserve_live_copied_handles"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_child_waiters.rs",
+          "symbol": "child_await_and_join_waiters_resume_fifo_after_the_child_finishes"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_child_waiters.rs",
+          "symbol": "failed_handleless_children_release_records_during_sibling_cleanup"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p6.md"
         }
       ],
-      "reason": "固定revisionの独立backend入口を採用。source・全実行文脈・所有権等の完了は個別の実行証拠が揃うまで判定しない。"
+      "reason": "Scope/Fiber/Deferred/Causeを独立sourceと内部IRからCへ接続。typed値・Unit・FIFO・失敗分類/表示/再送出、取消時の中断cleanup完了、完了child/handleなしchild/待機リンクの回収をC両最適化で検証。旧全source/IR観測の照合はP7で別途判定する。"
     },
     {
       "id": "emela_core::FiberOp::Scope.fails",
       "relation": "member_of_variant",
       "legacy_role": "emit",
-      "phase": null,
-      "status": "mapped",
+      "phase": "P6",
+      "status": "verified",
       "source_scope": "schema",
       "new_implementation": [
         {
@@ -3705,16 +5301,100 @@
         {
           "kind": "review",
           "path": "docs/migration-source.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_concurrency.rs",
+          "symbol": "source_concurrency_preserves_handles_values_causes_and_unit_results"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_concurrency_advanced.rs",
+          "symbol": "source_scope_evidence_nested_scopes_and_standard_combinators_preserve_ownership"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "scope_fork_and_join_reclaim_children_and_their_erased_values"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "deferred_complete_poll_and_await_share_one_typed_value_until_scope_closes"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "attempts_preserve_success_and_typed_cause_failures_across_raise"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "interruption_waits_for_nested_suspending_cleanup_before_await_reports_its_cause"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_scope_tests.rs",
+          "symbol": "scope_handlers_merge_callback_failure_abis_and_box_typed_child_results"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_scope_tests.rs",
+          "symbol": "calling_the_generated_scope_deferred_operation_requires_its_pool"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_deferred_tests.rs",
+          "symbol": "deferred_wakes_fifo_waiters_with_owned_strings_and_releases_the_scope_value"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_unit_tests.rs",
+          "symbol": "unit_deferred_distinguishes_empty_and_full_without_payload_storage"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_lifecycle.rs",
+          "symbol": "closing_a_source_scope_drops_ready_join_and_await_deliveries"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_lifecycle.rs",
+          "symbol": "cancelling_nested_source_scopes_unlinks_all_deferred_waiters"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_lifecycle.rs",
+          "symbol": "source_interrupt_waiters_resume_fifo_after_suspending_cleanup"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_lifecycle.rs",
+          "symbol": "source_scopes_reclaim_completed_children_and_preserve_live_copied_handles"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_child_waiters.rs",
+          "symbol": "child_await_and_join_waiters_resume_fifo_after_the_child_finishes"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_child_waiters.rs",
+          "symbol": "failed_handleless_children_release_records_during_sibling_cleanup"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p6.md"
         }
       ],
-      "reason": "固定revisionの独立backend入口を採用。source・全実行文脈・所有権等の完了は個別の実行証拠が揃うまで判定しない。"
+      "reason": "Scope/Fiber/Deferred/Causeを独立sourceと内部IRからCへ接続。typed値・Unit・FIFO・失敗分類/表示/再送出、取消時の中断cleanup完了、完了child/handleなしchild/待機リンクの回収をC両最適化で検証。旧全source/IR観測の照合はP7で別途判定する。"
     },
     {
       "id": "emela_core::FnSets",
       "relation": "shared_declaration",
       "legacy_role": "schema",
       "phase": "P6",
-      "status": "mapped",
+      "status": "verified",
       "source_scope": "schema",
       "new_implementation": [
         {
@@ -3750,16 +5430,50 @@
         {
           "kind": "run_report",
           "path": "docs/reports/compiler-p5.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_concurrency.rs",
+          "symbol": "source_concurrency_preserves_handles_values_causes_and_unit_results"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_concurrency.rs",
+          "symbol": "scope_result_and_row_kind_constraints_report_the_source_boundary"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_concurrency_advanced.rs",
+          "symbol": "source_scope_evidence_nested_scopes_and_standard_combinators_preserve_ownership"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_rows.rs",
+          "symbol": "source_scopes_accept_children_with_different_error_and_effect_subsets"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_scope_tests.rs",
+          "symbol": "scope_handlers_merge_callback_failure_abis_and_box_typed_child_results"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_scope_tests.rs",
+          "symbol": "conservative_scope_failures_remain_when_a_c_boundary_can_supply_failing_values"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p6.md"
         }
       ],
-      "reason": "独立集合表現と値型から具体化後のfailure/effect/evidence/suspends ABIを確定。Asyncはevidence不要・中断可能、普通effectはoperation構成に従う。Scopeの集合制約とintrinsic ABIはP6で追加検証する。"
+      "reason": "独自の集合表現と具体化ABIを使用。childごとのerror/effect包含、row kind、Scope evidence継承、Unit/値/失敗/中断関数ABIをsourceとCで検証。閉じたpure callbackのみ保守的failureを除去し、外部境界の未知failureは維持する。"
     },
     {
       "id": "emela_core::FnSets.effects",
       "relation": "member_of_declaration",
       "legacy_role": "schema",
       "phase": "P6",
-      "status": "mapped",
+      "status": "verified",
       "source_scope": "schema",
       "new_implementation": [
         {
@@ -3795,16 +5509,50 @@
         {
           "kind": "run_report",
           "path": "docs/reports/compiler-p5.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_concurrency.rs",
+          "symbol": "source_concurrency_preserves_handles_values_causes_and_unit_results"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_concurrency.rs",
+          "symbol": "scope_result_and_row_kind_constraints_report_the_source_boundary"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_concurrency_advanced.rs",
+          "symbol": "source_scope_evidence_nested_scopes_and_standard_combinators_preserve_ownership"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_rows.rs",
+          "symbol": "source_scopes_accept_children_with_different_error_and_effect_subsets"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_scope_tests.rs",
+          "symbol": "scope_handlers_merge_callback_failure_abis_and_box_typed_child_results"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_scope_tests.rs",
+          "symbol": "conservative_scope_failures_remain_when_a_c_boundary_can_supply_failing_values"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p6.md"
         }
       ],
-      "reason": "独立集合表現と値型から具体化後のfailure/effect/evidence/suspends ABIを確定。Asyncはevidence不要・中断可能、普通effectはoperation構成に従う。Scopeの集合制約とintrinsic ABIはP6で追加検証する。"
+      "reason": "独自の集合表現と具体化ABIを使用。childごとのerror/effect包含、row kind、Scope evidence継承、Unit/値/失敗/中断関数ABIをsourceとCで検証。閉じたpure callbackのみ保守的failureを除去し、外部境界の未知failureは維持する。"
     },
     {
       "id": "emela_core::FnSets.errors",
       "relation": "member_of_declaration",
       "legacy_role": "schema",
       "phase": "P6",
-      "status": "mapped",
+      "status": "verified",
       "source_scope": "schema",
       "new_implementation": [
         {
@@ -3840,16 +5588,50 @@
         {
           "kind": "run_report",
           "path": "docs/reports/compiler-p5.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_concurrency.rs",
+          "symbol": "source_concurrency_preserves_handles_values_causes_and_unit_results"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_concurrency.rs",
+          "symbol": "scope_result_and_row_kind_constraints_report_the_source_boundary"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_concurrency_advanced.rs",
+          "symbol": "source_scope_evidence_nested_scopes_and_standard_combinators_preserve_ownership"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_rows.rs",
+          "symbol": "source_scopes_accept_children_with_different_error_and_effect_subsets"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_scope_tests.rs",
+          "symbol": "scope_handlers_merge_callback_failure_abis_and_box_typed_child_results"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_scope_tests.rs",
+          "symbol": "conservative_scope_failures_remain_when_a_c_boundary_can_supply_failing_values"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p6.md"
         }
       ],
-      "reason": "独立集合表現と値型から具体化後のfailure/effect/evidence/suspends ABIを確定。Asyncはevidence不要・中断可能、普通effectはoperation構成に従う。Scopeの集合制約とintrinsic ABIはP6で追加検証する。"
+      "reason": "独自の集合表現と具体化ABIを使用。childごとのerror/effect包含、row kind、Scope evidence継承、Unit/値/失敗/中断関数ABIをsourceとCで検証。閉じたpure callbackのみ保守的failureを除去し、外部境界の未知failureは維持する。"
     },
     {
       "id": "emela_core::FnType",
       "relation": "shared_declaration",
       "legacy_role": "schema",
       "phase": "P6",
-      "status": "mapped",
+      "status": "verified",
       "source_scope": "schema",
       "new_implementation": [
         {
@@ -3885,16 +5667,50 @@
         {
           "kind": "run_report",
           "path": "docs/reports/compiler-p5.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_concurrency.rs",
+          "symbol": "source_concurrency_preserves_handles_values_causes_and_unit_results"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_concurrency.rs",
+          "symbol": "scope_result_and_row_kind_constraints_report_the_source_boundary"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_concurrency_advanced.rs",
+          "symbol": "source_scope_evidence_nested_scopes_and_standard_combinators_preserve_ownership"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_rows.rs",
+          "symbol": "source_scopes_accept_children_with_different_error_and_effect_subsets"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_scope_tests.rs",
+          "symbol": "scope_handlers_merge_callback_failure_abis_and_box_typed_child_results"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_scope_tests.rs",
+          "symbol": "conservative_scope_failures_remain_when_a_c_boundary_can_supply_failing_values"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p6.md"
         }
       ],
-      "reason": "独立集合表現と値型から具体化後のfailure/effect/evidence/suspends ABIを確定。Asyncはevidence不要・中断可能、普通effectはoperation構成に従う。Scopeの集合制約とintrinsic ABIはP6で追加検証する。"
+      "reason": "独自の集合表現と具体化ABIを使用。childごとのerror/effect包含、row kind、Scope evidence継承、Unit/値/失敗/中断関数ABIをsourceとCで検証。閉じたpure callbackのみ保守的failureを除去し、外部境界の未知failureは維持する。"
     },
     {
       "id": "emela_core::FnType.ev",
       "relation": "member_of_declaration",
       "legacy_role": "schema",
       "phase": "P6",
-      "status": "mapped",
+      "status": "verified",
       "source_scope": "schema",
       "new_implementation": [
         {
@@ -3930,16 +5746,50 @@
         {
           "kind": "run_report",
           "path": "docs/reports/compiler-p5.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_concurrency.rs",
+          "symbol": "source_concurrency_preserves_handles_values_causes_and_unit_results"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_concurrency.rs",
+          "symbol": "scope_result_and_row_kind_constraints_report_the_source_boundary"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_concurrency_advanced.rs",
+          "symbol": "source_scope_evidence_nested_scopes_and_standard_combinators_preserve_ownership"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_rows.rs",
+          "symbol": "source_scopes_accept_children_with_different_error_and_effect_subsets"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_scope_tests.rs",
+          "symbol": "scope_handlers_merge_callback_failure_abis_and_box_typed_child_results"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_scope_tests.rs",
+          "symbol": "conservative_scope_failures_remain_when_a_c_boundary_can_supply_failing_values"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p6.md"
         }
       ],
-      "reason": "独立集合表現と値型から具体化後のfailure/effect/evidence/suspends ABIを確定。Asyncはevidence不要・中断可能、普通effectはoperation構成に従う。Scopeの集合制約とintrinsic ABIはP6で追加検証する。"
+      "reason": "独自の集合表現と具体化ABIを使用。childごとのerror/effect包含、row kind、Scope evidence継承、Unit/値/失敗/中断関数ABIをsourceとCで検証。閉じたpure callbackのみ保守的failureを除去し、外部境界の未知failureは維持する。"
     },
     {
       "id": "emela_core::FnType.fails",
       "relation": "member_of_declaration",
       "legacy_role": "schema",
       "phase": "P6",
-      "status": "mapped",
+      "status": "verified",
       "source_scope": "schema",
       "new_implementation": [
         {
@@ -3975,16 +5825,50 @@
         {
           "kind": "run_report",
           "path": "docs/reports/compiler-p5.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_concurrency.rs",
+          "symbol": "source_concurrency_preserves_handles_values_causes_and_unit_results"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_concurrency.rs",
+          "symbol": "scope_result_and_row_kind_constraints_report_the_source_boundary"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_concurrency_advanced.rs",
+          "symbol": "source_scope_evidence_nested_scopes_and_standard_combinators_preserve_ownership"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_rows.rs",
+          "symbol": "source_scopes_accept_children_with_different_error_and_effect_subsets"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_scope_tests.rs",
+          "symbol": "scope_handlers_merge_callback_failure_abis_and_box_typed_child_results"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_scope_tests.rs",
+          "symbol": "conservative_scope_failures_remain_when_a_c_boundary_can_supply_failing_values"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p6.md"
         }
       ],
-      "reason": "独立集合表現と値型から具体化後のfailure/effect/evidence/suspends ABIを確定。Asyncはevidence不要・中断可能、普通effectはoperation構成に従う。Scopeの集合制約とintrinsic ABIはP6で追加検証する。"
+      "reason": "独自の集合表現と具体化ABIを使用。childごとのerror/effect包含、row kind、Scope evidence継承、Unit/値/失敗/中断関数ABIをsourceとCで検証。閉じたpure callbackのみ保守的failureを除去し、外部境界の未知failureは維持する。"
     },
     {
       "id": "emela_core::FnType.params",
       "relation": "member_of_declaration",
       "legacy_role": "schema",
       "phase": "P6",
-      "status": "mapped",
+      "status": "verified",
       "source_scope": "schema",
       "new_implementation": [
         {
@@ -4020,16 +5904,50 @@
         {
           "kind": "run_report",
           "path": "docs/reports/compiler-p5.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_concurrency.rs",
+          "symbol": "source_concurrency_preserves_handles_values_causes_and_unit_results"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_concurrency.rs",
+          "symbol": "scope_result_and_row_kind_constraints_report_the_source_boundary"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_concurrency_advanced.rs",
+          "symbol": "source_scope_evidence_nested_scopes_and_standard_combinators_preserve_ownership"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_rows.rs",
+          "symbol": "source_scopes_accept_children_with_different_error_and_effect_subsets"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_scope_tests.rs",
+          "symbol": "scope_handlers_merge_callback_failure_abis_and_box_typed_child_results"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_scope_tests.rs",
+          "symbol": "conservative_scope_failures_remain_when_a_c_boundary_can_supply_failing_values"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p6.md"
         }
       ],
-      "reason": "独立集合表現と値型から具体化後のfailure/effect/evidence/suspends ABIを確定。Asyncはevidence不要・中断可能、普通effectはoperation構成に従う。Scopeの集合制約とintrinsic ABIはP6で追加検証する。"
+      "reason": "独自の集合表現と具体化ABIを使用。childごとのerror/effect包含、row kind、Scope evidence継承、Unit/値/失敗/中断関数ABIをsourceとCで検証。閉じたpure callbackのみ保守的failureを除去し、外部境界の未知failureは維持する。"
     },
     {
       "id": "emela_core::FnType.ret",
       "relation": "member_of_declaration",
       "legacy_role": "schema",
       "phase": "P6",
-      "status": "mapped",
+      "status": "verified",
       "source_scope": "schema",
       "new_implementation": [
         {
@@ -4065,16 +5983,50 @@
         {
           "kind": "run_report",
           "path": "docs/reports/compiler-p5.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_concurrency.rs",
+          "symbol": "source_concurrency_preserves_handles_values_causes_and_unit_results"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_concurrency.rs",
+          "symbol": "scope_result_and_row_kind_constraints_report_the_source_boundary"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_concurrency_advanced.rs",
+          "symbol": "source_scope_evidence_nested_scopes_and_standard_combinators_preserve_ownership"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_rows.rs",
+          "symbol": "source_scopes_accept_children_with_different_error_and_effect_subsets"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_scope_tests.rs",
+          "symbol": "scope_handlers_merge_callback_failure_abis_and_box_typed_child_results"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_scope_tests.rs",
+          "symbol": "conservative_scope_failures_remain_when_a_c_boundary_can_supply_failing_values"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p6.md"
         }
       ],
-      "reason": "独立集合表現と値型から具体化後のfailure/effect/evidence/suspends ABIを確定。Asyncはevidence不要・中断可能、普通effectはoperation構成に従う。Scopeの集合制約とintrinsic ABIはP6で追加検証する。"
+      "reason": "独自の集合表現と具体化ABIを使用。childごとのerror/effect包含、row kind、Scope evidence継承、Unit/値/失敗/中断関数ABIをsourceとCで検証。閉じたpure callbackのみ保守的failureを除去し、外部境界の未知failureは維持する。"
     },
     {
       "id": "emela_core::FnType.sets",
       "relation": "member_of_declaration",
       "legacy_role": "schema",
       "phase": "P6",
-      "status": "mapped",
+      "status": "verified",
       "source_scope": "schema",
       "new_implementation": [
         {
@@ -4110,16 +6062,50 @@
         {
           "kind": "run_report",
           "path": "docs/reports/compiler-p5.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_concurrency.rs",
+          "symbol": "source_concurrency_preserves_handles_values_causes_and_unit_results"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_concurrency.rs",
+          "symbol": "scope_result_and_row_kind_constraints_report_the_source_boundary"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_concurrency_advanced.rs",
+          "symbol": "source_scope_evidence_nested_scopes_and_standard_combinators_preserve_ownership"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_rows.rs",
+          "symbol": "source_scopes_accept_children_with_different_error_and_effect_subsets"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_scope_tests.rs",
+          "symbol": "scope_handlers_merge_callback_failure_abis_and_box_typed_child_results"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_scope_tests.rs",
+          "symbol": "conservative_scope_failures_remain_when_a_c_boundary_can_supply_failing_values"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p6.md"
         }
       ],
-      "reason": "独立集合表現と値型から具体化後のfailure/effect/evidence/suspends ABIを確定。Asyncはevidence不要・中断可能、普通effectはoperation構成に従う。Scopeの集合制約とintrinsic ABIはP6で追加検証する。"
+      "reason": "独自の集合表現と具体化ABIを使用。childごとのerror/effect包含、row kind、Scope evidence継承、Unit/値/失敗/中断関数ABIをsourceとCで検証。閉じたpure callbackのみ保守的failureを除去し、外部境界の未知failureは維持する。"
     },
     {
       "id": "emela_core::FnType.suspends",
       "relation": "member_of_declaration",
       "legacy_role": "schema",
       "phase": "P6",
-      "status": "mapped",
+      "status": "verified",
       "source_scope": "schema",
       "new_implementation": [
         {
@@ -4155,9 +6141,43 @@
         {
           "kind": "run_report",
           "path": "docs/reports/compiler-p5.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_concurrency.rs",
+          "symbol": "source_concurrency_preserves_handles_values_causes_and_unit_results"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_concurrency.rs",
+          "symbol": "scope_result_and_row_kind_constraints_report_the_source_boundary"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_concurrency_advanced.rs",
+          "symbol": "source_scope_evidence_nested_scopes_and_standard_combinators_preserve_ownership"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_rows.rs",
+          "symbol": "source_scopes_accept_children_with_different_error_and_effect_subsets"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_scope_tests.rs",
+          "symbol": "scope_handlers_merge_callback_failure_abis_and_box_typed_child_results"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_scope_tests.rs",
+          "symbol": "conservative_scope_failures_remain_when_a_c_boundary_can_supply_failing_values"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p6.md"
         }
       ],
-      "reason": "独立集合表現と値型から具体化後のfailure/effect/evidence/suspends ABIを確定。Asyncはevidence不要・中断可能、普通effectはoperation構成に従う。Scopeの集合制約とintrinsic ABIはP6で追加検証する。"
+      "reason": "独自の集合表現と具体化ABIを使用。childごとのerror/effect包含、row kind、Scope evidence継承、Unit/値/失敗/中断関数ABIをsourceとCで検証。閉じたpure callbackのみ保守的failureを除去し、外部境界の未知failureは維持する。"
     },
     {
       "id": "emela_core::HostModule",
@@ -4604,7 +6624,7 @@
       "relation": "shared_declaration",
       "legacy_role": "schema",
       "phase": "P6",
-      "status": "mapped",
+      "status": "verified",
       "source_scope": "schema",
       "new_implementation": [
         {
@@ -4640,16 +6660,50 @@
         {
           "kind": "run_report",
           "path": "docs/reports/compiler-p5.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_concurrency.rs",
+          "symbol": "source_concurrency_preserves_handles_values_causes_and_unit_results"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_concurrency.rs",
+          "symbol": "scope_result_and_row_kind_constraints_report_the_source_boundary"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_concurrency_advanced.rs",
+          "symbol": "source_scope_evidence_nested_scopes_and_standard_combinators_preserve_ownership"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_rows.rs",
+          "symbol": "source_scopes_accept_children_with_different_error_and_effect_subsets"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_scope_tests.rs",
+          "symbol": "scope_handlers_merge_callback_failure_abis_and_box_typed_child_results"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_scope_tests.rs",
+          "symbol": "conservative_scope_failures_remain_when_a_c_boundary_can_supply_failing_values"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p6.md"
         }
       ],
-      "reason": "独立集合表現と値型から具体化後のfailure/effect/evidence/suspends ABIを確定。Asyncはevidence不要・中断可能、普通effectはoperation構成に従う。Scopeの集合制約とintrinsic ABIはP6で追加検証する。"
+      "reason": "独自の集合表現と具体化ABIを使用。childごとのerror/effect包含、row kind、Scope evidence継承、Unit/値/失敗/中断関数ABIをsourceとCで検証。閉じたpure callbackのみ保守的failureを除去し、外部境界の未知failureは維持する。"
     },
     {
       "id": "emela_core::SetSummary.ev",
       "relation": "member_of_declaration",
       "legacy_role": "schema",
       "phase": "P6",
-      "status": "mapped",
+      "status": "verified",
       "source_scope": "schema",
       "new_implementation": [
         {
@@ -4685,16 +6739,50 @@
         {
           "kind": "run_report",
           "path": "docs/reports/compiler-p5.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_concurrency.rs",
+          "symbol": "source_concurrency_preserves_handles_values_causes_and_unit_results"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_concurrency.rs",
+          "symbol": "scope_result_and_row_kind_constraints_report_the_source_boundary"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_concurrency_advanced.rs",
+          "symbol": "source_scope_evidence_nested_scopes_and_standard_combinators_preserve_ownership"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_rows.rs",
+          "symbol": "source_scopes_accept_children_with_different_error_and_effect_subsets"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_scope_tests.rs",
+          "symbol": "scope_handlers_merge_callback_failure_abis_and_box_typed_child_results"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_scope_tests.rs",
+          "symbol": "conservative_scope_failures_remain_when_a_c_boundary_can_supply_failing_values"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p6.md"
         }
       ],
-      "reason": "独立集合表現と値型から具体化後のfailure/effect/evidence/suspends ABIを確定。Asyncはevidence不要・中断可能、普通effectはoperation構成に従う。Scopeの集合制約とintrinsic ABIはP6で追加検証する。"
+      "reason": "独自の集合表現と具体化ABIを使用。childごとのerror/effect包含、row kind、Scope evidence継承、Unit/値/失敗/中断関数ABIをsourceとCで検証。閉じたpure callbackのみ保守的failureを除去し、外部境界の未知failureは維持する。"
     },
     {
       "id": "emela_core::SetSummary.fails",
       "relation": "member_of_declaration",
       "legacy_role": "schema",
       "phase": "P6",
-      "status": "mapped",
+      "status": "verified",
       "source_scope": "schema",
       "new_implementation": [
         {
@@ -4730,16 +6818,50 @@
         {
           "kind": "run_report",
           "path": "docs/reports/compiler-p5.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_concurrency.rs",
+          "symbol": "source_concurrency_preserves_handles_values_causes_and_unit_results"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_concurrency.rs",
+          "symbol": "scope_result_and_row_kind_constraints_report_the_source_boundary"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_concurrency_advanced.rs",
+          "symbol": "source_scope_evidence_nested_scopes_and_standard_combinators_preserve_ownership"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_rows.rs",
+          "symbol": "source_scopes_accept_children_with_different_error_and_effect_subsets"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_scope_tests.rs",
+          "symbol": "scope_handlers_merge_callback_failure_abis_and_box_typed_child_results"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_scope_tests.rs",
+          "symbol": "conservative_scope_failures_remain_when_a_c_boundary_can_supply_failing_values"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p6.md"
         }
       ],
-      "reason": "独立集合表現と値型から具体化後のfailure/effect/evidence/suspends ABIを確定。Asyncはevidence不要・中断可能、普通effectはoperation構成に従う。Scopeの集合制約とintrinsic ABIはP6で追加検証する。"
+      "reason": "独自の集合表現と具体化ABIを使用。childごとのerror/effect包含、row kind、Scope evidence継承、Unit/値/失敗/中断関数ABIをsourceとCで検証。閉じたpure callbackのみ保守的failureを除去し、外部境界の未知failureは維持する。"
     },
     {
       "id": "emela_core::SetSummary.params",
       "relation": "member_of_declaration",
       "legacy_role": "schema",
       "phase": "P6",
-      "status": "mapped",
+      "status": "verified",
       "source_scope": "schema",
       "new_implementation": [
         {
@@ -4775,16 +6897,50 @@
         {
           "kind": "run_report",
           "path": "docs/reports/compiler-p5.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_concurrency.rs",
+          "symbol": "source_concurrency_preserves_handles_values_causes_and_unit_results"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_concurrency.rs",
+          "symbol": "scope_result_and_row_kind_constraints_report_the_source_boundary"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_concurrency_advanced.rs",
+          "symbol": "source_scope_evidence_nested_scopes_and_standard_combinators_preserve_ownership"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_rows.rs",
+          "symbol": "source_scopes_accept_children_with_different_error_and_effect_subsets"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_scope_tests.rs",
+          "symbol": "scope_handlers_merge_callback_failure_abis_and_box_typed_child_results"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_scope_tests.rs",
+          "symbol": "conservative_scope_failures_remain_when_a_c_boundary_can_supply_failing_values"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p6.md"
         }
       ],
-      "reason": "独立集合表現と値型から具体化後のfailure/effect/evidence/suspends ABIを確定。Asyncはevidence不要・中断可能、普通effectはoperation構成に従う。Scopeの集合制約とintrinsic ABIはP6で追加検証する。"
+      "reason": "独自の集合表現と具体化ABIを使用。childごとのerror/effect包含、row kind、Scope evidence継承、Unit/値/失敗/中断関数ABIをsourceとCで検証。閉じたpure callbackのみ保守的failureを除去し、外部境界の未知failureは維持する。"
     },
     {
       "id": "emela_core::SetSummary.suspends",
       "relation": "member_of_declaration",
       "legacy_role": "schema",
       "phase": "P6",
-      "status": "mapped",
+      "status": "verified",
       "source_scope": "schema",
       "new_implementation": [
         {
@@ -4820,9 +6976,43 @@
         {
           "kind": "run_report",
           "path": "docs/reports/compiler-p5.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_concurrency.rs",
+          "symbol": "source_concurrency_preserves_handles_values_causes_and_unit_results"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_concurrency.rs",
+          "symbol": "scope_result_and_row_kind_constraints_report_the_source_boundary"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_concurrency_advanced.rs",
+          "symbol": "source_scope_evidence_nested_scopes_and_standard_combinators_preserve_ownership"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_rows.rs",
+          "symbol": "source_scopes_accept_children_with_different_error_and_effect_subsets"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_scope_tests.rs",
+          "symbol": "scope_handlers_merge_callback_failure_abis_and_box_typed_child_results"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_scope_tests.rs",
+          "symbol": "conservative_scope_failures_remain_when_a_c_boundary_can_supply_failing_values"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p6.md"
         }
       ],
-      "reason": "独立集合表現と値型から具体化後のfailure/effect/evidence/suspends ABIを確定。Asyncはevidence不要・中断可能、普通effectはoperation構成に従う。Scopeの集合制約とintrinsic ABIはP6で追加検証する。"
+      "reason": "独自の集合表現と具体化ABIを使用。childごとのerror/effect包含、row kind、Scope evidence継承、Unit/値/失敗/中断関数ABIをsourceとCで検証。閉じたpure callbackのみ保守的failureを除去し、外部境界の未知failureは維持する。"
     },
     {
       "id": "emela_core::Type",
@@ -5152,9 +7342,9 @@
       "id": "emela_core::Type::FiberScope",
       "relation": "variant_entry",
       "legacy_role": "metadata",
-      "phase": null,
-      "status": "mapped",
-      "source_scope": "unclassified",
+      "phase": "P6",
+      "status": "verified",
+      "source_scope": "source",
       "new_implementation": [
         {
           "kind": "implementation",
@@ -5166,9 +7356,93 @@
         {
           "kind": "review",
           "path": "docs/migration-source.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_concurrency.rs",
+          "symbol": "source_concurrency_preserves_handles_values_causes_and_unit_results"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_concurrency_advanced.rs",
+          "symbol": "source_scope_evidence_nested_scopes_and_standard_combinators_preserve_ownership"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "scope_fork_and_join_reclaim_children_and_their_erased_values"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "deferred_complete_poll_and_await_share_one_typed_value_until_scope_closes"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "attempts_preserve_success_and_typed_cause_failures_across_raise"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "interruption_waits_for_nested_suspending_cleanup_before_await_reports_its_cause"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_scope_tests.rs",
+          "symbol": "scope_handlers_merge_callback_failure_abis_and_box_typed_child_results"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_scope_tests.rs",
+          "symbol": "calling_the_generated_scope_deferred_operation_requires_its_pool"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_deferred_tests.rs",
+          "symbol": "deferred_wakes_fifo_waiters_with_owned_strings_and_releases_the_scope_value"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_unit_tests.rs",
+          "symbol": "unit_deferred_distinguishes_empty_and_full_without_payload_storage"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_lifecycle.rs",
+          "symbol": "closing_a_source_scope_drops_ready_join_and_await_deliveries"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_lifecycle.rs",
+          "symbol": "cancelling_nested_source_scopes_unlinks_all_deferred_waiters"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_lifecycle.rs",
+          "symbol": "source_interrupt_waiters_resume_fifo_after_suspending_cleanup"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_lifecycle.rs",
+          "symbol": "source_scopes_reclaim_completed_children_and_preserve_live_copied_handles"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_child_waiters.rs",
+          "symbol": "child_await_and_join_waiters_resume_fifo_after_the_child_finishes"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_child_waiters.rs",
+          "symbol": "failed_handleless_children_release_records_during_sibling_cleanup"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p6.md"
         }
       ],
-      "reason": "固定revisionの独立backend入口を採用。source・全実行文脈・所有権等の完了は個別の実行証拠が揃うまで判定しない。"
+      "reason": "Scope/Fiber/Deferred/Causeを独立sourceと内部IRからCへ接続。typed値・Unit・FIFO・失敗分類/表示/再送出、取消時の中断cleanup完了、完了child/handleなしchild/待機リンクの回収をC両最適化で検証。旧全source/IR観測の照合はP7で別途判定する。"
     },
     {
       "id": "emela_core::Type::Float",
@@ -5217,7 +7491,7 @@
       "relation": "variant_entry",
       "legacy_role": "metadata",
       "phase": "P6",
-      "status": "mapped",
+      "status": "verified",
       "source_scope": "source",
       "new_implementation": [
         {
@@ -5262,16 +7536,50 @@
         {
           "kind": "run_report",
           "path": "docs/reports/compiler-p5.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_concurrency.rs",
+          "symbol": "source_concurrency_preserves_handles_values_causes_and_unit_results"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_concurrency.rs",
+          "symbol": "scope_result_and_row_kind_constraints_report_the_source_boundary"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_concurrency_advanced.rs",
+          "symbol": "source_scope_evidence_nested_scopes_and_standard_combinators_preserve_ownership"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_rows.rs",
+          "symbol": "source_scopes_accept_children_with_different_error_and_effect_subsets"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_scope_tests.rs",
+          "symbol": "scope_handlers_merge_callback_failure_abis_and_box_typed_child_results"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_scope_tests.rs",
+          "symbol": "conservative_scope_failures_remain_when_a_c_boundary_can_supply_failing_values"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p6.md"
         }
       ],
-      "reason": "独立集合表現と値型から具体化後のfailure/effect/evidence/suspends ABIを確定。Asyncはevidence不要・中断可能、普通effectはoperation構成に従う。Scopeの集合制約とintrinsic ABIはP6で追加検証する。"
+      "reason": "独自の集合表現と具体化ABIを使用。childごとのerror/effect包含、row kind、Scope evidence継承、Unit/値/失敗/中断関数ABIをsourceとCで検証。閉じたpure callbackのみ保守的failureを除去し、外部境界の未知failureは維持する。"
     },
     {
       "id": "emela_core::Type::Fn.0",
       "relation": "member_of_variant",
       "legacy_role": "metadata",
       "phase": "P6",
-      "status": "mapped",
+      "status": "verified",
       "source_scope": "schema",
       "new_implementation": [
         {
@@ -5316,9 +7624,43 @@
         {
           "kind": "run_report",
           "path": "docs/reports/compiler-p5.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_concurrency.rs",
+          "symbol": "source_concurrency_preserves_handles_values_causes_and_unit_results"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_concurrency.rs",
+          "symbol": "scope_result_and_row_kind_constraints_report_the_source_boundary"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_concurrency_advanced.rs",
+          "symbol": "source_scope_evidence_nested_scopes_and_standard_combinators_preserve_ownership"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_rows.rs",
+          "symbol": "source_scopes_accept_children_with_different_error_and_effect_subsets"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_scope_tests.rs",
+          "symbol": "scope_handlers_merge_callback_failure_abis_and_box_typed_child_results"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_scope_tests.rs",
+          "symbol": "conservative_scope_failures_remain_when_a_c_boundary_can_supply_failing_values"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p6.md"
         }
       ],
-      "reason": "独立集合表現と値型から具体化後のfailure/effect/evidence/suspends ABIを確定。Asyncはevidence不要・中断可能、普通effectはoperation構成に従う。Scopeの集合制約とintrinsic ABIはP6で追加検証する。"
+      "reason": "独自の集合表現と具体化ABIを使用。childごとのerror/effect包含、row kind、Scope evidence継承、Unit/値/失敗/中断関数ABIをsourceとCで検証。閉じたpure callbackのみ保守的failureを除去し、外部境界の未知failureは維持する。"
     },
     {
       "id": "emela_core::Type::Handler",
@@ -5679,7 +8021,7 @@
       "relation": "variant_entry",
       "legacy_role": "metadata",
       "phase": "P6",
-      "status": "mapped",
+      "status": "verified",
       "source_scope": "schema",
       "new_implementation": [
         {
@@ -5736,16 +8078,50 @@
         {
           "kind": "run_report",
           "path": "docs/reports/compiler-p4.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_concurrency.rs",
+          "symbol": "source_concurrency_preserves_handles_values_causes_and_unit_results"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_concurrency.rs",
+          "symbol": "scope_result_and_row_kind_constraints_report_the_source_boundary"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_concurrency_advanced.rs",
+          "symbol": "source_scope_evidence_nested_scopes_and_standard_combinators_preserve_ownership"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_rows.rs",
+          "symbol": "source_scopes_accept_children_with_different_error_and_effect_subsets"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_scope_tests.rs",
+          "symbol": "scope_handlers_merge_callback_failure_abis_and_box_typed_child_results"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_scope_tests.rs",
+          "symbol": "conservative_scope_failures_remain_when_a_c_boundary_can_supply_failing_values"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p6.md"
         }
       ],
-      "reason": "error/effect集合のkind・包含・汎化・hidden/opaque row・具体instance・関数型の反変/共変/不変とImmediate境界を検証。Scopeの集合制約とAsync実行はP5/P6へ残す。"
+      "reason": "独自の集合表現と具体化ABIを使用。childごとのerror/effect包含、row kind、Scope evidence継承、Unit/値/失敗/中断関数ABIをsourceとCで検証。閉じたpure callbackのみ保守的failureを除去し、外部境界の未知failureは維持する。"
     },
     {
       "id": "emela_core::Type::Set.0",
       "relation": "member_of_variant",
       "legacy_role": "metadata",
       "phase": "P6",
-      "status": "mapped",
+      "status": "verified",
       "source_scope": "schema",
       "new_implementation": [
         {
@@ -5790,9 +8166,43 @@
         {
           "kind": "run_report",
           "path": "docs/reports/compiler-p4.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_concurrency.rs",
+          "symbol": "source_concurrency_preserves_handles_values_causes_and_unit_results"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_concurrency.rs",
+          "symbol": "scope_result_and_row_kind_constraints_report_the_source_boundary"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_concurrency_advanced.rs",
+          "symbol": "source_scope_evidence_nested_scopes_and_standard_combinators_preserve_ownership"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_rows.rs",
+          "symbol": "source_scopes_accept_children_with_different_error_and_effect_subsets"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_scope_tests.rs",
+          "symbol": "scope_handlers_merge_callback_failure_abis_and_box_typed_child_results"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_scope_tests.rs",
+          "symbol": "conservative_scope_failures_remain_when_a_c_boundary_can_supply_failing_values"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p6.md"
         }
       ],
-      "reason": "error/effect集合のkind・包含・汎化・hidden/opaque row・具体instance・関数型の反変/共変/不変とImmediate境界を検証。Scopeの集合制約とAsync実行はP5/P6へ残す。"
+      "reason": "独自の集合表現と具体化ABIを使用。childごとのerror/effect包含、row kind、Scope evidence継承、Unit/値/失敗/中断関数ABIをsourceとCで検証。閉じたpure callbackのみ保守的failureを除去し、外部境界の未知failureは維持する。"
     },
     {
       "id": "emela_core::Type::String",
@@ -9798,9 +12208,9 @@
       "id": "emela_lir::RuntimeOp::Hold",
       "relation": "variant_entry",
       "legacy_role": "emit",
-      "phase": null,
-      "status": "mapped",
-      "source_scope": "unclassified",
+      "phase": "P6",
+      "status": "verified",
+      "source_scope": "ir_only",
       "new_implementation": [
         {
           "kind": "implementation",
@@ -9832,9 +12242,18 @@
         {
           "kind": "review",
           "path": "docs/migration-source.md"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "raw_interrupt_masks_are_unit_operations_and_are_rejected_from_isr_entries"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p6.md"
         }
       ],
-      "reason": "固定revisionの独立backend入口を採用。source・全実行文脈・所有権等の完了は個別の実行証拠が揃うまで判定しない。"
+      "reason": "Hold/Unholdを引数・結果なしUnit操作として検証し、ISRからの到達を拒否。不要なscheduler領域は生成しない。入れ子と取消経路の全旧IR観測はP7で照合する。"
     },
     {
       "id": "emela_lir::RuntimeOp::Retire",
@@ -9956,9 +12375,9 @@
       "id": "emela_lir::RuntimeOp::Unhold",
       "relation": "variant_entry",
       "legacy_role": "emit",
-      "phase": null,
-      "status": "mapped",
-      "source_scope": "unclassified",
+      "phase": "P6",
+      "status": "verified",
+      "source_scope": "ir_only",
       "new_implementation": [
         {
           "kind": "implementation",
@@ -9990,9 +12409,18 @@
         {
           "kind": "review",
           "path": "docs/migration-source.md"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "raw_interrupt_masks_are_unit_operations_and_are_rejected_from_isr_entries"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p6.md"
         }
       ],
-      "reason": "固定revisionの独立backend入口を採用。source・全実行文脈・所有権等の完了は個別の実行証拠が揃うまで判定しない。"
+      "reason": "Hold/Unholdを引数・結果なしUnit操作として検証し、ISRからの到達を拒否。不要なscheduler領域は生成しない。入れ子と取消経路の全旧IR観測はP7で照合する。"
     },
     {
       "id": "emela_lir::RuntimeOp::Yield",
@@ -10954,7 +13382,7 @@
       "relation": "variant_entry",
       "legacy_role": "emit",
       "phase": "P6",
-      "status": "mapped",
+      "status": "verified",
       "source_scope": "source",
       "new_implementation": [
         {
@@ -11015,16 +13443,55 @@
         {
           "kind": "run_report",
           "path": "docs/reports/compiler-p5.md"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "interruption_waits_for_nested_suspending_cleanup_before_await_reports_its_cause"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_lifecycle.rs",
+          "symbol": "closing_a_source_scope_drops_ready_join_and_await_deliveries"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_lifecycle.rs",
+          "symbol": "cancelling_nested_source_scopes_unlinks_all_deferred_waiters"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_lifecycle.rs",
+          "symbol": "source_interrupt_waiters_resume_fifo_after_suspending_cleanup"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_lifecycle.rs",
+          "symbol": "source_scopes_reclaim_completed_children_and_preserve_live_copied_handles"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_defects.rs",
+          "symbol": "attempts_stop_at_defects_without_running_unreachable_handler_release"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_defects.rs",
+          "symbol": "typed_failure_before_a_defect_still_runs_the_protected_release"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p6.md"
         }
       ],
-      "reason": "成功/失敗とも中断するcleanup完了前に元結果を公開せず、失敗payloadを保持して外側のescapeへ配送する。取消時のcleanup完了はP6へ残す。"
+      "reason": "成功/失敗に加え、取消時もcleanupを逆順に実行し、中断完了前に元結果を配送しない。defectは即時停止する。全旧notes/overlap観測の照合はP7に保持する。"
     },
     {
       "id": "emela_lir::Stmt::Protect.body",
       "relation": "member_of_variant",
       "legacy_role": "emit",
       "phase": "P6",
-      "status": "mapped",
+      "status": "verified",
       "source_scope": "schema",
       "new_implementation": [
         {
@@ -11070,16 +13537,55 @@
         {
           "kind": "run_report",
           "path": "docs/reports/compiler-p5.md"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "interruption_waits_for_nested_suspending_cleanup_before_await_reports_its_cause"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_lifecycle.rs",
+          "symbol": "closing_a_source_scope_drops_ready_join_and_await_deliveries"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_lifecycle.rs",
+          "symbol": "cancelling_nested_source_scopes_unlinks_all_deferred_waiters"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_lifecycle.rs",
+          "symbol": "source_interrupt_waiters_resume_fifo_after_suspending_cleanup"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_lifecycle.rs",
+          "symbol": "source_scopes_reclaim_completed_children_and_preserve_live_copied_handles"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_defects.rs",
+          "symbol": "attempts_stop_at_defects_without_running_unreachable_handler_release"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_defects.rs",
+          "symbol": "typed_failure_before_a_defect_still_runs_the_protected_release"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p6.md"
         }
       ],
-      "reason": "成功/失敗とも中断するcleanup完了前に元結果を公開せず、失敗payloadを保持して外側のescapeへ配送する。取消時のcleanup完了はP6へ残す。"
+      "reason": "成功/失敗に加え、取消時もcleanupを逆順に実行し、中断完了前に元結果を配送しない。defectは即時停止する。全旧notes/overlap観測の照合はP7に保持する。"
     },
     {
       "id": "emela_lir::Stmt::Protect.cleanup",
       "relation": "member_of_variant",
       "legacy_role": "emit",
       "phase": "P6",
-      "status": "mapped",
+      "status": "verified",
       "source_scope": "schema",
       "new_implementation": [
         {
@@ -11125,16 +13631,55 @@
         {
           "kind": "run_report",
           "path": "docs/reports/compiler-p5.md"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "interruption_waits_for_nested_suspending_cleanup_before_await_reports_its_cause"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_lifecycle.rs",
+          "symbol": "closing_a_source_scope_drops_ready_join_and_await_deliveries"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_lifecycle.rs",
+          "symbol": "cancelling_nested_source_scopes_unlinks_all_deferred_waiters"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_lifecycle.rs",
+          "symbol": "source_interrupt_waiters_resume_fifo_after_suspending_cleanup"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_lifecycle.rs",
+          "symbol": "source_scopes_reclaim_completed_children_and_preserve_live_copied_handles"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_defects.rs",
+          "symbol": "attempts_stop_at_defects_without_running_unreachable_handler_release"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_defects.rs",
+          "symbol": "typed_failure_before_a_defect_still_runs_the_protected_release"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p6.md"
         }
       ],
-      "reason": "成功/失敗とも中断するcleanup完了前に元結果を公開せず、失敗payloadを保持して外側のescapeへ配送する。取消時のcleanup完了はP6へ残す。"
+      "reason": "成功/失敗に加え、取消時もcleanupを逆順に実行し、中断完了前に元結果を配送しない。defectは即時停止する。全旧notes/overlap観測の照合はP7に保持する。"
     },
     {
       "id": "emela_lir::Stmt::Protect.dst",
       "relation": "member_of_variant",
       "legacy_role": "emit",
       "phase": "P6",
-      "status": "mapped",
+      "status": "verified",
       "source_scope": "schema",
       "new_implementation": [
         {
@@ -11180,9 +13725,48 @@
         {
           "kind": "run_report",
           "path": "docs/reports/compiler-p5.md"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "interruption_waits_for_nested_suspending_cleanup_before_await_reports_its_cause"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_lifecycle.rs",
+          "symbol": "closing_a_source_scope_drops_ready_join_and_await_deliveries"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_lifecycle.rs",
+          "symbol": "cancelling_nested_source_scopes_unlinks_all_deferred_waiters"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_lifecycle.rs",
+          "symbol": "source_interrupt_waiters_resume_fifo_after_suspending_cleanup"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_lifecycle.rs",
+          "symbol": "source_scopes_reclaim_completed_children_and_preserve_live_copied_handles"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_defects.rs",
+          "symbol": "attempts_stop_at_defects_without_running_unreachable_handler_release"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_defects.rs",
+          "symbol": "typed_failure_before_a_defect_still_runs_the_protected_release"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p6.md"
         }
       ],
-      "reason": "成功/失敗とも中断するcleanup完了前に元結果を公開せず、失敗payloadを保持して外側のescapeへ配送する。取消時のcleanup完了はP6へ残す。"
+      "reason": "成功/失敗に加え、取消時もcleanupを逆順に実行し、中断完了前に元結果を配送しない。defectは即時停止する。全旧notes/overlap観測の照合はP7に保持する。"
     },
     {
       "id": "emela_lir::Stmt::Switch",
@@ -13798,9 +16382,9 @@
       "id": "emela_lir::Value::Fiber",
       "relation": "variant_entry",
       "legacy_role": "emit",
-      "phase": null,
-      "status": "mapped",
-      "source_scope": "unclassified",
+      "phase": "P6",
+      "status": "verified",
+      "source_scope": "source",
       "new_implementation": [
         {
           "kind": "implementation",
@@ -13817,16 +16401,100 @@
         {
           "kind": "review",
           "path": "docs/migration-source.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_concurrency.rs",
+          "symbol": "source_concurrency_preserves_handles_values_causes_and_unit_results"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_concurrency_advanced.rs",
+          "symbol": "source_scope_evidence_nested_scopes_and_standard_combinators_preserve_ownership"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "scope_fork_and_join_reclaim_children_and_their_erased_values"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "deferred_complete_poll_and_await_share_one_typed_value_until_scope_closes"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "attempts_preserve_success_and_typed_cause_failures_across_raise"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "interruption_waits_for_nested_suspending_cleanup_before_await_reports_its_cause"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_scope_tests.rs",
+          "symbol": "scope_handlers_merge_callback_failure_abis_and_box_typed_child_results"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_scope_tests.rs",
+          "symbol": "calling_the_generated_scope_deferred_operation_requires_its_pool"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_deferred_tests.rs",
+          "symbol": "deferred_wakes_fifo_waiters_with_owned_strings_and_releases_the_scope_value"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_unit_tests.rs",
+          "symbol": "unit_deferred_distinguishes_empty_and_full_without_payload_storage"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_lifecycle.rs",
+          "symbol": "closing_a_source_scope_drops_ready_join_and_await_deliveries"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_lifecycle.rs",
+          "symbol": "cancelling_nested_source_scopes_unlinks_all_deferred_waiters"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_lifecycle.rs",
+          "symbol": "source_interrupt_waiters_resume_fifo_after_suspending_cleanup"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_lifecycle.rs",
+          "symbol": "source_scopes_reclaim_completed_children_and_preserve_live_copied_handles"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_child_waiters.rs",
+          "symbol": "child_await_and_join_waiters_resume_fifo_after_the_child_finishes"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_child_waiters.rs",
+          "symbol": "failed_handleless_children_release_records_during_sibling_cleanup"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p6.md"
         }
       ],
-      "reason": "固定revisionの独立backend入口を採用。source・全実行文脈・所有権等の完了は個別の実行証拠が揃うまで判定しない。"
+      "reason": "Scope/Fiber/Deferred/Causeを独立sourceと内部IRからCへ接続。typed値・Unit・FIFO・失敗分類/表示/再送出、取消時の中断cleanup完了、完了child/handleなしchild/待機リンクの回収をC両最適化で検証。旧全source/IR観測の照合はP7で別途判定する。"
     },
     {
       "id": "emela_lir::Value::Fiber.args",
       "relation": "member_of_variant",
       "legacy_role": "emit",
-      "phase": null,
-      "status": "mapped",
+      "phase": "P6",
+      "status": "verified",
       "source_scope": "schema",
       "new_implementation": [
         {
@@ -13844,16 +16512,100 @@
         {
           "kind": "review",
           "path": "docs/migration-source.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_concurrency.rs",
+          "symbol": "source_concurrency_preserves_handles_values_causes_and_unit_results"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_concurrency_advanced.rs",
+          "symbol": "source_scope_evidence_nested_scopes_and_standard_combinators_preserve_ownership"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "scope_fork_and_join_reclaim_children_and_their_erased_values"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "deferred_complete_poll_and_await_share_one_typed_value_until_scope_closes"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "attempts_preserve_success_and_typed_cause_failures_across_raise"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "interruption_waits_for_nested_suspending_cleanup_before_await_reports_its_cause"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_scope_tests.rs",
+          "symbol": "scope_handlers_merge_callback_failure_abis_and_box_typed_child_results"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_scope_tests.rs",
+          "symbol": "calling_the_generated_scope_deferred_operation_requires_its_pool"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_deferred_tests.rs",
+          "symbol": "deferred_wakes_fifo_waiters_with_owned_strings_and_releases_the_scope_value"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_unit_tests.rs",
+          "symbol": "unit_deferred_distinguishes_empty_and_full_without_payload_storage"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_lifecycle.rs",
+          "symbol": "closing_a_source_scope_drops_ready_join_and_await_deliveries"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_lifecycle.rs",
+          "symbol": "cancelling_nested_source_scopes_unlinks_all_deferred_waiters"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_lifecycle.rs",
+          "symbol": "source_interrupt_waiters_resume_fifo_after_suspending_cleanup"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_lifecycle.rs",
+          "symbol": "source_scopes_reclaim_completed_children_and_preserve_live_copied_handles"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_child_waiters.rs",
+          "symbol": "child_await_and_join_waiters_resume_fifo_after_the_child_finishes"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_child_waiters.rs",
+          "symbol": "failed_handleless_children_release_records_during_sibling_cleanup"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p6.md"
         }
       ],
-      "reason": "固定revisionの独立backend入口を採用。source・全実行文脈・所有権等の完了は個別の実行証拠が揃うまで判定しない。"
+      "reason": "Scope/Fiber/Deferred/Causeを独立sourceと内部IRからCへ接続。typed値・Unit・FIFO・失敗分類/表示/再送出、取消時の中断cleanup完了、完了child/handleなしchild/待機リンクの回収をC両最適化で検証。旧全source/IR観測の照合はP7で別途判定する。"
     },
     {
       "id": "emela_lir::Value::Fiber.on_fail",
       "relation": "member_of_variant",
       "legacy_role": "emit",
-      "phase": null,
-      "status": "mapped",
+      "phase": "P6",
+      "status": "verified",
       "source_scope": "schema",
       "new_implementation": [
         {
@@ -13871,16 +16623,100 @@
         {
           "kind": "review",
           "path": "docs/migration-source.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_concurrency.rs",
+          "symbol": "source_concurrency_preserves_handles_values_causes_and_unit_results"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_concurrency_advanced.rs",
+          "symbol": "source_scope_evidence_nested_scopes_and_standard_combinators_preserve_ownership"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "scope_fork_and_join_reclaim_children_and_their_erased_values"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "deferred_complete_poll_and_await_share_one_typed_value_until_scope_closes"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "attempts_preserve_success_and_typed_cause_failures_across_raise"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "interruption_waits_for_nested_suspending_cleanup_before_await_reports_its_cause"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_scope_tests.rs",
+          "symbol": "scope_handlers_merge_callback_failure_abis_and_box_typed_child_results"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_scope_tests.rs",
+          "symbol": "calling_the_generated_scope_deferred_operation_requires_its_pool"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_deferred_tests.rs",
+          "symbol": "deferred_wakes_fifo_waiters_with_owned_strings_and_releases_the_scope_value"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_unit_tests.rs",
+          "symbol": "unit_deferred_distinguishes_empty_and_full_without_payload_storage"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_lifecycle.rs",
+          "symbol": "closing_a_source_scope_drops_ready_join_and_await_deliveries"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_lifecycle.rs",
+          "symbol": "cancelling_nested_source_scopes_unlinks_all_deferred_waiters"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_lifecycle.rs",
+          "symbol": "source_interrupt_waiters_resume_fifo_after_suspending_cleanup"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_lifecycle.rs",
+          "symbol": "source_scopes_reclaim_completed_children_and_preserve_live_copied_handles"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_child_waiters.rs",
+          "symbol": "child_await_and_join_waiters_resume_fifo_after_the_child_finishes"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_child_waiters.rs",
+          "symbol": "failed_handleless_children_release_records_during_sibling_cleanup"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p6.md"
         }
       ],
-      "reason": "固定revisionの独立backend入口を採用。source・全実行文脈・所有権等の完了は個別の実行証拠が揃うまで判定しない。"
+      "reason": "Scope/Fiber/Deferred/Causeを独立sourceと内部IRからCへ接続。typed値・Unit・FIFO・失敗分類/表示/再送出、取消時の中断cleanup完了、完了child/handleなしchild/待機リンクの回収をC両最適化で検証。旧全source/IR観測の照合はP7で別途判定する。"
     },
     {
       "id": "emela_lir::Value::Fiber.op",
       "relation": "member_of_variant",
       "legacy_role": "emit",
-      "phase": null,
-      "status": "mapped",
+      "phase": "P6",
+      "status": "verified",
       "source_scope": "schema",
       "new_implementation": [
         {
@@ -13898,9 +16734,93 @@
         {
           "kind": "review",
           "path": "docs/migration-source.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_concurrency.rs",
+          "symbol": "source_concurrency_preserves_handles_values_causes_and_unit_results"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_concurrency_advanced.rs",
+          "symbol": "source_scope_evidence_nested_scopes_and_standard_combinators_preserve_ownership"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "scope_fork_and_join_reclaim_children_and_their_erased_values"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "deferred_complete_poll_and_await_share_one_typed_value_until_scope_closes"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "attempts_preserve_success_and_typed_cause_failures_across_raise"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "interruption_waits_for_nested_suspending_cleanup_before_await_reports_its_cause"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_scope_tests.rs",
+          "symbol": "scope_handlers_merge_callback_failure_abis_and_box_typed_child_results"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_scope_tests.rs",
+          "symbol": "calling_the_generated_scope_deferred_operation_requires_its_pool"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_deferred_tests.rs",
+          "symbol": "deferred_wakes_fifo_waiters_with_owned_strings_and_releases_the_scope_value"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_unit_tests.rs",
+          "symbol": "unit_deferred_distinguishes_empty_and_full_without_payload_storage"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_lifecycle.rs",
+          "symbol": "closing_a_source_scope_drops_ready_join_and_await_deliveries"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_lifecycle.rs",
+          "symbol": "cancelling_nested_source_scopes_unlinks_all_deferred_waiters"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_lifecycle.rs",
+          "symbol": "source_interrupt_waiters_resume_fifo_after_suspending_cleanup"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_lifecycle.rs",
+          "symbol": "source_scopes_reclaim_completed_children_and_preserve_live_copied_handles"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_child_waiters.rs",
+          "symbol": "child_await_and_join_waiters_resume_fifo_after_the_child_finishes"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_child_waiters.rs",
+          "symbol": "failed_handleless_children_release_records_during_sibling_cleanup"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p6.md"
         }
       ],
-      "reason": "固定revisionの独立backend入口を採用。source・全実行文脈・所有権等の完了は個別の実行証拠が揃うまで判定しない。"
+      "reason": "Scope/Fiber/Deferred/Causeを独立sourceと内部IRからCへ接続。typed値・Unit・FIFO・失敗分類/表示/再送出、取消時の中断cleanup完了、完了child/handleなしchild/待機リンクの回収をC両最適化で検証。旧全source/IR観測の照合はP7で別途判定する。"
     },
     {
       "id": "emela_lir::Value::Field",
@@ -16226,9 +19146,48 @@
         {
           "kind": "run_report",
           "path": "docs/reports/compiler-p5.md"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "interruption_waits_for_nested_suspending_cleanup_before_await_reports_its_cause"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_lifecycle.rs",
+          "symbol": "closing_a_source_scope_drops_ready_join_and_await_deliveries"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_lifecycle.rs",
+          "symbol": "cancelling_nested_source_scopes_unlinks_all_deferred_waiters"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_lifecycle.rs",
+          "symbol": "source_interrupt_waiters_resume_fifo_after_suspending_cleanup"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_lifecycle.rs",
+          "symbol": "source_scopes_reclaim_completed_children_and_preserve_live_copied_handles"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_defects.rs",
+          "symbol": "attempts_stop_at_defects_without_running_unreachable_handler_release"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_defects.rs",
+          "symbol": "typed_failure_before_a_defect_still_runs_the_protected_release"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p6.md"
         }
       ],
-      "reason": "成功/失敗とも中断するcleanup完了前に元結果を公開せず、失敗payloadを保持して外側のescapeへ配送する。取消時のcleanup完了はP6へ残す。"
+      "reason": "P5の成功/失敗cleanupにP6の取消・中断完了待ち・即時defect停止の観測を追加。"
     },
     {
       "id": "emela_lir::Stmt::Protect",
@@ -16250,9 +19209,48 @@
         {
           "kind": "run_report",
           "path": "docs/reports/compiler-p5.md"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "interruption_waits_for_nested_suspending_cleanup_before_await_reports_its_cause"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_lifecycle.rs",
+          "symbol": "closing_a_source_scope_drops_ready_join_and_await_deliveries"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_lifecycle.rs",
+          "symbol": "cancelling_nested_source_scopes_unlinks_all_deferred_waiters"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_lifecycle.rs",
+          "symbol": "source_interrupt_waiters_resume_fifo_after_suspending_cleanup"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_lifecycle.rs",
+          "symbol": "source_scopes_reclaim_completed_children_and_preserve_live_copied_handles"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_defects.rs",
+          "symbol": "attempts_stop_at_defects_without_running_unreachable_handler_release"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_defects.rs",
+          "symbol": "typed_failure_before_a_defect_still_runs_the_protected_release"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p6.md"
         }
       ],
-      "reason": "成功/失敗とも中断するcleanup完了前に元結果を公開せず、失敗payloadを保持して外側のescapeへ配送する。取消時のcleanup完了はP6へ残す。"
+      "reason": "P5の成功/失敗cleanupにP6の取消・中断完了待ち・即時defect停止の観測を追加。"
     },
     {
       "id": "emela_lir::Stmt::Dup",
@@ -17377,16 +20375,71 @@
     {
       "id": "emela_lir::Value::Fiber",
       "context": "sync",
-      "status": "pending",
-      "evidence": [],
-      "reason": ""
+      "status": "verified",
+      "evidence": [
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "attempts_preserve_success_and_typed_cause_failures_across_raise"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_concurrency.rs",
+          "symbol": "source_concurrency_preserves_handles_values_causes_and_unit_results"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p6.md"
+        }
+      ],
+      "reason": "P6の指定caller文脈で受理・実行される操作を直接試験で確認。旧全source観測の完了とは分けて記録する。"
     },
     {
       "id": "emela_lir::Value::Fiber",
       "context": "suspend",
-      "status": "pending",
-      "evidence": [],
-      "reason": ""
+      "status": "verified",
+      "evidence": [
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "scope_fork_and_join_reclaim_children_and_their_erased_values"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "deferred_complete_poll_and_await_share_one_typed_value_until_scope_closes"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "interruption_waits_for_nested_suspending_cleanup_before_await_reports_its_cause"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_lifecycle.rs",
+          "symbol": "closing_a_source_scope_drops_ready_join_and_await_deliveries"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_lifecycle.rs",
+          "symbol": "cancelling_nested_source_scopes_unlinks_all_deferred_waiters"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_lifecycle.rs",
+          "symbol": "source_interrupt_waiters_resume_fifo_after_suspending_cleanup"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_lifecycle.rs",
+          "symbol": "source_scopes_reclaim_completed_children_and_preserve_live_copied_handles"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p6.md"
+        }
+      ],
+      "reason": "P6の指定caller文脈で受理・実行される操作を直接試験で確認。旧全source観測の完了とは分けて記録する。"
     },
     {
       "id": "emela_lir::Value::IsError",
@@ -17638,16 +20691,36 @@
     {
       "id": "emela_lir::RuntimeOp::Hold",
       "context": "common",
-      "status": "pending",
-      "evidence": [],
-      "reason": ""
+      "status": "verified",
+      "evidence": [
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "raw_interrupt_masks_are_unit_operations_and_are_rejected_from_isr_entries"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p6.md"
+        }
+      ],
+      "reason": "P6の指定caller文脈で受理・実行される操作を直接試験で確認。旧全source観測の完了とは分けて記録する。"
     },
     {
       "id": "emela_lir::RuntimeOp::Unhold",
       "context": "common",
-      "status": "pending",
-      "evidence": [],
-      "reason": ""
+      "status": "verified",
+      "evidence": [
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "raw_interrupt_masks_are_unit_operations_and_are_rejected_from_isr_entries"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p6.md"
+        }
+      ],
+      "reason": "P6の指定caller文脈で受理・実行される操作を直接試験で確認。旧全source観測の完了とは分けて記録する。"
     },
     {
       "id": "emela_lir::RuntimeOp::Yield",
@@ -19448,37 +22521,147 @@
     {
       "id": "emela_core::FiberOp::Scope",
       "context": "suspend",
-      "status": "pending",
-      "evidence": [],
-      "reason": ""
+      "status": "verified",
+      "evidence": [
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "scope_fork_and_join_reclaim_children_and_their_erased_values"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_concurrency.rs",
+          "symbol": "source_concurrency_preserves_handles_values_causes_and_unit_results"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_scope_tests.rs",
+          "symbol": "scope_handlers_merge_callback_failure_abis_and_box_typed_child_results"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p6.md"
+        }
+      ],
+      "reason": "P6の指定caller文脈で受理・実行される操作を直接試験で確認。旧全source観測の完了とは分けて記録する。"
     },
     {
       "id": "emela_core::FiberOp::Fork",
       "context": "sync",
-      "status": "pending",
-      "evidence": [],
-      "reason": ""
+      "status": "verified",
+      "evidence": [
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "scope_fork_and_join_reclaim_children_and_their_erased_values"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_concurrency.rs",
+          "symbol": "source_concurrency_preserves_handles_values_causes_and_unit_results"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_scope_tests.rs",
+          "symbol": "scope_handlers_merge_callback_failure_abis_and_box_typed_child_results"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p6.md"
+        }
+      ],
+      "reason": "P6の指定caller文脈で受理・実行される操作を直接試験で確認。旧全source観測の完了とは分けて記録する。"
     },
     {
       "id": "emela_core::FiberOp::Fork",
       "context": "suspend",
-      "status": "pending",
-      "evidence": [],
-      "reason": ""
+      "status": "verified",
+      "evidence": [
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "scope_fork_and_join_reclaim_children_and_their_erased_values"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_concurrency.rs",
+          "symbol": "source_concurrency_preserves_handles_values_causes_and_unit_results"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_scope_tests.rs",
+          "symbol": "scope_handlers_merge_callback_failure_abis_and_box_typed_child_results"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p6.md"
+        }
+      ],
+      "reason": "P6の指定caller文脈で受理・実行される操作を直接試験で確認。旧全source観測の完了とは分けて記録する。"
     },
     {
       "id": "emela_core::FiberOp::Deferred",
       "context": "sync",
-      "status": "pending",
-      "evidence": [],
-      "reason": ""
+      "status": "verified",
+      "evidence": [
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "deferred_complete_poll_and_await_share_one_typed_value_until_scope_closes"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_concurrency.rs",
+          "symbol": "source_concurrency_preserves_handles_values_causes_and_unit_results"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_scope_tests.rs",
+          "symbol": "calling_the_generated_scope_deferred_operation_requires_its_pool"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_scope_tests.rs",
+          "symbol": "scope_handlers_merge_callback_failure_abis_and_box_typed_child_results"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p6.md"
+        }
+      ],
+      "reason": "P6の指定caller文脈で受理・実行される操作を直接試験で確認。旧全source観測の完了とは分けて記録する。"
     },
     {
       "id": "emela_core::FiberOp::Deferred",
       "context": "suspend",
-      "status": "pending",
-      "evidence": [],
-      "reason": ""
+      "status": "verified",
+      "evidence": [
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "deferred_complete_poll_and_await_share_one_typed_value_until_scope_closes"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_concurrency.rs",
+          "symbol": "source_concurrency_preserves_handles_values_causes_and_unit_results"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_scope_tests.rs",
+          "symbol": "calling_the_generated_scope_deferred_operation_requires_its_pool"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_scope_tests.rs",
+          "symbol": "scope_handlers_merge_callback_failure_abis_and_box_typed_child_results"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p6.md"
+        }
+      ],
+      "reason": "P6の指定caller文脈で受理・実行される操作を直接試験で確認。旧全source観測の完了とは分けて記録する。"
     },
     {
       "id": "emela_core::FiberOp::Join",
@@ -19490,9 +22673,34 @@
     {
       "id": "emela_core::FiberOp::Join",
       "context": "suspend",
-      "status": "pending",
-      "evidence": [],
-      "reason": ""
+      "status": "verified",
+      "evidence": [
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "scope_fork_and_join_reclaim_children_and_their_erased_values"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_concurrency.rs",
+          "symbol": "source_concurrency_preserves_handles_values_causes_and_unit_results"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_child_waiters.rs",
+          "symbol": "child_await_and_join_waiters_resume_fifo_after_the_child_finishes"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_child_waiters.rs",
+          "symbol": "failed_handleless_children_release_records_during_sibling_cleanup"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p6.md"
+        }
+      ],
+      "reason": "P6の指定caller文脈で受理・実行される操作を直接試験で確認。旧全source観測の完了とは分けて記録する。"
     },
     {
       "id": "emela_core::FiberOp::Await",
@@ -19504,9 +22712,49 @@
     {
       "id": "emela_core::FiberOp::Await",
       "context": "suspend",
-      "status": "pending",
-      "evidence": [],
-      "reason": ""
+      "status": "verified",
+      "evidence": [
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "interruption_waits_for_nested_suspending_cleanup_before_await_reports_its_cause"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_child_waiters.rs",
+          "symbol": "child_await_and_join_waiters_resume_fifo_after_the_child_finishes"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_child_waiters.rs",
+          "symbol": "failed_handleless_children_release_records_during_sibling_cleanup"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_lifecycle.rs",
+          "symbol": "closing_a_source_scope_drops_ready_join_and_await_deliveries"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_lifecycle.rs",
+          "symbol": "cancelling_nested_source_scopes_unlinks_all_deferred_waiters"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_lifecycle.rs",
+          "symbol": "source_interrupt_waiters_resume_fifo_after_suspending_cleanup"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_lifecycle.rs",
+          "symbol": "source_scopes_reclaim_completed_children_and_preserve_live_copied_handles"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p6.md"
+        }
+      ],
+      "reason": "P6の指定caller文脈で受理・実行される操作を直接試験で確認。旧全source観測の完了とは分けて記録する。"
     },
     {
       "id": "emela_core::FiberOp::Interrupt",
@@ -19518,37 +22766,137 @@
     {
       "id": "emela_core::FiberOp::Interrupt",
       "context": "suspend",
-      "status": "pending",
-      "evidence": [],
-      "reason": ""
+      "status": "verified",
+      "evidence": [
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "interruption_waits_for_nested_suspending_cleanup_before_await_reports_its_cause"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_lifecycle.rs",
+          "symbol": "closing_a_source_scope_drops_ready_join_and_await_deliveries"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_lifecycle.rs",
+          "symbol": "cancelling_nested_source_scopes_unlinks_all_deferred_waiters"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_lifecycle.rs",
+          "symbol": "source_interrupt_waiters_resume_fifo_after_suspending_cleanup"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_lifecycle.rs",
+          "symbol": "source_scopes_reclaim_completed_children_and_preserve_live_copied_handles"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p6.md"
+        }
+      ],
+      "reason": "P6の指定caller文脈で受理・実行される操作を直接試験で確認。旧全source観測の完了とは分けて記録する。"
     },
     {
       "id": "emela_core::FiberOp::Attempt",
       "context": "sync",
-      "status": "pending",
-      "evidence": [],
-      "reason": ""
+      "status": "verified",
+      "evidence": [
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "attempts_preserve_success_and_typed_cause_failures_across_raise"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_concurrency.rs",
+          "symbol": "source_concurrency_preserves_handles_values_causes_and_unit_results"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p6.md"
+        }
+      ],
+      "reason": "P6の指定caller文脈で受理・実行される操作を直接試験で確認。旧全source観測の完了とは分けて記録する。"
     },
     {
       "id": "emela_core::FiberOp::Attempt",
       "context": "suspend",
-      "status": "pending",
-      "evidence": [],
-      "reason": ""
+      "status": "verified",
+      "evidence": [
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "attempts_preserve_success_and_typed_cause_failures_across_raise"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_concurrency.rs",
+          "symbol": "source_concurrency_preserves_handles_values_causes_and_unit_results"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p6.md"
+        }
+      ],
+      "reason": "P6の指定caller文脈で受理・実行される操作を直接試験で確認。旧全source観測の完了とは分けて記録する。"
     },
     {
       "id": "emela_core::FiberOp::Complete",
       "context": "sync",
-      "status": "pending",
-      "evidence": [],
-      "reason": ""
+      "status": "verified",
+      "evidence": [
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "deferred_complete_poll_and_await_share_one_typed_value_until_scope_closes"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_concurrency.rs",
+          "symbol": "source_concurrency_preserves_handles_values_causes_and_unit_results"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_unit_tests.rs",
+          "symbol": "unit_deferred_distinguishes_empty_and_full_without_payload_storage"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p6.md"
+        }
+      ],
+      "reason": "P6の指定caller文脈で受理・実行される操作を直接試験で確認。旧全source観測の完了とは分けて記録する。"
     },
     {
       "id": "emela_core::FiberOp::Complete",
       "context": "suspend",
-      "status": "pending",
-      "evidence": [],
-      "reason": ""
+      "status": "verified",
+      "evidence": [
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "deferred_complete_poll_and_await_share_one_typed_value_until_scope_closes"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_concurrency.rs",
+          "symbol": "source_concurrency_preserves_handles_values_causes_and_unit_results"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_unit_tests.rs",
+          "symbol": "unit_deferred_distinguishes_empty_and_full_without_payload_storage"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p6.md"
+        }
+      ],
+      "reason": "P6の指定caller文脈で受理・実行される操作を直接試験で確認。旧全source観測の完了とは分けて記録する。"
     },
     {
       "id": "emela_core::FiberOp::DeferredAwait",
@@ -19560,65 +22908,215 @@
     {
       "id": "emela_core::FiberOp::DeferredAwait",
       "context": "suspend",
-      "status": "pending",
-      "evidence": [],
-      "reason": ""
+      "status": "verified",
+      "evidence": [
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "deferred_complete_poll_and_await_share_one_typed_value_until_scope_closes"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_concurrency.rs",
+          "symbol": "source_concurrency_preserves_handles_values_causes_and_unit_results"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_deferred_tests.rs",
+          "symbol": "deferred_wakes_fifo_waiters_with_owned_strings_and_releases_the_scope_value"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p6.md"
+        }
+      ],
+      "reason": "P6の指定caller文脈で受理・実行される操作を直接試験で確認。旧全source観測の完了とは分けて記録する。"
     },
     {
       "id": "emela_core::FiberOp::Poll",
       "context": "sync",
-      "status": "pending",
-      "evidence": [],
-      "reason": ""
+      "status": "verified",
+      "evidence": [
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "deferred_complete_poll_and_await_share_one_typed_value_until_scope_closes"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_concurrency.rs",
+          "symbol": "source_concurrency_preserves_handles_values_causes_and_unit_results"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_unit_tests.rs",
+          "symbol": "unit_deferred_distinguishes_empty_and_full_without_payload_storage"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p6.md"
+        }
+      ],
+      "reason": "P6の指定caller文脈で受理・実行される操作を直接試験で確認。旧全source観測の完了とは分けて記録する。"
     },
     {
       "id": "emela_core::FiberOp::Poll",
       "context": "suspend",
-      "status": "pending",
-      "evidence": [],
-      "reason": ""
+      "status": "verified",
+      "evidence": [
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "deferred_complete_poll_and_await_share_one_typed_value_until_scope_closes"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_concurrency.rs",
+          "symbol": "source_concurrency_preserves_handles_values_causes_and_unit_results"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_unit_tests.rs",
+          "symbol": "unit_deferred_distinguishes_empty_and_full_without_payload_storage"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p6.md"
+        }
+      ],
+      "reason": "P6の指定caller文脈で受理・実行される操作を直接試験で確認。旧全source観測の完了とは分けて記録する。"
     },
     {
       "id": "emela_core::FiberOp::CauseKind",
       "context": "sync",
-      "status": "pending",
-      "evidence": [],
-      "reason": ""
+      "status": "verified",
+      "evidence": [
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "attempts_preserve_success_and_typed_cause_failures_across_raise"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_concurrency.rs",
+          "symbol": "source_concurrency_preserves_handles_values_causes_and_unit_results"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p6.md"
+        }
+      ],
+      "reason": "P6の指定caller文脈で受理・実行される操作を直接試験で確認。旧全source観測の完了とは分けて記録する。"
     },
     {
       "id": "emela_core::FiberOp::CauseKind",
       "context": "suspend",
-      "status": "pending",
-      "evidence": [],
-      "reason": ""
+      "status": "verified",
+      "evidence": [
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "attempts_preserve_success_and_typed_cause_failures_across_raise"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_concurrency.rs",
+          "symbol": "source_concurrency_preserves_handles_values_causes_and_unit_results"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p6.md"
+        }
+      ],
+      "reason": "P6の指定caller文脈で受理・実行される操作を直接試験で確認。旧全source観測の完了とは分けて記録する。"
     },
     {
       "id": "emela_core::FiberOp::CauseToString",
       "context": "sync",
-      "status": "pending",
-      "evidence": [],
-      "reason": ""
+      "status": "verified",
+      "evidence": [
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "attempts_preserve_success_and_typed_cause_failures_across_raise"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_concurrency.rs",
+          "symbol": "source_concurrency_preserves_handles_values_causes_and_unit_results"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p6.md"
+        }
+      ],
+      "reason": "P6の指定caller文脈で受理・実行される操作を直接試験で確認。旧全source観測の完了とは分けて記録する。"
     },
     {
       "id": "emela_core::FiberOp::CauseToString",
       "context": "suspend",
-      "status": "pending",
-      "evidence": [],
-      "reason": ""
+      "status": "verified",
+      "evidence": [
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "attempts_preserve_success_and_typed_cause_failures_across_raise"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_concurrency.rs",
+          "symbol": "source_concurrency_preserves_handles_values_causes_and_unit_results"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p6.md"
+        }
+      ],
+      "reason": "P6の指定caller文脈で受理・実行される操作を直接試験で確認。旧全source観測の完了とは分けて記録する。"
     },
     {
       "id": "emela_core::FiberOp::CauseRaise",
       "context": "sync",
-      "status": "pending",
-      "evidence": [],
-      "reason": ""
+      "status": "verified",
+      "evidence": [
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "attempts_preserve_success_and_typed_cause_failures_across_raise"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_concurrency.rs",
+          "symbol": "source_concurrency_preserves_handles_values_causes_and_unit_results"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p6.md"
+        }
+      ],
+      "reason": "P6の指定caller文脈で受理・実行される操作を直接試験で確認。旧全source観測の完了とは分けて記録する。"
     },
     {
       "id": "emela_core::FiberOp::CauseRaise",
       "context": "suspend",
-      "status": "pending",
-      "evidence": [],
-      "reason": ""
+      "status": "verified",
+      "evidence": [
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "attempts_preserve_success_and_typed_cause_failures_across_raise"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_concurrency.rs",
+          "symbol": "source_concurrency_preserves_handles_values_causes_and_unit_results"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p6.md"
+        }
+      ],
+      "reason": "P6の指定caller文脈で受理・実行される操作を直接試験で確認。旧全source観測の完了とは分けて記録する。"
     }
   ],
   "tests": [
@@ -21568,6 +25066,10 @@
         {
           "kind": "run_report",
           "path": "docs/reports/compiler-p5.md"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p6.md"
         }
       ]
     },
@@ -21651,6 +25153,10 @@
         {
           "kind": "run_report",
           "path": "docs/reports/compiler-p5.md"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p6.md"
         }
       ]
     },
@@ -21703,8 +25209,13 @@
         "P6",
         "P7"
       ],
-      "status": "pending",
-      "evidence": []
+      "status": "mapped",
+      "evidence": [
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p6.md"
+        }
+      ]
     },
     {
       "id": "c_abi_isr_services",
@@ -21804,6 +25315,10 @@
         {
           "kind": "run_report",
           "path": "docs/reports/compiler-p3.md"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p6.md"
         }
       ]
     },

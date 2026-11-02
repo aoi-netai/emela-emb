@@ -11,7 +11,7 @@ pub fn answer() -> Int {
 }
 ```
 
-P1〜P5の基盤・同期型システム・固定heap・関数値・effect・中断と外部taskが完了しました。Clock・型付き完了・所有値を含む [対応仕様](docs/language-subset.md)、365試験と独立環境での実行結果は [P5検証報告](docs/reports/compiler-p5.md) を参照してください。[7段階の計画](docs/compiler-parity-plan.md) に沿って、固定した旧fork相当の独立コンパイラーを実現します。
+P1〜P6の基盤・型システム・固定heap・関数値・effect・中断・構造化並行処理が完了しました。Scope/Fiber/Deferred/Causeと取消を含む [対応仕様](docs/language-subset.md)、398試験と独立環境の結果は [P6検証報告](docs/reports/compiler-p6.md) を参照してください。[7段階の計画](docs/compiler-parity-plan.md) に沿って、P7で残るABI・const・ISRと旧試験の全件照合を進めます。
 
 ## ビルドと生成
 

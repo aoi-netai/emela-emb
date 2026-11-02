@@ -1,6 +1,6 @@
 # 独立コンパイラーが対応するEmelaの範囲
 
-P1〜P5の基盤・同期型システム・固定heap・関数値・effect・中断と外部taskを記録する。P5は365試験・独立環境での検証を完了。字句解析、構文解析、module・名前解決、型検査、独自IR、C生成をこのrepoが所有し、Emela本体のcrate・CLI・checkout・core/std・Pomeを要求しない。[実装計画](compiler-parity-plan.md) と [終了条件](compiler-coverage.md) に従い、後続段階の機能を追加する。
+P1〜P6の基盤・型システム・固定heap・関数値・effect・中断・構造化並行処理を記録する。P6は398試験・独立環境での検証を完了。字句解析、構文解析、module・名前解決、型検査、独自IR、C生成をこのrepoが所有し、Emela本体のcrate・CLI・checkout・core/std・Pomeを要求しない。[実装計画](compiler-parity-plan.md) と [終了条件](compiler-coverage.md) に従い、後続段階の機能を追加する。
 
 基準仕様は旧forkの `c34c0aeefdd966d854371b3110db00a47798751d`。`spec/language/02-lexical.md`、`03-keywords.md`、`12-external.md`、`spec/grammar.md`、`spec/targets/16-targets.md`、`spec/targets/c.md` を参照する。これは仕様・採用コードの出自であり、取得する依存ではない。全Emela仕様・全target契約への適合を表明しない。
 
@@ -103,6 +103,12 @@ Asyncとeffect集合から関数・operation・関数値の中断可能性を判
 
 Std.Duration/Std.Instant/Std.ClockとSystemClock/TestClockを供給する。State[Instant]・List.mapのeffect多相callbackも中断・再開できる。Clock.nowだけを呼ぶ通常helperもClockの中断可能性を保持する。同期operation内からnowを直接呼ぶ場合は同期ABIを使う。
 
+## 構造化並行処理・取消
+
+Std.Fiber/Scope/Deferred/Causeを供給する。Scope地点のevidenceをchildへ渡し、childごとのerror/effect集合を包含関係で推論する。fork/join/await/interrupt、attempt、both/race/all/map、Deferredのcomplete/poll/awaitを扱い、Unit・String・List等の結果を保持する。
+
+Scope終了時は子を取消し、逆順cleanupと中断するreleaseの完了を待つ。FIFO待機・一度だけの完了・古いtask通知の拒否・完了child回収を検証する。Causeは成功/失敗/取消を区別し、所有payloadと失敗noteを保持して表示・再送出する。Scope/Fiber/Deferredを可視戻り型でScope外へ返す操作と、不適合な集合kindを拒否する。
+
 ## C公開境界と生成物
 
 **`pub` はEmela内の可視性、`@export(c, "名前")` はC公開を指定する。** `pub` だけでCの公開関数にはならない。内部関数にはexport属性を付ける必要はない。到達したimport先の明示exportも保持する。exportとexternalの衝突、重複export、不正なC公開名を拒否する。C公開関数と起動entryへ未供給のeffectを持ち出すことも拒否する。
@@ -123,10 +129,10 @@ emela-emb build main.emel math.emel --entry main.emel --out-dir generated
 
 `--entry-function`、`--heap-bytes`、`--string-capacity`、`--task-adapter C名=adapter名`、`--fiber-capacity`、`--frame-capacity`、`--frame-bytes`、`--task-capacity`、`--event-capacity` で明示した設定を渡せる。新規または空の出力先に全生成物を一時ディレクトリから公開し、既存の非空ディレクトリ・ファイル・symlinkを保護する。終了コードは成功/helpが0、入力・生成・保存失敗が1、引数エラーが2。
 
-[P1検証報告](reports/compiler-p1.md)、[P2検証報告](reports/compiler-p2.md)、[P3検証報告](reports/compiler-p3.md)、[P4検証報告](reports/compiler-p4.md)、[P5検証報告](reports/compiler-p5.md) にsource/C・CLI・独立環境の確認を記録する。生成Cは `-O0` / `-O2` の両方でコンパイル・リンク・実行する。試験環境のC compiler不在を成功として扱わない。
+[P1検証報告](reports/compiler-p1.md)、[P2検証報告](reports/compiler-p2.md)、[P3検証報告](reports/compiler-p3.md)、[P4検証報告](reports/compiler-p4.md)、[P5検証報告](reports/compiler-p5.md)、[P6検証報告](reports/compiler-p6.md) にsource/C・CLI・独立環境の確認を記録する。生成Cは `-O0` / `-O2` の両方でコンパイル・リンク・実行する。試験環境のC compiler不在を成功として扱わない。
 
 ## 後続段階
 
-P6の構造化並行処理と取消、P7の残るABI・ISR・標準bridge・汎化constは、ここで記録したsource対応には含めない。backendのコードが採用済みでも、sourceからの接続・拒否試験・C実行を確認するまでは未完了として台帳へ記録する。
+P7の残るABI・ISR・標準bridge・汎化constと旧試験の全件照合は、ここで記録した完了範囲には含めない。backendのコードが採用済みでも、sourceからの接続・拒否試験・C実行を確認するまでは未完了として台帳へ記録する。
 
 Pomeによる取得、物理BSP、firmware build/flash、実機確認、LSP・formatterは今回のcompiler移行の範囲外。
