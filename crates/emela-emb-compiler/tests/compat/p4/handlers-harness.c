@@ -14,7 +14,7 @@ int main(void) {
     assert(capability_shadow()==12 && test_heap_empty());
     assert(label_providers()==123 && test_heap_empty());
     assert(explicit_default()==2 && label_merge()==1 && test_heap_empty());
-    trace=0;assert(handler_failure()==7 && trace==123894 && test_heap_empty());
+    trace=0;int failed=handler_failure();if(failed!=7||trace!=123894||!test_heap_empty()){fprintf(stderr,"handler failure result=%d trace=%d empty=%d\n",failed,trace,test_heap_empty());return 2;}
     trace=0;assert(initializer_failure()==7 && trace==1294 && test_heap_empty());
   }
   return 0;
