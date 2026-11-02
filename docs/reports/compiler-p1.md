@@ -4,14 +4,14 @@
 
 ## 実行環境と再現
 
-- 検証したsource revision: `2444fd779736baa8077433573ff0ccbff619745f`（workspace全試験）。追加の非有限Float独自IR fixtureのみを `a4d252bc16780af8f6f5ab8d6d647ec6ebbf6e30` で検証した。後者の差分は試験1件の追加のみ。未コミット変更はこの報告、fixture出自README、最小実験の履歴案内だけで、検証対象のcode/test差分はない。
+- 最終検証したcode/test revision: `13c492149e43ba41e3d33b6ad831bda97c4dd660`。下記の途中確認をすべて含み、Unit引数の評価順修正と回帰試験も含む。この後の変更は台帳・報告・計画だけで、実行対象のコードを変更しない。
 - OS: WSL2 Linux `6.18.54.1-microsoft-standard-WSL2`、target `x86_64-unknown-linux-gnu`。
 - Rust実体: `/home/aoi_nemui/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/bin/{rustc,cargo}`。C実体: `/usr/bin/x86_64-linux-gnu-gcc-11`。
 - 事前に確認したtoolchain: `rustc 1.99.1 (58cf8f9c3 2026-10-13)`、`cargo 1.99.1 (5f94df478 2026-08-27)`、`cc (Ubuntu 11.4.0-1ubuntu1~22.04.3) 11.4.0`。
 - 必須C compilerは`cc`。`tests/support/mod.rs` とCLIのintegration testは `-std=c11 -Wall -Werror -O0` / `-O2` で別々に全生成Cをコンパイル・リンク・実行する。`cc`不在、コンパイル失敗、実行失敗をskipしない。
 - C mockは `tests/compat/p1/*-harness.c` および `tests/p1.rs` 内に固定したもののみ。通常の試験経路は旧checkout・upstream crate・CLI・core/std bundleを参照しない。
 
-入力拒否試験は生成Cが存在しないためC実行を適用しない。最終統合HEAD・独立環境の結果は末尾へ追記する。
+入力拒否試験は生成Cが存在しないためC実行を適用しない。最終統合・独立環境の結果は末尾を参照。
 
 ## P1のsource/API・CLI観測
 
@@ -154,7 +154,26 @@ P1 integrationの正常source 9試験中、未使用defectは10個の入力（In
 
 P1対象に失敗・skip・未実行は残っていない。旧115件全体、38 source fixture全体、P2以降の機能は前節の残観点として残る。台帳のsource_corpus/numeric_unicode等の横断要件全体をこの結果だけでverifiedへ進めない。
 
-## 最終統合の追記欄
+## 最終統合と独立環境の結果
 
-rootで最終HEAD、固定台帳の構造監査、workspace全checks、本体checkoutを参照できない独立環境の結果を追記する。
+`13c492149e43ba41e3d33b6ad831bda97c4dd660` のtracked snapshotを `git archive` で `/tmp` に展開し、Cargo.lockに固定した第三者crateだけを一時vendorした。vendorとsource replacement設定は検証用の一時領域にのみ置き、repoには追加していない。
+
+Linux Landlockで元の `/home/aoi_nemui/emela` 全体を読み取れない状態にし、実際の読取りがPermissionErrorになることを確認した。許可したのはsystem tools、選択したRust toolchain、検証用の一時領域。空のCARGO_HOME、明示したRUSTC/RUSTDOC、offlineで以下を実行した。Emela本体・元repo・旧checkout・既存Cargo cacheを実行時に参照していない。
+
+| command / 確認 | 結果 |
+| --- | --- |
+| `cargo metadata --format-version 1 --locked --offline` | workspaceは2 crateのみ、上流Emela依存なし。全packageのmanifestは一時領域内 |
+| `cargo build --workspace --locked --offline` | 成功、終了0 |
+| `cargo test --workspace --locked --offline` | 66件成功、失敗0、ignored/skip 0、終了0 |
+| `cargo run --locked --offline -p emela-emb-cli -- build examples/minimal/main.emel --out-dir generated` | 全生成物の保存に成功、終了0 |
+| 生成Cと`answer() == 42`を検査するC harnessを`cc -std=c11 -Wall -Werror -O0/-O2 -Igenerated ... -lm`でリンク・実行 | 両方成功、各終了0 |
+| `cargo fmt --all -- --check` | 統合worktreeで成功、終了0 |
+| `cargo clippy --workspace --all-targets --locked --offline -- -D warnings` | 統合worktreeで成功、終了0 |
+| `cargo test -p emela-emb-compiler --test coverage_ledger --locked --offline` | 台帳更新後も2監査試験成功、終了0 |
+
+66件の内訳はCLI unit 3、CLI integration 17、compiler lib 21、compile 4、coverage ledger 2、frontend scalar 7、P1 integration 12。Unit引数の追加試験は値のC引数省略、評価順、Unitを伴う10万回の末尾再帰を両最適化で確認する。入出力拒否・純Rustの構造検査にはC実行を適用しない。
+
+直接依存は `la-arena`、`serde`、`serde_json` のみ。採用元256ファイルのhash、repo外include不在、Cargo dependency graphも確認した。Rust最低対応版の設定は1.85を維持し、新しいlet-chain等を等価な書き方へ適応した。実行したtoolchainは上記1.99.1であり、Rust 1.85実体での実行は今回の証拠に含まない。
+
+P1時点の台帳は46定義・36文脈をverified、後段の入口等353定義と同期部分15文脈をmapped、旧23試験を部分対応のmappedとした。残る29定義・175文脈・92旧試験はpending。追加10要件は7件mapped/3件pendingであり、全体完了としない。比較演算のString対応や、Call/Stmt/Termの所有値・failure・suspend対応は後続段階で個別に確認する。
 
