@@ -1,0 +1,39 @@
+{
+  "kind": "isolated_P7_backend_integration_validation",
+  "base": "a2e8709",
+  "compiler_checkpoint": "8376483",
+  "official_worktree_modified": false,
+  "feature_commits": [
+    "931c3ce",
+    "2c27d11",
+    "76ab71b",
+    "49db59e",
+    "da721f2",
+    "88677b6"
+  ],
+  "integration_adaptation": "Keep all test-module registrations across cherry-pick conflicts, remove duplicate registration, and apply cargo fmt. No compiler behavior changes beyond the listed feature commits.",
+  "coverage": {
+    "legacy_IR_tests_reviewed": 86,
+    "IR_proposal_pending": 0,
+    "cleanup_post_source_IR_seam_cases": 12,
+    "lifted_Fiber_failure_edge_cases": 2,
+    "source_only_runtime_claim_for_seams": false
+  },
+  "checks": {
+    "backend_tests_passed": 146,
+    "backend_tests_failed": 0,
+    "backend_tests_ignored": 0,
+    "backend_elapsed_seconds": 50.13,
+    "strict_clippy_workspace_all_targets": "passed",
+    "actual_Rust_1_85_workspace_all_targets": "passed",
+    "fmt_and_diff": "passed",
+    "C_flags": ["-std=c11", "-Wall", "-Wextra", "-Werror"],
+    "C_optimizations": ["-O0", "-O2"],
+    "compiler_absent_skip": false
+  },
+  "limits": [
+    "This is a backend integration run, not a final standalone archive or complete workspace test run.",
+    "Canonical record/context/test/requirement ledger promotion remains root-owned.",
+    "The remaining structural-context audit and its new suspend literal-switch probe are delivered separately by the frontend agent."
+  ]
+}
