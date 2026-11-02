@@ -259,6 +259,18 @@ pub(crate) fn check(mut modules: Modules) -> Result<ir::Program, Vec<Diagnostic>
         .map(|(index, definition)| (DefinitionId(index), definition.effect_mode.clone()))
         .collect();
     super::effects::infer(&mut program, &effect_modes, &mut checker.catalog)?;
+    for function in &program.functions {
+        if function.exported && !function.signature.sets.effects.is_empty() {
+            return Err(vec![
+                Diagnostic::new(
+                    DK::Export,
+                    function.span,
+                    "C exports must provide every required effect with a handler",
+                )
+                .in_source(&function.source_name),
+            ]);
+        }
+    }
     super::capabilities::audit(&program)?;
     Ok(program)
 }

@@ -1,6 +1,43 @@
 use emela_emb_compiler::{Options, Source, compile_sources};
 
 #[test]
+fn c_exports_reject_unprovided_ambient_effects() {
+    let source = "effect Read {fn get()->Int}\n@export(c,\"unprovided\")\npub fn read()->Int use Read{(use Read).get()}";
+    let errors = compile_sources(
+        &[Source::new("main.emel", source)],
+        "main.emel",
+        &Options::default().with_heap_bytes(4096),
+    )
+    .unwrap_err();
+    assert!(
+        errors.iter().any(
+            |error| error.kind == emela_emb_compiler::DiagnosticKind::Export
+                && error.source.as_deref() == Some("main.emel")
+                && error.message.contains("required effect")
+        ),
+        "{errors:?}"
+    );
+}
+
+#[test]
+fn selected_startup_functions_cannot_require_an_ambient_evidence_argument() {
+    let source = "effect Read {fn get()->Int}\nfn run()->Int use Read{(use Read).get()}";
+    let errors = compile_sources(
+        &[Source::new("main.emel", source)],
+        "main.emel",
+        &Options::default().with_heap_bytes(4096).with_entry("run"),
+    )
+    .unwrap_err();
+    assert!(
+        errors.iter().any(
+            |error| error.kind == emela_emb_compiler::DiagnosticKind::Backend
+                && error.message.contains("parameter")
+        ),
+        "{errors:?}"
+    );
+}
+
+#[test]
 fn source_effect_declarations_and_capability_operations_keep_requirements_checked() {
     for (source, accepted) in [
         (
