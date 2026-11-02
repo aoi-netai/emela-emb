@@ -1,0 +1,215 @@
+{
+  "legacy_revision": "c34c0aeefdd966d854371b3110db00a47798751d",
+  "compiler_checkpoint": "cb56194",
+  "legacy_source_runtime": [
+    {
+      "program": "program:13362f28679b3bbabd69",
+      "legacy_tests": [
+        "emit::fiber::await_::closing_a_scope_drops_ready_join_and_await_frames_before_result_delivery"
+      ],
+      "source_sha256": "90178b14fd7587b8ac7e63044a6378abc08f0d58fed107a8569454a34d434fd8",
+      "source_path": "crates/emela-emb-compiler/tests/compat/p6/closing-ready.emel",
+      "evidence": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_lifecycle.rs",
+          "symbol": "closing_a_source_scope_drops_ready_join_and_await_deliveries",
+          "checkpoint": "cb56194",
+          "file_sha256": "91f670b599a098189356ebb856cc7714971df6636743d481e7d130a49250852f"
+        }
+      ],
+      "adaptation": "Original source body unchanged; explicit C export annotations only. Legacy C observations use host/task, heap auditing and private child instrumentation seams documented in migration-source.md.",
+      "pipeline": "source-to-C",
+      "scope": "Original body runtime evidence; child counters/weak links use an explicit private C instrumentation seam."
+    },
+    {
+      "program": "program:28a6cce6abfc4186e46c",
+      "legacy_tests": [
+        "emit::deferred::nested_scope_cancellation_unlinks_middle_tail_and_head_waiters_and_ready_deliveries"
+      ],
+      "source_sha256": "1eb66f065e0d3a0f1d63c3d4c1cbade1d68435d715e94bd746d06d1efa7187f6",
+      "source_path": "crates/emela-emb-compiler/tests/compat/p6/nested-cancel.emel",
+      "evidence": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_lifecycle.rs",
+          "symbol": "cancelling_nested_source_scopes_unlinks_all_deferred_waiters",
+          "checkpoint": "cb56194",
+          "file_sha256": "91f670b599a098189356ebb856cc7714971df6636743d481e7d130a49250852f"
+        }
+      ],
+      "adaptation": "Original source body unchanged; explicit C export annotations only. Legacy C observations use host/task, heap auditing and private child instrumentation seams documented in migration-source.md.",
+      "pipeline": "source-to-C",
+      "scope": "Original body runtime evidence; child counters/weak links use an explicit private C instrumentation seam."
+    },
+    {
+      "program": "program:47d46c7e6dae870c95f3",
+      "legacy_tests": [
+        "emit::fiber::interrupt::multiple_interrupt_waiters_resume_fifo_after_release_finishes"
+      ],
+      "source_sha256": "6570121a20b232ff437847c3abe2efc1e8a8c6f7be07327d50c7982842f988de",
+      "source_path": "crates/emela-emb-compiler/tests/compat/p6/interrupt-waiters.emel",
+      "evidence": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_lifecycle.rs",
+          "symbol": "source_interrupt_waiters_resume_fifo_after_suspending_cleanup",
+          "checkpoint": "cb56194",
+          "file_sha256": "91f670b599a098189356ebb856cc7714971df6636743d481e7d130a49250852f"
+        }
+      ],
+      "adaptation": "Original source body unchanged; explicit C export annotations only. Legacy C observations use host/task, heap auditing and private child instrumentation seams documented in migration-source.md.",
+      "pipeline": "source-to-C",
+      "scope": "Original body runtime evidence; child counters/weak links use an explicit private C instrumentation seam."
+    },
+    {
+      "program": "program:48cb903c8f5703bd062c",
+      "legacy_tests": [
+        "emit::fiber::child_reclaim::discarded_completed_children_release_results_before_scope_end_and_survive_cancellation",
+        "emit::fiber::child_reclaim::live_handles_keep_completed_results_for_repeated_join_await_after_execution_slot_reuse",
+        "emit::fiber::child_reclaim::long_lived_scope_reclaims_completed_children_with_copied_handles_and_repeated_join_await"
+      ],
+      "source_sha256": "80aeb97a49c6de058bc68bdc0a86d166af7ea26bdfbe935879af5586f1a577dd",
+      "source_path": "crates/emela-emb-compiler/tests/compat/p6/completed-children.emel",
+      "evidence": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_lifecycle.rs",
+          "symbol": "source_scopes_reclaim_completed_children_and_preserve_live_copied_handles",
+          "checkpoint": "cb56194",
+          "file_sha256": "91f670b599a098189356ebb856cc7714971df6636743d481e7d130a49250852f"
+        }
+      ],
+      "adaptation": "Original source body unchanged; explicit C export annotations only. Legacy C observations use host/task, heap auditing and private child instrumentation seams documented in migration-source.md.",
+      "pipeline": "source-to-C",
+      "scope": "Original body runtime evidence; child counters/weak links use an explicit private C instrumentation seam."
+    },
+    {
+      "program": "program:87aa60141422b5f9141c",
+      "legacy_tests": [
+        "emit::fiber::child_reclaim::failed_handleless_children_release_records_while_scope_waits_for_sibling_cleanup"
+      ],
+      "evidence_report": "docs/reports/p6-child-waiters-compat.json",
+      "pipeline": "public_source",
+      "observations": {
+        "source_check": "passed",
+        "C_generation": "passed",
+        "C_runtime_O0": "passed",
+        "C_runtime_O2": "passed",
+        "iterations_per_optimization": 1000,
+        "heap_empty_after_each_iteration": true,
+        "pure_source_runtime": true,
+        "expected_result": null,
+        "assertions": [
+          "three tasks start before the scope waits for sibling cleanup",
+          "failed handleless child record is reclaimed while one sibling child record remains",
+          "root cancellation alternates; NULL output is passed every third iteration",
+          "cleanup completion reclaims all child records and invalidates the two earlier tasks",
+          "owned String 42 survives only a noncancelled call with a supplied output pointer"
+        ]
+      },
+      "post_lowering_ir_seam": null
+    },
+    {
+      "program": "program:966e35a933bb50fec529",
+      "legacy_tests": [
+        "emit::fiber::await_::await_and_join_share_fifo_waiters_and_transfer_each_result"
+      ],
+      "evidence_report": "docs/reports/p6-child-waiters-compat.json",
+      "pipeline": "public_source",
+      "observations": {
+        "source_check": "passed",
+        "C_generation": "passed",
+        "C_runtime_O0": "passed",
+        "C_runtime_O2": "passed",
+        "iterations_per_optimization": 1000,
+        "heap_empty_after_each_iteration": true,
+        "pure_source_runtime": true,
+        "expected_result": 84,
+        "assertions": [
+          "marks 1/2/3 occur before child task completion",
+          "child mark 4 precedes FIFO waiter marks 5/6/7",
+          "mixed await/join result is 84",
+          "stale completion rejected after release"
+        ]
+      },
+      "post_lowering_ir_seam": null
+    },
+    {
+      "program": "program:a90d0e707bff9fd0c0d9",
+      "legacy_tests": [
+        "emit::fiber::join::join_wakes_multiple_waiters_in_fifo_after_the_childs_last_breath"
+      ],
+      "evidence_report": "docs/reports/p6-child-waiters-compat.json",
+      "pipeline": "public_source",
+      "observations": {
+        "source_check": "passed",
+        "C_generation": "passed",
+        "C_runtime_O0": "passed",
+        "C_runtime_O2": "passed",
+        "iterations_per_optimization": 1000,
+        "heap_empty_after_each_iteration": true,
+        "pure_source_runtime": true,
+        "expected_result": 126,
+        "assertions": [
+          "marks 1/2/3 occur before child task completion",
+          "child mark 4 precedes FIFO join waiter marks 5/6/7",
+          "three waiter results sum to 126",
+          "stale completion rejected after release"
+        ]
+      },
+      "post_lowering_ir_seam": null
+    },
+    {
+      "program": "program:b351d40891e80eb8b8ec",
+      "legacy_tests": [
+        "emit::fiber::overlap::failures_from_cancelled_nested_scopes_become_notes_of_the_outer_first_failure"
+      ],
+      "evidence_report": "docs/reports/p6-child-waiters-compat.json",
+      "pipeline": "source_then_post_lowering_hold",
+      "observations": {
+        "source_check": "passed",
+        "C_generation": "passed",
+        "C_runtime_O0": "passed",
+        "C_runtime_O2": "passed",
+        "iterations_per_optimization": 1000,
+        "heap_empty_after_each_iteration": true,
+        "pure_source_runtime": false,
+        "expected_result": null,
+        "assertions": [
+          "first failure alternates between Boom(1) and Boom(3)",
+          "root waits for second held child after first failure",
+          "late failure is rendered as another-fiber-failed note after the first error",
+          "cancelled task 2/4 completions are stale",
+          "returned cause is released after exact Show text comparison"
+        ]
+      },
+      "post_lowering_ir_seam": {
+        "target": "late",
+        "operation": "RuntimeOp::Hold",
+        "position": "first statement of the function body",
+        "matches_fixed_legacy_test": true
+      }
+    }
+  ],
+  "validation": {
+    "report": "docs/reports/compiler-p6.md",
+    "run_owner": "root",
+    "status": "Independent full workspace, strict Clippy, MSRV 1.85 and C O0/O2 verification is running at proposal creation; final evidence must be attached by root.",
+    "C_flags": [
+      "-std=c11",
+      "-Wall",
+      "-Werror"
+    ],
+    "C_optimizations": [
+      "-O0",
+      "-O2"
+    ],
+    "iterations": 1000
+  },
+  "provenance": {
+    "original_checkpoint": "0cb01f9",
+    "original_path": "docs/reports/compiler-p6-ledger-proposal.json",
+    "transformation": "Copy only lifecycle source/fixture/runtime evidence and validation. Canonical P6 ledger changes were applied separately in a686172; no proposal-status promotion is inherited here."
+  }
+}

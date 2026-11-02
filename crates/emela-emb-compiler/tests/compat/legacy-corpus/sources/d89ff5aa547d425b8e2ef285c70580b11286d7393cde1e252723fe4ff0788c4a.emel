@@ -1,0 +1,13 @@
+
+const VALUE = { dbg("once")
+ (Some(42), ["a", "bc"], String.from_code_point(65)) }
+pub fn read() -> Int {
+  (parsed, values, point) = VALUE
+  n = parsed match { Some(n) -> n
+_ -> -100 }
+  first = values match { [a, ..rest] -> String.byte_size(a)
+_ -> 0 }
+  size = point match { Some(s) -> String.byte_size(s)
+_ -> 0 }
+  n + first + size
+}

@@ -754,6 +754,44 @@ fn suspending_cleanup_preserves_the_failure_until_an_outer_handler_runs() {
         external: false,
     });
     let error_type = p.core.types.intern(Type::Enum(error, vec![]));
+    let mut nested = Function::new("cleanup_failure");
+    nested.fails = true;
+    let nested_text = aggregate_variable(&mut nested, TypeId::STRING);
+    let nested_error = aggregate_variable(&mut nested, error_type);
+    let nested_format = binding(
+        &mut nested,
+        Some(nested_text),
+        Value::Builtin {
+            op: Builtin::IntToString,
+            args: vec![Const::Int(7).into()],
+        },
+    );
+    let nested_make = binding(
+        &mut nested,
+        Some(nested_error),
+        Value::Make {
+            ctor: CtorRef {
+                enum_id: error,
+                variant: 0,
+            },
+            args: vec![nested_text.into()],
+        },
+    );
+    nested.body = Some(nested.seqs.alloc(Seq {
+        stmts: vec![nested_format, nested_make],
+        term: Term::Fail(nested_error.into()),
+    }));
+    let nested = p.functions.alloc(nested);
+    let mut observe = Function::new("cleanup_seen");
+    let observed = variable(&mut observe, TypeId::BOOL);
+    observe.params.push(observed);
+    observe.external = Some(External {
+        bindings: vec![ExternalBinding {
+            target: "c".into(),
+            host: HostRef::Global("cleanup_seen".into()),
+        }],
+    });
+    let observe = p.functions.alloc(observe);
     let mut worker = Function::new("worker");
     worker.suspends = true;
     worker.fails = true;
@@ -803,8 +841,69 @@ fn suspending_cleanup_preserves_the_failure_until_an_outer_handler_runs() {
         stmts: vec![wait_body, format, make],
         term: Term::Fail(payload.into()),
     });
+    let nested_caught = aggregate_variable(&mut worker, TypeId::ANY);
+    let nested_payload = aggregate_variable(&mut worker, error_type);
+    let nested_value = aggregate_variable(&mut worker, TypeId::STRING);
+    let nested_unpack = binding(
+        &mut worker,
+        Some(nested_payload),
+        Value::AsError {
+            error: nested_caught,
+            enum_id: error,
+            error_type,
+        },
+    );
+    let nested_field = binding(
+        &mut worker,
+        Some(nested_value),
+        Value::Field {
+            base: nested_payload,
+            ctor: CtorRef {
+                enum_id: error,
+                variant: 0,
+            },
+            index: 0,
+        },
+    );
+    let nested_matches = variable(&mut worker, TypeId::BOOL);
+    let nested_check = binding(
+        &mut worker,
+        Some(nested_matches),
+        Value::Prim {
+            op: PrimOp::Eq,
+            ty: PrimTy::String,
+            args: vec![nested_value.into(), Const::String("7".into()).into()],
+        },
+    );
+    let nested_observe = binding(
+        &mut worker,
+        None,
+        Value::Call {
+            callee: Callee::Direct(observe),
+            args: vec![nested_matches.into()],
+            suspends: false,
+            on_fail: None,
+        },
+    );
+    let nested_handler = worker.seqs.alloc(Seq {
+        stmts: vec![nested_unpack, nested_field, nested_check, nested_observe],
+        term: Term::Yield(None),
+    });
+    let nested_call = binding(
+        &mut worker,
+        None,
+        Value::Call {
+            callee: Callee::Direct(nested),
+            args: vec![],
+            suspends: false,
+            on_fail: Some(OnFail::Handle {
+                error: nested_caught,
+                body: nested_handler,
+            }),
+        },
+    );
     let cleanup = worker.seqs.alloc(Seq {
-        stmts: vec![wait_cleanup],
+        stmts: vec![nested_call, wait_cleanup],
         term: Term::Yield(None),
     });
     let protect = worker.stmts.alloc(Stmt::Protect {
@@ -874,7 +973,7 @@ fn suspending_cleanup_preserves_the_failure_until_an_outer_handler_runs() {
     audit_heap(&mut output);
     execute(
         &output,
-        "#include <stdlib.h>\n#include <string.h>\n#include \"emela_embedded.h\"\n#include \"emela_board.h\"\nint test_heap_empty(void);\nstatic EmelaTask pending;\nstatic int32_t value;\nuint32_t emela_board_event_lock(void){return 0;}\nvoid emela_board_event_unlock(uint32_t p){(void)p;}\n_Noreturn void emela_board_defect(EmelaDefectKind k,const char*m,uint16_t n){(void)k;(void)m;(void)n;abort();}\nvoid board_wait_start(EmelaTask t,int32_t n){pending=t;value=n;}\nint main(void){for(int i=0;i<1000;i++){EmelaString result={0};EmelaFiber f=answer_start(&result);while(emela_scheduler_run(1)){}if(value!=1||result.length||emela_fiber_done(f))return 1;if(!emela_task_complete_int(pending,0))return 2;while(emela_scheduler_run(1)){}if(value!=99||result.length||emela_fiber_done(f))return 3;if(!emela_task_complete_int(pending,0))return 4;while(!emela_fiber_done(f))if(!emela_scheduler_run(1))return 5;emela_fiber_release(f);if(!result.owner||result.length!=2||memcmp(result.data,\"42\",2))return 6;emela_embedded_release_string(&result);if(!test_heap_empty())return 7;}return 0;}\n",
+        "#include <stdlib.h>\n#include <string.h>\n#include \"emela_embedded.h\"\n#include \"emela_board.h\"\nint test_heap_empty(void);\nstatic EmelaTask pending;\nstatic int32_t value;static int seen;void cleanup_seen(int32_t matches){if(!matches)abort();seen++;}\nuint32_t emela_board_event_lock(void){return 0;}\nvoid emela_board_event_unlock(uint32_t p){(void)p;}\n_Noreturn void emela_board_defect(EmelaDefectKind k,const char*m,uint16_t n){(void)k;(void)m;(void)n;abort();}\nvoid board_wait_start(EmelaTask t,int32_t n){pending=t;value=n;}\nint main(void){for(int i=0;i<1000;i++){EmelaString result={0};seen=0;EmelaFiber f=answer_start(&result);while(emela_scheduler_run(1)){}if(value!=1||result.length||emela_fiber_done(f))return 1;if(!emela_task_complete_int(pending,0))return 2;while(emela_scheduler_run(1)){}if(value!=99||result.length||emela_fiber_done(f)||seen!=1)return 3;if(!emela_task_complete_int(pending,0))return 4;while(!emela_fiber_done(f))if(!emela_scheduler_run(1))return 5;emela_fiber_release(f);if(!result.owner||result.length!=2||memcmp(result.data,\"42\",2))return 6;emela_embedded_release_string(&result);if(!test_heap_empty())return 7;}return 0;}\n",
         0,
     );
 }

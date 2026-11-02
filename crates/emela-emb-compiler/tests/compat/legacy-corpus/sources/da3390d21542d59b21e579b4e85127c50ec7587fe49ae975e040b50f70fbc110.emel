@@ -1,0 +1,2 @@
+import Std.Bytes.{Bytes}
+pub fn make(s: String) -> Bytes { Bytes.encode_utf8(s) }

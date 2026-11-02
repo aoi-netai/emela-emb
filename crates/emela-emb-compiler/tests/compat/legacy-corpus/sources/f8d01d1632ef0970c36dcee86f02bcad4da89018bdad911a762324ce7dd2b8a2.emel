@@ -1,0 +1,25 @@
+
+import Std.Fiber.{Fiber, Scope}
+import Std.Deferred.{Deferred}
+pub fn wide(n: Int64) -> Int64 use Async {
+  Fiber.scope(fn() {
+    d: Deferred[Int64] = (use Scope).deferred()
+    Fiber.fork(fn() { Deferred.complete(d, n) })
+    first = Deferred.await(d)
+    Deferred.poll(d) match {
+      Some(x) -> x
+      None -> first
+    }
+  })
+}
+pub fn real(n: Float) -> Float use Async {
+  Fiber.scope(fn() {
+    d: Deferred[Float] = (use Scope).deferred()
+    Fiber.fork(fn() { Deferred.complete(d, n) })
+    first = Deferred.await(d)
+    Deferred.poll(d) match {
+      Some(x) -> x
+      None -> first
+    }
+  })
+}

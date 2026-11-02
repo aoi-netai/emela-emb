@@ -1,0 +1,10 @@
+
+import Std.Fiber.{Fiber, Success, Failure}
+import Std.Cause.{Cause}
+error Boom(n: Int) derive Show
+pub fn make(n: Int) -> Cause[Boom] {
+ Fiber.attempt(fn() { fail Boom(n: n) }) match { Success(_) -> panic("unexpected")
+  Failure(c) -> c
+ }
+}
+pub fn show(c: Cause[Boom]) -> String { Cause.to_string(c) }

@@ -1,0 +1,4 @@
+const EMPTY=[]
+fn ints(xs:List[Int])->Int{if List.is_empty(xs) {0}else{1}}
+fn texts(xs:List[String])->Int{if List.is_empty(xs) {0}else{1}}
+pub fn work()->Int{ints(EMPTY)+texts(EMPTY)+42}

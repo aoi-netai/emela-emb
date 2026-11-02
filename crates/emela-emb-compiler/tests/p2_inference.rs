@@ -92,7 +92,7 @@ fn generalization_keeps_numeric_defaults_rigid_signatures_and_c_boundaries() {
         "enum Maybe[A] { None, Some(A) }\n@export(c, \"empty\")\npub fn empty() { None }",
         "enum Maybe[A] { None, Some(A) }\nfn wrong[A](a: A) -> Maybe[A] { Some(42) }",
         "enum Maybe[A] { None, Some(A) }\nfn wrong() { None + 1 }",
-        "enum Maybe[A] { None, Some(A) }\nconst EMPTY = None\nfn integer() -> Maybe[Int] { EMPTY }\nfn text() -> Maybe[String] { EMPTY }",
+        "enum Maybe[A] { None, Some(A) }\nconst EMPTY: Maybe[Int] = None\nfn integer() -> Maybe[Int] { EMPTY }\nfn text() -> Maybe[String] { EMPTY }",
     ] {
         assert!(compile(source).is_err(), "{source}");
     }

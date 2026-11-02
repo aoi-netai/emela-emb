@@ -1,0 +1,180 @@
+{
+  "schema_version": 1,
+  "baseline_revision": "c34c0aeefdd966d854371b3110db00a47798751d",
+  "entries": [
+    {
+      "program": "program:b47677c76cf26174e501",
+      "legacy_tests": [
+        "emit::fiber::scope_starts_children_at_real_suspension_and_reclaims_waiting_tasks"
+      ],
+      "files": [
+        {
+          "name": "main.emel",
+          "fixture": "sources/7c63a85ad77ff1e3a964d8ee29bf14b848551723954ad9daa240aa13905a3951.emel",
+          "source_id": "source:7c63a85ad77ff1e3a964",
+          "sha256": "7c63a85ad77ff1e3a964d8ee29bf14b848551723954ad9daa240aa13905a3951"
+        }
+      ],
+      "new_test": {
+        "kind": "source_test",
+        "path": "crates/emela-emb-compiler/tests/p7_scope_compat.rs",
+        "symbol": "scope_starts_children_at_real_suspension_and_reclaims_waiting_tasks"
+      },
+      "route": "original-source",
+      "C_harness": "crates/emela-emb-compiler/tests/compat/p7/concurrency/scope_starts_children_at_real_suspension_and_reclaims_waiting_tasks.c",
+      "options": "options()",
+      "adaptation": "Original source body with explicit legacy_* C exports. Original C observations unchanged except public C symbol adaptation; no post-lowering IR mutation. All old heap/frame/task/event/fiber budgets preserved."
+    },
+    {
+      "program": "program:e0f622ab5e646e64e7cb",
+      "legacy_tests": [
+        "emit::fiber::scope_cancels_unstarted_children_before_running_their_function"
+      ],
+      "files": [
+        {
+          "name": "main.emel",
+          "fixture": "sources/aa29524d35f30fa4e0631820dd16a8240b1e6b8e5bc086e47a22dea6debcc093.emel",
+          "source_id": "source:aa29524d35f30fa4e063",
+          "sha256": "aa29524d35f30fa4e0631820dd16a8240b1e6b8e5bc086e47a22dea6debcc093"
+        }
+      ],
+      "new_test": {
+        "kind": "source_test",
+        "path": "crates/emela-emb-compiler/tests/p7_scope_compat.rs",
+        "symbol": "scope_cancels_unstarted_children_before_running_their_function"
+      },
+      "route": "original-source",
+      "C_harness": "crates/emela-emb-compiler/tests/compat/p7/concurrency/scope_cancels_unstarted_children_before_running_their_function.c",
+      "options": "options().with_heap_bytes(4096)",
+      "adaptation": "Original source body with explicit legacy_* C exports. Original C observations unchanged except public C symbol adaptation; no post-lowering IR mutation. All old heap/frame/task/event/fiber budgets preserved."
+    },
+    {
+      "program": "program:b47677c76cf26174e501",
+      "legacy_tests": [
+        "emit::fiber::completed_children_and_queued_events_do_not_leak_across_scope_reuse"
+      ],
+      "files": [
+        {
+          "name": "main.emel",
+          "fixture": "sources/7c63a85ad77ff1e3a964d8ee29bf14b848551723954ad9daa240aa13905a3951.emel",
+          "source_id": "source:7c63a85ad77ff1e3a964",
+          "sha256": "7c63a85ad77ff1e3a964d8ee29bf14b848551723954ad9daa240aa13905a3951"
+        }
+      ],
+      "new_test": {
+        "kind": "source_test",
+        "path": "crates/emela-emb-compiler/tests/p7_scope_compat.rs",
+        "symbol": "completed_children_and_queued_events_do_not_leak_across_scope_reuse"
+      },
+      "route": "original-source",
+      "C_harness": "crates/emela-emb-compiler/tests/compat/p7/concurrency/completed_children_and_queued_events_do_not_leak_across_scope_reuse.c",
+      "options": "options()",
+      "adaptation": "Original source body with explicit legacy_* C exports. Original C observations unchanged except public C symbol adaptation; no post-lowering IR mutation. All old heap/frame/task/event/fiber budgets preserved."
+    },
+    {
+      "program": "program:f188261f99b265687e19",
+      "legacy_tests": [
+        "emit::fiber::closing_outer_scope_reclaims_nested_scopes_and_their_tasks"
+      ],
+      "files": [
+        {
+          "name": "main.emel",
+          "fixture": "sources/01ee0403a9801092d42c75ea68594adfe7debde90b3c457763dbeb99a4244044.emel",
+          "source_id": "source:01ee0403a9801092d42c",
+          "sha256": "01ee0403a9801092d42c75ea68594adfe7debde90b3c457763dbeb99a4244044"
+        }
+      ],
+      "new_test": {
+        "kind": "source_test",
+        "path": "crates/emela-emb-compiler/tests/p7_scope_compat.rs",
+        "symbol": "closing_outer_scope_reclaims_nested_scopes_and_their_tasks"
+      },
+      "route": "original-source",
+      "C_harness": "crates/emela-emb-compiler/tests/compat/p7/concurrency/closing_outer_scope_reclaims_nested_scopes_and_their_tasks.c",
+      "options": "options().with_heap_bytes(16384).with_task_capacity(3).with_event_capacity(3)",
+      "adaptation": "Original source body with explicit legacy_* C exports. Original C observations unchanged except public C symbol adaptation; no post-lowering IR mutation. All old heap/frame/task/event/fiber budgets preserved."
+    },
+    {
+      "program": "program:cb86c54d554b7584458c",
+      "legacy_tests": [
+        "emit::fiber::children_can_fork_siblings_and_inherit_the_scope_call_evidence"
+      ],
+      "files": [
+        {
+          "name": "main.emel",
+          "fixture": "sources/7a713f19178fbb71a4706bcc3332d37e5e3ee4181aad5facdd89b9d927df1471.emel",
+          "source_id": "source:7a713f19178fbb71a470",
+          "sha256": "7a713f19178fbb71a4706bcc3332d37e5e3ee4181aad5facdd89b9d927df1471"
+        }
+      ],
+      "new_test": {
+        "kind": "source_test",
+        "path": "crates/emela-emb-compiler/tests/p7_scope_compat.rs",
+        "symbol": "children_can_fork_siblings_and_inherit_the_scope_call_evidence"
+      },
+      "route": "original-source",
+      "C_harness": "crates/emela-emb-compiler/tests/compat/p7/concurrency/children_can_fork_siblings_and_inherit_the_scope_call_evidence.c",
+      "options": "options().with_heap_bytes(16384)",
+      "adaptation": "Original source body with explicit legacy_* C exports. Original C observations unchanged except public C symbol adaptation; no post-lowering IR mutation. All old heap/frame/task/event/fiber budgets preserved."
+    },
+    {
+      "program": "program:dec5101b69674f921c75",
+      "legacy_tests": [
+        "emit::fiber::fork_exhaustion_is_a_fixed_pool_defect_before_children_start"
+      ],
+      "files": [
+        {
+          "name": "main.emel",
+          "fixture": "sources/3e1f978d4ef410aedf4aae15d6dc9bb139b5dfc30a8e7b00477bbf3aaf68422e.emel",
+          "source_id": "source:3e1f978d4ef410aedf4a",
+          "sha256": "3e1f978d4ef410aedf4aae15d6dc9bb139b5dfc30a8e7b00477bbf3aaf68422e"
+        }
+      ],
+      "new_test": {
+        "kind": "source_test",
+        "path": "crates/emela-emb-compiler/tests/p7_scope_compat.rs",
+        "symbol": "fork_exhaustion_is_a_fixed_pool_defect_before_children_start"
+      },
+      "route": "original-source",
+      "C_harness": "crates/emela-emb-compiler/tests/compat/p7/concurrency/fork_exhaustion_is_a_fixed_pool_defect_before_children_start.c",
+      "options": "options().with_fiber_capacity(2)",
+      "adaptation": "Original source body with explicit legacy_* C exports. Original C observations unchanged except public C symbol adaptation; no post-lowering IR mutation. All old heap/frame/task/event/fiber budgets preserved."
+    },
+    {
+      "program": "program:eac7456a92396f46e7a2",
+      "legacy_tests": [
+        "emit::fiber::scope_keeps_managed_captures_and_boxes_reference_results_without_leaks"
+      ],
+      "files": [
+        {
+          "name": "main.emel",
+          "fixture": "sources/7d2e60e633ebd2a639057570433bdc75c270ca2fb1f9792330c79c781d7d9baf.emel",
+          "source_id": "source:7d2e60e633ebd2a63905",
+          "sha256": "7d2e60e633ebd2a639057570433bdc75c270ca2fb1f9792330c79c781d7d9baf"
+        }
+      ],
+      "new_test": {
+        "kind": "source_test",
+        "path": "crates/emela-emb-compiler/tests/p7_scope_compat.rs",
+        "symbol": "scope_keeps_managed_captures_and_boxes_reference_results_without_leaks"
+      },
+      "route": "original-source",
+      "C_harness": "crates/emela-emb-compiler/tests/compat/p7/concurrency/scope_keeps_managed_captures_and_boxes_reference_results_without_leaks.c",
+      "options": "options().with_heap_bytes(8192)",
+      "adaptation": "Original source body with explicit legacy_* C exports. Original C observations unchanged except public C symbol adaptation; no post-lowering IR mutation. All old heap/frame/task/event/fiber budgets preserved."
+    }
+  ],
+  "validation": {
+    "status": "passed",
+    "test_count": 7,
+    "C_optimizations": [
+      "-O0",
+      "-O2"
+    ],
+    "flags": [
+      "-std=c11",
+      "-Wall",
+      "-Werror"
+    ]
+  }
+}

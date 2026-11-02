@@ -1,0 +1,963 @@
+{
+  "baseline_revision": "c34c0aeefdd966d854371b3110db00a47798751d",
+  "purpose": "固定objectのrouteを人手で分類した補足。新compilerでの成功/検証済みを示さない。",
+  "tests": {
+    "architecture::contract_guard_rejects_aliases_grouped_imports_and_indirect_source_includes": {
+      "category": "infrastructure-contract",
+      "note": "Rustのstage/contract依存境界を調べる構造検査。fixtureはRust sourceで、Emela frontend入力ではない。",
+      "evidence": {
+        "path": "crates/emela-codegen-emb/tests/architecture.rs",
+        "line": 120,
+        "end_line": 135
+      },
+      "non_program_literal_language": "Rust"
+    },
+    "architecture::contracts_do_not_depend_on_upstream_ir_or_compiler_implementations": {
+      "category": "infrastructure-contract",
+      "note": "Rustのstage/contract依存境界を調べる構造検査。fixtureはRust sourceで、Emela frontend入力ではない。",
+      "evidence": {
+        "path": "crates/emela-codegen-emb/tests/architecture.rs",
+        "line": 94,
+        "end_line": 117
+      },
+      "non_program_literal_language": null
+    },
+    "architecture::shared_semantics_cannot_hide_stage_implementations_or_external_effects": {
+      "category": "infrastructure-contract",
+      "note": "Rustのstage/contract依存境界を調べる構造検査。fixtureはRust sourceで、Emela frontend入力ではない。",
+      "evidence": {
+        "path": "crates/emela-codegen-emb/tests/architecture.rs",
+        "line": 330,
+        "end_line": 350
+      },
+      "non_program_literal_language": null
+    },
+    "architecture::stage_guard_rejects_reexports_effect_aliases_and_cross_stage_relative_imports": {
+      "category": "infrastructure-contract",
+      "note": "Rustのstage/contract依存境界を調べる構造検査。fixtureはRust sourceで、Emela frontend入力ではない。",
+      "evidence": {
+        "path": "crates/emela-codegen-emb/tests/architecture.rs",
+        "line": 310,
+        "end_line": 327
+      },
+      "non_program_literal_language": "Rust"
+    },
+    "architecture::stages_use_only_contracts_and_explicit_pure_shared_libraries": {
+      "category": "infrastructure-contract",
+      "note": "Rustのstage/contract依存境界を調べる構造検査。fixtureはRust sourceで、Emela frontend入力ではない。",
+      "evidence": {
+        "path": "crates/emela-codegen-emb/tests/architecture.rs",
+        "line": 260,
+        "end_line": 308
+      },
+      "non_program_literal_language": null
+    },
+    "artifact::rust_and_python_share_the_persisted_contract_fixtures": {
+      "category": "infrastructure-contract",
+      "note": "Rust/Pythonのpersisted artifact contract fixture一致を検査する。",
+      "evidence": {
+        "path": "crates/emela-codegen-emb/tests/artifact.rs",
+        "line": 87,
+        "end_line": 115
+      },
+      "non_program_literal_language": null
+    },
+    "backend_inventory::inventory::backend_inventory_matches_all_definition_ids_sources_and_tests": {
+      "category": "infrastructure-contract",
+      "note": "旧backend variant/test対応inventoryの整合性・再生成を検査する。fixtureはRust enum/dispatch構造。",
+      "evidence": {
+        "path": "crates/emela-codegen-emb/tests/support/backend_inventory.rs",
+        "line": 615,
+        "end_line": 627
+      },
+      "non_program_literal_language": null
+    },
+    "backend_inventory::inventory::missing_reused_and_orphan_entries_are_reported": {
+      "category": "infrastructure-contract",
+      "note": "旧backend variant/test対応inventoryの整合性・再生成を検査する。fixtureはRust enum/dispatch構造。",
+      "evidence": {
+        "path": "crates/emela-codegen-emb/tests/support/backend_inventory.rs",
+        "line": 692,
+        "end_line": 718
+      },
+      "non_program_literal_language": "Rust"
+    },
+    "backend_inventory::inventory::missing_variants_remain_visible_in_partial_reports": {
+      "category": "infrastructure-contract",
+      "note": "旧backend variant/test対応inventoryの整合性・再生成を検査する。fixtureはRust enum/dispatch構造。",
+      "evidence": {
+        "path": "crates/emela-codegen-emb/tests/support/backend_inventory.rs",
+        "line": 739,
+        "end_line": 754
+      },
+      "non_program_literal_language": "Rust"
+    },
+    "backend_inventory::inventory::new_fields_remain_unreviewed_members_of_their_owner": {
+      "category": "infrastructure-contract",
+      "note": "旧backend variant/test対応inventoryの整合性・再生成を検査する。fixtureはRust enum/dispatch構造。",
+      "evidence": {
+        "path": "crates/emela-codegen-emb/tests/support/backend_inventory.rs",
+        "line": 721,
+        "end_line": 736
+      },
+      "non_program_literal_language": "Rust"
+    },
+    "backend_inventory::inventory::newly_defined_variants_cannot_silently_inherit_another_entry": {
+      "category": "infrastructure-contract",
+      "note": "旧backend variant/test対応inventoryの整合性・再生成を検査する。fixtureはRust enum/dispatch構造。",
+      "evidence": {
+        "path": "crates/emela-codegen-emb/tests/support/backend_inventory.rs",
+        "line": 643,
+        "end_line": 651
+      },
+      "non_program_literal_language": null
+    },
+    "backend_inventory::inventory::regenerate_backend_inventory": {
+      "category": "infrastructure-contract",
+      "note": "旧backend variant/test対応inventoryの整合性・再生成を検査する。fixtureはRust enum/dispatch構造。",
+      "evidence": {
+        "path": "crates/emela-codegen-emb/tests/support/backend_inventory.rs",
+        "line": 631,
+        "end_line": 640
+      },
+      "non_program_literal_language": null
+    },
+    "boards::bundled_boards_have_complete_flat_packages": {
+      "category": "infrastructure-contract",
+      "note": "同梱board packageのC/header/metadataファイル構成を検査する。",
+      "evidence": {
+        "path": "crates/emela-codegen-emb/tests/boards.rs",
+        "line": 7,
+        "end_line": 47
+      },
+      "non_program_literal_language": null
+    },
+    "boards::unknown_board_names_do_not_select_a_default_package": {
+      "category": "infrastructure-contract",
+      "note": "未知board名のpackage lookup拒否を検査する。",
+      "evidence": {
+        "path": "crates/emela-codegen-emb/tests/boards.rs",
+        "line": 50,
+        "end_line": 54
+      },
+      "non_program_literal_language": null
+    },
+    "coverage_audit::audit_inventory_matches_current_flow_and_builtin_enum_definitions": {
+      "category": "infrastructure-contract",
+      "note": "旧Flow/builtin coverage inventoryとRust宣言parserの整合性検査。",
+      "evidence": {
+        "path": "crates/emela-codegen-emb/tests/coverage_audit.rs",
+        "line": 5,
+        "end_line": 7
+      },
+      "non_program_literal_language": null
+    },
+    "coverage_audit::audit_inventory_rejects_missing_extra_duplicated_and_malformed_entries": {
+      "category": "infrastructure-contract",
+      "note": "旧Flow/builtin coverage inventoryとRust宣言parserの整合性検査。",
+      "evidence": {
+        "path": "crates/emela-codegen-emb/tests/coverage_audit.rs",
+        "line": 33,
+        "end_line": 59
+      },
+      "non_program_literal_language": null
+    },
+    "coverage_audit::audit_parser_ignores_comments_attributes_and_nested_payloads": {
+      "category": "infrastructure-contract",
+      "note": "旧Flow/builtin coverage inventoryとRust宣言parserの整合性検査。",
+      "evidence": {
+        "path": "crates/emela-codegen-emb/tests/coverage_audit.rs",
+        "line": 10,
+        "end_line": 30
+      },
+      "non_program_literal_language": "Rust"
+    },
+    "emit::completion_types::derived::nested_generic_error_payloads_have_finite_display_functions": {
+      "category": "source",
+      "legacy_classes": [
+        "source-success-expectation"
+      ],
+      "note": "固定tupleのdefinition/valueとformat!のty=Wrap[Int]をそのまま差し込む。",
+      "evidence": {
+        "path": "crates/emela-codegen-emb/tests/completion_types/derived.rs",
+        "line": 4,
+        "end_line": 53
+      },
+      "materializations": [
+        {
+          "generated_input": "generated:d5a01d80e06079399f3c",
+          "variants": [
+            {
+              "name": "nested-wrap",
+              "fields": {
+                "definition": "enum Wrap[A] { Box(List[A]) } derive Show",
+                "ty": "Wrap[Int]",
+                "value": "Box([42])"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "emit::const_runtime::oversized_static_string_growth_falls_back_before_unbounded_compiler_allocation": {
+      "category": "source",
+      "legacy_classes": [
+        "source-success-expectation"
+      ],
+      "note": "初期式\"x\"をdouble(...)で17回包む固定loopを展開する。",
+      "evidence": {
+        "path": "crates/emela-codegen-emb/tests/const_runtime/mod.rs",
+        "line": 1094,
+        "end_line": 1127
+      },
+      "materializations": [
+        {
+          "generated_input": "generated:cf02caf71021add92ccf",
+          "variants": [
+            {
+              "name": "double-17",
+              "fields": {
+                "expression": {
+                  "wrap": {
+                    "initial": "\"x\"",
+                    "template": "double({value})",
+                    "repeat": 17
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "emit::const_runtime::polymorphic_const_defects_have_one_source_context_and_self_reference_retries": {
+      "category": "source",
+      "legacy_classes": [
+        "source-success-expectation"
+      ],
+      "note": "recursive=false/trueで選ばれるpanic式/BROKEN式を両方展開する。",
+      "evidence": {
+        "path": "crates/emela-codegen-emb/tests/const_runtime/mod.rs",
+        "line": 984,
+        "end_line": 1033
+      },
+      "materializations": [
+        {
+          "generated_input": "generated:af359e418a0414baa5e0",
+          "variants": [
+            {
+              "name": "panic",
+              "fields": {
+                "expression": "panic(\"broken\")"
+              }
+            },
+            {
+              "name": "self-reference",
+              "fields": {
+                "expression": "BROKEN"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "emit::deferred::ended_deferred_poll_and_await_reject_leaked_callbacks_after_slot_reuse": {
+      "category": "source",
+      "legacy_classes": [
+        "source-success-expectation"
+      ],
+      "note": "awaiting=false/trueのret/operation/invokeを同じboolで相関させた2variant。",
+      "evidence": {
+        "path": "crates/emela-codegen-emb/tests/deferred/mod.rs",
+        "line": 732,
+        "end_line": 807
+      },
+      "materializations": [
+        {
+          "generated_input": "generated:649eeb43128ae5b9f7ca",
+          "variants": [
+            {
+              "name": "poll",
+              "fields": {
+                "ret": "Bool",
+                "operation": "Deferred.poll(d) match { Some(_) -> True\nNone -> False }",
+                "invoke": ""
+              }
+            },
+            {
+              "name": "await",
+              "fields": {
+                "ret": "Int use Async",
+                "operation": "Deferred.await(d)",
+                "invoke": "pub fn invoke(f: fn() -> Int fails {} use Async) -> Int use Async { f() }"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "emit::fiber::await_::child_wait_is_a_resume_boundary_and_scope_end_reclaims_the_operation_tail": {
+      "category": "source",
+      "legacy_classes": [
+        "source-success-expectation"
+      ],
+      "note": "operation配列join/awaitをそれぞれ展開する。",
+      "evidence": {
+        "path": "crates/emela-codegen-emb/tests/fiber/await_.rs",
+        "line": 255,
+        "end_line": 307
+      },
+      "materializations": [
+        {
+          "generated_input": "generated:f1dfbdc5012a3a33a63a",
+          "variants": [
+            {
+              "name": "join",
+              "fields": {
+                "operation": "join"
+              }
+            },
+            {
+              "name": "await",
+              "fields": {
+                "operation": "await"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "emit::fiber::cause::interruption_raised_by_cleanup_replaces_a_body_failure": {
+      "category": "source",
+      "legacy_classes": [
+        "source-success-expectation"
+      ],
+      "note": "mode=0,1,2に対応するprotected関数を差し込み、IR側protect_cleanup_call処理は別adapterとして記録する。",
+      "evidence": {
+        "path": "crates/emela-codegen-emb/tests/fiber/cause.rs",
+        "line": 326,
+        "end_line": 429
+      },
+      "materializations": [
+        {
+          "generated_input": "generated:4e9c40666c45e10264b0",
+          "variants": [
+            {
+              "name": "mode-0",
+              "fields": {
+                "protected": "fn protected(c: Cause[{}]) -> Int fails Boom { with Res { failure()\n cleanup(c)\n 0 } }"
+              }
+            },
+            {
+              "name": "mode-1",
+              "fields": {
+                "protected": "fn protected(c: Cause[{}]) -> Int fails Boom use Wait { with Res { (use Wait).get(3)\n failure()\n cleanup(c)\n 0 } }"
+              }
+            },
+            {
+              "name": "mode-2",
+              "fields": {
+                "protected": "fn protected(c: Cause[{}]) -> Int { with Res { failure()\n cleanup(c)\n 0 } escape { Boom(n) -> { mark(3)\n n } } }"
+              }
+            }
+          ]
+        }
+      ],
+      "execution_configuration": {
+        "options": {
+          "heap_bytes": 4096,
+          "task_capacity": 3,
+          "event_capacity": 3
+        },
+        "post_lower_mutations": [
+          {
+            "helper": "interrupt::protect_cleanup_call"
+          }
+        ]
+      }
+    },
+    "emit::fiber::integration::managed_task_success_values_share_state_child_and_deferred_ownership_with_and_without_gc": {
+      "category": "source",
+      "legacy_classes": [
+        "source-success-expectation"
+      ],
+      "note": "run引数managed_successはこのtestでtrueに固定。対応するlower_managed/lower traceとsource書換え結果を選ぶ。with_collector=false/trueは同sourceに対するIR adapter差として保持。",
+      "evidence": {
+        "path": "crates/emela-codegen-emb/tests/fiber/integration.rs",
+        "line": 14,
+        "end_line": 16
+      },
+      "select_trace": {
+        "path": "crates/emela-codegen-emb/examples/support/phase7_integration_flow.rs",
+        "function": "lower_managed"
+      },
+      "select_source_contains": [
+        "fn request(n: Int) -> String fails",
+        "state.set(value)"
+      ],
+      "execution_configuration": {
+        "options": {
+          "heap_bytes": 4096,
+          "string_capacity": 32,
+          "frame_capacity": 48,
+          "frame_bytes": 2048,
+          "deferred_capacity": 2
+        },
+        "task_adapters": [
+          [
+            "host_request",
+            "board_request_start"
+          ]
+        ],
+        "post_lower_mutations": [
+          {
+            "function": "request",
+            "body": null,
+            "external_c_symbol": "host_request",
+            "required_flags": [
+              "suspends",
+              "fails"
+            ]
+          },
+          {
+            "helper": "gc_anchor::add",
+            "variants": [
+              false,
+              true
+            ]
+          }
+        ]
+      }
+    },
+    "emit::fiber::integration::shared_state_child_reclamation_deferreds_and_external_failure_share_owned_edges_with_and_without_gc": {
+      "category": "source",
+      "legacy_classes": [
+        "source-success-expectation"
+      ],
+      "note": "run引数managed_successはこのtestでfalseに固定。対応するlower_managed/lower traceとsource書換え結果を選ぶ。with_collector=false/trueは同sourceに対するIR adapter差として保持。",
+      "evidence": {
+        "path": "crates/emela-codegen-emb/tests/fiber/integration.rs",
+        "line": 8,
+        "end_line": 11
+      },
+      "select_trace": {
+        "path": "crates/emela-codegen-emb/examples/support/phase7_integration_flow.rs",
+        "function": "lower"
+      },
+      "select_source_contains": [
+        "fn request(n: Int) -> Int fails",
+        "state.set(Int.to_string(value))"
+      ],
+      "execution_configuration": {
+        "options": {
+          "heap_bytes": 4096,
+          "string_capacity": 32,
+          "frame_capacity": 48,
+          "frame_bytes": 2048,
+          "deferred_capacity": 2
+        },
+        "task_adapters": [
+          [
+            "host_request",
+            "board_request_start"
+          ]
+        ],
+        "post_lower_mutations": [
+          {
+            "function": "request",
+            "body": null,
+            "external_c_symbol": "host_request",
+            "required_flags": [
+              "suspends",
+              "fails"
+            ]
+          },
+          {
+            "helper": "gc_anchor::add",
+            "variants": [
+              false,
+              true
+            ]
+          }
+        ]
+      }
+    },
+    "emit::string_comparison::owned_string_views_compare_without_allocating_or_changing_ownership": {
+      "category": "source",
+      "legacy_classes": [
+        "source-success-expectation"
+      ],
+      "note": "SOURCE定数のinclude assetを固定objectから読み、store/readの追記を展開する。",
+      "evidence": {
+        "path": "crates/emela-codegen-emb/tests/string_comparison/mod.rs",
+        "line": 131,
+        "end_line": 182
+      },
+      "materializations": [
+        {
+          "generated_input": "generated:68b09248816cdf1f93f8",
+          "variants": [
+            {
+              "name": "owned-views",
+              "fields": {
+                "SOURCE": {
+                  "asset": "crates/emela-codegen-emb/examples/support/string_comparison.emel"
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "feature_inventory::check_detects_stale_and_missing_files_without_writing": {
+      "category": "infrastructure-contract",
+      "note": "Rust宣言の抽出・fingerprint・inventory更新検査。source形状の文字列はRust fixture。",
+      "evidence": {
+        "path": "crates/emela-codegen-emb/tests/feature_inventory.rs",
+        "line": 168,
+        "end_line": 187
+      },
+      "non_program_literal_language": null
+    },
+    "feature_inventory::checked_in_inventory_matches_the_declared_source_scope": {
+      "category": "infrastructure-contract",
+      "note": "Rust宣言の抽出・fingerprint・inventory更新検査。source形状の文字列はRust fixture。",
+      "evidence": {
+        "path": "crates/emela-codegen-emb/tests/feature_inventory.rs",
+        "line": 190,
+        "end_line": 211
+      },
+      "non_program_literal_language": null
+    },
+    "feature_inventory::extracts_payloads_attributes_docs_and_fields_without_lexical_false_positives": {
+      "category": "infrastructure-contract",
+      "note": "Rust宣言の抽出・fingerprint・inventory更新検査。source形状の文字列はRust fixture。",
+      "evidence": {
+        "path": "crates/emela-codegen-emb/tests/feature_inventory.rs",
+        "line": 15,
+        "end_line": 82
+      },
+      "non_program_literal_language": "Rust"
+    },
+    "feature_inventory::fingerprints_ignore_comments_and_locations_but_keep_conditional_attributes": {
+      "category": "infrastructure-contract",
+      "note": "Rust宣言の抽出・fingerprint・inventory更新検査。source形状の文字列はRust fixture。",
+      "evidence": {
+        "path": "crates/emela-codegen-emb/tests/feature_inventory.rs",
+        "line": 120,
+        "end_line": 142
+      },
+      "non_program_literal_language": "Rust"
+    },
+    "feature_inventory::missing_selections_ambiguous_ids_and_unsupported_syntax_fail_explicitly": {
+      "category": "infrastructure-contract",
+      "note": "Rust宣言の抽出・fingerprint・inventory更新検査。source形状の文字列はRust fixture。",
+      "evidence": {
+        "path": "crates/emela-codegen-emb/tests/feature_inventory.rs",
+        "line": 145,
+        "end_line": 165
+      },
+      "non_program_literal_language": "Rust"
+    },
+    "feature_inventory::new_declarations_and_fields_are_discovered_and_shape_changes_keep_their_ids": {
+      "category": "infrastructure-contract",
+      "note": "Rust宣言の抽出・fingerprint・inventory更新検査。source形状の文字列はRust fixture。",
+      "evidence": {
+        "path": "crates/emela-codegen-emb/tests/feature_inventory.rs",
+        "line": 85,
+        "end_line": 117
+      },
+      "non_program_literal_language": "Rust"
+    },
+    "frontend::backend_board_handlers_resolve_typecheck_and_lower_with_the_default_frontend": {
+      "category": "source",
+      "legacy_expected": {
+        "parse": "accept",
+        "resolve": "accept",
+        "typecheck": "accept",
+        "lower": "accept",
+        "backend": "accept"
+      },
+      "legacy_classes": [
+        "source-success-expectation"
+      ],
+      "note": "Analysis.has_errors()==falseをTypecheck/Lower両方でassertし、生成C/headerを確認する正常source期待。",
+      "evidence": {
+        "path": "crates/emela-codegen-emb/tests/frontend.rs",
+        "line": 14,
+        "end_line": 52
+      }
+    },
+    "frontend::embedded_backend_does_not_supply_the_old_std_namespace": {
+      "category": "source",
+      "legacy_expected": {
+        "resolve": "reject"
+      },
+      "legacy_classes": [
+        "source-rejection-expectation"
+      ],
+      "note": "driver diagnosticsにE0205（削除済Std.Embedded namespace）を期待する拒否source。",
+      "evidence": {
+        "path": "crates/emela-codegen-emb/tests/frontend.rs",
+        "line": 55,
+        "end_line": 71
+      }
+    },
+    "frontend::embedded_backend_module_names_cannot_be_shadowed_by_project_files": {
+      "category": "source",
+      "legacy_expected": {
+        "resolve": "reject"
+      },
+      "legacy_classes": [
+        "source-rejection-expectation"
+      ],
+      "note": "projectのEmbedded.Gpioとの衝突でE0203を期待する拒否source。",
+      "evidence": {
+        "path": "crates/emela-codegen-emb/tests/frontend.rs",
+        "line": 74,
+        "end_line": 88
+      }
+    },
+    "frontend::unrelated_project_modules_under_embedded_remain_available": {
+      "category": "source",
+      "legacy_expected": {
+        "parse": "accept",
+        "resolve": "accept",
+        "typecheck": "accept"
+      },
+      "legacy_classes": [
+        "source-success-expectation"
+      ],
+      "note": "Embedded.Localのproject moduleはAnalysis.has_errors()==falseを期待。lower/C成功はこのtestから主張しない。",
+      "evidence": {
+        "path": "crates/emela-codegen-emb/tests/frontend.rs",
+        "line": 91,
+        "end_line": 101
+      }
+    },
+    "implementation_inventory::checked_in_implementation_and_comparison_match_all_backend_contexts": {
+      "category": "infrastructure-contract",
+      "note": "Rust dispatch/guardとbackend coverage対応の監査検査。Emela frontendの正常経路ではない。",
+      "evidence": {
+        "path": "crates/emela-codegen-emb/tests/implementation_inventory.rs",
+        "line": 226,
+        "end_line": 258
+      },
+      "non_program_literal_language": null
+    },
+    "implementation_inventory::direct_errors_are_not_generation_and_exclusions_require_a_rejection_route": {
+      "category": "infrastructure-contract",
+      "note": "Rust dispatch/guardとbackend coverage対応の監査検査。Emela frontendの正常経路ではない。",
+      "evidence": {
+        "path": "crates/emela-codegen-emb/tests/implementation_inventory.rs",
+        "line": 122,
+        "end_line": 142
+      },
+      "non_program_literal_language": "Rust"
+    },
+    "implementation_inventory::extracts_only_selected_dispatch_and_preserves_guards_and_calls": {
+      "category": "infrastructure-contract",
+      "note": "Rust dispatch/guardとbackend coverage対応の監査検査。Emela frontendの正常経路ではない。",
+      "evidence": {
+        "path": "crates/emela-codegen-emb/tests/implementation_inventory.rs",
+        "line": 41,
+        "end_line": 65
+      },
+      "non_program_literal_language": "Rust"
+    },
+    "implementation_inventory::if_conditions_and_let_else_are_candidates_but_negative_conditions_are_not_inverted": {
+      "category": "infrastructure-contract",
+      "note": "Rust dispatch/guardとbackend coverage対応の監査検査。Emela frontendの正常経路ではない。",
+      "evidence": {
+        "path": "crates/emela-codegen-emb/tests/implementation_inventory.rs",
+        "line": 145,
+        "end_line": 167
+      },
+      "non_program_literal_language": "Rust"
+    },
+    "implementation_inventory::missing_dispatch_functions_are_reported_without_preventing_coverage_generation": {
+      "category": "infrastructure-contract",
+      "note": "Rust dispatch/guardとbackend coverage対応の監査検査。Emela frontendの正常経路ではない。",
+      "evidence": {
+        "path": "crates/emela-codegen-emb/tests/implementation_inventory.rs",
+        "line": 298,
+        "end_line": 305
+      },
+      "non_program_literal_language": "Rust"
+    },
+    "implementation_inventory::newly_added_primary_enums_are_flagged_instead_of_silently_excluded": {
+      "category": "infrastructure-contract",
+      "note": "Rust dispatch/guardとbackend coverage対応の監査検査。Emela frontendの正常経路ではない。",
+      "evidence": {
+        "path": "crates/emela-codegen-emb/tests/implementation_inventory.rs",
+        "line": 96,
+        "end_line": 119
+      },
+      "non_program_literal_language": "Rust"
+    },
+    "implementation_inventory::old_implementation_ids_are_orphans_and_candidates_never_become_reviewed": {
+      "category": "infrastructure-contract",
+      "note": "Rust dispatch/guardとbackend coverage対応の監査検査。Emela frontendの正常経路ではない。",
+      "evidence": {
+        "path": "crates/emela-codegen-emb/tests/implementation_inventory.rs",
+        "line": 195,
+        "end_line": 223
+      },
+      "non_program_literal_language": "Rust"
+    },
+    "implementation_inventory::renamed_or_ambiguous_selectors_and_removed_required_calls_fail": {
+      "category": "infrastructure-contract",
+      "note": "Rust dispatch/guardとbackend coverage対応の監査検査。Emela frontendの正常経路ではない。",
+      "evidence": {
+        "path": "crates/emela-codegen-emb/tests/implementation_inventory.rs",
+        "line": 170,
+        "end_line": 192
+      },
+      "non_program_literal_language": "Rust"
+    },
+    "implementation_inventory::representation_gaps_are_reported_without_preventing_coverage_generation": {
+      "category": "infrastructure-contract",
+      "note": "Rust dispatch/guardとbackend coverage対応の監査検査。Emela frontendの正常経路ではない。",
+      "evidence": {
+        "path": "crates/emela-codegen-emb/tests/implementation_inventory.rs",
+        "line": 261,
+        "end_line": 295
+      },
+      "non_program_literal_language": "Rust"
+    },
+    "implementation_inventory::wildcard_and_other_context_do_not_cover_new_variants": {
+      "category": "infrastructure-contract",
+      "note": "Rust dispatch/guardとbackend coverage対応の監査検査。Emela frontendの正常経路ではない。",
+      "evidence": {
+        "path": "crates/emela-codegen-emb/tests/implementation_inventory.rs",
+        "line": 68,
+        "end_line": 93
+      },
+      "non_program_literal_language": "Rust"
+    },
+    "lib::compiler::emit::heap::tests::fixed_heap_cycle_collection_preserves_roots_and_reclaims_every_iteration": {
+      "category": "runtime-only",
+      "note": "生成heap runtimeをC harnessから直接実行する。Emela sourceを経由しない。",
+      "evidence": {
+        "path": "crates/emela-codegen-emb/src/compiler/emit/heap.rs",
+        "line": 385,
+        "end_line": 436
+      },
+      "non_program_literal_language": null
+    },
+    "lib::compiler::emit::tests::renders_a_contract_fixture_without_invoking_plan_or_lower": {
+      "category": "IR-only",
+      "note": "独立したemit contract fixtureを直接renderする。source/plan/lowerを経由しない。",
+      "evidence": {
+        "path": "crates/emela-codegen-emb/src/compiler/emit/mod.rs",
+        "line": 624,
+        "end_line": 637
+      },
+      "non_program_literal_language": null
+    },
+    "lib::compiler::lower::fiber_normalize::tests::closed_failure_free_wrappers_can_erase_conservative_flags": {
+      "category": "IR-only",
+      "note": "Flowのwrapper/callback flagを直接構築して正規化する。",
+      "evidence": {
+        "path": "crates/emela-codegen-emb/src/compiler/lower/fiber_normalize.rs",
+        "line": 571,
+        "end_line": 585
+      },
+      "non_program_literal_language": null
+    },
+    "lib::compiler::lower::fiber_normalize::tests::unknown_callbacks_and_actual_failure_prevent_erasure": {
+      "category": "IR-only",
+      "note": "Flowのcallback/failure flagを直接構築して正規化する。",
+      "evidence": {
+        "path": "crates/emela-codegen-emb/src/compiler/lower/fiber_normalize.rs",
+        "line": 561,
+        "end_line": 568
+      },
+      "non_program_literal_language": null
+    },
+    "lib::compiler::plan::runtime::shared_runtime_dependencies_are_emitted_before_their_consumers": {
+      "category": "runtime-only",
+      "note": "runtime fragment依存順を直接検査する。Emela source入力はない。",
+      "evidence": {
+        "path": "crates/emela-codegen-emb/src/compiler/plan/runtime.rs",
+        "line": 60,
+        "end_line": 85
+      },
+      "non_program_literal_language": null
+    },
+    "lib::compiler::plan::tests::plans_an_independent_contract_without_flow_or_lower_implementation": {
+      "category": "IR-only",
+      "note": "独立したlowered contract fixtureからplanを構築する。source frontendを経由しない。",
+      "evidence": {
+        "path": "crates/emela-codegen-emb/src/compiler/plan/mod.rs",
+        "line": 570,
+        "end_line": 586
+      },
+      "non_program_literal_language": null
+    },
+    "lib::compiler::separation_tests::shared_planners_use_feature_facts_instead_of_concrete_operations": {
+      "category": "infrastructure-contract",
+      "note": "plannerがFeatureFactsのみ参照するRust構造境界の検査。",
+      "evidence": {
+        "path": "crates/emela-codegen-emb/src/compiler/tests/separation.rs",
+        "line": 310,
+        "end_line": 333
+      },
+      "non_program_literal_language": null
+    },
+    "lib::input::upstream::const_eval::tests::evaluates_unicode_string_length_with_the_pinned_grapheme_data": {
+      "category": "IR-only",
+      "note": "Core const値のUnicode評価を直接呼ぶ。sourceでのconst宣言を経由しない。",
+      "evidence": {
+        "path": "crates/emela-codegen-emb/src/input/upstream/const_eval.rs",
+        "line": 433,
+        "end_line": 441
+      },
+      "non_program_literal_language": null
+    },
+    "lib::input::upstream::const_eval::tests::formats_float_edges_with_emela_decimal_notation": {
+      "category": "IR-only",
+      "note": "Core const float表示の評価関数を直接呼ぶ。source frontendを経由しない。",
+      "evidence": {
+        "path": "crates/emela-codegen-emb/src/input/upstream/const_eval.rs",
+        "line": 412,
+        "end_line": 430
+      },
+      "non_program_literal_language": null
+    },
+    "lib::semantics::unicode_grapheme::tests::unicode_18_grapheme_count_matches_the_official_test_vectors": {
+      "category": "runtime-only",
+      "note": "Unicode18の公式dataをgrapheme実装で直接検査する。source API経路とは区別する。",
+      "evidence": {
+        "path": "crates/emela-codegen-emb/src/semantics/unicode_grapheme.rs",
+        "line": 1747,
+        "end_line": 1765
+      },
+      "non_program_literal_language": null
+    },
+    "lib::semantics::unicode_grapheme::tests::unicode_18_property_ranges_are_sorted_and_valid": {
+      "category": "runtime-only",
+      "note": "Unicode property tableの順序・範囲を直接検査する。",
+      "evidence": {
+        "path": "crates/emela-codegen-emb/src/semantics/unicode_grapheme.rs",
+        "line": 1722,
+        "end_line": 1744
+      },
+      "non_program_literal_language": null
+    },
+    "scheduler_runtime::fixed_scheduler_bounds_work_reuses_pools_and_rejects_stale_handles": {
+      "category": "runtime-only",
+      "note": "scheduler.cの固定pool・stale handleをC harnessで直接実行する。",
+      "evidence": {
+        "path": "crates/emela-codegen-emb/tests/scheduler_runtime.rs",
+        "line": 4,
+        "end_line": 24
+      },
+      "non_program_literal_language": null
+    },
+    "sources::embedded_sources_are_supplied_by_the_backend_without_shadowing_core": {
+      "category": "source",
+      "legacy_classes": [
+        "source-parse-only-expectation"
+      ],
+      "legacy_expected": {
+        "parse": "accept",
+        "resolve": "not-established",
+        "typecheck": "not-established",
+        "lower": "not-established"
+      },
+      "note": "bundled_sources()はsrc/sources.rsの定数SOURCESそのもの。6moduleをparserへ渡しdiagnostics空をassertする。",
+      "evidence": {
+        "path": "crates/emela-codegen-emb/tests/sources.rs",
+        "line": 6,
+        "end_line": 28
+      },
+      "source_assets": [
+        {
+          "module": "Embedded.Peripheral",
+          "path": "crates/emela-codegen-emb/lib/embedded/peripheral.emel"
+        },
+        {
+          "module": "Embedded.Gpio",
+          "path": "crates/emela-codegen-emb/lib/embedded/gpio.emel"
+        },
+        {
+          "module": "Embedded.Uart",
+          "path": "crates/emela-codegen-emb/lib/embedded/uart.emel"
+        },
+        {
+          "module": "Embedded.I2c",
+          "path": "crates/emela-codegen-emb/lib/embedded/i2c.emel"
+        },
+        {
+          "module": "Embedded.Spi",
+          "path": "crates/emela-codegen-emb/lib/embedded/spi.emel"
+        },
+        {
+          "module": "Embedded.Board",
+          "path": "crates/emela-codegen-emb/lib/embedded/board.emel"
+        }
+      ]
+    },
+    "sources::source_helpers_and_fixtures_do_not_read_sibling_crates": {
+      "category": "infrastructure-contract",
+      "note": "Rust path/include参照がcrate内に収まる所有境界検査。",
+      "evidence": {
+        "path": "crates/emela-codegen-emb/tests/sources.rs",
+        "line": 60,
+        "end_line": 95
+      },
+      "non_program_literal_language": null
+    },
+    "test_inventory::associations_allow_shared_tests_and_multiple_tests_per_variant": {
+      "category": "infrastructure-contract",
+      "note": "Rust test target/module/include/ignore検出と対応inventoryの検査。文字列中の#[test]はRust fixture。",
+      "evidence": {
+        "path": "crates/emela-codegen-emb/tests/test_inventory.rs",
+        "line": 108,
+        "end_line": 124
+      },
+      "non_program_literal_language": null
+    },
+    "test_inventory::discovery_resolves_targets_modules_includes_and_ignore_attributes": {
+      "category": "infrastructure-contract",
+      "note": "Rust test target/module/include/ignore検出と対応inventoryの検査。文字列中の#[test]はRust fixture。",
+      "evidence": {
+        "path": "crates/emela-codegen-emb/tests/test_inventory.rs",
+        "line": 43,
+        "end_line": 64
+      },
+      "non_program_literal_language": null
+    },
+    "test_inventory::every_variant_names_existing_enabled_tests": {
+      "category": "infrastructure-contract",
+      "note": "Rust test target/module/include/ignore検出と対応inventoryの検査。文字列中の#[test]はRust fixture。",
+      "evidence": {
+        "path": "crates/emela-codegen-emb/tests/test_inventory.rs",
+        "line": 7,
+        "end_line": 17
+      },
+      "non_program_literal_language": null
+    },
+    "test_inventory::export_test_catalog": {
+      "category": "infrastructure-contract",
+      "note": "Rust test target/module/include/ignore検出と対応inventoryの検査。文字列中の#[test]はRust fixture。",
+      "evidence": {
+        "path": "crates/emela-codegen-emb/tests/test_inventory.rs",
+        "line": 128,
+        "end_line": 142
+      },
+      "non_program_literal_language": null
+    },
+    "test_inventory::missing_orphan_renamed_duplicate_and_only_ignored_tests_fail": {
+      "category": "infrastructure-contract",
+      "note": "Rust test target/module/include/ignore検出と対応inventoryの検査。文字列中の#[test]はRust fixture。",
+      "evidence": {
+        "path": "crates/emela-codegen-emb/tests/test_inventory.rs",
+        "line": 67,
+        "end_line": 105
+      },
+      "non_program_literal_language": null
+    }
+  }
+}

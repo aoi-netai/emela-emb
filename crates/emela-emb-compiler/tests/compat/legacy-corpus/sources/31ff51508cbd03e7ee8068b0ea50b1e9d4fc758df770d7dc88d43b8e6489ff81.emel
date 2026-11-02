@@ -1,0 +1,11 @@
+
+pub enum Nest[A] { End(A), Next(Nest[Bool]) }
+fn count(value: Nest[Bool]) -> Int {
+  value match { End(ok) -> if ok { 1 } else { 0 }
+    Next(rest) -> count(rest) + 1 }
+}
+pub fn work(n: Int) -> Int {
+  value: Nest[Int] = if n == 0 { End(42) } else { Next(Next(End(n == 1))) }
+  value match { End(number) -> number
+    Next(rest) -> count(rest) + 1 }
+}

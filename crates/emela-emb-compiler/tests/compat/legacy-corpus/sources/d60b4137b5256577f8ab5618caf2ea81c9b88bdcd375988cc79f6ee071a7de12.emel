@@ -1,0 +1,14 @@
+
+import Std.Clock.{Clock}
+import Std.Fiber.{Fiber}
+import Embedded.Board.{BoardClock}
+pub fn wait_ms() -> Int use Async {
+  with BoardClock {
+    Fiber.scope(fn() {
+      child = Fiber.fork(fn() { (use Clock).sleep(10000) })
+      (use Clock).sleep(0)
+      Fiber.interrupt(child)
+      42
+    })
+  }
+}

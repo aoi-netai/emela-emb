@@ -1,0 +1,7 @@
+
+import Std.Fiber.{Fiber}
+pub fn leak() -> (fn() -> () use Async) use Async {
+  Fiber.scope(fn() { child = Fiber.fork(fn() { 42 })
+    fn() { Fiber.interrupt(child) } })
+}
+pub fn invoke(f: fn() -> () fails {} use Async) -> () use Async { f() }

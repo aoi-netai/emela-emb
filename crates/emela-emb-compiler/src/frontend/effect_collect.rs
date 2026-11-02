@@ -628,6 +628,7 @@ pub fn expand_handlers(modules: &mut Modules) -> Result<(), Vec<Diagnostic>> {
                         public: handler.public,
                         opaque: false,
                         error: false,
+                        record: true,
                         params: vec![],
                         derives: vec![],
                         variants: vec![ast::Variant {

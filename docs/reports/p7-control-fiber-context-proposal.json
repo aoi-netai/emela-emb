@@ -1,0 +1,3311 @@
+{
+  "schema_version": 1,
+  "kind": "proposal_only_no_canonical_ledger_changes",
+  "baseline_ledger_revision": "a686172",
+  "legacy_revision": "c34c0aeefdd966d854371b3110db00a47798751d",
+  "reviewed_source_revision": "769241b",
+  "counts": {
+    "contexts": 74,
+    "baseline_verified_preserved": 29,
+    "mapped_or_pending_resolved": 45,
+    "proposed_verified": 74,
+    "pending": 0
+  },
+  "policy": "Native and suspend modes are matched to the function containing the operation. Source match lowered as If is not a Switch witness; actual literal Switch suspend is supplied by769241b. All references resolve at explicit committed source or their fixed revision; final integrated run is still required.",
+  "context_proposals": [
+    {
+      "id": "emela_lir::Term::Yield",
+      "context": "sync",
+      "baseline_status": "mapped",
+      "action": "upgrade_with_reviewed_evidence",
+      "proposed_status": "verified",
+      "behavior": "executed",
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/terms/yield.rs",
+          "symbol": "emit"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/plan/operations/terms/yield.rs",
+          "symbol": "lower"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/terms/yield.rs",
+          "symbol": "emit_function"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "IR_C_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/tests.rs",
+          "symbol": "block_yield_and_break_to_enclosing_block_execute",
+          "observation": "Both Yield and Break edges initialize the enclosing block result and execute expected42."
+        }
+      ],
+      "reason": "The referenced function/case explicitly uses this caller mode or validates the mode boundary; source-to-IR bridges are stated where the operation is lowered from source.",
+      "final_integrated_verification": "required"
+    },
+    {
+      "id": "emela_lir::Term::Yield",
+      "context": "suspend",
+      "baseline_status": "pending",
+      "action": "upgrade_with_reviewed_evidence",
+      "proposed_status": "verified",
+      "behavior": "executed",
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/terms/yield.rs",
+          "symbol": "emit"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/plan/operations/terms/yield.rs",
+          "symbol": "lower"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/terms/yield.rs",
+          "symbol": "emit_function"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "IR_C_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend_tests.rs",
+          "symbol": "suspending_cleanup_delays_delivery_of_the_original_result",
+          "observation": "answer.suspends=true; Protect body and cleanup use actual task calls and Yield; result is not delivered until cleanup finishes."
+        }
+      ],
+      "reason": "The referenced function/case explicitly uses this caller mode or validates the mode boundary; source-to-IR bridges are stated where the operation is lowered from source.",
+      "final_integrated_verification": "required"
+    },
+    {
+      "id": "emela_lir::Term::Return",
+      "context": "sync",
+      "baseline_status": "mapped",
+      "action": "upgrade_with_reviewed_evidence",
+      "proposed_status": "verified",
+      "behavior": "executed",
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/terms/return_.rs",
+          "symbol": "emit"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/plan/operations/terms/return_.rs",
+          "symbol": "lower"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/terms/return_.rs",
+          "symbol": "emit_function"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/terms/return_.rs",
+          "symbol": "emit_suspend"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "IR_C_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/p7_data_tests.rs",
+          "symbol": "legacy_inline_layouts_preserve_generic_fields_tags_and_unit_positions_at_the_c_boundary",
+          "observation": "Generic Maybe/Box, named record, unit enum, tuple Unit erasure: exact public C tags/fields and release behavior."
+        }
+      ],
+      "reason": "The referenced function/case explicitly uses this caller mode or validates the mode boundary; source-to-IR bridges are stated where the operation is lowered from source.",
+      "final_integrated_verification": "required"
+    },
+    {
+      "id": "emela_lir::Term::Return",
+      "context": "suspend",
+      "baseline_status": "pending",
+      "action": "upgrade_with_reviewed_evidence",
+      "proposed_status": "verified",
+      "behavior": "executed",
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/terms/return_.rs",
+          "symbol": "emit"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/plan/operations/terms/return_.rs",
+          "symbol": "lower"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/terms/return_.rs",
+          "symbol": "emit_function"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/terms/return_.rs",
+          "symbol": "emit_suspend"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "IR_C_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend_tests.rs",
+          "symbol": "external_task_resumes_an_independent_frame_and_rejects_repeated_completion",
+          "observation": "answer.suspends=true; task wait result is returned after notification, repeated/stale completions reject."
+        }
+      ],
+      "reason": "The referenced function/case explicitly uses this caller mode or validates the mode boundary; source-to-IR bridges are stated where the operation is lowered from source.",
+      "final_integrated_verification": "required"
+    },
+    {
+      "id": "emela_lir::Term::Fail",
+      "context": "sync",
+      "baseline_status": "mapped",
+      "action": "upgrade_with_reviewed_evidence",
+      "proposed_status": "verified",
+      "behavior": "executed",
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/terms/fail.rs",
+          "symbol": "emit"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/plan/operations/terms/fail.rs",
+          "symbol": "lower"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/terms/fail.rs",
+          "symbol": "emit_function"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/terms/fail.rs",
+          "symbol": "emit_suspend"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "IR_C_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/tests.rs",
+          "symbol": "failure_payload_recovery_runs_cleanup_once",
+          "observation": "Fail -> Break(Any) -> AsError -> Field recovers42; Protect cleanup callback runs exactly once, bad error type rejected."
+        }
+      ],
+      "reason": "The referenced function/case explicitly uses this caller mode or validates the mode boundary; source-to-IR bridges are stated where the operation is lowered from source.",
+      "final_integrated_verification": "required"
+    },
+    {
+      "id": "emela_lir::Term::Fail",
+      "context": "suspend",
+      "baseline_status": "pending",
+      "action": "upgrade_with_reviewed_evidence",
+      "proposed_status": "verified",
+      "behavior": "executed",
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/terms/fail.rs",
+          "symbol": "emit"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/plan/operations/terms/fail.rs",
+          "symbol": "lower"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/terms/fail.rs",
+          "symbol": "emit_function"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/terms/fail.rs",
+          "symbol": "emit_suspend"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "IR_C_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend_tests.rs",
+          "symbol": "suspending_cleanup_preserves_the_failure_until_an_outer_handler_runs",
+          "observation": "Actual suspend/cleanup then outer failure handler preserves original payload and ownership."
+        }
+      ],
+      "reason": "The referenced function/case explicitly uses this caller mode or validates the mode boundary; source-to-IR bridges are stated where the operation is lowered from source.",
+      "final_integrated_verification": "required"
+    },
+    {
+      "id": "emela_lir::Term::Break",
+      "context": "sync",
+      "baseline_status": "mapped",
+      "action": "upgrade_with_reviewed_evidence",
+      "proposed_status": "verified",
+      "behavior": "executed",
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/terms/break.rs",
+          "symbol": "emit"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/plan/operations/terms/break.rs",
+          "symbol": "lower"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/terms/break.rs",
+          "symbol": "emit_function"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "IR_C_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/tests.rs",
+          "symbol": "block_yield_and_break_to_enclosing_block_execute",
+          "observation": "Both Yield and Break edges initialize the enclosing block result and execute expected42."
+        }
+      ],
+      "reason": "The referenced function/case explicitly uses this caller mode or validates the mode boundary; source-to-IR bridges are stated where the operation is lowered from source.",
+      "final_integrated_verification": "required"
+    },
+    {
+      "id": "emela_lir::Term::Break",
+      "context": "suspend",
+      "baseline_status": "pending",
+      "action": "upgrade_with_reviewed_evidence",
+      "proposed_status": "verified",
+      "behavior": "executed",
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/terms/break.rs",
+          "symbol": "emit"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/plan/operations/terms/break.rs",
+          "symbol": "lower"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/terms/break.rs",
+          "symbol": "emit_function"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "source_C_test",
+          "path": "crates/emela-emb-compiler/tests/p7_payload_compat.rs",
+          "symbol": "list_error_payloads_survive_suspending_cleanup_and_are_dropped_on_cancellation",
+          "observation": "Export legacy_caught_start is a suspending function; after real waits1/2/3 its escape arm exits by Term Break with result12, or cancellation suppresses the result."
+        }
+      ],
+      "reason": "The referenced function/case explicitly uses this caller mode or validates the mode boundary; source-to-IR bridges are stated where the operation is lowered from source.",
+      "final_integrated_verification": "required",
+      "source_to_IR_bridge": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/frontend/lower/failures.rs",
+          "symbol": "Context::escape_expression",
+          "observation": "The escape arm result is explicitly lowered to Term Break targeting the result Block, in the current function rather than a helper."
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/frontend/function_abi.rs",
+          "symbol": "project",
+          "observation": "Function.suspends is projected from its declared/inferred effect set; source start exports also witness this flag."
+        }
+      ]
+    },
+    {
+      "id": "emela_lir::Term::Recur",
+      "context": "sync",
+      "baseline_status": "mapped",
+      "action": "upgrade_with_reviewed_evidence",
+      "proposed_status": "verified",
+      "behavior": "executed",
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/terms/recur.rs",
+          "symbol": "emit"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/plan/operations/terms/recur.rs",
+          "symbol": "lower"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/terms/recur.rs",
+          "symbol": "emit_function"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "IR_C_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/tests.rs",
+          "symbol": "loop_initial_values_yield_and_multiple_recur_variables_execute",
+          "observation": "Loop initial values, Yield and parallel multiple-Recur variable replacement are directly executed."
+        }
+      ],
+      "reason": "The referenced function/case explicitly uses this caller mode or validates the mode boundary; source-to-IR bridges are stated where the operation is lowered from source.",
+      "final_integrated_verification": "required"
+    },
+    {
+      "id": "emela_lir::Term::Recur",
+      "context": "suspend",
+      "baseline_status": "pending",
+      "action": "upgrade_with_reviewed_evidence",
+      "proposed_status": "verified",
+      "behavior": "executed",
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/terms/recur.rs",
+          "symbol": "emit"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/plan/operations/terms/recur.rs",
+          "symbol": "lower"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/terms/recur.rs",
+          "symbol": "emit_function"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "IR_C_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_deferred_tests.rs",
+          "symbol": "discarded_deferreds_reuse_one_slot_in_a_long_lived_scope",
+          "observation": "Explicit f.suspends=true, Scope body Loop with Term Recur creates/discards1000 Deferreds in one slot; C repeats1000 scopes.",
+          "revision": "aeb7c53"
+        }
+      ],
+      "reason": "The referenced function/case explicitly uses this caller mode or validates the mode boundary; source-to-IR bridges are stated where the operation is lowered from source.",
+      "final_integrated_verification": "required"
+    },
+    {
+      "id": "emela_lir::Term::Defect",
+      "context": "sync",
+      "baseline_status": "mapped",
+      "action": "upgrade_with_reviewed_evidence",
+      "proposed_status": "verified",
+      "behavior": "executed",
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/terms/defect.rs",
+          "symbol": "emit"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/plan/operations/terms/defect.rs",
+          "symbol": "lower"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/plan/operations/terms/defect.rs",
+          "symbol": "require_runtime"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/terms/defect.rs",
+          "symbol": "emit_function"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/terms/defect.rs",
+          "symbol": "emit_suspend"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "IR_C_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/p7_misc_value_tests.rs",
+          "symbol": "dynamic_defect_preserves_an_offset_string_view_and_embedded_nul",
+          "observation": "Explicit native/suspend matrix; reached defect receives exact offset a/NUL/b bytes and length3. Suspend input String is owned with heap2048.",
+          "revision": "81a4ef6"
+        }
+      ],
+      "reason": "The referenced function/case explicitly uses this caller mode or validates the mode boundary; source-to-IR bridges are stated where the operation is lowered from source.",
+      "final_integrated_verification": "required"
+    },
+    {
+      "id": "emela_lir::Term::Defect",
+      "context": "suspend",
+      "baseline_status": "pending",
+      "action": "upgrade_with_reviewed_evidence",
+      "proposed_status": "verified",
+      "behavior": "executed",
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/terms/defect.rs",
+          "symbol": "emit"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/plan/operations/terms/defect.rs",
+          "symbol": "lower"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/plan/operations/terms/defect.rs",
+          "symbol": "require_runtime"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/terms/defect.rs",
+          "symbol": "emit_function"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/terms/defect.rs",
+          "symbol": "emit_suspend"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "IR_C_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/p7_misc_value_tests.rs",
+          "symbol": "dynamic_defect_preserves_an_offset_string_view_and_embedded_nul",
+          "observation": "Explicit native/suspend matrix; reached defect receives exact offset a/NUL/b bytes and length3. Suspend input String is owned with heap2048.",
+          "revision": "81a4ef6"
+        }
+      ],
+      "reason": "The referenced function/case explicitly uses this caller mode or validates the mode boundary; source-to-IR bridges are stated where the operation is lowered from source.",
+      "final_integrated_verification": "required"
+    },
+    {
+      "id": "emela_lir::Term::Unwind",
+      "context": "input",
+      "baseline_status": "pending",
+      "action": "upgrade_with_reviewed_evidence",
+      "proposed_status": "verified",
+      "behavior": "input_rejected",
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/terms/unwind.rs",
+          "symbol": "emit"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/plan/operations/terms/unwind.rs",
+          "symbol": "lower"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/terms/unwind.rs",
+          "symbol": "emit_function"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "diagnostic_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/p7_contract_tests.rs",
+          "symbol": "unwind_environment_values_and_refcount_statements_are_rejected_as_input",
+          "observation": "Raw EnvGet/MakeClosure, Stmt Dup/Drop and Term Unwind inputs are retained in the contract and rejected in both caller modes."
+        }
+      ],
+      "reason": "The referenced function/case explicitly uses this caller mode or validates the mode boundary; source-to-IR bridges are stated where the operation is lowered from source.",
+      "final_integrated_verification": "required"
+    },
+    {
+      "id": "emela_lir::Term::Unreachable",
+      "context": "sync",
+      "baseline_status": "mapped",
+      "action": "upgrade_with_reviewed_evidence",
+      "proposed_status": "verified",
+      "behavior": "executed",
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/terms/unreachable.rs",
+          "symbol": "emit"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/plan/operations/terms/unreachable.rs",
+          "symbol": "lower"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/plan/operations/terms/unreachable.rs",
+          "symbol": "require_runtime"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/terms/unreachable.rs",
+          "symbol": "emit_function"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/terms/unreachable.rs",
+          "symbol": "emit_suspend"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "IR_C_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/p7_misc_value_tests.rs",
+          "symbol": "unreachable_terms_raise_the_native_or_scheduler_defect_when_reached",
+          "observation": "Explicit native/suspend direct terminal entry observes ASSERT/unreachable code or ASSERT/invalid scheduler state, not an unexecuted post-return tail.",
+          "revision": "931c3ce"
+        }
+      ],
+      "reason": "The referenced function/case explicitly uses this caller mode or validates the mode boundary; source-to-IR bridges are stated where the operation is lowered from source.",
+      "final_integrated_verification": "required"
+    },
+    {
+      "id": "emela_lir::Term::Unreachable",
+      "context": "suspend",
+      "baseline_status": "pending",
+      "action": "upgrade_with_reviewed_evidence",
+      "proposed_status": "verified",
+      "behavior": "executed",
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/terms/unreachable.rs",
+          "symbol": "emit"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/plan/operations/terms/unreachable.rs",
+          "symbol": "lower"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/plan/operations/terms/unreachable.rs",
+          "symbol": "require_runtime"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/terms/unreachable.rs",
+          "symbol": "emit_function"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/terms/unreachable.rs",
+          "symbol": "emit_suspend"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "IR_C_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/p7_misc_value_tests.rs",
+          "symbol": "unreachable_terms_raise_the_native_or_scheduler_defect_when_reached",
+          "observation": "Explicit native/suspend direct terminal entry observes ASSERT/unreachable code or ASSERT/invalid scheduler state, not an unexecuted post-return tail.",
+          "revision": "931c3ce"
+        }
+      ],
+      "reason": "The referenced function/case explicitly uses this caller mode or validates the mode boundary; source-to-IR bridges are stated where the operation is lowered from source.",
+      "final_integrated_verification": "required"
+    },
+    {
+      "id": "emela_lir::Stmt::Let",
+      "context": "sync",
+      "baseline_status": "mapped",
+      "action": "upgrade_with_reviewed_evidence",
+      "proposed_status": "verified",
+      "behavior": "executed",
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/statements/let_.rs",
+          "symbol": "emit"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/plan/operations/statements/let_.rs",
+          "symbol": "lower"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "IR_C_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/p7_data_tests.rs",
+          "symbol": "legacy_inline_layouts_preserve_generic_fields_tags_and_unit_positions_at_the_c_boundary",
+          "observation": "Generic Maybe/Box, named record, unit enum, tuple Unit erasure: exact public C tags/fields and release behavior."
+        }
+      ],
+      "reason": "The referenced function/case explicitly uses this caller mode or validates the mode boundary; source-to-IR bridges are stated where the operation is lowered from source.",
+      "final_integrated_verification": "required"
+    },
+    {
+      "id": "emela_lir::Stmt::Let",
+      "context": "suspend",
+      "baseline_status": "pending",
+      "action": "upgrade_with_reviewed_evidence",
+      "proposed_status": "verified",
+      "behavior": "executed",
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/statements/let_.rs",
+          "symbol": "emit"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/plan/operations/statements/let_.rs",
+          "symbol": "lower"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "IR_C_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend_tests.rs",
+          "symbol": "typed_task_producers_run_on_main_and_their_string_survives_another_suspension",
+          "observation": "answer.suspends=true; typed String task result and subsequent values are kept in the frame across a second wait."
+        }
+      ],
+      "reason": "The referenced function/case explicitly uses this caller mode or validates the mode boundary; source-to-IR bridges are stated where the operation is lowered from source.",
+      "final_integrated_verification": "required"
+    },
+    {
+      "id": "emela_lir::Stmt::If",
+      "context": "sync",
+      "baseline_status": "mapped",
+      "action": "upgrade_with_reviewed_evidence",
+      "proposed_status": "verified",
+      "behavior": "executed",
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/statements/if_.rs",
+          "symbol": "emit"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/plan/operations/statements/if_.rs",
+          "symbol": "lower"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/statements/if_.rs",
+          "symbol": "emit_suspend"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "IR_C_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/tests.rs",
+          "symbol": "tail_recursion_uses_parallel_parameter_assignment_and_scalar_external_calls",
+          "observation": "Raw Prim and If/Recur loop with parallel replacement of parameters executes with an external scalar hook."
+        }
+      ],
+      "reason": "The referenced function/case explicitly uses this caller mode or validates the mode boundary; source-to-IR bridges are stated where the operation is lowered from source.",
+      "final_integrated_verification": "required"
+    },
+    {
+      "id": "emela_lir::Stmt::If",
+      "context": "suspend",
+      "baseline_status": "pending",
+      "action": "upgrade_with_reviewed_evidence",
+      "proposed_status": "verified",
+      "behavior": "executed",
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/statements/if_.rs",
+          "symbol": "emit"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/plan/operations/statements/if_.rs",
+          "symbol": "lower"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/statements/if_.rs",
+          "symbol": "emit_suspend"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "IR_C_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "deferred_complete_poll_and_await_share_one_typed_value_until_scope_closes",
+          "observation": "Explicit f.suspends=true; check_bool emits If for true/false Complete results, check_option emits SwitchOn Tag/Variant cases for empty/full poll."
+        }
+      ],
+      "reason": "The referenced function/case explicitly uses this caller mode or validates the mode boundary; source-to-IR bridges are stated where the operation is lowered from source.",
+      "final_integrated_verification": "required"
+    },
+    {
+      "id": "emela_lir::Stmt::Switch",
+      "context": "sync",
+      "baseline_status": "mapped",
+      "action": "upgrade_with_reviewed_evidence",
+      "proposed_status": "verified",
+      "behavior": "executed",
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/statements/switch.rs",
+          "symbol": "emit"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/plan/operations/statements/switch.rs",
+          "symbol": "lower"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/plan/operations/statements/switch.rs",
+          "symbol": "require_runtime"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/statements/switch.rs",
+          "symbol": "emit_suspend"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "IR_C_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/p7_data_tests.rs",
+          "symbol": "legacy_literal_and_enum_switches_cover_numeric_extremes_and_reject_invalid_tags",
+          "observation": "Dynamic I32/I64 literals, enum tags, default branches and invalid enum tags are observed through C."
+        }
+      ],
+      "reason": "The referenced function/case explicitly uses this caller mode or validates the mode boundary; source-to-IR bridges are stated where the operation is lowered from source.",
+      "final_integrated_verification": "required"
+    },
+    {
+      "id": "emela_lir::Stmt::Switch",
+      "context": "suspend",
+      "baseline_status": "pending",
+      "action": "upgrade_with_reviewed_evidence",
+      "proposed_status": "verified",
+      "behavior": "executed",
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/statements/switch.rs",
+          "symbol": "emit"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/plan/operations/statements/switch.rs",
+          "symbol": "lower"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/plan/operations/statements/switch.rs",
+          "symbol": "require_runtime"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/statements/switch.rs",
+          "symbol": "emit_suspend"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "IR_C_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/p7_switch_frame_tests.rs",
+          "symbol": "literal_i32_and_i64_switches_resume_into_cases_and_default",
+          "observation": "All exports.suspends=true; real task wait preserves I32/I64 selector then enters min/max/default, yielding11/22/33. heap0/frame128 and pool1, C1000 iterations.",
+          "revision": "769241b"
+        },
+        {
+          "kind": "IR_C_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "deferred_complete_poll_and_await_share_one_typed_value_until_scope_closes",
+          "observation": "Explicit f.suspends=true; check_bool emits If for true/false Complete results, check_option emits SwitchOn Tag/Variant cases for empty/full poll."
+        }
+      ],
+      "reason": "The referenced function/case explicitly uses this caller mode or validates the mode boundary; source-to-IR bridges are stated where the operation is lowered from source.",
+      "final_integrated_verification": "required"
+    },
+    {
+      "id": "emela_lir::Stmt::Loop",
+      "context": "sync",
+      "baseline_status": "mapped",
+      "action": "upgrade_with_reviewed_evidence",
+      "proposed_status": "verified",
+      "behavior": "executed",
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/statements/loop_.rs",
+          "symbol": "emit"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/plan/operations/statements/loop_.rs",
+          "symbol": "lower"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "IR_C_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/tests.rs",
+          "symbol": "loop_initial_values_yield_and_multiple_recur_variables_execute",
+          "observation": "Loop initial values, Yield and parallel multiple-Recur variable replacement are directly executed."
+        }
+      ],
+      "reason": "The referenced function/case explicitly uses this caller mode or validates the mode boundary; source-to-IR bridges are stated where the operation is lowered from source.",
+      "final_integrated_verification": "required"
+    },
+    {
+      "id": "emela_lir::Stmt::Loop",
+      "context": "suspend",
+      "baseline_status": "pending",
+      "action": "upgrade_with_reviewed_evidence",
+      "proposed_status": "verified",
+      "behavior": "executed",
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/statements/loop_.rs",
+          "symbol": "emit"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/plan/operations/statements/loop_.rs",
+          "symbol": "lower"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "IR_C_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_deferred_tests.rs",
+          "symbol": "discarded_deferreds_reuse_one_slot_in_a_long_lived_scope",
+          "observation": "Explicit f.suspends=true, Scope body Loop with Term Recur creates/discards1000 Deferreds in one slot; C repeats1000 scopes.",
+          "revision": "aeb7c53"
+        }
+      ],
+      "reason": "The referenced function/case explicitly uses this caller mode or validates the mode boundary; source-to-IR bridges are stated where the operation is lowered from source.",
+      "final_integrated_verification": "required"
+    },
+    {
+      "id": "emela_lir::Stmt::Block",
+      "context": "sync",
+      "baseline_status": "mapped",
+      "action": "upgrade_with_reviewed_evidence",
+      "proposed_status": "verified",
+      "behavior": "executed",
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/statements/block.rs",
+          "symbol": "emit"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/plan/operations/statements/block.rs",
+          "symbol": "lower"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "IR_C_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/tests.rs",
+          "symbol": "block_yield_and_break_to_enclosing_block_execute",
+          "observation": "Both Yield and Break edges initialize the enclosing block result and execute expected42."
+        }
+      ],
+      "reason": "The referenced function/case explicitly uses this caller mode or validates the mode boundary; source-to-IR bridges are stated where the operation is lowered from source.",
+      "final_integrated_verification": "required"
+    },
+    {
+      "id": "emela_lir::Stmt::Block",
+      "context": "suspend",
+      "baseline_status": "pending",
+      "action": "upgrade_with_reviewed_evidence",
+      "proposed_status": "verified",
+      "behavior": "executed",
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/statements/block.rs",
+          "symbol": "emit"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/plan/operations/statements/block.rs",
+          "symbol": "lower"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "source_C_test",
+          "path": "crates/emela-emb-compiler/tests/p7_payload_compat.rs",
+          "symbol": "list_error_payloads_survive_suspending_cleanup_and_are_dropped_on_cancellation",
+          "observation": "Export legacy_caught_start is a suspending function; after real waits1/2/3 its escape arm exits by Term Break with result12, or cancellation suppresses the result."
+        }
+      ],
+      "reason": "The referenced function/case explicitly uses this caller mode or validates the mode boundary; source-to-IR bridges are stated where the operation is lowered from source.",
+      "final_integrated_verification": "required",
+      "source_to_IR_bridge": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/frontend/lower/failures.rs",
+          "symbol": "Context::escape_expression",
+          "observation": "The escape arm result is explicitly lowered to Term Break targeting the result Block, in the current function rather than a helper."
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/frontend/function_abi.rs",
+          "symbol": "project",
+          "observation": "Function.suspends is projected from its declared/inferred effect set; source start exports also witness this flag."
+        }
+      ]
+    },
+    {
+      "id": "emela_lir::Stmt::Protect",
+      "context": "sync",
+      "baseline_status": "verified",
+      "action": "preserve_verified",
+      "proposed_status": "verified",
+      "behavior": "executed",
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/statements/protect.rs",
+          "symbol": "emit"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/plan/operations/statements/protect.rs",
+          "symbol": "lower"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/statements/protect.rs",
+          "symbol": "emit_enter"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/statements/protect.rs",
+          "symbol": "emit_leave"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/statements/protect.rs",
+          "symbol": "emit_finish"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/frontend/function_abi.rs"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/frontend/lower.rs"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend.rs"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "IR_C_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/tests.rs",
+          "symbol": "failure_payload_recovery_runs_cleanup_once",
+          "observation": "Fail -> Break(Any) -> AsError -> Field recovers42; Protect cleanup callback runs exactly once, bad error type rejected."
+        }
+      ],
+      "reason": "The referenced function/case explicitly uses this caller mode or validates the mode boundary; source-to-IR bridges are stated where the operation is lowered from source.",
+      "final_integrated_verification": "required",
+      "baseline_evidence_preserved": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_suspend.rs"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_clock.rs"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend_tests.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p5.md"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "interruption_waits_for_nested_suspending_cleanup_before_await_reports_its_cause"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_lifecycle.rs",
+          "symbol": "closing_a_source_scope_drops_ready_join_and_await_deliveries"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_lifecycle.rs",
+          "symbol": "cancelling_nested_source_scopes_unlinks_all_deferred_waiters"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_lifecycle.rs",
+          "symbol": "source_interrupt_waiters_resume_fifo_after_suspending_cleanup"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_lifecycle.rs",
+          "symbol": "source_scopes_reclaim_completed_children_and_preserve_live_copied_handles"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_defects.rs",
+          "symbol": "attempts_stop_at_defects_without_running_unreachable_handler_release"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_defects.rs",
+          "symbol": "typed_failure_before_a_defect_still_runs_the_protected_release"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p6.md"
+        }
+      ]
+    },
+    {
+      "id": "emela_lir::Stmt::Protect",
+      "context": "suspend",
+      "baseline_status": "verified",
+      "action": "preserve_verified",
+      "proposed_status": "verified",
+      "behavior": "executed",
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/statements/protect.rs",
+          "symbol": "emit"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/plan/operations/statements/protect.rs",
+          "symbol": "lower"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/statements/protect.rs",
+          "symbol": "emit_enter"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/statements/protect.rs",
+          "symbol": "emit_leave"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/statements/protect.rs",
+          "symbol": "emit_finish"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/frontend/function_abi.rs"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/frontend/lower.rs"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend.rs"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "IR_C_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend_tests.rs",
+          "symbol": "suspending_cleanup_delays_delivery_of_the_original_result",
+          "observation": "answer.suspends=true; Protect body and cleanup use actual task calls and Yield; result is not delivered until cleanup finishes."
+        }
+      ],
+      "reason": "The referenced function/case explicitly uses this caller mode or validates the mode boundary; source-to-IR bridges are stated where the operation is lowered from source.",
+      "final_integrated_verification": "required",
+      "baseline_evidence_preserved": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_suspend.rs"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_clock.rs"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend_tests.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p5.md"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "interruption_waits_for_nested_suspending_cleanup_before_await_reports_its_cause"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_lifecycle.rs",
+          "symbol": "closing_a_source_scope_drops_ready_join_and_await_deliveries"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_lifecycle.rs",
+          "symbol": "cancelling_nested_source_scopes_unlinks_all_deferred_waiters"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_lifecycle.rs",
+          "symbol": "source_interrupt_waiters_resume_fifo_after_suspending_cleanup"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_lifecycle.rs",
+          "symbol": "source_scopes_reclaim_completed_children_and_preserve_live_copied_handles"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_defects.rs",
+          "symbol": "attempts_stop_at_defects_without_running_unreachable_handler_release"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_defects.rs",
+          "symbol": "typed_failure_before_a_defect_still_runs_the_protected_release"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p6.md"
+        }
+      ]
+    },
+    {
+      "id": "emela_lir::Stmt::Dup",
+      "context": "input",
+      "baseline_status": "pending",
+      "action": "upgrade_with_reviewed_evidence",
+      "proposed_status": "verified",
+      "behavior": "input_rejected",
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/statements/dup.rs",
+          "symbol": "emit"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/plan/operations/statements/dup.rs",
+          "symbol": "lower"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "diagnostic_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/p7_contract_tests.rs",
+          "symbol": "unwind_environment_values_and_refcount_statements_are_rejected_as_input",
+          "observation": "Raw EnvGet/MakeClosure, Stmt Dup/Drop and Term Unwind inputs are retained in the contract and rejected in both caller modes."
+        }
+      ],
+      "reason": "The referenced function/case explicitly uses this caller mode or validates the mode boundary; source-to-IR bridges are stated where the operation is lowered from source.",
+      "final_integrated_verification": "required"
+    },
+    {
+      "id": "emela_lir::Stmt::Drop",
+      "context": "input",
+      "baseline_status": "pending",
+      "action": "upgrade_with_reviewed_evidence",
+      "proposed_status": "verified",
+      "behavior": "input_rejected",
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/statements/drop.rs",
+          "symbol": "emit"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/plan/operations/statements/drop.rs",
+          "symbol": "lower"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "diagnostic_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/p7_contract_tests.rs",
+          "symbol": "unwind_environment_values_and_refcount_statements_are_rejected_as_input",
+          "observation": "Raw EnvGet/MakeClosure, Stmt Dup/Drop and Term Unwind inputs are retained in the contract and rejected in both caller modes."
+        }
+      ],
+      "reason": "The referenced function/case explicitly uses this caller mode or validates the mode boundary; source-to-IR bridges are stated where the operation is lowered from source.",
+      "final_integrated_verification": "required"
+    },
+    {
+      "id": "emela_lir::SwitchOn::Tag",
+      "context": "sync",
+      "baseline_status": "mapped",
+      "action": "upgrade_with_reviewed_evidence",
+      "proposed_status": "verified",
+      "behavior": "executed",
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/switches.rs",
+          "symbol": "tag_scrutinee"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "IR_C_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/p7_data_tests.rs",
+          "symbol": "legacy_literal_and_enum_switches_cover_numeric_extremes_and_reject_invalid_tags",
+          "observation": "Dynamic I32/I64 literals, enum tags, default branches and invalid enum tags are observed through C."
+        }
+      ],
+      "reason": "The referenced function/case explicitly uses this caller mode or validates the mode boundary; source-to-IR bridges are stated where the operation is lowered from source.",
+      "final_integrated_verification": "required"
+    },
+    {
+      "id": "emela_lir::SwitchOn::Tag",
+      "context": "suspend",
+      "baseline_status": "pending",
+      "action": "upgrade_with_reviewed_evidence",
+      "proposed_status": "verified",
+      "behavior": "executed",
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/switches.rs",
+          "symbol": "tag_scrutinee"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "IR_C_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "deferred_complete_poll_and_await_share_one_typed_value_until_scope_closes",
+          "observation": "Explicit f.suspends=true; check_bool emits If for true/false Complete results, check_option emits SwitchOn Tag/Variant cases for empty/full poll."
+        }
+      ],
+      "reason": "The referenced function/case explicitly uses this caller mode or validates the mode boundary; source-to-IR bridges are stated where the operation is lowered from source.",
+      "final_integrated_verification": "required"
+    },
+    {
+      "id": "emela_lir::SwitchOn::Lit",
+      "context": "sync",
+      "baseline_status": "mapped",
+      "action": "upgrade_with_reviewed_evidence",
+      "proposed_status": "verified",
+      "behavior": "executed",
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/switches.rs",
+          "symbol": "lit_scrutinee"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "IR_C_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/p7_data_tests.rs",
+          "symbol": "legacy_literal_and_enum_switches_cover_numeric_extremes_and_reject_invalid_tags",
+          "observation": "Dynamic I32/I64 literals, enum tags, default branches and invalid enum tags are observed through C."
+        }
+      ],
+      "reason": "The referenced function/case explicitly uses this caller mode or validates the mode boundary; source-to-IR bridges are stated where the operation is lowered from source.",
+      "final_integrated_verification": "required"
+    },
+    {
+      "id": "emela_lir::SwitchOn::Lit",
+      "context": "suspend",
+      "baseline_status": "pending",
+      "action": "upgrade_with_reviewed_evidence",
+      "proposed_status": "verified",
+      "behavior": "executed",
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/switches.rs",
+          "symbol": "lit_scrutinee"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "IR_C_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/p7_switch_frame_tests.rs",
+          "symbol": "literal_i32_and_i64_switches_resume_into_cases_and_default",
+          "observation": "All exports.suspends=true; real task wait preserves I32/I64 selector then enters min/max/default, yielding11/22/33. heap0/frame128 and pool1, C1000 iterations.",
+          "revision": "769241b"
+        }
+      ],
+      "reason": "The referenced function/case explicitly uses this caller mode or validates the mode boundary; source-to-IR bridges are stated where the operation is lowered from source.",
+      "final_integrated_verification": "required"
+    },
+    {
+      "id": "emela_lir::CaseKey::Variant",
+      "context": "sync",
+      "baseline_status": "mapped",
+      "action": "upgrade_with_reviewed_evidence",
+      "proposed_status": "verified",
+      "behavior": "executed",
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/case_keys.rs",
+          "symbol": "variant_label"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "IR_C_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/p7_data_tests.rs",
+          "symbol": "legacy_literal_and_enum_switches_cover_numeric_extremes_and_reject_invalid_tags",
+          "observation": "Dynamic I32/I64 literals, enum tags, default branches and invalid enum tags are observed through C."
+        }
+      ],
+      "reason": "The referenced function/case explicitly uses this caller mode or validates the mode boundary; source-to-IR bridges are stated where the operation is lowered from source.",
+      "final_integrated_verification": "required"
+    },
+    {
+      "id": "emela_lir::CaseKey::Variant",
+      "context": "suspend",
+      "baseline_status": "pending",
+      "action": "upgrade_with_reviewed_evidence",
+      "proposed_status": "verified",
+      "behavior": "executed",
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/case_keys.rs",
+          "symbol": "variant_label"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "IR_C_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "deferred_complete_poll_and_await_share_one_typed_value_until_scope_closes",
+          "observation": "Explicit f.suspends=true; check_bool emits If for true/false Complete results, check_option emits SwitchOn Tag/Variant cases for empty/full poll."
+        }
+      ],
+      "reason": "The referenced function/case explicitly uses this caller mode or validates the mode boundary; source-to-IR bridges are stated where the operation is lowered from source.",
+      "final_integrated_verification": "required"
+    },
+    {
+      "id": "emela_lir::CaseKey::Lit",
+      "context": "sync",
+      "baseline_status": "mapped",
+      "action": "upgrade_with_reviewed_evidence",
+      "proposed_status": "verified",
+      "behavior": "executed",
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/case_keys.rs",
+          "symbol": "lit_label"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "IR_C_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/p7_data_tests.rs",
+          "symbol": "legacy_literal_and_enum_switches_cover_numeric_extremes_and_reject_invalid_tags",
+          "observation": "Dynamic I32/I64 literals, enum tags, default branches and invalid enum tags are observed through C."
+        }
+      ],
+      "reason": "The referenced function/case explicitly uses this caller mode or validates the mode boundary; source-to-IR bridges are stated where the operation is lowered from source.",
+      "final_integrated_verification": "required"
+    },
+    {
+      "id": "emela_lir::CaseKey::Lit",
+      "context": "suspend",
+      "baseline_status": "pending",
+      "action": "upgrade_with_reviewed_evidence",
+      "proposed_status": "verified",
+      "behavior": "executed",
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/case_keys.rs",
+          "symbol": "lit_label"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "IR_C_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/p7_switch_frame_tests.rs",
+          "symbol": "literal_i32_and_i64_switches_resume_into_cases_and_default",
+          "observation": "All exports.suspends=true; real task wait preserves I32/I64 selector then enters min/max/default, yielding11/22/33. heap0/frame128 and pool1, C1000 iterations.",
+          "revision": "769241b"
+        }
+      ],
+      "reason": "The referenced function/case explicitly uses this caller mode or validates the mode boundary; source-to-IR bridges are stated where the operation is lowered from source.",
+      "final_integrated_verification": "required"
+    },
+    {
+      "id": "emela_lir::Callee::Direct",
+      "context": "sync",
+      "baseline_status": "verified",
+      "action": "preserve_verified",
+      "proposed_status": "verified",
+      "behavior": "executed",
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/values/call.rs",
+          "symbol": "emit_direct"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/plan/operations/values/call.rs",
+          "symbol": "string_behavior"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/plan/operations/values/call.rs",
+          "symbol": "needs_heap"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/plan/operations/values/call.rs",
+          "symbol": "is_known_empty"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/plan/operations/values/call.rs",
+          "symbol": "require_runtime"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/values/call.rs",
+          "symbol": "emit_suspend_direct"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/frontend/function_abi.rs"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/frontend/lower.rs"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend.rs"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "IR_C_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/tests.rs",
+          "symbol": "tail_recursion_uses_parallel_parameter_assignment_and_scalar_external_calls",
+          "observation": "Raw Prim and If/Recur loop with parallel replacement of parameters executes with an external scalar hook."
+        }
+      ],
+      "reason": "The referenced function/case explicitly uses this caller mode or validates the mode boundary; source-to-IR bridges are stated where the operation is lowered from source.",
+      "final_integrated_verification": "required",
+      "baseline_evidence_preserved": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p1.rs"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/tests.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p1.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_suspend.rs"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_clock.rs"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend_tests.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p5.md"
+        }
+      ]
+    },
+    {
+      "id": "emela_lir::Callee::Direct",
+      "context": "suspend",
+      "baseline_status": "verified",
+      "action": "preserve_verified",
+      "proposed_status": "verified",
+      "behavior": "executed",
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/values/call.rs",
+          "symbol": "emit_direct"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/plan/operations/values/call.rs",
+          "symbol": "string_behavior"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/plan/operations/values/call.rs",
+          "symbol": "needs_heap"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/plan/operations/values/call.rs",
+          "symbol": "is_known_empty"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/plan/operations/values/call.rs",
+          "symbol": "require_runtime"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/values/call.rs",
+          "symbol": "emit_suspend_direct"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/frontend/function_abi.rs"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/frontend/lower.rs"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend.rs"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "IR_C_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend_tests.rs",
+          "symbol": "external_task_resumes_an_independent_frame_and_rejects_repeated_completion",
+          "observation": "answer.suspends=true; task wait result is returned after notification, repeated/stale completions reject."
+        }
+      ],
+      "reason": "The referenced function/case explicitly uses this caller mode or validates the mode boundary; source-to-IR bridges are stated where the operation is lowered from source.",
+      "final_integrated_verification": "required",
+      "baseline_evidence_preserved": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_suspend.rs"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_clock.rs"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend_tests.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p5.md"
+        }
+      ]
+    },
+    {
+      "id": "emela_lir::Callee::Indirect",
+      "context": "sync",
+      "baseline_status": "verified",
+      "action": "preserve_verified",
+      "proposed_status": "verified",
+      "behavior": "executed",
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/values/call.rs",
+          "symbol": "emit_indirect"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/plan/operations/values/call.rs",
+          "symbol": "string_behavior"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/plan/operations/values/call.rs",
+          "symbol": "needs_heap"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/plan/operations/values/call.rs",
+          "symbol": "is_known_empty"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/plan/operations/values/call.rs",
+          "symbol": "require_runtime"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/values/call.rs",
+          "symbol": "emit_suspend_indirect"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/frontend/function_abi.rs"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/frontend/lower.rs"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend.rs"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "IR_C_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/function_tests.rs",
+          "symbol": "returned_function_references_remain_reachable_and_indirect_calls_use_their_abi",
+          "observation": "Native caller has a function-value parameter and actual indirect dispatch, including returned references; values/ABI checked by C."
+        }
+      ],
+      "reason": "The referenced function/case explicitly uses this caller mode or validates the mode boundary; source-to-IR bridges are stated where the operation is lowered from source.",
+      "final_integrated_verification": "required",
+      "baseline_evidence_preserved": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_suspend.rs"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_clock.rs"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend_tests.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p5.md"
+        }
+      ]
+    },
+    {
+      "id": "emela_lir::Callee::Indirect",
+      "context": "suspend",
+      "baseline_status": "verified",
+      "action": "preserve_verified",
+      "proposed_status": "verified",
+      "behavior": "executed",
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/values/call.rs",
+          "symbol": "emit_indirect"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/plan/operations/values/call.rs",
+          "symbol": "string_behavior"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/plan/operations/values/call.rs",
+          "symbol": "needs_heap"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/plan/operations/values/call.rs",
+          "symbol": "is_known_empty"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/plan/operations/values/call.rs",
+          "symbol": "require_runtime"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/values/call.rs",
+          "symbol": "emit_suspend_indirect"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/frontend/function_abi.rs"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/frontend/lower.rs"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend.rs"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "IR_C_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend_tests.rs",
+          "symbol": "suspending_function_references_dispatch_to_external_tasks_then_internal_frames",
+          "observation": "Explicit suspending indirect callee ABI dispatches first to external task then internal frame; observed result and pending task notifications."
+        }
+      ],
+      "reason": "The referenced function/case explicitly uses this caller mode or validates the mode boundary; source-to-IR bridges are stated where the operation is lowered from source.",
+      "final_integrated_verification": "required",
+      "baseline_evidence_preserved": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_suspend.rs"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_clock.rs"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend_tests.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p5.md"
+        }
+      ]
+    },
+    {
+      "id": "emela_lir::Callee::Op",
+      "context": "sync",
+      "baseline_status": "verified",
+      "action": "preserve_verified",
+      "proposed_status": "verified",
+      "behavior": "executed",
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/values/call.rs",
+          "symbol": "emit_op"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/plan/operations/values/call.rs",
+          "symbol": "string_behavior"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/plan/operations/values/call.rs",
+          "symbol": "needs_heap"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/plan/operations/values/call.rs",
+          "symbol": "is_known_empty"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/plan/operations/values/call.rs",
+          "symbol": "require_runtime"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/values/call.rs",
+          "symbol": "emit_suspend_op"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/frontend/function_abi.rs"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/frontend/lower.rs"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend.rs"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "IR_C_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/handler_tests.rs",
+          "symbol": "dynamic_evidence_keeps_handlers_alive_and_protection_retires_and_releases_them",
+          "observation": "Dynamic evidence resolves operation closures, keeps handlers alive and releases them after Protect/Retire."
+        }
+      ],
+      "reason": "The referenced function/case explicitly uses this caller mode or validates the mode boundary; source-to-IR bridges are stated where the operation is lowered from source.",
+      "final_integrated_verification": "required",
+      "baseline_evidence_preserved": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_suspend.rs"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_clock.rs"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend_tests.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p5.md"
+        }
+      ]
+    },
+    {
+      "id": "emela_lir::Callee::Op",
+      "context": "suspend",
+      "baseline_status": "verified",
+      "action": "preserve_verified",
+      "proposed_status": "verified",
+      "behavior": "executed",
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/values/call.rs",
+          "symbol": "emit_op"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/plan/operations/values/call.rs",
+          "symbol": "string_behavior"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/plan/operations/values/call.rs",
+          "symbol": "needs_heap"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/plan/operations/values/call.rs",
+          "symbol": "is_known_empty"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/plan/operations/values/call.rs",
+          "symbol": "require_runtime"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/values/call.rs",
+          "symbol": "emit_suspend_op"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/frontend/function_abi.rs"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/frontend/lower.rs"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend.rs"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "source_C_test",
+          "path": "crates/emela-emb-compiler/tests/p5_suspend.rs",
+          "symbol": "source_suspend_operations_and_effectful_closures_resume_through_a_host_task",
+          "observation": "Source suspending operation invokes its method through effect evidence and resumes via real host task, with closures and typed results."
+        }
+      ],
+      "reason": "The referenced function/case explicitly uses this caller mode or validates the mode boundary; source-to-IR bridges are stated where the operation is lowered from source.",
+      "final_integrated_verification": "required",
+      "baseline_evidence_preserved": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_suspend.rs"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_clock.rs"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend_tests.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p5.md"
+        }
+      ]
+    },
+    {
+      "id": "emela_lir::OnFail::Break",
+      "context": "sync",
+      "baseline_status": "mapped",
+      "action": "upgrade_with_reviewed_evidence",
+      "proposed_status": "verified",
+      "behavior": "executed",
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/failures.rs",
+          "symbol": "break_edge"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "IR_C_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/tests.rs",
+          "symbol": "failure_payload_recovery_runs_cleanup_once",
+          "observation": "Fail -> Break(Any) -> AsError -> Field recovers42; Protect cleanup callback runs exactly once, bad error type rejected."
+        }
+      ],
+      "reason": "The referenced function/case explicitly uses this caller mode or validates the mode boundary; source-to-IR bridges are stated where the operation is lowered from source.",
+      "final_integrated_verification": "required"
+    },
+    {
+      "id": "emela_lir::OnFail::Break",
+      "context": "suspend",
+      "baseline_status": "pending",
+      "action": "upgrade_with_reviewed_evidence",
+      "proposed_status": "verified",
+      "behavior": "executed",
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/failures.rs",
+          "symbol": "break_edge"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "IR_C_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend_tests.rs",
+          "symbol": "suspending_cleanup_preserves_the_failure_until_an_outer_handler_runs",
+          "observation": "Actual suspend/cleanup then outer failure handler preserves original payload and ownership."
+        },
+        {
+          "kind": "source_C_test",
+          "path": "crates/emela-emb-compiler/tests/p7_payload_compat.rs",
+          "symbol": "list_error_payloads_survive_suspending_cleanup_and_are_dropped_on_cancellation",
+          "observation": "Export legacy_caught_start is a suspending function; after real waits1/2/3 its escape arm exits by Term Break with result12, or cancellation suppresses the result."
+        }
+      ],
+      "reason": "The referenced function/case explicitly uses this caller mode or validates the mode boundary; source-to-IR bridges are stated where the operation is lowered from source.",
+      "final_integrated_verification": "required",
+      "source_to_IR_bridge": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/frontend/function_abi.rs",
+          "symbol": "project",
+          "observation": "Function.suspends is projected from its declared/inferred effect set; source start exports also witness this flag."
+        }
+      ]
+    },
+    {
+      "id": "emela_lir::OnFail::Propagate",
+      "context": "sync",
+      "baseline_status": "mapped",
+      "action": "upgrade_with_reviewed_evidence",
+      "proposed_status": "verified",
+      "behavior": "executed",
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/failures.rs",
+          "symbol": "propagate_edge"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "source_C_test",
+          "path": "crates/emela-emb-compiler/tests/p2_failures.rs",
+          "symbol": "concrete_generic_error_payloads_keep_distinct_slots_and_owned_nested_strings",
+          "observation": "Source error tests/selects and payload extraction distinguish concrete generic error tags and preserve nested ownership."
+        }
+      ],
+      "reason": "The referenced function/case explicitly uses this caller mode or validates the mode boundary; source-to-IR bridges are stated where the operation is lowered from source.",
+      "final_integrated_verification": "required"
+    },
+    {
+      "id": "emela_lir::OnFail::Propagate",
+      "context": "suspend",
+      "baseline_status": "pending",
+      "action": "upgrade_with_reviewed_evidence",
+      "proposed_status": "verified",
+      "behavior": "executed",
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/failures.rs",
+          "symbol": "propagate_edge"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "IR_C_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend_tests.rs",
+          "symbol": "suspending_cleanup_preserves_the_failure_until_an_outer_handler_runs",
+          "observation": "Actual suspend/cleanup then outer failure handler preserves original payload and ownership."
+        },
+        {
+          "kind": "source_C_test",
+          "path": "crates/emela-emb-compiler/tests/p7_payload_compat.rs",
+          "symbol": "list_error_payloads_survive_suspending_cleanup_and_are_dropped_on_cancellation",
+          "observation": "Export legacy_caught_start is a suspending function; after real waits1/2/3 its escape arm exits by Term Break with result12, or cancellation suppresses the result."
+        }
+      ],
+      "reason": "The referenced function/case explicitly uses this caller mode or validates the mode boundary; source-to-IR bridges are stated where the operation is lowered from source.",
+      "final_integrated_verification": "required",
+      "source_to_IR_bridge": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/frontend/function_abi.rs",
+          "symbol": "project",
+          "observation": "Function.suspends is projected from its declared/inferred effect set; source start exports also witness this flag."
+        }
+      ]
+    },
+    {
+      "id": "emela_lir::OnFail::Handle",
+      "context": "input",
+      "baseline_status": "pending",
+      "action": "upgrade_with_reviewed_evidence",
+      "proposed_status": "verified",
+      "behavior": "validated_and_normalized",
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/failures.rs",
+          "symbol": "handle_edge"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "IR_C_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/p7_contract_tests.rs",
+          "symbol": "local_failure_handlers_are_validated_and_normalized_in_sync_and_suspend_calls",
+          "observation": "Typed OnFail Handle inputs validate, normalize to local Block/Break and return42 with handler sideeffect in both modes."
+        }
+      ],
+      "reason": "The referenced function/case explicitly uses this caller mode or validates the mode boundary; source-to-IR bridges are stated where the operation is lowered from source.",
+      "final_integrated_verification": "required"
+    },
+    {
+      "id": "emela_core::FiberOp::Scope",
+      "context": "sync",
+      "baseline_status": "pending",
+      "action": "upgrade_with_reviewed_evidence",
+      "proposed_status": "verified",
+      "behavior": "mode_rejected",
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/fibers/scope.rs",
+          "symbol": "emit"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/fibers/scope.rs",
+          "symbol": "emit_suspend"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "diagnostic_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/p7_contract_tests.rs",
+          "symbol": "structured_fiber_waits_accept_suspending_and_reject_native_callers",
+          "observation": "Well-typed Scope/Join/Await/Interrupt/DeferredAwait first accept with suspends=true; changing only caller flag to false yields requires a suspending caller.",
+          "revision": "aeb7c53"
+        }
+      ],
+      "reason": "The referenced function/case explicitly uses this caller mode or validates the mode boundary; source-to-IR bridges are stated where the operation is lowered from source.",
+      "final_integrated_verification": "required"
+    },
+    {
+      "id": "emela_core::FiberOp::Scope",
+      "context": "suspend",
+      "baseline_status": "verified",
+      "action": "preserve_verified",
+      "proposed_status": "verified",
+      "behavior": "executed",
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/fibers/scope.rs",
+          "symbol": "emit"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/fibers/scope.rs",
+          "symbol": "emit_suspend"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "IR_C_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "scope_fork_and_join_reclaim_children_and_their_erased_values",
+          "observation": "Root f.suspends=true; typed Scope body and Fork/Join produce42, repeat1000 and release erased child values."
+        }
+      ],
+      "reason": "The referenced function/case explicitly uses this caller mode or validates the mode boundary; source-to-IR bridges are stated where the operation is lowered from source.",
+      "final_integrated_verification": "required",
+      "baseline_evidence_preserved": [
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "scope_fork_and_join_reclaim_children_and_their_erased_values"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_concurrency.rs",
+          "symbol": "source_concurrency_preserves_handles_values_causes_and_unit_results"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_scope_tests.rs",
+          "symbol": "scope_handlers_merge_callback_failure_abis_and_box_typed_child_results"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p6.md"
+        }
+      ]
+    },
+    {
+      "id": "emela_core::FiberOp::Fork",
+      "context": "sync",
+      "baseline_status": "verified",
+      "action": "preserve_verified",
+      "proposed_status": "verified",
+      "behavior": "executed",
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/fibers/fork.rs",
+          "symbol": "emit"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "source_C_test",
+          "path": "crates/emela-emb-compiler/tests/p6_concurrency.rs",
+          "symbol": "source_concurrency_preserves_handles_values_causes_and_unit_results",
+          "observation": "Source Scope drives its nonsuspending trusted fork operation wrapper (actual Fork sync path), and the suspending source body joins the child."
+        }
+      ],
+      "reason": "The referenced function/case explicitly uses this caller mode or validates the mode boundary; source-to-IR bridges are stated where the operation is lowered from source.",
+      "final_integrated_verification": "required",
+      "baseline_evidence_preserved": [
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "scope_fork_and_join_reclaim_children_and_their_erased_values"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_concurrency.rs",
+          "symbol": "source_concurrency_preserves_handles_values_causes_and_unit_results"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_scope_tests.rs",
+          "symbol": "scope_handlers_merge_callback_failure_abis_and_box_typed_child_results"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p6.md"
+        }
+      ]
+    },
+    {
+      "id": "emela_core::FiberOp::Fork",
+      "context": "suspend",
+      "baseline_status": "verified",
+      "action": "preserve_verified",
+      "proposed_status": "verified",
+      "behavior": "executed",
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/fibers/fork.rs",
+          "symbol": "emit"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "IR_C_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "scope_fork_and_join_reclaim_children_and_their_erased_values",
+          "observation": "Root f.suspends=true; typed Scope body and Fork/Join produce42, repeat1000 and release erased child values."
+        }
+      ],
+      "reason": "The referenced function/case explicitly uses this caller mode or validates the mode boundary; source-to-IR bridges are stated where the operation is lowered from source.",
+      "final_integrated_verification": "required",
+      "baseline_evidence_preserved": [
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "scope_fork_and_join_reclaim_children_and_their_erased_values"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_concurrency.rs",
+          "symbol": "source_concurrency_preserves_handles_values_causes_and_unit_results"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_scope_tests.rs",
+          "symbol": "scope_handlers_merge_callback_failure_abis_and_box_typed_child_results"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p6.md"
+        }
+      ]
+    },
+    {
+      "id": "emela_core::FiberOp::Deferred",
+      "context": "sync",
+      "baseline_status": "verified",
+      "action": "preserve_verified",
+      "proposed_status": "verified",
+      "behavior": "executed",
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/fibers/deferred.rs",
+          "symbol": "emit"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "IR_C_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_scope_tests.rs",
+          "symbol": "calling_the_generated_scope_deferred_operation_requires_its_pool",
+          "observation": "Generated native Scope deferred operation executes the direct Deferred constructor with pool1; pool0 rejects.",
+          "revision": "aeb7c53"
+        }
+      ],
+      "reason": "The referenced function/case explicitly uses this caller mode or validates the mode boundary; source-to-IR bridges are stated where the operation is lowered from source.",
+      "final_integrated_verification": "required",
+      "baseline_evidence_preserved": [
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "deferred_complete_poll_and_await_share_one_typed_value_until_scope_closes"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_concurrency.rs",
+          "symbol": "source_concurrency_preserves_handles_values_causes_and_unit_results"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_scope_tests.rs",
+          "symbol": "calling_the_generated_scope_deferred_operation_requires_its_pool"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_scope_tests.rs",
+          "symbol": "scope_handlers_merge_callback_failure_abis_and_box_typed_child_results"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p6.md"
+        }
+      ]
+    },
+    {
+      "id": "emela_core::FiberOp::Deferred",
+      "context": "suspend",
+      "baseline_status": "verified",
+      "action": "preserve_verified",
+      "proposed_status": "verified",
+      "behavior": "executed",
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/fibers/deferred.rs",
+          "symbol": "emit"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "IR_C_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_deferred_tests.rs",
+          "symbol": "discarded_deferreds_reuse_one_slot_in_a_long_lived_scope",
+          "observation": "Explicit suspending Scope body loops1000 constructor/discard operations in capacity1; C repeats1000.",
+          "revision": "aeb7c53"
+        }
+      ],
+      "reason": "The referenced function/case explicitly uses this caller mode or validates the mode boundary; source-to-IR bridges are stated where the operation is lowered from source.",
+      "final_integrated_verification": "required",
+      "baseline_evidence_preserved": [
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "deferred_complete_poll_and_await_share_one_typed_value_until_scope_closes"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_concurrency.rs",
+          "symbol": "source_concurrency_preserves_handles_values_causes_and_unit_results"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_scope_tests.rs",
+          "symbol": "calling_the_generated_scope_deferred_operation_requires_its_pool"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_scope_tests.rs",
+          "symbol": "scope_handlers_merge_callback_failure_abis_and_box_typed_child_results"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p6.md"
+        }
+      ]
+    },
+    {
+      "id": "emela_core::FiberOp::Join",
+      "context": "sync",
+      "baseline_status": "pending",
+      "action": "upgrade_with_reviewed_evidence",
+      "proposed_status": "verified",
+      "behavior": "mode_rejected",
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/fibers/join.rs",
+          "symbol": "emit"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/fibers/join.rs",
+          "symbol": "emit_suspend"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "diagnostic_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/p7_contract_tests.rs",
+          "symbol": "structured_fiber_waits_accept_suspending_and_reject_native_callers",
+          "observation": "Well-typed Scope/Join/Await/Interrupt/DeferredAwait first accept with suspends=true; changing only caller flag to false yields requires a suspending caller.",
+          "revision": "aeb7c53"
+        }
+      ],
+      "reason": "The referenced function/case explicitly uses this caller mode or validates the mode boundary; source-to-IR bridges are stated where the operation is lowered from source.",
+      "final_integrated_verification": "required"
+    },
+    {
+      "id": "emela_core::FiberOp::Join",
+      "context": "suspend",
+      "baseline_status": "verified",
+      "action": "preserve_verified",
+      "proposed_status": "verified",
+      "behavior": "executed",
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/fibers/join.rs",
+          "symbol": "emit"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/fibers/join.rs",
+          "symbol": "emit_suspend"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "source_C_test",
+          "path": "crates/emela-emb-compiler/tests/p7_child_results_compat.rs",
+          "symbol": "join_results_own_strings_and_lists_after_scope_and_frame_reuse",
+          "observation": "Source start exports are suspending; repeated Join returns retain owned String/List after Scope end/frame reuse,1000 calls."
+        }
+      ],
+      "reason": "The referenced function/case explicitly uses this caller mode or validates the mode boundary; source-to-IR bridges are stated where the operation is lowered from source.",
+      "final_integrated_verification": "required",
+      "baseline_evidence_preserved": [
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "scope_fork_and_join_reclaim_children_and_their_erased_values"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_concurrency.rs",
+          "symbol": "source_concurrency_preserves_handles_values_causes_and_unit_results"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_child_waiters.rs",
+          "symbol": "child_await_and_join_waiters_resume_fifo_after_the_child_finishes"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_child_waiters.rs",
+          "symbol": "failed_handleless_children_release_records_during_sibling_cleanup"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p6.md"
+        }
+      ]
+    },
+    {
+      "id": "emela_core::FiberOp::Await",
+      "context": "sync",
+      "baseline_status": "pending",
+      "action": "upgrade_with_reviewed_evidence",
+      "proposed_status": "verified",
+      "behavior": "mode_rejected",
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/fibers/await.rs",
+          "symbol": "emit"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/fibers/await.rs",
+          "symbol": "emit_suspend"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "diagnostic_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/p7_contract_tests.rs",
+          "symbol": "structured_fiber_waits_accept_suspending_and_reject_native_callers",
+          "observation": "Well-typed Scope/Join/Await/Interrupt/DeferredAwait first accept with suspends=true; changing only caller flag to false yields requires a suspending caller.",
+          "revision": "aeb7c53"
+        }
+      ],
+      "reason": "The referenced function/case explicitly uses this caller mode or validates the mode boundary; source-to-IR bridges are stated where the operation is lowered from source.",
+      "final_integrated_verification": "required"
+    },
+    {
+      "id": "emela_core::FiberOp::Await",
+      "context": "suspend",
+      "baseline_status": "verified",
+      "action": "preserve_verified",
+      "proposed_status": "verified",
+      "behavior": "executed",
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/fibers/await.rs",
+          "symbol": "emit"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/fibers/await.rs",
+          "symbol": "emit_suspend"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "source_C_test",
+          "path": "crates/emela-emb-compiler/tests/p7_child_results_compat.rs",
+          "symbol": "await_returns_success_and_can_mix_with_repeated_join_without_yielding",
+          "observation": "Source start exports are suspending; repeated Await/Join, Unit and ignored results retain order/values."
+        }
+      ],
+      "reason": "The referenced function/case explicitly uses this caller mode or validates the mode boundary; source-to-IR bridges are stated where the operation is lowered from source.",
+      "final_integrated_verification": "required",
+      "baseline_evidence_preserved": [
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "interruption_waits_for_nested_suspending_cleanup_before_await_reports_its_cause"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_child_waiters.rs",
+          "symbol": "child_await_and_join_waiters_resume_fifo_after_the_child_finishes"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_child_waiters.rs",
+          "symbol": "failed_handleless_children_release_records_during_sibling_cleanup"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_lifecycle.rs",
+          "symbol": "closing_a_source_scope_drops_ready_join_and_await_deliveries"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_lifecycle.rs",
+          "symbol": "cancelling_nested_source_scopes_unlinks_all_deferred_waiters"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_lifecycle.rs",
+          "symbol": "source_interrupt_waiters_resume_fifo_after_suspending_cleanup"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_lifecycle.rs",
+          "symbol": "source_scopes_reclaim_completed_children_and_preserve_live_copied_handles"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p6.md"
+        }
+      ]
+    },
+    {
+      "id": "emela_core::FiberOp::Interrupt",
+      "context": "sync",
+      "baseline_status": "pending",
+      "action": "upgrade_with_reviewed_evidence",
+      "proposed_status": "verified",
+      "behavior": "mode_rejected",
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/fibers/interrupt.rs",
+          "symbol": "emit"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/fibers/interrupt.rs",
+          "symbol": "emit_suspend"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "diagnostic_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/p7_contract_tests.rs",
+          "symbol": "structured_fiber_waits_accept_suspending_and_reject_native_callers",
+          "observation": "Well-typed Scope/Join/Await/Interrupt/DeferredAwait first accept with suspends=true; changing only caller flag to false yields requires a suspending caller.",
+          "revision": "aeb7c53"
+        }
+      ],
+      "reason": "The referenced function/case explicitly uses this caller mode or validates the mode boundary; source-to-IR bridges are stated where the operation is lowered from source.",
+      "final_integrated_verification": "required"
+    },
+    {
+      "id": "emela_core::FiberOp::Interrupt",
+      "context": "suspend",
+      "baseline_status": "verified",
+      "action": "preserve_verified",
+      "proposed_status": "verified",
+      "behavior": "executed",
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/fibers/interrupt.rs",
+          "symbol": "emit"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/fibers/interrupt.rs",
+          "symbol": "emit_suspend"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "source_C_test",
+          "path": "crates/emela-emb-compiler/tests/p7_interrupt_compat.rs",
+          "symbol": "multiple_interrupt_waiters_resume_fifo_after_release_finishes",
+          "observation": "Suspending start export has child wait plus suspending release; interrupt waiters resume FIFO only after release, stale completion rejects."
+        }
+      ],
+      "reason": "The referenced function/case explicitly uses this caller mode or validates the mode boundary; source-to-IR bridges are stated where the operation is lowered from source.",
+      "final_integrated_verification": "required",
+      "baseline_evidence_preserved": [
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "interruption_waits_for_nested_suspending_cleanup_before_await_reports_its_cause"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_lifecycle.rs",
+          "symbol": "closing_a_source_scope_drops_ready_join_and_await_deliveries"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_lifecycle.rs",
+          "symbol": "cancelling_nested_source_scopes_unlinks_all_deferred_waiters"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_lifecycle.rs",
+          "symbol": "source_interrupt_waiters_resume_fifo_after_suspending_cleanup"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_lifecycle.rs",
+          "symbol": "source_scopes_reclaim_completed_children_and_preserve_live_copied_handles"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p6.md"
+        }
+      ]
+    },
+    {
+      "id": "emela_core::FiberOp::Attempt",
+      "context": "sync",
+      "baseline_status": "verified",
+      "action": "preserve_verified",
+      "proposed_status": "verified",
+      "behavior": "executed",
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/fibers/attempt.rs",
+          "symbol": "emit"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/fibers/attempt.rs",
+          "symbol": "emit_suspend"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "IR_C_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "attempts_preserve_success_and_typed_cause_failures_across_raise",
+          "observation": "Test iterates native/suspend flags. Direct Attempt, CauseKind/ToString/Raise execute success/failure paths with owned Cause values and typed catches."
+        }
+      ],
+      "reason": "The referenced function/case explicitly uses this caller mode or validates the mode boundary; source-to-IR bridges are stated where the operation is lowered from source.",
+      "final_integrated_verification": "required",
+      "baseline_evidence_preserved": [
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "attempts_preserve_success_and_typed_cause_failures_across_raise"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_concurrency.rs",
+          "symbol": "source_concurrency_preserves_handles_values_causes_and_unit_results"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p6.md"
+        }
+      ]
+    },
+    {
+      "id": "emela_core::FiberOp::Attempt",
+      "context": "suspend",
+      "baseline_status": "verified",
+      "action": "preserve_verified",
+      "proposed_status": "verified",
+      "behavior": "executed",
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/fibers/attempt.rs",
+          "symbol": "emit"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/fibers/attempt.rs",
+          "symbol": "emit_suspend"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "IR_C_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "attempts_preserve_success_and_typed_cause_failures_across_raise",
+          "observation": "Test iterates native/suspend flags. Direct Attempt, CauseKind/ToString/Raise execute success/failure paths with owned Cause values and typed catches."
+        }
+      ],
+      "reason": "The referenced function/case explicitly uses this caller mode or validates the mode boundary; source-to-IR bridges are stated where the operation is lowered from source.",
+      "final_integrated_verification": "required",
+      "baseline_evidence_preserved": [
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "attempts_preserve_success_and_typed_cause_failures_across_raise"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_concurrency.rs",
+          "symbol": "source_concurrency_preserves_handles_values_causes_and_unit_results"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p6.md"
+        }
+      ]
+    },
+    {
+      "id": "emela_core::FiberOp::Complete",
+      "context": "sync",
+      "baseline_status": "verified",
+      "action": "preserve_verified",
+      "proposed_status": "verified",
+      "behavior": "executed",
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/fibers/complete.rs",
+          "symbol": "emit"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "source_C_test",
+          "path": "crates/emela-emb-compiler/tests/p7_deferred_compat.rs",
+          "symbol": "complete_copies_borrowed_string_and_poll_retains_it_past_scope_end",
+          "observation": "The original source has private pure save/peek functions; direct Complete/Poll lower into those native functions. Returned String42 survives Scope end."
+        }
+      ],
+      "reason": "The referenced function/case explicitly uses this caller mode or validates the mode boundary; source-to-IR bridges are stated where the operation is lowered from source.",
+      "final_integrated_verification": "required",
+      "source_to_IR_bridge": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/frontend/function_abi.rs",
+          "symbol": "project",
+          "observation": "Function.suspends is projected from its declared/inferred effect set; source start exports also witness this flag."
+        }
+      ],
+      "baseline_evidence_preserved": [
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "deferred_complete_poll_and_await_share_one_typed_value_until_scope_closes"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_concurrency.rs",
+          "symbol": "source_concurrency_preserves_handles_values_causes_and_unit_results"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_unit_tests.rs",
+          "symbol": "unit_deferred_distinguishes_empty_and_full_without_payload_storage"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p6.md"
+        }
+      ]
+    },
+    {
+      "id": "emela_core::FiberOp::Complete",
+      "context": "suspend",
+      "baseline_status": "verified",
+      "action": "preserve_verified",
+      "proposed_status": "verified",
+      "behavior": "executed",
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/fibers/complete.rs",
+          "symbol": "emit"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "IR_C_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "deferred_complete_poll_and_await_share_one_typed_value_until_scope_closes",
+          "observation": "Direct Complete/Poll/Await values in f.suspends=true; None/Some, once-only completion and stored value are observed through C."
+        }
+      ],
+      "reason": "The referenced function/case explicitly uses this caller mode or validates the mode boundary; source-to-IR bridges are stated where the operation is lowered from source.",
+      "final_integrated_verification": "required",
+      "baseline_evidence_preserved": [
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "deferred_complete_poll_and_await_share_one_typed_value_until_scope_closes"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_concurrency.rs",
+          "symbol": "source_concurrency_preserves_handles_values_causes_and_unit_results"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_unit_tests.rs",
+          "symbol": "unit_deferred_distinguishes_empty_and_full_without_payload_storage"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p6.md"
+        }
+      ]
+    },
+    {
+      "id": "emela_core::FiberOp::DeferredAwait",
+      "context": "sync",
+      "baseline_status": "pending",
+      "action": "upgrade_with_reviewed_evidence",
+      "proposed_status": "verified",
+      "behavior": "mode_rejected",
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/fibers/deferred_await.rs",
+          "symbol": "emit"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/fibers/deferred_await.rs",
+          "symbol": "emit_suspend"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "diagnostic_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/p7_contract_tests.rs",
+          "symbol": "structured_fiber_waits_accept_suspending_and_reject_native_callers",
+          "observation": "Well-typed Scope/Join/Await/Interrupt/DeferredAwait first accept with suspends=true; changing only caller flag to false yields requires a suspending caller.",
+          "revision": "aeb7c53"
+        }
+      ],
+      "reason": "The referenced function/case explicitly uses this caller mode or validates the mode boundary; source-to-IR bridges are stated where the operation is lowered from source.",
+      "final_integrated_verification": "required"
+    },
+    {
+      "id": "emela_core::FiberOp::DeferredAwait",
+      "context": "suspend",
+      "baseline_status": "verified",
+      "action": "preserve_verified",
+      "proposed_status": "verified",
+      "behavior": "executed",
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/fibers/deferred_await.rs",
+          "symbol": "emit"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/fibers/deferred_await.rs",
+          "symbol": "emit_suspend"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "source_C_test",
+          "path": "crates/emela-emb-compiler/tests/p7_deferred_compat.rs",
+          "symbol": "await_resumes_all_waiters_in_fifo_order_after_completer_finishes",
+          "observation": "Suspending source body waits on Deferred; all waiters receive10 in FIFO order after completion with exact mark sequence."
+        }
+      ],
+      "reason": "The referenced function/case explicitly uses this caller mode or validates the mode boundary; source-to-IR bridges are stated where the operation is lowered from source.",
+      "final_integrated_verification": "required",
+      "baseline_evidence_preserved": [
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "deferred_complete_poll_and_await_share_one_typed_value_until_scope_closes"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_concurrency.rs",
+          "symbol": "source_concurrency_preserves_handles_values_causes_and_unit_results"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_deferred_tests.rs",
+          "symbol": "deferred_wakes_fifo_waiters_with_owned_strings_and_releases_the_scope_value"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p6.md"
+        }
+      ]
+    },
+    {
+      "id": "emela_core::FiberOp::Poll",
+      "context": "sync",
+      "baseline_status": "verified",
+      "action": "preserve_verified",
+      "proposed_status": "verified",
+      "behavior": "executed",
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/fibers/poll.rs",
+          "symbol": "emit"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "source_C_test",
+          "path": "crates/emela-emb-compiler/tests/p7_deferred_compat.rs",
+          "symbol": "complete_copies_borrowed_string_and_poll_retains_it_past_scope_end",
+          "observation": "The original source has private pure save/peek functions; direct Complete/Poll lower into those native functions. Returned String42 survives Scope end."
+        }
+      ],
+      "reason": "The referenced function/case explicitly uses this caller mode or validates the mode boundary; source-to-IR bridges are stated where the operation is lowered from source.",
+      "final_integrated_verification": "required",
+      "source_to_IR_bridge": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/frontend/function_abi.rs",
+          "symbol": "project",
+          "observation": "Function.suspends is projected from its declared/inferred effect set; source start exports also witness this flag."
+        }
+      ],
+      "baseline_evidence_preserved": [
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "deferred_complete_poll_and_await_share_one_typed_value_until_scope_closes"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_concurrency.rs",
+          "symbol": "source_concurrency_preserves_handles_values_causes_and_unit_results"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_unit_tests.rs",
+          "symbol": "unit_deferred_distinguishes_empty_and_full_without_payload_storage"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p6.md"
+        }
+      ]
+    },
+    {
+      "id": "emela_core::FiberOp::Poll",
+      "context": "suspend",
+      "baseline_status": "verified",
+      "action": "preserve_verified",
+      "proposed_status": "verified",
+      "behavior": "executed",
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/fibers/poll.rs",
+          "symbol": "emit"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "IR_C_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "deferred_complete_poll_and_await_share_one_typed_value_until_scope_closes",
+          "observation": "Direct Complete/Poll/Await values in f.suspends=true; None/Some, once-only completion and stored value are observed through C."
+        }
+      ],
+      "reason": "The referenced function/case explicitly uses this caller mode or validates the mode boundary; source-to-IR bridges are stated where the operation is lowered from source.",
+      "final_integrated_verification": "required",
+      "baseline_evidence_preserved": [
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "deferred_complete_poll_and_await_share_one_typed_value_until_scope_closes"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_concurrency.rs",
+          "symbol": "source_concurrency_preserves_handles_values_causes_and_unit_results"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_unit_tests.rs",
+          "symbol": "unit_deferred_distinguishes_empty_and_full_without_payload_storage"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p6.md"
+        }
+      ]
+    },
+    {
+      "id": "emela_core::FiberOp::CauseKind",
+      "context": "sync",
+      "baseline_status": "verified",
+      "action": "preserve_verified",
+      "proposed_status": "verified",
+      "behavior": "executed",
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/fibers/cause_kind.rs",
+          "symbol": "emit"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "IR_C_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "attempts_preserve_success_and_typed_cause_failures_across_raise",
+          "observation": "Test iterates native/suspend flags. Direct Attempt, CauseKind/ToString/Raise execute success/failure paths with owned Cause values and typed catches."
+        }
+      ],
+      "reason": "The referenced function/case explicitly uses this caller mode or validates the mode boundary; source-to-IR bridges are stated where the operation is lowered from source.",
+      "final_integrated_verification": "required",
+      "baseline_evidence_preserved": [
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "attempts_preserve_success_and_typed_cause_failures_across_raise"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_concurrency.rs",
+          "symbol": "source_concurrency_preserves_handles_values_causes_and_unit_results"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p6.md"
+        }
+      ]
+    },
+    {
+      "id": "emela_core::FiberOp::CauseKind",
+      "context": "suspend",
+      "baseline_status": "verified",
+      "action": "preserve_verified",
+      "proposed_status": "verified",
+      "behavior": "executed",
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/fibers/cause_kind.rs",
+          "symbol": "emit"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "IR_C_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "attempts_preserve_success_and_typed_cause_failures_across_raise",
+          "observation": "Test iterates native/suspend flags. Direct Attempt, CauseKind/ToString/Raise execute success/failure paths with owned Cause values and typed catches."
+        }
+      ],
+      "reason": "The referenced function/case explicitly uses this caller mode or validates the mode boundary; source-to-IR bridges are stated where the operation is lowered from source.",
+      "final_integrated_verification": "required",
+      "baseline_evidence_preserved": [
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "attempts_preserve_success_and_typed_cause_failures_across_raise"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_concurrency.rs",
+          "symbol": "source_concurrency_preserves_handles_values_causes_and_unit_results"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p6.md"
+        }
+      ]
+    },
+    {
+      "id": "emela_core::FiberOp::CauseToString",
+      "context": "sync",
+      "baseline_status": "verified",
+      "action": "preserve_verified",
+      "proposed_status": "verified",
+      "behavior": "executed",
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/fibers/cause_to_string.rs",
+          "symbol": "emit"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/plan/operations/fibers/cause_to_string.rs",
+          "symbol": "string_behavior"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "IR_C_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "attempts_preserve_success_and_typed_cause_failures_across_raise",
+          "observation": "Test iterates native/suspend flags. Direct Attempt, CauseKind/ToString/Raise execute success/failure paths with owned Cause values and typed catches."
+        }
+      ],
+      "reason": "The referenced function/case explicitly uses this caller mode or validates the mode boundary; source-to-IR bridges are stated where the operation is lowered from source.",
+      "final_integrated_verification": "required",
+      "baseline_evidence_preserved": [
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "attempts_preserve_success_and_typed_cause_failures_across_raise"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_concurrency.rs",
+          "symbol": "source_concurrency_preserves_handles_values_causes_and_unit_results"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p6.md"
+        }
+      ]
+    },
+    {
+      "id": "emela_core::FiberOp::CauseToString",
+      "context": "suspend",
+      "baseline_status": "verified",
+      "action": "preserve_verified",
+      "proposed_status": "verified",
+      "behavior": "executed",
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/fibers/cause_to_string.rs",
+          "symbol": "emit"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/plan/operations/fibers/cause_to_string.rs",
+          "symbol": "string_behavior"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "IR_C_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "attempts_preserve_success_and_typed_cause_failures_across_raise",
+          "observation": "Test iterates native/suspend flags. Direct Attempt, CauseKind/ToString/Raise execute success/failure paths with owned Cause values and typed catches."
+        }
+      ],
+      "reason": "The referenced function/case explicitly uses this caller mode or validates the mode boundary; source-to-IR bridges are stated where the operation is lowered from source.",
+      "final_integrated_verification": "required",
+      "baseline_evidence_preserved": [
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "attempts_preserve_success_and_typed_cause_failures_across_raise"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_concurrency.rs",
+          "symbol": "source_concurrency_preserves_handles_values_causes_and_unit_results"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p6.md"
+        }
+      ]
+    },
+    {
+      "id": "emela_core::FiberOp::CauseRaise",
+      "context": "sync",
+      "baseline_status": "verified",
+      "action": "preserve_verified",
+      "proposed_status": "verified",
+      "behavior": "executed",
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/fibers/cause_raise.rs",
+          "symbol": "emit"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "IR_C_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "attempts_preserve_success_and_typed_cause_failures_across_raise",
+          "observation": "Test iterates native/suspend flags. Direct Attempt, CauseKind/ToString/Raise execute success/failure paths with owned Cause values and typed catches."
+        },
+        {
+          "kind": "diagnostic_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/p7_contract_tests.rs",
+          "symbol": "cause_raise_requires_a_failure_edge_and_a_propagation_channel",
+          "observation": "Native/suspend input matrix rejects missing error edge/propagation channel; the accepted typed Cause fixture has direct execution evidence in attempts test.",
+          "revision": "aeb7c53"
+        }
+      ],
+      "reason": "The referenced function/case explicitly uses this caller mode or validates the mode boundary; source-to-IR bridges are stated where the operation is lowered from source.",
+      "final_integrated_verification": "required",
+      "baseline_evidence_preserved": [
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "attempts_preserve_success_and_typed_cause_failures_across_raise"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_concurrency.rs",
+          "symbol": "source_concurrency_preserves_handles_values_causes_and_unit_results"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p6.md"
+        }
+      ]
+    },
+    {
+      "id": "emela_core::FiberOp::CauseRaise",
+      "context": "suspend",
+      "baseline_status": "verified",
+      "action": "preserve_verified",
+      "proposed_status": "verified",
+      "behavior": "executed",
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/fibers/cause_raise.rs",
+          "symbol": "emit"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "IR_C_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "attempts_preserve_success_and_typed_cause_failures_across_raise",
+          "observation": "Test iterates native/suspend flags. Direct Attempt, CauseKind/ToString/Raise execute success/failure paths with owned Cause values and typed catches."
+        },
+        {
+          "kind": "diagnostic_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/p7_contract_tests.rs",
+          "symbol": "cause_raise_requires_a_failure_edge_and_a_propagation_channel",
+          "observation": "Native/suspend input matrix rejects missing error edge/propagation channel; the accepted typed Cause fixture has direct execution evidence in attempts test.",
+          "revision": "aeb7c53"
+        }
+      ],
+      "reason": "The referenced function/case explicitly uses this caller mode or validates the mode boundary; source-to-IR bridges are stated where the operation is lowered from source.",
+      "final_integrated_verification": "required",
+      "baseline_evidence_preserved": [
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "attempts_preserve_success_and_typed_cause_failures_across_raise"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p6_concurrency.rs",
+          "symbol": "source_concurrency_preserves_handles_values_causes_and_unit_results"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p6.md"
+        }
+      ]
+    }
+  ]
+}

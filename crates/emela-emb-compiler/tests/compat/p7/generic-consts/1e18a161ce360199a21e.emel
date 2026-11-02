@@ -1,0 +1,7 @@
+
+fn identity[A](value: A, unit: ()) -> A { value }
+const IDENTITY = (identity, ())
+pub fn integer() -> Int { (identity, _) = IDENTITY
+ identity(42, ()) }
+pub fn text() -> String { (identity, _) = IDENTITY
+ identity("42", ()) }

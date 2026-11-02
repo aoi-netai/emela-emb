@@ -148,6 +148,7 @@ impl Specializer {
             immediate: false,
             constant: false,
             origin: None,
+            canonical_const: None,
             derivation: None,
             error_show: None,
             name: format!("__trait_{kind:?}_{}_{}", ty.index(), id.0),

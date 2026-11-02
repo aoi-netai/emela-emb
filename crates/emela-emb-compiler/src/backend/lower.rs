@@ -8,8 +8,10 @@ use std::collections::{HashMap, HashSet};
 
 mod closure;
 mod const_eval;
+mod const_groups;
 mod effects;
 mod error_types;
+mod exports;
 mod failures;
 mod fiber_failures;
 mod fibers;
@@ -77,6 +79,8 @@ pub(crate) fn lower_program(
         }
         validate_function(&program, function)?;
     }
+    exports::normalize(&mut program);
+    let mut const_groups = const_groups::prepare(&mut program)?;
     let (mut program, mut closures) = closure::lower(&program, options)?;
     fiber_failures::erase(&mut program, &mut closures, options)?;
     suspend::normalize_handlers(&mut program);
@@ -122,9 +126,14 @@ pub(crate) fn lower_program(
     for &id in &runtime_consts {
         program.functions[id].constant = false;
     }
+    runtime_consts.extend(
+        const_groups
+            .iter()
+            .flat_map(|group| group.specializations.iter().copied()),
+    );
     failures::normalize(&mut program);
-    // Calls, checked builtins and List construction retain allocation/defect behavior even when
-    // unused. A temporary destination also lets ownership planning release their results.
+    // Calls and checked values retain allocation and validation behavior when unused.
+    // Temporary destinations release returned data, handlers and evidence immediately.
     let mut discarded_results: HashMap<FnId, HashSet<VarId>> = HashMap::new();
     let mut discarded = Vec::new();
     for (function_id, function) in program.functions.iter() {
@@ -138,7 +147,17 @@ pub(crate) fn lower_program(
             }
             if let Stmt::Let {
                 dst: None,
-                value: Value::Builtin { .. } | Value::List { .. } | Value::Call { .. },
+                value:
+                    Value::Builtin { .. }
+                    | Value::List { .. }
+                    | Value::Call { .. }
+                    | Value::Handler { .. }
+                    | Value::EvExtend { .. }
+                    | Value::EvLookup { .. }
+                    | Value::Runtime {
+                        op: RuntimeOp::ShowString,
+                        ..
+                    },
                 ..
             } = stmt
             {
@@ -209,12 +228,28 @@ pub(crate) fn lower_program(
         closure::runtime_reachable_without_initializers(&program, options, &resolved_constants);
     let has_scopes = fibers::runtime_metadata(&program, &emitted_functions);
     program.has_scopes |= has_scopes;
+    runtime_consts.retain(|id| emitted_functions.contains(id));
+    const_outcomes.retain(|id, _| emitted_functions.contains(id));
+    for group in &mut const_groups {
+        group
+            .specializations
+            .retain(|id| emitted_functions.contains(id));
+    }
+    const_groups.retain(|group| {
+        emitted_functions.contains(&group.canonical) && !group.specializations.is_empty()
+    });
+    for group in &mut program.const_function_groups {
+        group.retain(|id| emitted_functions.contains(id));
+    }
+    program
+        .const_function_groups
+        .retain(|group| group.len() > 1);
     let suspensions = suspend::prepare(&program);
     Ok(LoweredModule {
         lowered: program,
         suspensions,
         closures,
-        const_groups: vec![],
+        const_groups,
         runtime_consts,
         deferred_pool,
         emitted_functions,

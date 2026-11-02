@@ -1,0 +1,29 @@
+
+import Std.Fiber.{Fiber, Scope}
+import Std.Deferred.{Deferred}
+@external(c, "mark")
+fn mark(n: Int) -> () use {}
+pub fn poll(n: Int) -> Int use Async {
+  Fiber.scope(fn() {
+    Fiber.fork(fn() { mark(99) })
+    d: Deferred[Int] = (use Scope).deferred()
+    empty = Deferred.poll(d) match {
+      None -> True
+      Some(_) -> False
+    }
+    first = Deferred.complete(d, n)
+    again = Deferred.complete(d, n + 1)
+    value = Deferred.poll(d) match {
+      Some(x) -> x
+      None -> 0
+    }
+    u: Deferred[()] = (use Scope).deferred()
+    Deferred.complete(u, ())
+    unit = Deferred.poll(u) match {
+      Some(()) -> True
+      None -> False
+    }
+    mark(1)
+    if empty && first && !again && unit { value } else { 0 }
+  })
+}

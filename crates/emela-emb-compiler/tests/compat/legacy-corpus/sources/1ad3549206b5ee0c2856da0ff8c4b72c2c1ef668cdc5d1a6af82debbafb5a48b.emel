@@ -1,0 +1,20 @@
+
+import Std.Fiber.{Fiber}
+pub fn text(n: Int) -> String use Async {
+  Fiber.scope(fn() {
+    child = Fiber.fork(fn() { Int.to_string(n) })
+    first = Fiber.join(child)
+    Fiber.join(child)
+    first
+  })
+}
+
+pub fn list(n: Int) -> List[Int] use Async {
+  Fiber.scope(fn() {
+    child = Fiber.fork(fn() { [n, n + 1] })
+    first = Fiber.join(child)
+    Fiber.join(child)
+    first
+  })
+}
+pub fn sum(xs: List[Int]) -> Int { List.fold(xs, 0, fn(a, b) { a + b }) }

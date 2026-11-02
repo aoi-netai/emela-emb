@@ -1,0 +1,11 @@
+# P7の保持IR入力と破棄evidenceの直接観測
+
+固定旧revisionは`c34c0aeefdd966d854371b3110db00a47798751d`。正本台帳を変更せず、`p7-ir-input-and-evidence-proposal.json`にvariant/contextの候補証拠を記録する。
+
+`p7_contract_tests.rs`はUnwind、MakeClosure、EnvGet、Dup、DropとFunction.envを実際の独自IRで構築し、native/suspend両入力をplanning前に拒否する。これらは保持されたvariantであり、不存在として対象外にしない。旧verify_flowのInvalidFlowIrに対し、独立private入力の残余拒否はUnsupportedとして返る。表現の不存在と診断分類の変更を区別する。
+
+OnFail::Handleは新入力で許可する。errorのAny型、handlerの結果型とlocal errorのscopeを検証し、failures::normalizeがBlock/Breakへ変換する。成功時はhandlerを飛び越え、失敗時だけhandlerを一度実行する。native/suspendそれぞれ1000組の成功/失敗をC両最適化で確認し、具体化後にHandleが残らないことも検査する。元のHeap入力一律拒否をそのまま移す契約ではない。
+
+破棄されたHandler/EvExtend/EvLookupは、validatorで受理した後にemitがdestination必須として拒否する差があった。既存のdiscarded_results機構へ通し、構築・lookupのvalidationを保った一時結果を直後に解放する。constructor回帰は各呼出し1000回のloop、Cからの各呼出し1000回で、その場のlive heap block数まで観測する。静的に不要な元handlerは既存handler passが消すため、discarded Handlerの観測ではlive数0、元handlerを持つEvExtendでは1を期待する。dynamic lookupはdestinationなし・使用しないdestinationありの両方で、callerのevidenceを13回借用した後も所有者が維持され、NULL lookupが同じ23byteのdefectを起こすことを確認する。
+
+Cは`-std=c11 -Wall -Wextra -Werror -O0/-O2`、省略なし。heapを必要としないlocal errorのcaseはheap runtime非生成を許し、所有値を構築するcaseでは全heap解放を調べる。

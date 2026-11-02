@@ -1,0 +1,48 @@
+{
+  "baseline_revision": "c34c0aeefdd966d854371b3110db00a47798751d",
+  "program": "program:dc3d2de098f1b7e80a21",
+  "source_sha256": "c2cacb8eb0a458543a2c75f44e74015be514f14c24db2ca938af34204d514b74",
+  "source_path": "crates/emela-emb-compiler/tests/compat/legacy-corpus/sources/c2cacb8eb0a458543a2c75f44e74015be514f14c24db2ca938af34204d514b74.emel",
+  "adaptation": "本文は変更せず7個のpub関数へ明示C exportを付与する。旧自動生成export名を指定したC名へ置換する。",
+  "observations": [
+    {
+      "legacy_tests": [
+        "emit::release_0_24::derived_and_written_traits_keep_static_dispatch_and_escaped_display",
+        "emit::release_0_24::debug_and_error_display_respect_written_derived_and_missing_show"
+      ],
+      "test": "full_legacy_traits_preserve_structural_display_debug_and_typed_causes",
+      "preserved": [
+        "n=7/text=xのEq/Ord/Score/Showとtuple/List/enum表示",
+        "NUL/quote/backslash/newline/interpolation/UTF-8 escape",
+        "debug <fn>/<fn>/K7の順序",
+        "written/derived/plain Cause表示",
+        "旧heap16384/String256、1000回全heap回収"
+      ]
+    },
+    {
+      "legacy_tests": [
+        "emit::release_0_24::public_failure_entry_keeps_the_embedded_immediate_defect_contract"
+      ],
+      "test": "full_legacy_traits_keep_public_failure_as_an_immediate_defect",
+      "preserved": [
+        "公開entry_failureがEMELA_DEFECT_UNHANDLED_ERRORで即時停止",
+        "hook文言unhandled error、正常returnなし"
+      ]
+    }
+  ],
+  "test_path": "crates/emela-emb-compiler/tests/p7_legacy_traits.rs",
+  "run": {
+    "source_revision": "b22c959",
+    "uncommitted_test_sha256": "3007527567a2666297246d1f50671213f265939eaad098f4f32407f79c8c7459",
+    "command": "CARGO_PROFILE_TEST_OPT_LEVEL=1 cargo test -p emela-emb-compiler --test p7_legacy_traits --locked --offline",
+    "exit_code": 0,
+    "passed": 2,
+    "failed": 0,
+    "ignored": 0,
+    "C": [
+      "-std=c11 -Wall -Werror -O0",
+      "-std=c11 -Wall -Werror -O2"
+    ],
+    "result": "compile/link/runtime success for both modes"
+  }
+}

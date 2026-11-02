@@ -1,0 +1,9 @@
+
+import Std.Fiber.{Fiber, Success, Failure}
+pub fn text(n: Int) -> String use Async {
+  Fiber.scope(fn() {
+    child = Fiber.fork(fn() { Int.to_string(n) })
+    Fiber.await(child) match { Success(v) -> v
+      Failure(_) -> "failed" }
+  })
+}

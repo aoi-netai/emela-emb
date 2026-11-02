@@ -1,0 +1,18 @@
+
+import Std.Fiber.{Fiber, Scope}
+import Std.Deferred.{Deferred}
+pub fn pair(n: Int) -> Int use Async {
+  Fiber.scope(fn() {
+    d: Deferred[(Int, Int)] = (use Scope).deferred()
+    Fiber.fork(fn() { Deferred.complete(d, (n, n + 1)) })
+    (a, b) = Deferred.await(d)
+    a + b
+  })
+}
+pub fn flag(n: Bool) -> Bool use Async {
+  Fiber.scope(fn() {
+    d: Deferred[Bool] = (use Scope).deferred()
+    Fiber.fork(fn() { Deferred.complete(d, n) })
+    Deferred.await(d)
+  })
+}

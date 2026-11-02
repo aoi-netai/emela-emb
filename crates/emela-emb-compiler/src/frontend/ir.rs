@@ -4,7 +4,7 @@ use super::{
     types::{Signature, ValueType},
 };
 use crate::{Span, sources::Intrinsic};
-#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub(crate) struct DefinitionId(pub usize);
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub(crate) struct LocalId(pub usize);
@@ -22,6 +22,8 @@ pub(crate) struct Function {
     pub immediate: bool,
     pub constant: bool,
     pub origin: Option<DefinitionId>,
+    /// Typed getters in one shared const family point to its erased canonical getter.
+    pub canonical_const: Option<DefinitionId>,
     pub derivation: Option<super::traits::BuiltinTrait>,
     /// Concrete error display entry; its parameter retains generic error arguments.
     pub error_show: Option<crate::contract::ir::EnumId>,

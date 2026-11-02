@@ -1,0 +1,10 @@
+
+import Std.Clock.{Clock}
+import Embedded.Board.{BoardClock}
+
+pub fn wait_then_return(ms: Int) -> Int use Async {
+  with BoardClock {
+    (use Clock).sleep(ms)
+    42
+  }
+}

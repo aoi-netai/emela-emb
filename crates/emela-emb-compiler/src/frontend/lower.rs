@@ -26,7 +26,6 @@ pub(crate) fn lower(input: &ir::Program) -> b::Program {
     for function in &input.functions {
         if function.intrinsic.is_none() {
             debug_assert!(function.derivation.is_none());
-            debug_assert!(function.origin.is_none() || function.constant);
             let mut target = b::Function::new(&function.name);
             target.constant = function.constant;
             target.fails = !function.signature.sets.errors.is_empty();
@@ -50,6 +49,25 @@ pub(crate) fn lower(input: &ir::Program) -> b::Program {
             ids.insert(function.id, program.functions.alloc(target));
         }
     }
+    let mut families: HashMap<_, Vec<_>> = HashMap::new();
+    for function in &input.functions {
+        if function.intrinsic.is_some() {
+            continue;
+        }
+        let id = ids[&function.id];
+        program.functions[id].canonical_const = function.canonical_const.map(|id| ids[&id]);
+        if !function.constant {
+            if let Some(origin) = function.origin {
+                families.entry(origin).or_default().push(id);
+            }
+        }
+    }
+    let mut families: Vec<_> = families
+        .into_iter()
+        .filter(|(_, members)| members.len() > 1)
+        .collect();
+    families.sort_by_key(|(origin, _)| origin.0);
+    program.const_function_groups = families.into_iter().map(|(_, members)| members).collect();
     program.error_shows = input
         .functions
         .iter()
@@ -258,10 +276,10 @@ impl Context<'_> {
                         tail && index + 1 == block.statements.len(),
                     );
                     if index + 1 != block.statements.len() {
-                        // Only a result produced by this statement can be discarded here.
-                        // An existing local may still be used after this expression.
+                        // Only the final call result can be discarded here. A compound
+                        // expression such as dbg(call()) still consumes an earlier result.
                         if let Some(b::Operand::Var(variable)) = result {
-                            for &statement in &builder.statements[first_statement..] {
+                            if let Some(&statement) = builder.statements[first_statement..].last() {
                                 if let b::Stmt::Let {
                                     dst,
                                     value: b::Value::Call { .. },
@@ -270,7 +288,6 @@ impl Context<'_> {
                                 {
                                     if *dst == Some(variable) {
                                         *dst = None;
-                                        break;
                                     }
                                 }
                             }

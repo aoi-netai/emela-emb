@@ -1,0 +1,14 @@
+
+import Std.Fiber.{Fiber, Success, Failure}
+pub fn list(n: Int) -> List[Int] use Async {
+  Fiber.scope(fn() {
+    child = Fiber.fork(fn() { [n, n + 1] })
+    first = Fiber.await(child) match { Success(v) -> v
+      Failure(_) -> [] }
+    Fiber.await(child)
+    second = Fiber.await(child) match { Success(v) -> v
+      Failure(_) -> [] }
+    List.append(first, second)
+  })
+}
+pub fn sum(xs: List[Int]) -> Int { List.fold(xs, 0, fn(a, b) { a + b }) }

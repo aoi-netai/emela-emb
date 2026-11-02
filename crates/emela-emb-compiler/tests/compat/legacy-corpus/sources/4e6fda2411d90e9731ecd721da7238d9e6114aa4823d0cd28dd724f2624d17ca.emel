@@ -1,0 +1,3 @@
+fn double(value: String) -> String { String.append(value,value) }
+const VALUE = double(double(double(double(double(double(double(double(double(double(double(double(double(double(double(double(double("x")))))))))))))))))
+pub fn size() -> Int { String.byte_size(VALUE) }

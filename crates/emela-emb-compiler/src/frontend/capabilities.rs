@@ -677,6 +677,7 @@ mod tests {
             immediate: false,
             constant: false,
             origin: None,
+            canonical_const: None,
             derivation: None,
             error_show: None,
             name: format!("function_{id}"),

@@ -1,0 +1,53 @@
+
+import Std.Fiber.{Fiber, Success, Failure}
+import Std.Cause.{Cause, Fail, Die, Interrupt}
+@external(c, "host_wait")
+suspend fn wait(n: Int) -> Int
+@external(c, "mark")
+fn mark(n: Int) -> () use {}
+error Boom
+effect Wait { suspend fn get(n: Int) -> Int }
+handler Waiting: Wait { suspend fn get(n,resume) { resume(wait(n)) } }
+effect Resource { fn read() -> Int }
+handler Inner: Resource { fn read() { 0 }
+ release { mark(1) }
+}
+handler Outer: Resource { fn read() { 0 }
+ release { mark(2) }
+}
+fn bounce(c: Cause[{}]) -> Int { with Inner { Cause.raise(c) } }
+pub fn make() -> Cause[{}] use Async {
+ with Waiting {
+  Fiber.scope(fn() {
+   first = Fiber.fork(fn() { (use Wait).get(1) })
+   (use Wait).get(2)
+   Fiber.interrupt(first)
+   Fiber.await(first) match {
+    Success(_) -> panic("unexpected")
+    Failure(c) -> c
+   }
+  })
+ }
+}
+pub fn raised(c: Cause[{}], asynchronous: Bool) -> Int use Async {
+ with Waiting { Fiber.scope(fn() {
+     second = Fiber.fork(fn() { with Outer {
+      if asynchronous { Fiber.attempt(fn() { (use Wait).get(3)
+       bounce(c)
+      }) } else { Fiber.attempt(fn() { bounce(c) }) }
+      mark(99)
+      0
+     } })
+     Fiber.await(second) match {
+      Success(_) -> -1
+      Failure(again) -> {
+       mark(3)
+       Cause.kind(again) match { Interrupt -> 42
+        Fail -> -2
+        Die -> -3
+       }
+      }
+     }
+ }) }
+}
+pub fn show(c: Cause[{}]) -> String { Cause.to_string(c) }

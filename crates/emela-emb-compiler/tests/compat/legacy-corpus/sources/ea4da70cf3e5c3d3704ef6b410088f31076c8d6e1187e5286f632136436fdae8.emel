@@ -1,0 +1,4 @@
+
+import Std.Bytes.{Bytes}
+pub fn size(b: Bytes) -> Int { Bytes.size(b) }
+pub fn at(b: Bytes, i: Int) -> Int { Option.or(Bytes.get(b, i), -1) }

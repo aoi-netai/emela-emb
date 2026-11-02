@@ -1,0 +1,11 @@
+
+import Std.Fiber.{Fiber, Scope}
+import Std.Deferred.{Deferred}
+pub fn leak() -> (fn() -> Bool) use Async {
+  Fiber.scope(fn() {
+    d: Deferred[Int] = (use Scope).deferred()
+    fn() { Deferred.poll(d) match { Some(_) -> True
+None -> False } }
+  })
+}
+

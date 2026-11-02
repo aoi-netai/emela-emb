@@ -1,0 +1,11 @@
+
+fn sum(n: Int) -> Int { if n == 0 { 0 } else { n + sum(n - 1) } }
+fn loop_sum(n: Int, acc: Int) -> Int { if n == 0 { acc } else { loop_sum(n - 1, acc + n) } }
+const VIA_INDIRECT = { f = sum
+ f(6) }
+const VALUE = { dbg("once")
+ if True { VIA_INDIRECT + loop_sum(6, 0) - 21 } else { 0 } }
+const APPLY = { x = VALUE
+ (fn(y: Int) { x + y }, ()) }
+pub fn read() -> Int { (apply, _) = APPLY
+ apply(VALUE) }

@@ -19,7 +19,7 @@ impl Checker {
             };
             let declaration = self.catalog.declaration(*id);
             if declaration.module == definition.module
-                && declaration.ast.variants.len() == 1
+                && declaration.ast.record
                 && declaration.ast.variants[0].fields.iter().any(|field| {
                     field
                         .name
@@ -67,7 +67,7 @@ impl Checker {
             if let Type::Enum(id, _) = self.catalog.core.ty(receiver_type) {
                 let id = *id;
                 let declaration = self.catalog.declaration(id);
-                if declaration.ast.variants.len() == 1
+                if declaration.ast.record
                     && declaration.ast.variants[0].fields.iter().any(|field| {
                         field
                             .name

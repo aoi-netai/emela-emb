@@ -1,0 +1,7 @@
+
+import Std.Bytes.{Bytes}
+pub fn make(s: String) -> Bytes { Bytes.encode_utf8(s) }
+pub fn copy(b: Bytes) -> Bytes { b }
+pub fn part(b: Bytes, a: Int, z: Int) -> Bytes { Bytes.slice(b, a, z) }
+pub fn joined(b: Bytes) -> Bytes { Bytes.concat([b, b]) }
+pub fn listed(b: Bytes) -> List[Bytes] { [b] }

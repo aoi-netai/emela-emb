@@ -1,0 +1,148 @@
+{
+  "kind": "isolated_P7_backend_integration_validation",
+  "base": "a2e8709",
+  "compiler_checkpoint": "8376483",
+  "feature_commits": [
+    "931c3ce",
+    "2c27d11",
+    "76ab71b",
+    "49db59e",
+    "da721f2",
+    "88677b6"
+  ],
+  "integration_adaptation": "Keep all test-module registrations across cherry-pick conflicts, remove duplicate registration, and apply cargo fmt. No compiler behavior changes beyond the listed feature commits.",
+  "coverage": {
+    "legacy_IR_tests_reviewed": 86,
+    "IR_proposal_pending": 0,
+    "cleanup_post_source_IR_seam_cases": 12,
+    "lifted_Fiber_failure_edge_cases": 2,
+    "source_only_runtime_claim_for_seams": false
+  },
+  "checks": {
+    "backend_tests_passed": 146,
+    "backend_tests_failed": 0,
+    "backend_tests_ignored": 0,
+    "backend_elapsed_seconds": 50.13,
+    "strict_clippy_workspace_all_targets": "passed",
+    "actual_Rust_1_85_workspace_all_targets": "passed",
+    "fmt_and_diff": "passed",
+    "C_flags": [
+      "-std=c11",
+      "-Wall",
+      "-Wextra",
+      "-Werror"
+    ],
+    "C_optimizations": [
+      "-O0",
+      "-O2"
+    ],
+    "compiler_absent_skip": false
+  },
+  "limits": [
+    "The final 607 test command succeeds at source snapshot d67dd4a. It runs in an isolated integration worktree; it is not the final standalone archive of the root-owned canonical ledger and final documentation.",
+    "Canonical record/context/test/requirement ledger promotion and final standalone archive remain root-owned.",
+    "The source177 crosswalk was adopted from the owning corpus agent and its reproducibility check passed; no raw reach snapshot was promoted to runtime evidence."
+  ],
+  "followup_source_checkpoint": "20c409e",
+  "followup_commits": [
+    "81a4ef6",
+    "3c3d650",
+    "d048abe",
+    "0c9cd60",
+    "58e6a38",
+    "769241b",
+    "56a42e6"
+  ],
+  "workspace_aggregate_validation": {
+    "single_uninterrupted_workspace_success": false,
+    "prefix": {
+      "snapshot": "bb5e3c0",
+      "successful_targets": 65,
+      "tests_passed": 558,
+      "tests_ignored": 0,
+      "stopped_at": "p7_legacy_bytes",
+      "failure": "main variable used before definition; dbg(call()) intermediate definition was discarded by7fd frontend optimization"
+    },
+    "fix_and_regression": {
+      "snapshot": "3c3d650",
+      "targets": [
+        "p7_legacy_bytes",
+        "p6_scope_lifecycle"
+      ],
+      "tests_passed": 7,
+      "tests_failed": 0,
+      "tests_ignored": 0,
+      "new_unique_tests_after_prefix": 3,
+      "duplicate_lifecycle_tests": 4,
+      "note": "The four lifecycle tests were deliberately repeated to preserve unused-child immediate reclamation and existing-local reuse."
+    },
+    "remaining": {
+      "snapshot": "3c3d650",
+      "integration_targets": 13,
+      "tests_passed": 45,
+      "tests_failed": 0,
+      "tests_ignored": 0
+    },
+    "doc_tests": {
+      "tests_passed": 0,
+      "tests_failed": 0,
+      "tests_ignored": 0
+    },
+    "followup": {
+      "snapshot": "20c409e",
+      "focused_P7_backend_tests_passed": 60,
+      "tests_failed": 0,
+      "tests_ignored": 0,
+      "new_unique_literal_switch_test": 1,
+      "strict_clippy_workspace_all_targets": "passed",
+      "actual_rust_1_85_workspace_all_targets": "passed",
+      "fmt_and_diff": "passed"
+    },
+    "unique_executable_tests_observed_across_phases": 607,
+    "C_optimizations": [
+      "-O0",
+      "-O2"
+    ],
+    "compiler_absent_skip": false,
+    "independent_read_only_review_of_3c3d650": "No concrete issue found. Conservative final-call-only discard retains compound expression uses and direct-call immediate reclamation; no source or test edits by reviewer.",
+    "latest_workspace_executable_inventory": 607,
+    "inventory_check": "cargo test --workspace -- --list confirms607 executable tests at the final source checkpoint; list operation is not execution evidence."
+  },
+  "context_partition_validation": {
+    "common_proposed_verified": 99,
+    "structural_proposed_verified": 122,
+    "root_owned_absent_Stage_selectors": 5,
+    "total": 226,
+    "duplicates": 0,
+    "proposal_pending": 0,
+    "canonical_ledger_modified": false
+  },
+  "official_tracked_source_modified": false,
+  "fresh_workspace_validation": {
+    "source_checkpoint": "d67dd4a",
+    "command": "CARGO_PROFILE_TEST_OPT_LEVEL=1 cargo test --workspace --locked --offline",
+    "single_uninterrupted_workspace_success": true,
+    "successful_target_batches_including_doc": 80,
+    "tests_passed": 607,
+    "tests_failed": 0,
+    "tests_ignored": 0,
+    "doc_tests": 0,
+    "C_optimizations": [
+      "-O0",
+      "-O2"
+    ],
+    "compiler_absent_skip": false,
+    "strict_clippy_workspace_all_targets": "passed",
+    "actual_rust_1_85_workspace_all_targets": "passed",
+    "actual_rustc_version": "rustc 1.85.0 (4d91de4e4 2025-02-17)",
+    "fmt_and_diff": "passed",
+    "additional_focused_corpus_tests_passed": 8,
+    "source_crosswalk_check": {
+      "normal_legacy_tests": 174,
+      "additional_cases": 3,
+      "programs": 169,
+      "open_observations": 0
+    },
+    "notes": "Includes 3c3d650 compound-discard fix, 81a4ef6 minimal defect-frame fix, 769241b literal-switch suspension probe, corpus 6409b64/8a6a585 small-budget strengthening, and all current P7 integration source features."
+  }
+}

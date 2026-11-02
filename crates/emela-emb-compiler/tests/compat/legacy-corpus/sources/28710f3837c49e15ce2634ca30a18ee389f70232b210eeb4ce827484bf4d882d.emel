@@ -1,0 +1,36 @@
+
+@external(c, "host_wait")
+suspend fn wait(n: Int) -> Int
+error Batch(items: List[String]) derive Show
+effect Wait { suspend fn get(n: Int) -> Int }
+handler Waiting: Wait { suspend fn get(n, resume) { resume(wait(n)) } }
+effect Resource { fn read() -> Int }
+handler Res: Resource {
+  fn read() { 0 }
+  release { (use Wait).get(2) }
+}
+fn fail_batch(n: Int) -> Int fails Batch {
+  fail Batch(items: [Int.to_string(n), "tail"])
+}
+fn failing(n: Int) -> Int fails Batch use Wait {
+  with Res {
+    (use Wait).get(1)
+    fail_batch(n)
+  }
+}
+pub fn caught(n: Int, direct: Bool) -> Int use Async {
+  with Waiting {
+    { if direct {
+      with Res {
+        (use Wait).get(1)
+        fail Batch(items: [Int.to_string(n), "tail"])
+      }
+    } else { failing(n) } } escape { Batch(items) -> {
+      (use Wait).get(3)
+      items match {
+        [text, ..rest] -> String.byte_size(text) + List.length(rest)
+        [] -> -1
+      }
+    } }
+  }
+}

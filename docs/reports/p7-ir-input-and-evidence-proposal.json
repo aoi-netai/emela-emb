@@ -1,0 +1,228 @@
+{
+  "fixed_revision": "c34c0aeefdd966d854371b3110db00a47798751d",
+  "base_revision": "888b821",
+  "kind": "proposal_only_no_canonical_ledger_changes",
+  "input_policy_note": "Legacy verify_flow reported InvalidFlowIr; this compiler private typed input reports Unsupported for residual heap-stage constructs. OnFail::Handle is an intentional accepted-and-normalized input contract rather than the old blanket rejection. Stage itself is absent; the retained variants are not marked absent.",
+  "C_flags": [
+    "-std=c11",
+    "-Wall",
+    "-Wextra",
+    "-Werror"
+  ],
+  "optimizations": [
+    "-O0",
+    "-O2"
+  ],
+  "runtime_iterations": 1000,
+  "proposals": [
+    {
+      "id": "emela_lir::Term::Unwind",
+      "contexts": [
+        {
+          "context": "input",
+          "proposed_status": "verified_rejected",
+          "evidence": [
+            {
+              "path": "crates/emela-emb-compiler/src/backend/lower/p7_contract_tests.rs",
+              "symbol": "unwind_environment_values_and_refcount_statements_are_rejected_as_input"
+            }
+          ],
+          "reason": "The variant is retained and constructible. Native and suspending independent inputs are rejected before planning; this is not a nonexistent-schema exemption."
+        }
+      ],
+      "new_implementation": [
+        {
+          "path": "crates/emela-emb-compiler/src/backend/lower.rs",
+          "symbol": "validate_sequence"
+        }
+      ]
+    },
+    {
+      "id": "emela_lir::Value::MakeClosure",
+      "contexts": [
+        {
+          "context": "input",
+          "proposed_status": "verified_rejected",
+          "evidence": [
+            {
+              "path": "crates/emela-emb-compiler/src/backend/lower/p7_contract_tests.rs",
+              "symbol": "unwind_environment_values_and_refcount_statements_are_rejected_as_input"
+            }
+          ],
+          "reason": "The variant is retained and constructible. Native and suspending independent inputs are rejected before planning; this is not a nonexistent-schema exemption."
+        }
+      ],
+      "new_implementation": [
+        {
+          "path": "crates/emela-emb-compiler/src/backend/lower/values.rs",
+          "symbol": "value_type"
+        }
+      ]
+    },
+    {
+      "id": "emela_lir::Value::EnvGet",
+      "contexts": [
+        {
+          "context": "input",
+          "proposed_status": "verified_rejected",
+          "evidence": [
+            {
+              "path": "crates/emela-emb-compiler/src/backend/lower/p7_contract_tests.rs",
+              "symbol": "unwind_environment_values_and_refcount_statements_are_rejected_as_input"
+            }
+          ],
+          "reason": "The variant is retained and constructible. Native and suspending independent inputs are rejected before planning; this is not a nonexistent-schema exemption."
+        }
+      ],
+      "new_implementation": [
+        {
+          "path": "crates/emela-emb-compiler/src/backend/lower/values.rs",
+          "symbol": "value_type"
+        }
+      ]
+    },
+    {
+      "id": "emela_lir::Stmt::Dup",
+      "contexts": [
+        {
+          "context": "input",
+          "proposed_status": "verified_rejected",
+          "evidence": [
+            {
+              "path": "crates/emela-emb-compiler/src/backend/lower/p7_contract_tests.rs",
+              "symbol": "unwind_environment_values_and_refcount_statements_are_rejected_as_input"
+            }
+          ],
+          "reason": "The variant is retained and constructible. Native and suspending independent inputs are rejected before planning; this is not a nonexistent-schema exemption."
+        }
+      ],
+      "new_implementation": [
+        {
+          "path": "crates/emela-emb-compiler/src/backend/lower.rs",
+          "symbol": "validate_sequence"
+        }
+      ]
+    },
+    {
+      "id": "emela_lir::Stmt::Drop",
+      "contexts": [
+        {
+          "context": "input",
+          "proposed_status": "verified_rejected",
+          "evidence": [
+            {
+              "path": "crates/emela-emb-compiler/src/backend/lower/p7_contract_tests.rs",
+              "symbol": "unwind_environment_values_and_refcount_statements_are_rejected_as_input"
+            }
+          ],
+          "reason": "The variant is retained and constructible. Native and suspending independent inputs are rejected before planning; this is not a nonexistent-schema exemption."
+        }
+      ],
+      "new_implementation": [
+        {
+          "path": "crates/emela-emb-compiler/src/backend/lower.rs",
+          "symbol": "validate_sequence"
+        }
+      ]
+    },
+    {
+      "id": "emela_lir::OnFail::Handle",
+      "include_variant_members": [
+        "error",
+        "body"
+      ],
+      "contexts": [
+        {
+          "context": "input",
+          "proposed_status": "verified_normalized",
+          "evidence": [
+            {
+              "path": "crates/emela-emb-compiler/src/backend/lower/p7_contract_tests.rs",
+              "symbol": "local_failure_handlers_are_validated_and_normalized_in_sync_and_suspend_calls"
+            }
+          ],
+          "reason": "The independent input deliberately accepts typed local handlers and normalizes them to Block/Break. Success bypasses the handler; failure invokes it. Wrong error type, handler result type and escaping local error are rejected. Both native and suspended C calls execute 1000 success/failure pairs with no remaining Handle edge."
+        }
+      ],
+      "new_implementation": [
+        {
+          "path": "crates/emela-emb-compiler/src/backend/lower.rs",
+          "symbol": "validate_sequence"
+        },
+        {
+          "path": "crates/emela-emb-compiler/src/backend/lower/failures.rs",
+          "symbol": "normalize"
+        }
+      ]
+    },
+    {
+      "id": "emela_lir::Value::Handler",
+      "contexts": [
+        {
+          "context": "sync",
+          "proposed_status": "verified_executed",
+          "evidence": [
+            {
+              "path": "crates/emela-emb-compiler/src/backend/lower/p7_evidence_tests.rs",
+              "symbol": "discarded_handler_and_evidence_constructors_release_before_the_next_statement"
+            }
+          ],
+          "reason": "A temporary owned destination preserves construction/lookup validation, then releases the discarded result immediately. Missing lookup still defects; borrowed caller evidence survives 13 calls per iteration.",
+          "observation": "discarded_result"
+        }
+      ],
+      "new_implementation": [
+        {
+          "path": "crates/emela-emb-compiler/src/backend/lower.rs",
+          "symbol": "lower_program"
+        }
+      ]
+    },
+    {
+      "id": "emela_lir::Value::EvExtend",
+      "contexts": [
+        {
+          "context": "sync",
+          "proposed_status": "verified_executed",
+          "evidence": [
+            {
+              "path": "crates/emela-emb-compiler/src/backend/lower/p7_evidence_tests.rs",
+              "symbol": "discarded_handler_and_evidence_constructors_release_before_the_next_statement"
+            }
+          ],
+          "reason": "A temporary owned destination preserves construction/lookup validation, then releases the discarded result immediately. Missing lookup still defects; borrowed caller evidence survives 13 calls per iteration.",
+          "observation": "discarded_result"
+        }
+      ],
+      "new_implementation": [
+        {
+          "path": "crates/emela-emb-compiler/src/backend/lower.rs",
+          "symbol": "lower_program"
+        }
+      ]
+    },
+    {
+      "id": "emela_lir::Value::EvLookup",
+      "contexts": [
+        {
+          "context": "sync",
+          "proposed_status": "verified_executed",
+          "evidence": [
+            {
+              "path": "crates/emela-emb-compiler/src/backend/lower/p7_evidence_tests.rs",
+              "symbol": "discarded_dynamic_evidence_lookup_checks_missing_handlers_without_releasing_the_caller"
+            }
+          ],
+          "reason": "A temporary owned destination preserves construction/lookup validation, then releases the discarded result immediately. Missing lookup still defects; borrowed caller evidence survives 13 calls per iteration.",
+          "observation": "discarded_result"
+        }
+      ],
+      "new_implementation": [
+        {
+          "path": "crates/emela-emb-compiler/src/backend/lower.rs",
+          "symbol": "lower_program"
+        }
+      ]
+    }
+  ]
+}

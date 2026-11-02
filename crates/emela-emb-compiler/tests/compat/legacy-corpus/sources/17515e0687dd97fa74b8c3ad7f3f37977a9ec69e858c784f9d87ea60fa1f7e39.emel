@@ -1,0 +1,7 @@
+
+import Std.Bytes.{Bytes}
+pub fn round_trip(n: Int) -> Bool {
+  value = Option.or(Bytes.from_list([0, n, 255]), Bytes.empty())
+  if n < 0 || n > 255 { Bytes.is_empty(value) }
+  else { Bytes.to_list(value) == [0, n, 255] }
+}

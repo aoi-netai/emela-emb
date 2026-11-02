@@ -1,0 +1,11 @@
+
+import Std.Fiber.{Fiber, Success, Failure}
+pub fn leak() -> (fn() -> Int use Async) use Async {
+  Fiber.scope(fn() {
+    child = Fiber.fork(fn() { 42 })
+    Fiber.join(child)
+    fn() { Fiber.await(child) match { Success(v) -> v
+      Failure(_) -> -1 } }
+  })
+}
+pub fn invoke(f: fn() -> Int fails {} use Async) -> Int use Async { f() }

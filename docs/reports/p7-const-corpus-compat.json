@@ -1,0 +1,422 @@
+{
+  "schema_version": 1,
+  "baseline_revision": "c34c0aeefdd966d854371b3110db00a47798751d",
+  "scope": "既存raw generic const8旧testに加える残14旧testの観測照合。15program（ISR2入力）を扱う。",
+  "entries": [
+    {
+      "program": "program:12c836689dcf8fbdefcc",
+      "legacy_tests": [
+        "emit::const_runtime::evaluates_branch_loop_recursive_helper_and_closure_const_once"
+      ],
+      "files": [
+        {
+          "name": "main.emel",
+          "fixture": "sources/1ebeab828a050a0d8dcc7b18c885f868aa3a2de645dd79d3f7a5d8db56cf8323.emel",
+          "source_id": "source:1ebeab828a050a0d8dcc",
+          "sha256": "1ebeab828a050a0d8dcc7b18c885f868aa3a2de645dd79d3f7a5d8db56cf8323"
+        }
+      ],
+      "route": "original-source",
+      "new_test": {
+        "kind": "source_test",
+        "path": "crates/emela-emb-compiler/src/backend/lower/p7_const_source_tests.rs",
+        "symbol": "original_const_sources_keep_recursive_closures_aggregates_and_discarded_first_reads"
+      },
+      "observations": [
+        "旧heap4096/8192と1000回の結果42/44",
+        "再帰/末尾再帰/closure const、tuple/List/OptionString保持、debug初期化1回",
+        "最初の参照が破棄でもhost1回、UNUSED未初期化"
+      ],
+      "source_adaptation": "元本文を保ち、指定pub関数へC exportだけを追加する。",
+      "GC_adaptation": null
+    },
+    {
+      "program": "program:fb872bf260d3593b4367",
+      "legacy_tests": [
+        "emit::const_runtime::keeps_list_tuple_enum_and_option_string_const_values_alive"
+      ],
+      "files": [
+        {
+          "name": "main.emel",
+          "fixture": "sources/d89ff5aa547d425b8e2ef285c70580b11286d7393cde1e252723fe4ff0788c4a.emel",
+          "source_id": "source:d89ff5aa547d425b8e2e",
+          "sha256": "d89ff5aa547d425b8e2ef285c70580b11286d7393cde1e252723fe4ff0788c4a"
+        }
+      ],
+      "route": "original-source",
+      "new_test": {
+        "kind": "source_test",
+        "path": "crates/emela-emb-compiler/src/backend/lower/p7_const_source_tests.rs",
+        "symbol": "original_const_sources_keep_recursive_closures_aggregates_and_discarded_first_reads"
+      },
+      "observations": [
+        "旧heap4096/8192と1000回の結果42/44",
+        "再帰/末尾再帰/closure const、tuple/List/OptionString保持、debug初期化1回",
+        "最初の参照が破棄でもhost1回、UNUSED未初期化"
+      ],
+      "source_adaptation": "元本文を保ち、指定pub関数へC exportだけを追加する。",
+      "GC_adaptation": null
+    },
+    {
+      "program": "program:356d9928e442971ded00",
+      "legacy_tests": [
+        "emit::const_runtime::caches_runtime_const_external_results_and_discards_without_reinitializing"
+      ],
+      "files": [
+        {
+          "name": "main.emel",
+          "fixture": "sources/1075c062bfa6c33bec8bf4250b7ff39649bbf950ae2870bfea817d933f62cb72.emel",
+          "source_id": "source:1075c062bfa6c33bec8b",
+          "sha256": "1075c062bfa6c33bec8bf4250b7ff39649bbf950ae2870bfea817d933f62cb72"
+        }
+      ],
+      "route": "original-source",
+      "new_test": {
+        "kind": "source_test",
+        "path": "crates/emela-emb-compiler/src/backend/lower/p7_const_source_tests.rs",
+        "symbol": "original_const_sources_keep_recursive_closures_aggregates_and_discarded_first_reads"
+      },
+      "observations": [
+        "旧heap4096/8192と1000回の結果42/44",
+        "再帰/末尾再帰/closure const、tuple/List/OptionString保持、debug初期化1回",
+        "最初の参照が破棄でもhost1回、UNUSED未初期化"
+      ],
+      "source_adaptation": "元本文を保ち、指定pub関数へC exportだけを追加する。",
+      "GC_adaptation": null
+    },
+    {
+      "program": "program:fee491a366b1c1ad5051",
+      "legacy_tests": [
+        "emit::const_runtime::memoizes_nested_const_defects_and_retries_self_reference_without_prefix"
+      ],
+      "files": [
+        {
+          "name": "main.emel",
+          "fixture": "sources/e8a837384e74b496543c494e9ffaf951d762278526343e94e95a4bcf44409227.emel",
+          "source_id": "source:e8a837384e74b496543c",
+          "sha256": "e8a837384e74b496543c494e9ffaf951d762278526343e94e95a4bcf44409227"
+        }
+      ],
+      "route": "original-source",
+      "new_test": {
+        "kind": "source_test",
+        "path": "crates/emela-emb-compiler/src/backend/lower/p7_const_source_tests.rs",
+        "symbol": "original_nested_const_defects_cache_the_exact_context_and_self_reference_retries"
+      },
+      "observations": [
+        "1000回cached A/B division defectのkind/全文context、host/debug1回",
+        "SELFは1000回再試行しcontext prefix無し、host累計1001回"
+      ],
+      "source_adaptation": "元本文を保ち、指定pub関数へC exportだけを追加する。",
+      "GC_adaptation": null
+    },
+    {
+      "program": "program:c52f04cf604c46c53d58",
+      "legacy_tests": [
+        "emit::const_runtime::heap_exhaustion_during_const_initialization_keeps_its_name_and_cached_defect"
+      ],
+      "files": [
+        {
+          "name": "main.emel",
+          "fixture": "sources/3470498cb17d1e6fc78b7e5c20daf069a582428eae78c0a87976a58c99dcfeac.emel",
+          "source_id": "source:3470498cb17d1e6fc78b",
+          "sha256": "3470498cb17d1e6fc78b7e5c20daf069a582428eae78c0a87976a58c99dcfeac"
+        }
+      ],
+      "route": "original-source",
+      "new_test": {
+        "kind": "source_test",
+        "path": "crates/emela-emb-compiler/src/backend/lower/p7_const_source_tests.rs",
+        "symbol": "original_const_heap_and_adapter_defects_are_cached_with_the_source_name"
+      },
+      "observations": [
+        "heap64不足とStringBuffer容量16不正を1000回cached",
+        "旧defect kind/全文source const context一致、adapter実行1回"
+      ],
+      "source_adaptation": "元本文を保ち、指定pub関数へC exportだけを追加する。",
+      "GC_adaptation": null
+    },
+    {
+      "program": "program:bd83fac6076474dfdacf",
+      "legacy_tests": [
+        "emit::const_runtime::external::adapter_contract_defects_are_memoized_with_the_source_const_name"
+      ],
+      "files": [
+        {
+          "name": "main.emel",
+          "fixture": "sources/7bb0297410fd968f98458a1092906c73953da55d677d155a45f51cc0b165b760.emel",
+          "source_id": "source:7bb0297410fd968f9845",
+          "sha256": "7bb0297410fd968f98458a1092906c73953da55d677d155a45f51cc0b165b760"
+        }
+      ],
+      "route": "original-source",
+      "new_test": {
+        "kind": "source_test",
+        "path": "crates/emela-emb-compiler/src/backend/lower/p7_const_source_tests.rs",
+        "symbol": "original_const_heap_and_adapter_defects_are_cached_with_the_source_name"
+      },
+      "observations": [
+        "heap64不足とStringBuffer容量16不正を1000回cached",
+        "旧defect kind/全文source const context一致、adapter実行1回"
+      ],
+      "source_adaptation": "元本文を保ち、指定pub関数へC exportだけを追加する。",
+      "GC_adaptation": null
+    },
+    {
+      "program": "program:2f21eb2017b3f0b1d760",
+      "legacy_tests": [
+        "emit::const_runtime::oversized_static_string_growth_falls_back_before_unbounded_compiler_allocation"
+      ],
+      "files": [
+        {
+          "name": "main.emel",
+          "fixture": "sources/4e6fda2411d90e9731ecd721da7238d9e6114aa4823d0cd28dd724f2624d17ca.emel",
+          "source_id": "source:4e6fda2411d90e9731ec",
+          "sha256": "4e6fda2411d90e9731ecd721da7238d9e6114aa4823d0cd28dd724f2624d17ca"
+        }
+      ],
+      "route": "original-source",
+      "new_test": {
+        "kind": "source_test",
+        "path": "crates/emela-emb-compiler/src/backend/lower/p7_const_source_tests.rs",
+        "symbol": "original_exponential_static_string_uses_bounded_runtime_evaluation"
+      },
+      "observations": [
+        "17段倍増を静的に無制限構築せずruntimeへfallback",
+        "heap1024/String32、StringCapacity defectとconst VALUE prefix"
+      ],
+      "source_adaptation": "元本文を保ち、指定pub関数へC exportだけを追加する。",
+      "GC_adaptation": null
+    },
+    {
+      "program": "program:661bd10d1eb4fcbe825b",
+      "legacy_tests": [
+        "emit::const_runtime::persistent_const_roots_survive_cycle_collection_and_caller_release"
+      ],
+      "files": [
+        {
+          "name": "main.emel",
+          "fixture": "sources/eaa26fe8c1293c069c162f584e4b8e1f8ac57561ec87989f8698efadad4f4928.emel",
+          "source_id": "source:eaa26fe8c1293c069c16",
+          "sha256": "eaa26fe8c1293c069c162f584e4b8e1f8ac57561ec87989f8698efadad4f4928"
+        }
+      ],
+      "route": "original-source-with-optional-GC-anchor",
+      "new_test": {
+        "kind": "source_test",
+        "path": "crates/emela-emb-compiler/src/backend/lower/p7_const_source_tests.rs",
+        "symbol": "original_const_roots_survive_cycle_collection_and_callable_family_reads"
+      },
+      "observations": [
+        "旧heap4096/32768、frame1024",
+        "強制GC後もconst root/返却値を保持、1000回以上のheap使用量不変",
+        "9種類のcallable結果42と9回だけの初期化、GC有無を比較"
+      ],
+      "source_adaptation": "元本文を保ち、指定pub関数へC exportだけを追加する。",
+      "GC_adaptation": "固定旧と同じreachable Cell[Any]のtest専用IR functionを通常source lowering後へ追加し、強制cycle collectionを呼ぶ。"
+    },
+    {
+      "program": "program:3341457f78b9863e37dd",
+      "legacy_tests": [
+        "emit::const_runtime::polymorphic_const_callable_families_preserve_failure_evidence_and_selected_origins"
+      ],
+      "files": [
+        {
+          "name": "main.emel",
+          "fixture": "sources/d890627621254b8304f9ceb1426517793e6cdc94d6870fff2ef0bf4cab758c03.emel",
+          "source_id": "source:d890627621254b8304f9",
+          "sha256": "d890627621254b8304f9ceb1426517793e6cdc94d6870fff2ef0bf4cab758c03"
+        }
+      ],
+      "route": "original-source-with-optional-GC-anchor",
+      "new_test": {
+        "kind": "source_test",
+        "path": "crates/emela-emb-compiler/src/backend/lower/p7_const_source_tests.rs",
+        "symbol": "original_const_roots_survive_cycle_collection_and_callable_family_reads"
+      },
+      "observations": [
+        "旧heap4096/32768、frame1024",
+        "強制GC後もconst root/返却値を保持、1000回以上のheap使用量不変",
+        "9種類のcallable結果42と9回だけの初期化、GC有無を比較"
+      ],
+      "source_adaptation": "元本文を保ち、指定pub関数へC exportだけを追加する。",
+      "GC_adaptation": "固定旧と同じreachable Cell[Any]のtest専用IR functionを通常source lowering後へ追加し、強制cycle collectionを呼ぶ。"
+    },
+    {
+      "program": "program:d81aa6294c52e64c91a5",
+      "legacy_tests": [
+        "emit::const_runtime::external::pure_external_string_const_caches_borrowed_owned_and_caller_buffer_values_across_public_flow_and_gc"
+      ],
+      "files": [
+        {
+          "name": "main.emel",
+          "fixture": "sources/aa70cf7d2d17a3947ff5b3c82bdcea91368298f48031515493bf5a62cd903b0c.emel",
+          "source_id": "source:aa70cf7d2d17a3947ff5",
+          "sha256": "aa70cf7d2d17a3947ff5b3c82bdcea91368298f48031515493bf5a62cd903b0c"
+        }
+      ],
+      "route": "original-source-with-optional-GC-anchor",
+      "new_test": {
+        "kind": "source_test",
+        "path": "crates/emela-emb-compiler/src/backend/lower/p7_const_source_tests.rs",
+        "symbol": "original_external_string_const_keeps_one_snapshot_for_all_policies_and_gc_modes"
+      },
+      "observations": [
+        "heap2048、Borrowed/Owned/StringBuffer×GC有無",
+        "最初の参照を破棄、元buffer上書き後もNUL付き4\\02を保持",
+        "所有戻り値を1000回releaseしてbaseline不変、host1回"
+      ],
+      "source_adaptation": "元本文を保ち、指定pub関数へC exportだけを追加する。",
+      "GC_adaptation": "固定旧と同じreachable Cell[Any]のtest専用IR functionを通常source lowering後へ追加し、強制cycle collectionを呼ぶ。"
+    },
+    {
+      "program": "program:a7326c76e24e2c628792",
+      "legacy_tests": [
+        "emit::const_runtime::external::pure_external_aggregate_const_owns_string_and_list_fields_after_board_release"
+      ],
+      "files": [
+        {
+          "name": "main.emel",
+          "fixture": "sources/dd30a4853ad5b7fc62b34c35706f0d28927c197ba132969f8ad17058398ba189.emel",
+          "source_id": "source:dd30a4853ad5b7fc62b3",
+          "sha256": "dd30a4853ad5b7fc62b34c35706f0d28927c197ba132969f8ad17058398ba189"
+        }
+      ],
+      "route": "original-source-with-optional-GC-anchor",
+      "new_test": {
+        "kind": "source_test",
+        "path": "crates/emela-emb-compiler/src/backend/lower/p7_const_source_tests.rs",
+        "symbol": "original_external_aggregate_const_owns_fields_after_the_board_releases_its_value"
+      },
+      "observations": [
+        "heap4096、GC有無、Borrowed tuple(String,List[String])",
+        "board保持値とcaller値をreleaseし元buffer上書き",
+        "1000回のtuple field/List head NUL文字列保持とbaseline不変、host1回"
+      ],
+      "source_adaptation": "元本文を保ち、指定pub関数へC exportだけを追加する。",
+      "GC_adaptation": "固定旧と同じreachable Cell[Any]のtest専用IR functionを通常source lowering後へ追加し、強制cycle collectionを呼ぶ。"
+    },
+    {
+      "program": "program:5ce8d2ba40fb42a01466",
+      "legacy_tests": [
+        "emit::const_runtime::rejects_runtime_const_reachable_from_isr_but_preserves_static_fold"
+      ],
+      "files": [
+        {
+          "name": "main.emel",
+          "fixture": "sources/7d8d1d371057c55b1648ce6229b2579477222a2353e5efb384dd9de6b50c947b.emel",
+          "source_id": "source:7d8d1d371057c55b1648",
+          "sha256": "7d8d1d371057c55b1648ce6229b2579477222a2353e5efb384dd9de6b50c947b"
+        }
+      ],
+      "route": "original-source",
+      "new_test": {
+        "kind": "source_test",
+        "path": "crates/emela-emb-compiler/src/backend/lower/p7_const_source_tests.rs",
+        "symbol": "original_runtime_const_isr_rejection_keeps_the_static_alternative_heapless"
+      },
+      "observations": [
+        "旧ISR入口read/外部fixture_seed許可でもruntime const initializationを拒否",
+        "static40+2はEmelaConstState/heapを出さず1000回42"
+      ],
+      "source_adaptation": "元本文を保ち、指定pub関数へC exportだけを追加する。",
+      "GC_adaptation": null
+    },
+    {
+      "program": "program:7eaad73bc9a9b5a9bcaa",
+      "legacy_tests": [
+        "emit::const_runtime::rejects_runtime_const_reachable_from_isr_but_preserves_static_fold"
+      ],
+      "files": [
+        {
+          "name": "main.emel",
+          "fixture": "sources/d8fd1c4c90ff151320d754fc3b6f02d1be5278a26059185977e2db4a97ebfcb7.emel",
+          "source_id": "source:d8fd1c4c90ff151320d7",
+          "sha256": "d8fd1c4c90ff151320d754fc3b6f02d1be5278a26059185977e2db4a97ebfcb7"
+        }
+      ],
+      "route": "original-source",
+      "new_test": {
+        "kind": "source_test",
+        "path": "crates/emela-emb-compiler/src/backend/lower/p7_const_source_tests.rs",
+        "symbol": "original_runtime_const_isr_rejection_keeps_the_static_alternative_heapless"
+      },
+      "observations": [
+        "旧ISR入口read/外部fixture_seed許可でもruntime const initializationを拒否",
+        "static40+2はEmelaConstState/heapを出さず1000回42"
+      ],
+      "source_adaptation": "元本文を保ち、指定pub関数へC exportだけを追加する。",
+      "GC_adaptation": null
+    },
+    {
+      "program": "program:fce8e7b6b3eba553963a",
+      "legacy_tests": [
+        "emit::const_runtime::external::pure_external_opaque_const_memoizes_the_board_handle_without_heap"
+      ],
+      "files": [
+        {
+          "name": "main.emel",
+          "fixture": "sources/9cdae934fb05960023833c3ba926fc321163208ef0a6818ce598bca49f93ffb9.emel",
+          "source_id": "source:9cdae934fb0596002383",
+          "sha256": "9cdae934fb05960023833c3ba926fc321163208ef0a6818ce598bca49f93ffb9"
+        }
+      ],
+      "route": "existing-source-observation-replacement",
+      "new_test": {
+        "kind": "source_test",
+        "path": "crates/emela-emb-compiler/tests/p7_external_types.rs",
+        "symbol": "opaque_external_values_keep_pointer_identity_and_const_memoization_without_heap"
+      },
+      "observations": [
+        "旧bare external Token/TOKEN初期化とpub readを包含",
+        "Borrowed/Owned×NULL/nonNULL×1000回、pointer identityとhost1回",
+        "heap不要も同じC生成物で確認"
+      ],
+      "source_adaptation": "既存のより広いfixtureに旧入力・C観測が含まれる。原本文自体の新たなruntime実行とは数えない。",
+      "GC_adaptation": null
+    },
+    {
+      "program": "program:c8599a8fbf13ac6c2ec8",
+      "legacy_tests": [
+        "emit::const_runtime::polymorphic_const_opaque_handles_forward_one_pointer_abi_and_one_initialization"
+      ],
+      "files": [
+        {
+          "name": "main.emel",
+          "fixture": "sources/a07a28ab1f1cf32903417bcc3abef529a72b9275d93fc2373837709b3ccfe9cb.emel",
+          "source_id": "source:a07a28ab1f1cf3290341",
+          "sha256": "a07a28ab1f1cf32903417bcc3abef529a72b9275d93fc2373837709b3ccfe9cb"
+        }
+      ],
+      "route": "existing-source-observation-replacement",
+      "new_test": {
+        "kind": "source_test",
+        "path": "crates/emela-emb-compiler/tests/p7_generic_consts.rs",
+        "symbol": "generic_external_const_handles_share_one_nullable_host_pointer_without_heap"
+      },
+      "observations": [
+        "旧Handle[Int]/Handle[String]の共有family・pointer ABIと単一初期化を包含",
+        "Borrowedに加えOwned、非NULLに加えNULL、各1000回、heapなし"
+      ],
+      "source_adaptation": "既存のより広いfixtureに旧入力・C観測が含まれる。原本文自体の新たなruntime実行とは数えない。",
+      "GC_adaptation": null
+    }
+  ],
+  "run": {
+    "source_revision": "e00cc30",
+    "uncommitted_test_sha256": "3da7c2a98db53d015af863ecab637f3525bbbaab0abe35fdba2fbd26ec08babe",
+    "commands": [
+      "CARGO_PROFILE_TEST_OPT_LEVEL=1 cargo test -p emela-emb-compiler --lib p7_const_source --locked --offline（追加前7試験）",
+      "CARGO_PROFILE_TEST_OPT_LEVEL=1 cargo test -p emela-emb-compiler --lib original_runtime_const_isr_rejection_keeps_the_static_alternative_heapless --locked --offline"
+    ],
+    "passed": 8,
+    "failed": 0,
+    "ignored": 0,
+    "C": [
+      "-std=c11 -Wall -Wextra -Werror -O0",
+      "-std=c11 -Wall -Wextra -Werror -O2"
+    ],
+    "notes": "既存opaque置換2件はb22c959のP7 source29試験の実行証拠。旧public Core/Flow二つの入口は独立frontend→backendの単一入口へ集約し、GCの意味は別途実行。最終統合snapshotで全試験を再確認する。"
+  },
+  "gc_anchor_sha256": "01c076eb48367d0df62f57175e2fadf2e16b8cc4dadd7e7950b7c4a7211fa708"
+}

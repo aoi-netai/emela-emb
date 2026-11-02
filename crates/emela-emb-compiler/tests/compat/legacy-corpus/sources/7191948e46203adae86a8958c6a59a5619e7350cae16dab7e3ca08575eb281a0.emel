@@ -1,0 +1,12 @@
+
+import Std.Fiber.{Fiber, Success, Failure}
+import Std.Cause.{Cause}
+pub fn failure() -> Cause[{}] use Async {
+  Fiber.scope(fn() {
+    child = Fiber.fork(fn() { 42 })
+    Fiber.interrupt(child)
+    Fiber.await(child) match { Failure(c) -> c
+      Success(_) -> panic("expected interruption") }
+  })
+}
+pub fn keep(c: Cause[{}]) -> Cause[{}] { c }

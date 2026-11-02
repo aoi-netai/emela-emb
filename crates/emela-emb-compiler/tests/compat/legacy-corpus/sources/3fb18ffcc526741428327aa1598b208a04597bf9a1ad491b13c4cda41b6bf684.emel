@@ -1,0 +1,35 @@
+
+import Std.Fiber.{Fiber, Scope}
+import Std.Deferred.{Deferred}
+@external(c, "host_wait")
+suspend fn wait(n: Int) -> Int
+@external(c, "mark")
+fn mark(n: Int) -> () use {}
+effect Wait { suspend fn get(n: Int) -> Int }
+handler Waiting: Wait { suspend fn get(n, resume) { resume(wait(n)) } }
+pub fn cancel(early: Bool) -> Int use Async {
+  with Waiting {
+    Fiber.scope(fn() {
+      d: Deferred[Int] = (use Scope).deferred()
+      target = Fiber.fork(fn() { Deferred.await(d) })
+      Fiber.scope(fn() {
+        a: Deferred[()] = (use Scope).deferred()
+        b: Deferred[()] = (use Scope).deferred()
+        Fiber.fork(fn() { Deferred.await(a)
+          Fiber.join(target)
+          mark(99) })
+        Fiber.fork(fn() { Deferred.await(b)
+          Fiber.join(target)
+          mark(99) })
+        Fiber.fork(fn() { Deferred.complete(a, ())
+          Deferred.complete(b, ())
+          Fiber.join(target)
+          mark(99) })
+        (use Wait).get(1)
+        if early { Deferred.complete(d, 42) } else { False }
+      })
+      Deferred.complete(d, 42)
+      Fiber.join(target)
+    })
+  }
+}

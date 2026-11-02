@@ -1,0 +1,2335 @@
+{
+  "schema_version": 1,
+  "legacy_revision": "c34c0aeefdd966d854371b3110db00a47798751d",
+  "policy": "Original source bodies with explicit exports only; C observations and post-source seams are reported separately. Pending records are not coverage claims.",
+  "cases": [
+    {
+      "legacy_test": "emit::deferred::await_preserves_string_and_list_results_past_frame_and_scope_reuse",
+      "legacy_path": "crates/emela-codegen-emb/tests/deferred/mod.rs",
+      "legacy_line": 442,
+      "programs": [
+        "program:d7d35bbc08500ea36416"
+      ],
+      "original_files": {
+        "program:d7d35bbc08500ea36416": [
+          {
+            "name": "main.emel",
+            "fixture": "sources/09d77fd35b21027246e2fcd97b6a040b1f6f67972dbf29294f0189b4e212408b.emel",
+            "source_id": "source:09d77fd35b21027246e2",
+            "sha256": "09d77fd35b21027246e2fcd97b6a040b1f6f67972dbf29294f0189b4e212408b"
+          }
+        ]
+      },
+      "legacy_options": {
+        "heap_bytes": 8192,
+        "fiber_capacity": 8,
+        "frame_capacity": 24,
+        "frame_bytes": 512,
+        "deferred_capacity": 2
+      },
+      "source_adaptation": "explicit C export only; original source fixture is byte-preserved",
+      "runtime_variants": [
+        {
+          "program": "program:d7d35bbc08500ea36416",
+          "source_sha256": "09d77fd35b21027246e2fcd97b6a040b1f6f67972dbf29294f0189b4e212408b",
+          "new_test": "tests/p7_deferred_compat.rs::await_preserves_string_and_list_results_past_frame_and_scope_reuse",
+          "harness": "tests/compat/p7/concurrency/await_preserves_string_and_list_results_past_frame_and_scope_reuse.c",
+          "status": "runtime-passed",
+          "actual_options": {
+            "heap_bytes": 8192,
+            "fiber_capacity": 8,
+            "frame_capacity": 24,
+            "frame_bytes": 512,
+            "deferred_capacity": 1
+          },
+          "old_postprocessing": "none; generated C heap observer only",
+          "C_generation": "accepted",
+          "strict_C_objects": {
+            "-O0": "compiled-linked",
+            "-O2": "compiled-linked"
+          },
+          "C_runtime": {
+            "-O0": "passed",
+            "-O2": "passed"
+          },
+          "successful_iterations": 1000,
+          "terminal_defect_observed": false,
+          "heap_observation": "all fully released iterations assert heap empty",
+          "old_resource_budgets_preserved": true
+        }
+      ],
+      "status": "source-runtime-verified",
+      "legacy_C_assertions": [
+        "emela_scheduler_run(1)",
+        "emela_scheduler_run(1)",
+        "text.owner && text.length == 2 && memcmp(text.data, \"42\", 2) == 0",
+        "emela_export_length_2(list) == 2"
+      ],
+      "harness_adaptations": [
+        "stable explicit export names",
+        "function/aggregate ABI type numbers and release symbol resolved from generated public header",
+        "event lock hooks supplied when required",
+        "heap-empty audit after fully released successful iterations"
+      ],
+      "recommended_ledger_status": "replaced",
+      "final_integrated_verification": "required",
+      "source_API_path": "source checker -> normalization -> specialization -> frontend lower -> independent backend -> public C export; no IR edits",
+      "legacy_rust_sha256": "0e343dcede15b37c59d08286561faeff8a3fb534b23f2c6f601ae0e1c0d52616"
+    },
+    {
+      "legacy_test": "emit::deferred::await_resumes_all_waiters_in_fifo_order_after_completer_finishes",
+      "legacy_path": "crates/emela-codegen-emb/tests/deferred/mod.rs",
+      "legacy_line": 376,
+      "programs": [
+        "program:a18100d79c54375672ef"
+      ],
+      "original_files": {
+        "program:a18100d79c54375672ef": [
+          {
+            "name": "main.emel",
+            "fixture": "sources/440f3d1a7a4f4be0f3deead5487b52c757ed2e0637e58281db7595ad1d49c331.emel",
+            "source_id": "source:440f3d1a7a4f4be0f3de",
+            "sha256": "440f3d1a7a4f4be0f3deead5487b52c757ed2e0637e58281db7595ad1d49c331"
+          }
+        ]
+      },
+      "legacy_options": {
+        "heap_bytes": 8192,
+        "fiber_capacity": 8,
+        "frame_capacity": 24,
+        "frame_bytes": 512,
+        "deferred_capacity": 2
+      },
+      "source_adaptation": "explicit C export only; original source fixture is byte-preserved",
+      "runtime_variants": [
+        {
+          "program": "program:a18100d79c54375672ef",
+          "source_sha256": "440f3d1a7a4f4be0f3deead5487b52c757ed2e0637e58281db7595ad1d49c331",
+          "new_test": "tests/p7_deferred_compat.rs::await_resumes_all_waiters_in_fifo_order_after_completer_finishes",
+          "harness": "tests/compat/p7/concurrency/await_resumes_all_waiters_in_fifo_order_after_completer_finishes.c",
+          "status": "runtime-passed",
+          "actual_options": {
+            "heap_bytes": 8192,
+            "fiber_capacity": 8,
+            "frame_capacity": 24,
+            "frame_bytes": 512,
+            "deferred_capacity": 3
+          },
+          "old_postprocessing": "none; generated C heap observer only",
+          "C_generation": "accepted",
+          "strict_C_objects": {
+            "-O0": "compiled-linked",
+            "-O2": "compiled-linked"
+          },
+          "C_runtime": {
+            "-O0": "passed",
+            "-O2": "passed"
+          },
+          "successful_iterations": 1000,
+          "terminal_defect_observed": false,
+          "heap_observation": "all fully released iterations assert heap empty",
+          "old_resource_budgets_preserved": true
+        }
+      ],
+      "status": "source-runtime-verified",
+      "legacy_C_assertions": [
+        "count < 6 && n == expected[count++]",
+        "emela_scheduler_run(0) == 0 && count == 0 && result == -1",
+        "emela_scheduler_run(1)",
+        "result == 10 && count == 6"
+      ],
+      "harness_adaptations": [
+        "stable explicit export names",
+        "function/aggregate ABI type numbers and release symbol resolved from generated public header",
+        "event lock hooks supplied when required",
+        "heap-empty audit after fully released successful iterations"
+      ],
+      "recommended_ledger_status": "replaced",
+      "final_integrated_verification": "required",
+      "source_API_path": "source checker -> normalization -> specialization -> frontend lower -> independent backend -> public C export; no IR edits",
+      "legacy_rust_sha256": "0e343dcede15b37c59d08286561faeff8a3fb534b23f2c6f601ae0e1c0d52616"
+    },
+    {
+      "legacy_test": "emit::deferred::complete_copies_borrowed_string_and_poll_retains_it_past_scope_end",
+      "legacy_path": "crates/emela-codegen-emb/tests/deferred/mod.rs",
+      "legacy_line": 316,
+      "programs": [
+        "program:331a2c931ce2d58cc538"
+      ],
+      "original_files": {
+        "program:331a2c931ce2d58cc538": [
+          {
+            "name": "main.emel",
+            "fixture": "sources/acd7bf4e88d35dc246b9197dafb293a1321dbca20def9b883831224d407f65d6.emel",
+            "source_id": "source:acd7bf4e88d35dc246b9",
+            "sha256": "acd7bf4e88d35dc246b9197dafb293a1321dbca20def9b883831224d407f65d6"
+          }
+        ]
+      },
+      "legacy_options": {
+        "heap_bytes": 8192,
+        "fiber_capacity": 8,
+        "frame_capacity": 24,
+        "frame_bytes": 512,
+        "deferred_capacity": 2
+      },
+      "source_adaptation": "explicit C export only; original source fixture is byte-preserved",
+      "runtime_variants": [
+        {
+          "program": "program:331a2c931ce2d58cc538",
+          "source_sha256": "acd7bf4e88d35dc246b9197dafb293a1321dbca20def9b883831224d407f65d6",
+          "new_test": "tests/p7_deferred_compat.rs::complete_copies_borrowed_string_and_poll_retains_it_past_scope_end",
+          "harness": "tests/compat/p7/concurrency/complete_copies_borrowed_string_and_poll_retains_it_past_scope_end.c",
+          "status": "runtime-passed",
+          "actual_options": {
+            "heap_bytes": 8192,
+            "fiber_capacity": 8,
+            "frame_capacity": 24,
+            "frame_bytes": 512,
+            "deferred_capacity": 1,
+            "string_capacity": 16
+          },
+          "old_postprocessing": "none; generated C heap observer only",
+          "C_generation": "accepted",
+          "strict_C_objects": {
+            "-O0": "compiled-linked",
+            "-O2": "compiled-linked"
+          },
+          "C_runtime": {
+            "-O0": "passed",
+            "-O2": "passed"
+          },
+          "successful_iterations": 1000,
+          "terminal_defect_observed": false,
+          "heap_observation": "all fully released iterations assert heap empty",
+          "old_resource_budgets_preserved": true
+        }
+      ],
+      "status": "source-runtime-verified",
+      "legacy_C_assertions": [
+        "emela_scheduler_run(1)",
+        "value.owner && value.length == 2 && memcmp(value.data, \"42\", 2) == 0"
+      ],
+      "harness_adaptations": [
+        "stable explicit export names",
+        "function/aggregate ABI type numbers and release symbol resolved from generated public header",
+        "event lock hooks supplied when required",
+        "heap-empty audit after fully released successful iterations"
+      ],
+      "recommended_ledger_status": "replaced",
+      "final_integrated_verification": "required",
+      "source_API_path": "source checker -> normalization -> specialization -> frontend lower -> independent backend -> public C export; no IR edits",
+      "legacy_rust_sha256": "0e343dcede15b37c59d08286561faeff8a3fb534b23f2c6f601ae0e1c0d52616"
+    },
+    {
+      "legacy_test": "emit::deferred::complete_stores_once_and_scope_end_breaks_cycles_through_captured_deferreds",
+      "legacy_path": "crates/emela-codegen-emb/tests/deferred/mod.rs",
+      "legacy_line": 142,
+      "programs": [
+        "program:d364a88840d93693e7a1"
+      ],
+      "original_files": {
+        "program:d364a88840d93693e7a1": [
+          {
+            "name": "main.emel",
+            "fixture": "sources/ff14e44cdb1ff58ac3c87d49f7c9d58579ca038d8a6e64b93b1e295f115b3d96.emel",
+            "source_id": "source:ff14e44cdb1ff58ac3c8",
+            "sha256": "ff14e44cdb1ff58ac3c87d49f7c9d58579ca038d8a6e64b93b1e295f115b3d96"
+          }
+        ]
+      },
+      "legacy_options": {
+        "heap_bytes": 8192,
+        "fiber_capacity": 8,
+        "frame_capacity": 24,
+        "frame_bytes": 512,
+        "deferred_capacity": 2
+      },
+      "source_adaptation": "explicit C export only; original source fixture is byte-preserved",
+      "runtime_variants": [
+        {
+          "program": "program:d364a88840d93693e7a1",
+          "source_sha256": "ff14e44cdb1ff58ac3c87d49f7c9d58579ca038d8a6e64b93b1e295f115b3d96",
+          "new_test": "tests/p7_deferred_compat.rs::complete_stores_once_and_scope_end_breaks_cycles_through_captured_deferreds",
+          "harness": "tests/compat/p7/concurrency/complete_stores_once_and_scope_end_breaks_cycles_through_captured_deferreds.c",
+          "status": "runtime-passed",
+          "actual_options": {
+            "heap_bytes": 8192,
+            "fiber_capacity": 8,
+            "frame_capacity": 24,
+            "frame_bytes": 512,
+            "deferred_capacity": 1
+          },
+          "old_postprocessing": "none; generated C heap observer only",
+          "C_generation": "accepted",
+          "strict_C_objects": {
+            "-O0": "compiled-linked",
+            "-O2": "compiled-linked"
+          },
+          "C_runtime": {
+            "-O0": "passed",
+            "-O2": "passed"
+          },
+          "successful_iterations": 1000,
+          "terminal_defect_observed": false,
+          "heap_observation": "all fully released iterations assert heap empty",
+          "old_resource_budgets_preserved": true
+        }
+      ],
+      "status": "source-runtime-verified",
+      "legacy_C_assertions": [
+        "emela_scheduler_run(1)",
+        "result == 1",
+        "emela_scheduler_run(1)",
+        "result == 1"
+      ],
+      "harness_adaptations": [
+        "stable explicit export names",
+        "function/aggregate ABI type numbers and release symbol resolved from generated public header",
+        "event lock hooks supplied when required",
+        "heap-empty audit after fully released successful iterations"
+      ],
+      "recommended_ledger_status": "replaced",
+      "final_integrated_verification": "required",
+      "source_API_path": "source checker -> normalization -> specialization -> frontend lower -> independent backend -> public C export; no IR edits",
+      "legacy_rust_sha256": "0e343dcede15b37c59d08286561faeff8a3fb534b23f2c6f601ae0e1c0d52616"
+    },
+    {
+      "legacy_test": "emit::deferred::deferred_constructor_reuses_slots_and_scope_only_programs_omit_the_pool",
+      "legacy_path": "crates/emela-codegen-emb/tests/deferred/mod.rs",
+      "legacy_line": 13,
+      "programs": [
+        "program:9c2f7bf8afd6c491518f",
+        "program:f7d2e02f4b35e1f1f64f"
+      ],
+      "original_files": {
+        "program:9c2f7bf8afd6c491518f": [
+          {
+            "name": "main.emel",
+            "fixture": "sources/e22d947309209ab57f8767c67e5ebe82e750c20a1eeb131408737c10e07fa2fb.emel",
+            "source_id": "source:e22d947309209ab57f87",
+            "sha256": "e22d947309209ab57f8767c67e5ebe82e750c20a1eeb131408737c10e07fa2fb"
+          }
+        ],
+        "program:f7d2e02f4b35e1f1f64f": [
+          {
+            "name": "main.emel",
+            "fixture": "sources/990d337c23cea5eac8947205398bf55de0d3652b430aa73dbdeaeab6fe702cf6.emel",
+            "source_id": "source:990d337c23cea5eac894",
+            "sha256": "990d337c23cea5eac8947205398bf55de0d3652b430aa73dbdeaeab6fe702cf6"
+          }
+        ]
+      },
+      "legacy_options": {
+        "heap_bytes": 8192,
+        "fiber_capacity": 8,
+        "frame_capacity": 24,
+        "frame_bytes": 512,
+        "deferred_capacity": 2
+      },
+      "source_adaptation": "explicit C export only; original source fixture is byte-preserved",
+      "runtime_variants": [
+        {
+          "program": "program:f7d2e02f4b35e1f1f64f",
+          "source_sha256": "990d337c23cea5eac8947205398bf55de0d3652b430aa73dbdeaeab6fe702cf6",
+          "new_test": "tests/p7_deferred_compat.rs::deferred_constructor_reuses_slots_and_scope_only_programs_omit_the_pool",
+          "harness": "tests/compat/p7/concurrency/deferred_constructor_reuses_slots_and_scope_only_programs_omit_the_pool.c",
+          "status": "runtime-passed",
+          "actual_options": {
+            "heap_bytes": 8192,
+            "fiber_capacity": 8,
+            "frame_capacity": 24,
+            "frame_bytes": 512,
+            "deferred_capacity": 1
+          },
+          "old_postprocessing": "none; generated C heap observer only",
+          "C_generation": "accepted",
+          "strict_C_objects": {
+            "-O0": "compiled-linked",
+            "-O2": "compiled-linked"
+          },
+          "C_runtime": {
+            "-O0": "passed",
+            "-O2": "passed"
+          },
+          "successful_iterations": 1000,
+          "terminal_defect_observed": false,
+          "heap_observation": "all fully released iterations assert heap empty",
+          "old_resource_budgets_preserved": true
+        }
+      ],
+      "status": "source-runtime-verified",
+      "legacy_C_assertions": [
+        "emela_scheduler_run(1)"
+      ],
+      "harness_adaptations": [
+        "stable explicit export names",
+        "function/aggregate ABI type numbers and release symbol resolved from generated public header",
+        "event lock hooks supplied when required",
+        "heap-empty audit after fully released successful iterations"
+      ],
+      "recommended_ledger_status": "replaced",
+      "final_integrated_verification": "required",
+      "source_API_path": "source checker -> normalization -> specialization -> frontend lower -> independent backend -> public C export; no IR edits",
+      "legacy_rust_sha256": "0e343dcede15b37c59d08286561faeff8a3fb534b23f2c6f601ae0e1c0d52616",
+      "artifact_observations": [
+        {
+          "program": "program:f7d2e02f4b35e1f1f64f",
+          "deferred_capacity": 1,
+          "C_define": "EMELA_DEFERRED_CAPACITY 1",
+          "result": "passed"
+        },
+        {
+          "program": "program:f7d2e02f4b35e1f1f64f",
+          "deferred_capacity": 0,
+          "diagnostic_contains": "deferred_capacity must be positive",
+          "result": "rejected as required"
+        },
+        {
+          "program": "program:9c2f7bf8afd6c491518f",
+          "deferred_capacity": 0,
+          "C_define": "EMELA_DEFERRED_CAPACITY absent",
+          "result": "passed; legacy artifact-only source, no additional runtime claim"
+        }
+      ]
+    },
+    {
+      "legacy_test": "emit::deferred::deferred_pool_exhaustion_uses_the_defined_defect",
+      "legacy_path": "crates/emela-codegen-emb/tests/deferred/mod.rs",
+      "legacy_line": 695,
+      "programs": [
+        "program:513af204033ab6c391db"
+      ],
+      "original_files": {
+        "program:513af204033ab6c391db": [
+          {
+            "name": "main.emel",
+            "fixture": "sources/e262c5165926bb3e8596a9bc7de0dea2686af814e0a0d1cf44b0d961169ade9e.emel",
+            "source_id": "source:e262c5165926bb3e8596",
+            "sha256": "e262c5165926bb3e8596a9bc7de0dea2686af814e0a0d1cf44b0d961169ade9e"
+          }
+        ]
+      },
+      "legacy_options": {
+        "heap_bytes": 8192,
+        "fiber_capacity": 8,
+        "frame_capacity": 24,
+        "frame_bytes": 512,
+        "deferred_capacity": 2
+      },
+      "source_adaptation": "explicit C export only; original source fixture is byte-preserved",
+      "runtime_variants": [
+        {
+          "program": "program:513af204033ab6c391db",
+          "source_sha256": "e262c5165926bb3e8596a9bc7de0dea2686af814e0a0d1cf44b0d961169ade9e",
+          "new_test": "tests/p7_deferred_compat.rs::deferred_pool_exhaustion_uses_the_defined_defect",
+          "harness": "tests/compat/p7/concurrency/deferred_pool_exhaustion_uses_the_defined_defect.c",
+          "status": "runtime-passed",
+          "actual_options": {
+            "heap_bytes": 8192,
+            "fiber_capacity": 8,
+            "frame_capacity": 24,
+            "frame_bytes": 512,
+            "deferred_capacity": 1
+          },
+          "old_postprocessing": "none",
+          "C_generation": "accepted",
+          "strict_C_objects": {
+            "-O0": "compiled-linked",
+            "-O2": "compiled-linked"
+          },
+          "C_runtime": {
+            "-O0": "passed",
+            "-O2": "passed"
+          },
+          "successful_iterations": 0,
+          "terminal_defect_observed": true,
+          "heap_observation": "terminal defect follows original process-stop observation; live callback retained intentionally",
+          "old_resource_budgets_preserved": true
+        }
+      ],
+      "status": "source-runtime-verified",
+      "legacy_C_assertions": [
+        "k == EMELA_DEFECT_HEAP_EXHAUSTED"
+      ],
+      "harness_adaptations": [
+        "stable explicit export names",
+        "function/aggregate ABI type numbers and release symbol resolved from generated public header",
+        "event lock hooks supplied when required",
+        "heap-empty audit after fully released successful iterations"
+      ],
+      "recommended_ledger_status": "replaced",
+      "final_integrated_verification": "required",
+      "source_API_path": "source checker -> normalization -> specialization -> frontend lower -> independent backend -> public C export; no IR edits",
+      "legacy_rust_sha256": "0e343dcede15b37c59d08286561faeff8a3fb534b23f2c6f601ae0e1c0d52616"
+    },
+    {
+      "legacy_test": "emit::deferred::deferred_round_trips_int64_and_float_bits_through_await_and_poll",
+      "legacy_path": "crates/emela-codegen-emb/tests/deferred/mod.rs",
+      "legacy_line": 584,
+      "programs": [
+        "program:dd78f6f854fc5e190a80"
+      ],
+      "original_files": {
+        "program:dd78f6f854fc5e190a80": [
+          {
+            "name": "main.emel",
+            "fixture": "sources/f8d01d1632ef0970c36dcee86f02bcad4da89018bdad911a762324ce7dd2b8a2.emel",
+            "source_id": "source:f8d01d1632ef0970c36d",
+            "sha256": "f8d01d1632ef0970c36dcee86f02bcad4da89018bdad911a762324ce7dd2b8a2"
+          }
+        ]
+      },
+      "legacy_options": {
+        "heap_bytes": 8192,
+        "fiber_capacity": 8,
+        "frame_capacity": 24,
+        "frame_bytes": 512,
+        "deferred_capacity": 2
+      },
+      "source_adaptation": "explicit C export only; original source fixture is byte-preserved",
+      "runtime_variants": [
+        {
+          "program": "program:dd78f6f854fc5e190a80",
+          "source_sha256": "f8d01d1632ef0970c36dcee86f02bcad4da89018bdad911a762324ce7dd2b8a2",
+          "new_test": "tests/p7_deferred_compat.rs::deferred_round_trips_int64_and_float_bits_through_await_and_poll",
+          "harness": "tests/compat/p7/concurrency/deferred_round_trips_int64_and_float_bits_through_await_and_poll.c",
+          "status": "runtime-passed",
+          "actual_options": {
+            "heap_bytes": 8192,
+            "fiber_capacity": 8,
+            "frame_capacity": 24,
+            "frame_bytes": 512,
+            "deferred_capacity": 1
+          },
+          "old_postprocessing": "none; generated C heap observer only",
+          "C_generation": "accepted",
+          "strict_C_objects": {
+            "-O0": "compiled-linked",
+            "-O2": "compiled-linked"
+          },
+          "C_runtime": {
+            "-O0": "passed",
+            "-O2": "passed"
+          },
+          "successful_iterations": 1000,
+          "terminal_defect_observed": false,
+          "heap_observation": "all fully released iterations assert heap empty",
+          "old_resource_budgets_preserved": true
+        }
+      ],
+      "status": "source-runtime-verified",
+      "legacy_C_assertions": [
+        "emela_scheduler_run(1)",
+        "wide == INT64_MIN",
+        "emela_scheduler_run(1)",
+        "memcmp(&real, &input, sizeof(double)) == 0"
+      ],
+      "harness_adaptations": [
+        "stable explicit export names",
+        "function/aggregate ABI type numbers and release symbol resolved from generated public header",
+        "event lock hooks supplied when required",
+        "heap-empty audit after fully released successful iterations"
+      ],
+      "recommended_ledger_status": "replaced",
+      "final_integrated_verification": "required",
+      "source_API_path": "source checker -> normalization -> specialization -> frontend lower -> independent backend -> public C export; no IR edits",
+      "legacy_rust_sha256": "0e343dcede15b37c59d08286561faeff8a3fb534b23f2c6f601ae0e1c0d52616"
+    },
+    {
+      "legacy_test": "emit::deferred::deferred_transfers_tuple_values_and_boolean_flags",
+      "legacy_path": "crates/emela-codegen-emb/tests/deferred/mod.rs",
+      "legacy_line": 810,
+      "programs": [
+        "program:6bf09cbf4f33df5e9332"
+      ],
+      "original_files": {
+        "program:6bf09cbf4f33df5e9332": [
+          {
+            "name": "main.emel",
+            "fixture": "sources/c9ee97f7f942892bb82075c56e6b554a5457cd064de0aa4efad9aa9c56696255.emel",
+            "source_id": "source:c9ee97f7f942892bb820",
+            "sha256": "c9ee97f7f942892bb82075c56e6b554a5457cd064de0aa4efad9aa9c56696255"
+          }
+        ]
+      },
+      "legacy_options": {
+        "heap_bytes": 8192,
+        "fiber_capacity": 8,
+        "frame_capacity": 24,
+        "frame_bytes": 512,
+        "deferred_capacity": 2
+      },
+      "source_adaptation": "explicit C export only; original source fixture is byte-preserved",
+      "runtime_variants": [
+        {
+          "program": "program:6bf09cbf4f33df5e9332",
+          "source_sha256": "c9ee97f7f942892bb82075c56e6b554a5457cd064de0aa4efad9aa9c56696255",
+          "new_test": "tests/p7_deferred_compat.rs::deferred_transfers_tuple_values_and_boolean_flags",
+          "harness": "tests/compat/p7/concurrency/deferred_transfers_tuple_values_and_boolean_flags.c",
+          "status": "runtime-passed",
+          "actual_options": {
+            "heap_bytes": 8192,
+            "fiber_capacity": 8,
+            "frame_capacity": 24,
+            "frame_bytes": 512,
+            "deferred_capacity": 1
+          },
+          "old_postprocessing": "none; generated C heap observer only",
+          "C_generation": "accepted",
+          "strict_C_objects": {
+            "-O0": "compiled-linked",
+            "-O2": "compiled-linked"
+          },
+          "C_runtime": {
+            "-O0": "passed",
+            "-O2": "passed"
+          },
+          "successful_iterations": 1000,
+          "terminal_defect_observed": false,
+          "heap_observation": "all fully released iterations assert heap empty",
+          "old_resource_budgets_preserved": true
+        }
+      ],
+      "status": "source-runtime-verified",
+      "legacy_C_assertions": [
+        "emela_scheduler_run(1)",
+        "result == 2 * i + 1",
+        "emela_scheduler_run(1)",
+        "result == i % 2"
+      ],
+      "harness_adaptations": [
+        "stable explicit export names",
+        "function/aggregate ABI type numbers and release symbol resolved from generated public header",
+        "event lock hooks supplied when required",
+        "heap-empty audit after fully released successful iterations"
+      ],
+      "recommended_ledger_status": "replaced",
+      "final_integrated_verification": "required",
+      "source_API_path": "source checker -> normalization -> specialization -> frontend lower -> independent backend -> public C export; no IR edits",
+      "legacy_rust_sha256": "0e343dcede15b37c59d08286561faeff8a3fb534b23f2c6f601ae0e1c0d52616"
+    },
+    {
+      "legacy_test": "emit::deferred::deferred_wait_is_a_real_resume_boundary_and_root_end_reclaims_pending_operation",
+      "legacy_path": "crates/emela-codegen-emb/tests/deferred/mod.rs",
+      "legacy_line": 639,
+      "programs": [
+        "program:2ce8270cb6507630ec58"
+      ],
+      "original_files": {
+        "program:2ce8270cb6507630ec58": [
+          {
+            "name": "main.emel",
+            "fixture": "sources/1ea65aa42e332c1d5dba3070ee1f4d4ce24818a918db8e003819a443a9e9db89.emel",
+            "source_id": "source:1ea65aa42e332c1d5dba",
+            "sha256": "1ea65aa42e332c1d5dba3070ee1f4d4ce24818a918db8e003819a443a9e9db89"
+          }
+        ]
+      },
+      "legacy_options": {
+        "heap_bytes": 8192,
+        "fiber_capacity": 8,
+        "frame_capacity": 24,
+        "frame_bytes": 512,
+        "deferred_capacity": 2
+      },
+      "source_adaptation": "explicit C export only; original source fixture is byte-preserved",
+      "runtime_variants": [
+        {
+          "program": "program:2ce8270cb6507630ec58",
+          "source_sha256": "1ea65aa42e332c1d5dba3070ee1f4d4ce24818a918db8e003819a443a9e9db89",
+          "new_test": "tests/p7_deferred_compat.rs::deferred_wait_is_a_real_resume_boundary_and_root_end_reclaims_pending_operation",
+          "harness": "tests/compat/p7/concurrency/deferred_wait_is_a_real_resume_boundary_and_root_end_reclaims_pending_operation.c",
+          "status": "runtime-passed",
+          "actual_options": {
+            "heap_bytes": 8192,
+            "fiber_capacity": 8,
+            "frame_capacity": 24,
+            "frame_bytes": 512,
+            "deferred_capacity": 1
+          },
+          "old_postprocessing": "none; generated C heap observer only",
+          "C_generation": "accepted",
+          "strict_C_objects": {
+            "-O0": "compiled-linked",
+            "-O2": "compiled-linked"
+          },
+          "C_runtime": {
+            "-O0": "passed",
+            "-O2": "passed"
+          },
+          "successful_iterations": 1000,
+          "terminal_defect_observed": false,
+          "heap_observation": "all fully released iterations assert heap empty",
+          "old_resource_budgets_preserved": true
+        }
+      ],
+      "status": "source-runtime-verified",
+      "legacy_C_assertions": [
+        "n == ++marks",
+        "emela_scheduler_run(1)",
+        "result == 7 && marks == 3"
+      ],
+      "harness_adaptations": [
+        "stable explicit export names",
+        "function/aggregate ABI type numbers and release symbol resolved from generated public header",
+        "event lock hooks supplied when required",
+        "heap-empty audit after fully released successful iterations"
+      ],
+      "recommended_ledger_status": "replaced",
+      "final_integrated_verification": "required",
+      "source_API_path": "source checker -> normalization -> specialization -> frontend lower -> independent backend -> public C export; no IR edits",
+      "legacy_rust_sha256": "0e343dcede15b37c59d08286561faeff8a3fb534b23f2c6f601ae0e1c0d52616"
+    },
+    {
+      "legacy_test": "emit::deferred::ended_deferred_poll_and_await_reject_leaked_callbacks_after_slot_reuse",
+      "legacy_path": "crates/emela-codegen-emb/tests/deferred/mod.rs",
+      "legacy_line": 732,
+      "programs": [
+        "program:112331fc072b58fda27c",
+        "program:884cdff6b76ad186a1ab"
+      ],
+      "original_files": {
+        "program:112331fc072b58fda27c": [
+          {
+            "name": "main.emel",
+            "fixture": "sources/c4f1b942172d789f31d4b299a7c8ed81c5990455e90b0a5a9f02cf0c7d211bda.emel",
+            "source_id": "source:c4f1b942172d789f31d4",
+            "sha256": "c4f1b942172d789f31d4b299a7c8ed81c5990455e90b0a5a9f02cf0c7d211bda"
+          }
+        ],
+        "program:884cdff6b76ad186a1ab": [
+          {
+            "name": "main.emel",
+            "fixture": "sources/6454690863d207729427473fed100c1850e4acf4a4007de446e9e8053e10f3ab.emel",
+            "source_id": "source:6454690863d207729427",
+            "sha256": "6454690863d207729427473fed100c1850e4acf4a4007de446e9e8053e10f3ab"
+          }
+        ]
+      },
+      "legacy_options": {
+        "heap_bytes": 8192,
+        "fiber_capacity": 8,
+        "frame_capacity": 24,
+        "frame_bytes": 512,
+        "deferred_capacity": 2
+      },
+      "source_adaptation": "explicit C export only; original source fixture is byte-preserved",
+      "runtime_variants": [
+        {
+          "program": "program:112331fc072b58fda27c",
+          "source_sha256": "c4f1b942172d789f31d4b299a7c8ed81c5990455e90b0a5a9f02cf0c7d211bda",
+          "new_test": "tests/p7_deferred_compat.rs::ended_deferred_poll_and_await_reject_leaked_callbacks_after_slot_reuse_poll",
+          "harness": "tests/compat/p7/concurrency/ended_deferred_poll_and_await_reject_leaked_callbacks_after_slot_reuse_poll.c",
+          "status": "runtime-passed",
+          "actual_options": {
+            "heap_bytes": 8192,
+            "fiber_capacity": 8,
+            "frame_capacity": 24,
+            "frame_bytes": 512,
+            "deferred_capacity": 1
+          },
+          "old_postprocessing": "none",
+          "C_generation": "accepted",
+          "strict_C_objects": {
+            "-O0": "compiled-linked",
+            "-O2": "compiled-linked"
+          },
+          "C_runtime": {
+            "-O0": "passed",
+            "-O2": "passed"
+          },
+          "successful_iterations": 1000,
+          "terminal_defect_observed": true,
+          "heap_observation": "terminal defect follows original process-stop observation; live callback retained intentionally",
+          "old_resource_budgets_preserved": true
+        },
+        {
+          "program": "program:884cdff6b76ad186a1ab",
+          "source_sha256": "6454690863d207729427473fed100c1850e4acf4a4007de446e9e8053e10f3ab",
+          "new_test": "tests/p7_deferred_compat.rs::ended_deferred_poll_and_await_reject_leaked_callbacks_after_slot_reuse_await",
+          "harness": "tests/compat/p7/concurrency/ended_deferred_poll_and_await_reject_leaked_callbacks_after_slot_reuse_await.c",
+          "status": "runtime-passed",
+          "actual_options": {
+            "heap_bytes": 8192,
+            "fiber_capacity": 8,
+            "frame_capacity": 24,
+            "frame_bytes": 512,
+            "deferred_capacity": 1
+          },
+          "old_postprocessing": "none",
+          "C_generation": "accepted",
+          "strict_C_objects": {
+            "-O0": "compiled-linked",
+            "-O2": "compiled-linked"
+          },
+          "C_runtime": {
+            "-O0": "passed",
+            "-O2": "passed"
+          },
+          "successful_iterations": 1000,
+          "terminal_defect_observed": true,
+          "heap_observation": "terminal defect follows original process-stop observation; live callback retained intentionally",
+          "old_resource_budgets_preserved": true
+        }
+      ],
+      "status": "source-runtime-verified",
+      "legacy_C_assertions": [
+        "expected && k == EMELA_DEFECT_PANIC && n == {len}",
+        "memcmp(m, \"{message}\", n) == 0",
+        "emela_scheduler_run(1)",
+        "emela_scheduler_run(1)"
+      ],
+      "harness_adaptations": [
+        "stable explicit export names",
+        "function/aggregate ABI type numbers and release symbol resolved from generated public header",
+        "event lock hooks supplied when required",
+        "heap-empty audit after fully released successful iterations"
+      ],
+      "recommended_ledger_status": "replaced",
+      "final_integrated_verification": "required",
+      "source_API_path": "source checker -> normalization -> specialization -> frontend lower -> independent backend -> public C export; no IR edits",
+      "legacy_rust_sha256": "0e343dcede15b37c59d08286561faeff8a3fb534b23f2c6f601ae0e1c0d52616"
+    },
+    {
+      "legacy_test": "emit::deferred::leaked_complete_callback_checks_scope_before_recycled_slot",
+      "legacy_path": "crates/emela-codegen-emb/tests/deferred/mod.rs",
+      "legacy_line": 194,
+      "programs": [
+        "program:4feeee010d5462bd622d"
+      ],
+      "original_files": {
+        "program:4feeee010d5462bd622d": [
+          {
+            "name": "main.emel",
+            "fixture": "sources/c32ba77cbf93104518ccc366d3388e190b4c912b705fc87202fb1ceb507f7510.emel",
+            "source_id": "source:c32ba77cbf93104518cc",
+            "sha256": "c32ba77cbf93104518ccc366d3388e190b4c912b705fc87202fb1ceb507f7510"
+          }
+        ]
+      },
+      "legacy_options": {
+        "heap_bytes": 8192,
+        "fiber_capacity": 8,
+        "frame_capacity": 24,
+        "frame_bytes": 512,
+        "deferred_capacity": 2
+      },
+      "source_adaptation": "explicit C export only; original source fixture is byte-preserved",
+      "runtime_variants": [
+        {
+          "program": "program:4feeee010d5462bd622d",
+          "source_sha256": "c32ba77cbf93104518ccc366d3388e190b4c912b705fc87202fb1ceb507f7510",
+          "new_test": "tests/p7_deferred_compat.rs::leaked_complete_callback_checks_scope_before_recycled_slot",
+          "harness": "tests/compat/p7/concurrency/leaked_complete_callback_checks_scope_before_recycled_slot.c",
+          "status": "runtime-passed",
+          "actual_options": {
+            "heap_bytes": 8192,
+            "fiber_capacity": 8,
+            "frame_capacity": 24,
+            "frame_bytes": 512,
+            "deferred_capacity": 1
+          },
+          "old_postprocessing": "none",
+          "C_generation": "accepted",
+          "strict_C_objects": {
+            "-O0": "compiled-linked",
+            "-O2": "compiled-linked"
+          },
+          "C_runtime": {
+            "-O0": "passed",
+            "-O2": "passed"
+          },
+          "successful_iterations": 1000,
+          "terminal_defect_observed": true,
+          "heap_observation": "terminal defect follows original process-stop observation; live callback retained intentionally",
+          "old_resource_budgets_preserved": true
+        }
+      ],
+      "status": "source-runtime-verified",
+      "legacy_C_assertions": [
+        "expected && k == EMELA_DEFECT_PANIC && n == 44",
+        "memcmp(m, \"deferred was completed after its scope ended\", 44) == 0",
+        "emela_scheduler_run(1)",
+        "emela_scheduler_run(1)"
+      ],
+      "harness_adaptations": [
+        "stable explicit export names",
+        "function/aggregate ABI type numbers and release symbol resolved from generated public header",
+        "event lock hooks supplied when required",
+        "heap-empty audit after fully released successful iterations"
+      ],
+      "recommended_ledger_status": "replaced",
+      "final_integrated_verification": "required",
+      "source_API_path": "source checker -> normalization -> specialization -> frontend lower -> independent backend -> public C export; no IR edits",
+      "legacy_rust_sha256": "0e343dcede15b37c59d08286561faeff8a3fb534b23f2c6f601ae0e1c0d52616"
+    },
+    {
+      "legacy_test": "emit::deferred::nested_scope_cancellation_unlinks_middle_tail_and_head_waiters_and_ready_deliveries",
+      "legacy_path": "crates/emela-codegen-emb/tests/deferred/mod.rs",
+      "legacy_line": 500,
+      "programs": [
+        "program:28a6cce6abfc4186e46c"
+      ],
+      "original_files": {
+        "program:28a6cce6abfc4186e46c": [
+          {
+            "name": "main.emel",
+            "fixture": "sources/1eb66f065e0d3a0f1d63c3d4c1cbade1d68435d715e94bd746d06d1efa7187f6.emel",
+            "source_id": "source:1eb66f065e0d3a0f1d63",
+            "sha256": "1eb66f065e0d3a0f1d63c3d4c1cbade1d68435d715e94bd746d06d1efa7187f6"
+          }
+        ]
+      },
+      "legacy_options": {
+        "heap_bytes": 8192,
+        "fiber_capacity": 8,
+        "frame_capacity": 24,
+        "frame_bytes": 512,
+        "deferred_capacity": 2
+      },
+      "source_adaptation": "explicit C export only; original source fixture is byte-preserved",
+      "status": "source-runtime-verified",
+      "evidence": "tests/p6_scope_lifecycle.rs::cancelling_nested_source_scopes_unlinks_all_deferred_waiters",
+      "observations": "Existing P6 original-body C observation is re-executed here with the original legacy resource budgets.",
+      "runtime_variants": [
+        {
+          "program": "program:28a6cce6abfc4186e46c",
+          "source_sha256": "1eb66f065e0d3a0f1d63c3d4c1cbade1d68435d715e94bd746d06d1efa7187f6",
+          "new_test": "tests/p7_deferred_compat.rs::nested_scope_cancellation_unlinks_middle_tail_and_head_waiters_and_ready_deliveries",
+          "harness": "tests/compat/p7/concurrency/nested_scope_cancellation_unlinks_middle_tail_and_head_waiters_and_ready_deliveries.c",
+          "status": "runtime-passed",
+          "actual_options": {
+            "heap_bytes": 8192,
+            "fiber_capacity": 8,
+            "frame_capacity": 40,
+            "frame_bytes": 512,
+            "deferred_capacity": 3,
+            "task_capacity": 1,
+            "event_capacity": 1
+          },
+          "old_postprocessing": "none; generated C heap observer only",
+          "C_generation": "accepted",
+          "strict_C_objects": {
+            "-O0": "compiled-linked",
+            "-O2": "compiled-linked"
+          },
+          "C_runtime": {
+            "-O0": "passed",
+            "-O2": "passed"
+          },
+          "successful_iterations": 1000,
+          "terminal_defect_observed": false,
+          "heap_observation": "all fully released iterations assert heap empty",
+          "old_resource_budgets_preserved": true
+        }
+      ],
+      "legacy_C_assertions": [
+        "n == 1 && !called++",
+        "called == 1 && !emela_fiber_done(f)",
+        "emela_task_complete_int(pending, 1)",
+        "emela_scheduler_run(1)",
+        "result == 42 && !emela_task_complete_int(pending, 0)"
+      ],
+      "harness_adaptations": [
+        "stable explicit export names",
+        "function/aggregate ABI type numbers and release symbol resolved from generated public header",
+        "event lock hooks supplied when required",
+        "heap-empty audit after fully released successful iterations"
+      ],
+      "recommended_ledger_status": "replaced",
+      "final_integrated_verification": "required",
+      "source_API_path": "source checker -> normalization -> specialization -> frontend lower -> independent backend -> public C export; no IR edits",
+      "legacy_rust_sha256": "0e343dcede15b37c59d08286561faeff8a3fb534b23f2c6f601ae0e1c0d52616"
+    },
+    {
+      "legacy_test": "emit::deferred::poll_observes_empty_and_first_value_for_scalar_and_unit_without_yielding",
+      "legacy_path": "crates/emela-codegen-emb/tests/deferred/mod.rs",
+      "legacy_line": 254,
+      "programs": [
+        "program:f590f55865c7dd94150f"
+      ],
+      "original_files": {
+        "program:f590f55865c7dd94150f": [
+          {
+            "name": "main.emel",
+            "fixture": "sources/a6b444b3e7a1aba4ba52ed9aac3547822f224887e093136ac4b78b07c0dae749.emel",
+            "source_id": "source:a6b444b3e7a1aba4ba52",
+            "sha256": "a6b444b3e7a1aba4ba52ed9aac3547822f224887e093136ac4b78b07c0dae749"
+          }
+        ]
+      },
+      "legacy_options": {
+        "heap_bytes": 8192,
+        "fiber_capacity": 8,
+        "frame_capacity": 24,
+        "frame_bytes": 512,
+        "deferred_capacity": 2
+      },
+      "source_adaptation": "explicit C export only; original source fixture is byte-preserved",
+      "runtime_variants": [
+        {
+          "program": "program:f590f55865c7dd94150f",
+          "source_sha256": "a6b444b3e7a1aba4ba52ed9aac3547822f224887e093136ac4b78b07c0dae749",
+          "new_test": "tests/p7_deferred_compat.rs::poll_observes_empty_and_first_value_for_scalar_and_unit_without_yielding",
+          "harness": "tests/compat/p7/concurrency/poll_observes_empty_and_first_value_for_scalar_and_unit_without_yielding.c",
+          "status": "runtime-passed",
+          "actual_options": {
+            "heap_bytes": 8192,
+            "fiber_capacity": 8,
+            "frame_capacity": 24,
+            "frame_bytes": 512,
+            "deferred_capacity": 2
+          },
+          "old_postprocessing": "none; generated C heap observer only",
+          "C_generation": "accepted",
+          "strict_C_objects": {
+            "-O0": "compiled-linked",
+            "-O2": "compiled-linked"
+          },
+          "C_runtime": {
+            "-O0": "passed",
+            "-O2": "passed"
+          },
+          "successful_iterations": 1000,
+          "terminal_defect_observed": false,
+          "heap_observation": "all fully released iterations assert heap empty",
+          "old_resource_budgets_preserved": true
+        }
+      ],
+      "status": "source-runtime-verified",
+      "legacy_C_assertions": [
+        "n == 1",
+        "emela_scheduler_run(1)",
+        "result == i && marks == i + 1"
+      ],
+      "harness_adaptations": [
+        "stable explicit export names",
+        "function/aggregate ABI type numbers and release symbol resolved from generated public header",
+        "event lock hooks supplied when required",
+        "heap-empty audit after fully released successful iterations"
+      ],
+      "recommended_ledger_status": "replaced",
+      "final_integrated_verification": "required",
+      "source_API_path": "source checker -> normalization -> specialization -> frontend lower -> independent backend -> public C export; no IR edits",
+      "legacy_rust_sha256": "0e343dcede15b37c59d08286561faeff8a3fb534b23f2c6f601ae0e1c0d52616"
+    },
+    {
+      "legacy_test": "emit::fiber::await_::a_direct_suspend_call_can_return_an_inline_exit_into_its_caller_frame",
+      "legacy_path": "crates/emela-codegen-emb/tests/fiber/await_.rs",
+      "legacy_line": 597,
+      "programs": [
+        "program:7b0faede711596ca092e"
+      ],
+      "original_files": {
+        "program:7b0faede711596ca092e": [
+          {
+            "name": "main.emel",
+            "fixture": "sources/a5840e3470614f66980344f3ac02ffad6e9efcdcb84fbd7444bc56d5f7d8f91b.emel",
+            "source_id": "source:a5840e3470614f669803",
+            "sha256": "a5840e3470614f66980344f3ac02ffad6e9efcdcb84fbd7444bc56d5f7d8f91b"
+          }
+        ]
+      },
+      "legacy_options": {
+        "heap_bytes": 8192,
+        "fiber_capacity": 8,
+        "frame_capacity": 24,
+        "frame_bytes": 512,
+        "deferred_capacity": 8
+      },
+      "source_adaptation": "explicit C export only; original source fixture is byte-preserved",
+      "runtime_variants": [
+        {
+          "program": "program:7b0faede711596ca092e",
+          "source_sha256": "a5840e3470614f66980344f3ac02ffad6e9efcdcb84fbd7444bc56d5f7d8f91b",
+          "new_test": "tests/p7_child_results_compat.rs::a_direct_suspend_call_can_return_an_inline_exit_into_its_caller_frame",
+          "harness": "tests/compat/p7/concurrency/a_direct_suspend_call_can_return_an_inline_exit_into_its_caller_frame.c",
+          "status": "runtime-passed",
+          "actual_options": {
+            "heap_bytes": 4096,
+            "fiber_capacity": 8,
+            "frame_capacity": 24,
+            "frame_bytes": 512,
+            "deferred_capacity": 8
+          },
+          "old_postprocessing": "none; generated C heap observer only",
+          "C_generation": "accepted",
+          "strict_C_objects": {
+            "-O0": "compiled-linked",
+            "-O2": "compiled-linked"
+          },
+          "C_runtime": {
+            "-O0": "passed",
+            "-O2": "passed"
+          },
+          "successful_iterations": 1000,
+          "terminal_defect_observed": false,
+          "heap_observation": "all fully released iterations assert heap empty",
+          "old_resource_budgets_preserved": true
+        }
+      ],
+      "status": "source-runtime-verified",
+      "legacy_C_assertions": [
+        "emela_scheduler_run(1)",
+        "value == i",
+        "emela_scheduler_run(1)"
+      ],
+      "harness_adaptations": [
+        "stable explicit export names",
+        "function/aggregate ABI type numbers and release symbol resolved from generated public header",
+        "event lock hooks supplied when required",
+        "heap-empty audit after fully released successful iterations"
+      ],
+      "recommended_ledger_status": "replaced",
+      "final_integrated_verification": "required",
+      "source_API_path": "source checker -> normalization -> specialization -> frontend lower -> independent backend -> public C export; no IR edits",
+      "legacy_rust_sha256": "118a273ac7f749dd9eaa294e56cfe913105a1b80ce5b6c8f760efdc6386f2bd0"
+    },
+    {
+      "legacy_test": "emit::fiber::await_::await_and_join_share_fifo_waiters_and_transfer_each_result",
+      "legacy_path": "crates/emela-codegen-emb/tests/fiber/await_.rs",
+      "legacy_line": 125,
+      "programs": [
+        "program:966e35a933bb50fec529"
+      ],
+      "original_files": {
+        "program:966e35a933bb50fec529": [
+          {
+            "name": "main.emel",
+            "fixture": "sources/1cb66d19500df0d547f7480e5d52bee20c1b15d63f1627246aee79ffc591e7a6.emel",
+            "source_id": "source:1cb66d19500df0d547f7",
+            "sha256": "1cb66d19500df0d547f7480e5d52bee20c1b15d63f1627246aee79ffc591e7a6"
+          }
+        ]
+      },
+      "legacy_options": {
+        "heap_bytes": 8192,
+        "fiber_capacity": 8,
+        "frame_capacity": 24,
+        "frame_bytes": 512,
+        "deferred_capacity": 8
+      },
+      "source_adaptation": "explicit C export only; original source fixture is byte-preserved",
+      "status": "source-runtime-verified",
+      "evidence": "tests/p6_child_waiters.rs::child_await_and_join_waiters_resume_fifo_after_the_child_finishes",
+      "observations": "Existing P6 original-body C observation is re-executed here with the original legacy resource budgets.",
+      "runtime_variants": [
+        {
+          "program": "program:966e35a933bb50fec529",
+          "source_sha256": "1cb66d19500df0d547f7480e5d52bee20c1b15d63f1627246aee79ffc591e7a6",
+          "new_test": "tests/p7_child_results_compat.rs::await_and_join_share_fifo_waiters_and_transfer_each_result",
+          "harness": "tests/compat/p7/concurrency/await_and_join_share_fifo_waiters_and_transfer_each_result.c",
+          "status": "runtime-passed",
+          "actual_options": {
+            "heap_bytes": 8192,
+            "fiber_capacity": 8,
+            "frame_capacity": 40,
+            "frame_bytes": 512,
+            "deferred_capacity": 8
+          },
+          "old_postprocessing": "none; generated C heap observer only",
+          "C_generation": "accepted",
+          "strict_C_objects": {
+            "-O0": "compiled-linked",
+            "-O2": "compiled-linked"
+          },
+          "C_runtime": {
+            "-O0": "passed",
+            "-O2": "passed"
+          },
+          "successful_iterations": 1000,
+          "terminal_defect_observed": false,
+          "heap_observation": "all fully released iterations assert heap empty",
+          "old_resource_budgets_preserved": true
+        }
+      ],
+      "legacy_C_assertions": [
+        "n == ++order",
+        "n == 40 && count++ == 0",
+        "order == 3 && count == 1 && result == -1 && !emela_fiber_done(f)",
+        "emela_task_complete_int(task, 42)",
+        "emela_scheduler_run(1)",
+        "result == 84 && order == 7"
+      ],
+      "harness_adaptations": [
+        "stable explicit export names",
+        "function/aggregate ABI type numbers and release symbol resolved from generated public header",
+        "event lock hooks supplied when required",
+        "heap-empty audit after fully released successful iterations"
+      ],
+      "recommended_ledger_status": "replaced",
+      "final_integrated_verification": "required",
+      "source_API_path": "source checker -> normalization -> specialization -> frontend lower -> independent backend -> public C export; no IR edits",
+      "legacy_rust_sha256": "118a273ac7f749dd9eaa294e56cfe913105a1b80ce5b6c8f760efdc6386f2bd0"
+    },
+    {
+      "legacy_test": "emit::fiber::await_::await_keeps_owned_list_results_after_the_scope_ends",
+      "legacy_path": "crates/emela-codegen-emb/tests/fiber/await_.rs",
+      "legacy_line": 76,
+      "programs": [
+        "program:238fdc7e166173ca81c5"
+      ],
+      "original_files": {
+        "program:238fdc7e166173ca81c5": [
+          {
+            "name": "main.emel",
+            "fixture": "sources/a1e7162e9e23d75580b07da1e4b845ebef25f75a9e147d8a2cfa8dc6b7228f9c.emel",
+            "source_id": "source:a1e7162e9e23d75580b0",
+            "sha256": "a1e7162e9e23d75580b07da1e4b845ebef25f75a9e147d8a2cfa8dc6b7228f9c"
+          }
+        ]
+      },
+      "legacy_options": {
+        "heap_bytes": 8192,
+        "fiber_capacity": 8,
+        "frame_capacity": 24,
+        "frame_bytes": 512,
+        "deferred_capacity": 8
+      },
+      "source_adaptation": "explicit C export only; original source fixture is byte-preserved",
+      "runtime_variants": [
+        {
+          "program": "program:238fdc7e166173ca81c5",
+          "source_sha256": "a1e7162e9e23d75580b07da1e4b845ebef25f75a9e147d8a2cfa8dc6b7228f9c",
+          "new_test": "tests/p7_child_results_compat.rs::await_keeps_owned_list_results_after_the_scope_ends",
+          "harness": "tests/compat/p7/concurrency/await_keeps_owned_list_results_after_the_scope_ends.c",
+          "status": "runtime-passed",
+          "actual_options": {
+            "heap_bytes": 4096,
+            "fiber_capacity": 8,
+            "frame_capacity": 24,
+            "frame_bytes": 512,
+            "deferred_capacity": 8
+          },
+          "old_postprocessing": "none; generated C heap observer only",
+          "C_generation": "accepted",
+          "strict_C_objects": {
+            "-O0": "compiled-linked",
+            "-O2": "compiled-linked"
+          },
+          "C_runtime": {
+            "-O0": "passed",
+            "-O2": "passed"
+          },
+          "successful_iterations": 1000,
+          "terminal_defect_observed": false,
+          "heap_observation": "all fully released iterations assert heap empty",
+          "old_resource_budgets_preserved": true
+        }
+      ],
+      "status": "source-runtime-verified",
+      "legacy_C_assertions": [
+        "emela_scheduler_run(1)",
+        "emela_export_sum_1(value) == 4 * i + 2"
+      ],
+      "harness_adaptations": [
+        "stable explicit export names",
+        "function/aggregate ABI type numbers and release symbol resolved from generated public header",
+        "event lock hooks supplied when required",
+        "heap-empty audit after fully released successful iterations"
+      ],
+      "recommended_ledger_status": "replaced",
+      "final_integrated_verification": "required",
+      "source_API_path": "source checker -> normalization -> specialization -> frontend lower -> independent backend -> public C export; no IR edits",
+      "legacy_rust_sha256": "118a273ac7f749dd9eaa294e56cfe913105a1b80ce5b6c8f760efdc6386f2bd0"
+    },
+    {
+      "legacy_test": "emit::fiber::await_::await_preserves_int64_float_bits_and_bool_payloads",
+      "legacy_path": "crates/emela-codegen-emb/tests/fiber/await_.rs",
+      "legacy_line": 431,
+      "programs": [
+        "program:b283b90d26e8ee6179f2"
+      ],
+      "original_files": {
+        "program:b283b90d26e8ee6179f2": [
+          {
+            "name": "main.emel",
+            "fixture": "sources/ef337966432b61a2420fa1a0ae2fbbb27583db77585366a4ecd5809ce69b3342.emel",
+            "source_id": "source:ef337966432b61a2420f",
+            "sha256": "ef337966432b61a2420fa1a0ae2fbbb27583db77585366a4ecd5809ce69b3342"
+          }
+        ]
+      },
+      "legacy_options": {
+        "heap_bytes": 8192,
+        "fiber_capacity": 8,
+        "frame_capacity": 24,
+        "frame_bytes": 512,
+        "deferred_capacity": 8
+      },
+      "source_adaptation": "explicit C export only; original source fixture is byte-preserved",
+      "runtime_variants": [
+        {
+          "program": "program:b283b90d26e8ee6179f2",
+          "source_sha256": "ef337966432b61a2420fa1a0ae2fbbb27583db77585366a4ecd5809ce69b3342",
+          "new_test": "tests/p7_child_results_compat.rs::await_preserves_int64_float_bits_and_bool_payloads",
+          "harness": "tests/compat/p7/concurrency/await_preserves_int64_float_bits_and_bool_payloads.c",
+          "status": "runtime-passed",
+          "actual_options": {
+            "heap_bytes": 4096,
+            "fiber_capacity": 8,
+            "frame_capacity": 24,
+            "frame_bytes": 512,
+            "deferred_capacity": 8
+          },
+          "old_postprocessing": "none; generated C heap observer only",
+          "C_generation": "accepted",
+          "strict_C_objects": {
+            "-O0": "compiled-linked",
+            "-O2": "compiled-linked"
+          },
+          "C_runtime": {
+            "-O0": "passed",
+            "-O2": "passed"
+          },
+          "successful_iterations": 1000,
+          "terminal_defect_observed": false,
+          "heap_observation": "all fully released iterations assert heap empty",
+          "old_resource_budgets_preserved": true
+        }
+      ],
+      "status": "source-runtime-verified",
+      "legacy_C_assertions": [
+        "emela_scheduler_run(1)",
+        "wide == INT64_MIN",
+        "emela_scheduler_run(1)",
+        "memcmp(&input, &real, sizeof(double)) == 0",
+        "emela_scheduler_run(1)",
+        "flag == i % 2"
+      ],
+      "harness_adaptations": [
+        "stable explicit export names",
+        "function/aggregate ABI type numbers and release symbol resolved from generated public header",
+        "event lock hooks supplied when required",
+        "heap-empty audit after fully released successful iterations"
+      ],
+      "recommended_ledger_status": "replaced",
+      "final_integrated_verification": "required",
+      "source_API_path": "source checker -> normalization -> specialization -> frontend lower -> independent backend -> public C export; no IR edits",
+      "legacy_rust_sha256": "118a273ac7f749dd9eaa294e56cfe913105a1b80ce5b6c8f760efdc6386f2bd0"
+    },
+    {
+      "legacy_test": "emit::fiber::await_::await_returns_success_and_can_mix_with_repeated_join_without_yielding",
+      "legacy_path": "crates/emela-codegen-emb/tests/fiber/await_.rs",
+      "legacy_line": 4,
+      "programs": [
+        "program:872b73526ae1cdeecd30"
+      ],
+      "original_files": {
+        "program:872b73526ae1cdeecd30": [
+          {
+            "name": "main.emel",
+            "fixture": "sources/c4618bb638c5ba2327260f2fd48651461c415839afd6ecb66bb686aa63ea585e.emel",
+            "source_id": "source:c4618bb638c5ba232726",
+            "sha256": "c4618bb638c5ba2327260f2fd48651461c415839afd6ecb66bb686aa63ea585e"
+          }
+        ]
+      },
+      "legacy_options": {
+        "heap_bytes": 8192,
+        "fiber_capacity": 8,
+        "frame_capacity": 24,
+        "frame_bytes": 512,
+        "deferred_capacity": 8
+      },
+      "source_adaptation": "explicit C export only; original source fixture is byte-preserved",
+      "runtime_variants": [
+        {
+          "program": "program:872b73526ae1cdeecd30",
+          "source_sha256": "c4618bb638c5ba2327260f2fd48651461c415839afd6ecb66bb686aa63ea585e",
+          "new_test": "tests/p7_child_results_compat.rs::await_returns_success_and_can_mix_with_repeated_join_without_yielding",
+          "harness": "tests/compat/p7/concurrency/await_returns_success_and_can_mix_with_repeated_join_without_yielding.c",
+          "status": "runtime-passed",
+          "actual_options": {
+            "heap_bytes": 4096,
+            "fiber_capacity": 8,
+            "frame_capacity": 24,
+            "frame_bytes": 512,
+            "deferred_capacity": 8
+          },
+          "old_postprocessing": "none; generated C heap observer only",
+          "C_generation": "accepted",
+          "strict_C_objects": {
+            "-O0": "compiled-linked",
+            "-O2": "compiled-linked"
+          },
+          "C_runtime": {
+            "-O0": "passed",
+            "-O2": "passed"
+          },
+          "successful_iterations": 1000,
+          "terminal_defect_observed": false,
+          "heap_observation": "all fully released iterations assert heap empty",
+          "old_resource_budgets_preserved": true
+        }
+      ],
+      "status": "source-runtime-verified",
+      "legacy_C_assertions": [
+        "n == ++order",
+        "emela_scheduler_run(1)",
+        "result == 3 * i && order == 3",
+        "emela_scheduler_run(1)",
+        "result == 1",
+        "emela_scheduler_run(1)",
+        "order == 2"
+      ],
+      "harness_adaptations": [
+        "stable explicit export names",
+        "function/aggregate ABI type numbers and release symbol resolved from generated public header",
+        "event lock hooks supplied when required",
+        "heap-empty audit after fully released successful iterations"
+      ],
+      "recommended_ledger_status": "replaced",
+      "final_integrated_verification": "required",
+      "source_API_path": "source checker -> normalization -> specialization -> frontend lower -> independent backend -> public C export; no IR edits",
+      "legacy_rust_sha256": "118a273ac7f749dd9eaa294e56cfe913105a1b80ce5b6c8f760efdc6386f2bd0"
+    },
+    {
+      "legacy_test": "emit::fiber::await_::await_with_a_string_exit_keeps_owned_backing_after_scope_and_frame_reuse",
+      "legacy_path": "crates/emela-codegen-emb/tests/fiber/await_.rs",
+      "legacy_line": 487,
+      "programs": [
+        "program:53fc4a519e38bfa7942e"
+      ],
+      "original_files": {
+        "program:53fc4a519e38bfa7942e": [
+          {
+            "name": "main.emel",
+            "fixture": "sources/d0e3146cfb9996adec8328dce5bde501e8a36f30b778415365cf8ac0d7eb5a80.emel",
+            "source_id": "source:d0e3146cfb9996adec83",
+            "sha256": "d0e3146cfb9996adec8328dce5bde501e8a36f30b778415365cf8ac0d7eb5a80"
+          }
+        ]
+      },
+      "legacy_options": {
+        "heap_bytes": 8192,
+        "fiber_capacity": 8,
+        "frame_capacity": 24,
+        "frame_bytes": 512,
+        "deferred_capacity": 8
+      },
+      "source_adaptation": "explicit C export only; original source fixture is byte-preserved",
+      "runtime_variants": [
+        {
+          "program": "program:53fc4a519e38bfa7942e",
+          "source_sha256": "d0e3146cfb9996adec8328dce5bde501e8a36f30b778415365cf8ac0d7eb5a80",
+          "new_test": "tests/p7_child_results_compat.rs::await_with_a_string_exit_keeps_owned_backing_after_scope_and_frame_reuse",
+          "harness": "tests/compat/p7/concurrency/await_with_a_string_exit_keeps_owned_backing_after_scope_and_frame_reuse.c",
+          "status": "runtime-passed",
+          "actual_options": {
+            "heap_bytes": 4096,
+            "fiber_capacity": 8,
+            "frame_capacity": 24,
+            "frame_bytes": 512,
+            "deferred_capacity": 8
+          },
+          "old_postprocessing": "none; generated C heap observer only",
+          "C_generation": "accepted",
+          "strict_C_objects": {
+            "-O0": "compiled-linked",
+            "-O2": "compiled-linked"
+          },
+          "C_runtime": {
+            "-O0": "passed",
+            "-O2": "passed"
+          },
+          "successful_iterations": 1000,
+          "terminal_defect_observed": false,
+          "heap_observation": "all fully released iterations assert heap empty",
+          "old_resource_budgets_preserved": true
+        }
+      ],
+      "status": "source-runtime-verified",
+      "legacy_C_assertions": [
+        "emela_scheduler_run(1)",
+        "result.owner && result.length == 11 && memcmp(result.data, \"-2147483648\", 11) == 0",
+        "test_heap_empty()"
+      ],
+      "harness_adaptations": [
+        "stable explicit export names",
+        "function/aggregate ABI type numbers and release symbol resolved from generated public header",
+        "event lock hooks supplied when required",
+        "heap-empty audit after fully released successful iterations"
+      ],
+      "recommended_ledger_status": "replaced",
+      "final_integrated_verification": "required",
+      "source_API_path": "source checker -> normalization -> specialization -> frontend lower -> independent backend -> public C export; no IR edits",
+      "legacy_rust_sha256": "118a273ac7f749dd9eaa294e56cfe913105a1b80ce5b6c8f760efdc6386f2bd0"
+    },
+    {
+      "legacy_test": "emit::fiber::await_::child_wait_is_a_resume_boundary_and_scope_end_reclaims_the_operation_tail",
+      "legacy_path": "crates/emela-codegen-emb/tests/fiber/await_.rs",
+      "legacy_line": 255,
+      "programs": [
+        "program:1526bca68557f74bf094",
+        "program:60f85310853803d70678"
+      ],
+      "original_files": {
+        "program:1526bca68557f74bf094": [
+          {
+            "name": "main.emel",
+            "fixture": "sources/5a0f57185295f477b99708ffcbc95c026b070ebd428ba3103d80cb036160297a.emel",
+            "source_id": "source:5a0f57185295f477b997",
+            "sha256": "5a0f57185295f477b99708ffcbc95c026b070ebd428ba3103d80cb036160297a"
+          }
+        ],
+        "program:60f85310853803d70678": [
+          {
+            "name": "main.emel",
+            "fixture": "sources/f86ddeba9b739002623e7ae0ff9d503ed9d716ab0b694175ebd40ff38a1a67c5.emel",
+            "source_id": "source:f86ddeba9b739002623e",
+            "sha256": "f86ddeba9b739002623e7ae0ff9d503ed9d716ab0b694175ebd40ff38a1a67c5"
+          }
+        ]
+      },
+      "legacy_options": {
+        "heap_bytes": 8192,
+        "fiber_capacity": 8,
+        "frame_capacity": 24,
+        "frame_bytes": 512,
+        "deferred_capacity": 8
+      },
+      "source_adaptation": "explicit C export only; original source fixture is byte-preserved",
+      "runtime_variants": [
+        {
+          "program": "program:1526bca68557f74bf094",
+          "source_sha256": "5a0f57185295f477b99708ffcbc95c026b070ebd428ba3103d80cb036160297a",
+          "new_test": "tests/p7_child_results_compat.rs::child_wait_is_a_resume_boundary_and_scope_end_reclaims_the_operation_tail_await",
+          "harness": "tests/compat/p7/concurrency/child_wait_is_a_resume_boundary_and_scope_end_reclaims_the_operation_tail_await.c",
+          "status": "runtime-passed",
+          "actual_options": {
+            "heap_bytes": 8192,
+            "fiber_capacity": 8,
+            "frame_capacity": 24,
+            "frame_bytes": 512,
+            "deferred_capacity": 1
+          },
+          "old_postprocessing": "none; generated C heap observer only",
+          "C_generation": "accepted",
+          "strict_C_objects": {
+            "-O0": "compiled-linked",
+            "-O2": "compiled-linked"
+          },
+          "C_runtime": {
+            "-O0": "passed",
+            "-O2": "passed"
+          },
+          "successful_iterations": 1000,
+          "terminal_defect_observed": false,
+          "heap_observation": "all fully released iterations assert heap empty",
+          "old_resource_budgets_preserved": true
+        },
+        {
+          "program": "program:60f85310853803d70678",
+          "source_sha256": "f86ddeba9b739002623e7ae0ff9d503ed9d716ab0b694175ebd40ff38a1a67c5",
+          "new_test": "tests/p7_child_results_compat.rs::child_wait_is_a_resume_boundary_and_scope_end_reclaims_the_operation_tail_join",
+          "harness": "tests/compat/p7/concurrency/child_wait_is_a_resume_boundary_and_scope_end_reclaims_the_operation_tail_join.c",
+          "status": "runtime-passed",
+          "actual_options": {
+            "heap_bytes": 8192,
+            "fiber_capacity": 8,
+            "frame_capacity": 24,
+            "frame_bytes": 512,
+            "deferred_capacity": 1
+          },
+          "old_postprocessing": "none; generated C heap observer only",
+          "C_generation": "accepted",
+          "strict_C_objects": {
+            "-O0": "compiled-linked",
+            "-O2": "compiled-linked"
+          },
+          "C_runtime": {
+            "-O0": "passed",
+            "-O2": "passed"
+          },
+          "successful_iterations": 1000,
+          "terminal_defect_observed": false,
+          "heap_observation": "all fully released iterations assert heap empty",
+          "old_resource_budgets_preserved": true
+        }
+      ],
+      "status": "source-runtime-verified",
+      "legacy_C_assertions": [
+        "n == ++marks",
+        "emela_scheduler_run(1)",
+        "result == 7 && marks == 3"
+      ],
+      "harness_adaptations": [
+        "stable explicit export names",
+        "function/aggregate ABI type numbers and release symbol resolved from generated public header",
+        "event lock hooks supplied when required",
+        "heap-empty audit after fully released successful iterations"
+      ],
+      "recommended_ledger_status": "replaced",
+      "final_integrated_verification": "required",
+      "source_API_path": "source checker -> normalization -> specialization -> frontend lower -> independent backend -> public C export; no IR edits",
+      "legacy_rust_sha256": "118a273ac7f749dd9eaa294e56cfe913105a1b80ce5b6c8f760efdc6386f2bd0"
+    },
+    {
+      "legacy_test": "emit::fiber::await_::closing_a_scope_drops_ready_join_and_await_frames_before_result_delivery",
+      "legacy_path": "crates/emela-codegen-emb/tests/fiber/await_.rs",
+      "legacy_line": 361,
+      "programs": [
+        "program:13362f28679b3bbabd69"
+      ],
+      "original_files": {
+        "program:13362f28679b3bbabd69": [
+          {
+            "name": "main.emel",
+            "fixture": "sources/90178b14fd7587b8ac7e63044a6378abc08f0d58fed107a8569454a34d434fd8.emel",
+            "source_id": "source:90178b14fd7587b8ac7e",
+            "sha256": "90178b14fd7587b8ac7e63044a6378abc08f0d58fed107a8569454a34d434fd8"
+          }
+        ]
+      },
+      "legacy_options": {
+        "heap_bytes": 8192,
+        "fiber_capacity": 8,
+        "frame_capacity": 24,
+        "frame_bytes": 512,
+        "deferred_capacity": 8
+      },
+      "source_adaptation": "explicit C export only; original source fixture is byte-preserved",
+      "status": "source-runtime-verified",
+      "evidence": "tests/p6_scope_lifecycle.rs::closing_a_source_scope_drops_ready_join_and_await_deliveries",
+      "observations": "Existing P6 original-body C observation is re-executed here with the original legacy resource budgets.",
+      "runtime_variants": [
+        {
+          "program": "program:13362f28679b3bbabd69",
+          "source_sha256": "90178b14fd7587b8ac7e63044a6378abc08f0d58fed107a8569454a34d434fd8",
+          "new_test": "tests/p7_child_results_compat.rs::closing_a_scope_drops_ready_join_and_await_frames_before_result_delivery",
+          "harness": "tests/compat/p7/concurrency/closing_a_scope_drops_ready_join_and_await_frames_before_result_delivery.c",
+          "status": "runtime-passed",
+          "actual_options": {
+            "heap_bytes": 8192,
+            "fiber_capacity": 8,
+            "frame_capacity": 48,
+            "frame_bytes": 512,
+            "deferred_capacity": 3
+          },
+          "old_postprocessing": "none; generated C heap observer only",
+          "C_generation": "accepted",
+          "strict_C_objects": {
+            "-O0": "compiled-linked",
+            "-O2": "compiled-linked"
+          },
+          "C_runtime": {
+            "-O0": "passed",
+            "-O2": "passed"
+          },
+          "successful_iterations": 1000,
+          "terminal_defect_observed": false,
+          "heap_observation": "all fully released iterations assert heap empty",
+          "old_resource_budgets_preserved": true
+        }
+      ],
+      "legacy_C_assertions": [
+        "emela_scheduler_run(1)",
+        "result == 49"
+      ],
+      "harness_adaptations": [
+        "stable explicit export names",
+        "function/aggregate ABI type numbers and release symbol resolved from generated public header",
+        "event lock hooks supplied when required",
+        "heap-empty audit after fully released successful iterations"
+      ],
+      "recommended_ledger_status": "replaced",
+      "final_integrated_verification": "required",
+      "source_API_path": "source checker -> normalization -> specialization -> frontend lower -> independent backend -> public C export; no IR edits",
+      "legacy_rust_sha256": "118a273ac7f749dd9eaa294e56cfe913105a1b80ce5b6c8f760efdc6386f2bd0"
+    },
+    {
+      "legacy_test": "emit::fiber::await_::leaked_await_callback_checks_the_ended_scope_before_using_the_child_result",
+      "legacy_path": "crates/emela-codegen-emb/tests/fiber/await_.rs",
+      "legacy_line": 197,
+      "programs": [
+        "program:fa40589ab2ec14656e19"
+      ],
+      "original_files": {
+        "program:fa40589ab2ec14656e19": [
+          {
+            "name": "main.emel",
+            "fixture": "sources/f952bd902b1791b304e8bab738848317de14f6447e8db94bbc1afcb41dd7377a.emel",
+            "source_id": "source:f952bd902b1791b304e8",
+            "sha256": "f952bd902b1791b304e8bab738848317de14f6447e8db94bbc1afcb41dd7377a"
+          }
+        ]
+      },
+      "legacy_options": {
+        "heap_bytes": 8192,
+        "fiber_capacity": 8,
+        "frame_capacity": 24,
+        "frame_bytes": 512,
+        "deferred_capacity": 8
+      },
+      "source_adaptation": "explicit C export only; original source fixture is byte-preserved",
+      "runtime_variants": [
+        {
+          "program": "program:fa40589ab2ec14656e19",
+          "source_sha256": "f952bd902b1791b304e8bab738848317de14f6447e8db94bbc1afcb41dd7377a",
+          "new_test": "tests/p7_child_results_compat.rs::leaked_await_callback_checks_the_ended_scope_before_using_the_child_result",
+          "harness": "tests/compat/p7/concurrency/leaked_await_callback_checks_the_ended_scope_before_using_the_child_result.c",
+          "status": "runtime-passed",
+          "actual_options": {
+            "heap_bytes": 4096,
+            "fiber_capacity": 8,
+            "frame_capacity": 24,
+            "frame_bytes": 512,
+            "deferred_capacity": 8
+          },
+          "old_postprocessing": "none",
+          "C_generation": "accepted",
+          "strict_C_objects": {
+            "-O0": "compiled-linked",
+            "-O2": "compiled-linked"
+          },
+          "C_runtime": {
+            "-O0": "passed",
+            "-O2": "passed"
+          },
+          "successful_iterations": 1000,
+          "terminal_defect_observed": true,
+          "heap_observation": "terminal defect follows original process-stop observation; live callback retained intentionally",
+          "old_resource_budgets_preserved": true
+        }
+      ],
+      "status": "source-runtime-verified",
+      "legacy_C_assertions": [
+        "expected && k == EMELA_DEFECT_PANIC && n == 38",
+        "memcmp(m, \"fiber was awaited after its scope ended\", n) == 0",
+        "emela_scheduler_run(1)",
+        "emela_scheduler_run(1)"
+      ],
+      "harness_adaptations": [
+        "stable explicit export names",
+        "function/aggregate ABI type numbers and release symbol resolved from generated public header",
+        "event lock hooks supplied when required",
+        "heap-empty audit after fully released successful iterations"
+      ],
+      "recommended_ledger_status": "replaced",
+      "final_integrated_verification": "required",
+      "source_API_path": "source checker -> normalization -> specialization -> frontend lower -> independent backend -> public C export; no IR edits",
+      "legacy_rust_sha256": "118a273ac7f749dd9eaa294e56cfe913105a1b80ce5b6c8f760efdc6386f2bd0"
+    },
+    {
+      "legacy_test": "emit::fiber::await_::returning_await_exit_through_scope_owns_the_exit_after_scope_end",
+      "legacy_path": "crates/emela-codegen-emb/tests/fiber/await_.rs",
+      "legacy_line": 535,
+      "programs": [
+        "program:60bb51f1f49ec78360a2"
+      ],
+      "original_files": {
+        "program:60bb51f1f49ec78360a2": [
+          {
+            "name": "main.emel",
+            "fixture": "sources/f9cc6597af34a37de88c8130f1c8d40f13e34f26c85e3c475451fca56e647f17.emel",
+            "source_id": "source:f9cc6597af34a37de88c",
+            "sha256": "f9cc6597af34a37de88c8130f1c8d40f13e34f26c85e3c475451fca56e647f17"
+          }
+        ]
+      },
+      "legacy_options": {
+        "heap_bytes": 8192,
+        "fiber_capacity": 8,
+        "frame_capacity": 24,
+        "frame_bytes": 512,
+        "deferred_capacity": 8
+      },
+      "source_adaptation": "explicit C export only; original source fixture is byte-preserved",
+      "runtime_variants": [
+        {
+          "program": "program:60bb51f1f49ec78360a2",
+          "source_sha256": "f9cc6597af34a37de88c8130f1c8d40f13e34f26c85e3c475451fca56e647f17",
+          "new_test": "tests/p7_child_results_compat.rs::returning_await_exit_through_scope_owns_the_exit_after_scope_end",
+          "harness": "tests/compat/p7/concurrency/returning_await_exit_through_scope_owns_the_exit_after_scope_end.c",
+          "status": "runtime-passed",
+          "actual_options": {
+            "heap_bytes": 8192,
+            "fiber_capacity": 8,
+            "frame_capacity": 24,
+            "frame_bytes": 512,
+            "deferred_capacity": 8
+          },
+          "old_postprocessing": "none; generated C heap observer only",
+          "C_generation": "accepted",
+          "strict_C_objects": {
+            "-O0": "compiled-linked",
+            "-O2": "compiled-linked"
+          },
+          "C_runtime": {
+            "-O0": "passed",
+            "-O2": "passed"
+          },
+          "successful_iterations": 1000,
+          "terminal_defect_observed": false,
+          "heap_observation": "all fully released iterations assert heap empty",
+          "old_resource_budgets_preserved": true
+        }
+      ],
+      "status": "source-runtime-verified",
+      "legacy_C_assertions": [
+        "emela_scheduler_run(1)",
+        "value.tag == 0 && value.payload.v0.f0 == i",
+        "test_heap_empty()"
+      ],
+      "harness_adaptations": [
+        "stable explicit export names",
+        "function/aggregate ABI type numbers and release symbol resolved from generated public header",
+        "event lock hooks supplied when required",
+        "heap-empty audit after fully released successful iterations"
+      ],
+      "recommended_ledger_status": "replaced",
+      "final_integrated_verification": "required",
+      "source_API_path": "source checker -> normalization -> specialization -> frontend lower -> independent backend -> public C export; no IR edits",
+      "legacy_rust_sha256": "118a273ac7f749dd9eaa294e56cfe913105a1b80ce5b6c8f760efdc6386f2bd0"
+    },
+    {
+      "legacy_test": "emit::fiber::await_::scope_end_breaks_cycles_when_a_child_result_closure_captures_its_own_handle",
+      "legacy_path": "crates/emela-codegen-emb/tests/fiber/await_.rs",
+      "legacy_line": 310,
+      "programs": [
+        "program:16849ead337634fd58fa"
+      ],
+      "original_files": {
+        "program:16849ead337634fd58fa": [
+          {
+            "name": "main.emel",
+            "fixture": "sources/25dde90a27b25bd4a5889318ee9ec9dd2fa236e641c6aa68d3afe3a212a99e7a.emel",
+            "source_id": "source:25dde90a27b25bd4a588",
+            "sha256": "25dde90a27b25bd4a5889318ee9ec9dd2fa236e641c6aa68d3afe3a212a99e7a"
+          }
+        ]
+      },
+      "legacy_options": {
+        "heap_bytes": 8192,
+        "fiber_capacity": 8,
+        "frame_capacity": 24,
+        "frame_bytes": 512,
+        "deferred_capacity": 8
+      },
+      "source_adaptation": "explicit C export only; original source fixture is byte-preserved",
+      "runtime_variants": [
+        {
+          "program": "program:16849ead337634fd58fa",
+          "source_sha256": "25dde90a27b25bd4a5889318ee9ec9dd2fa236e641c6aa68d3afe3a212a99e7a",
+          "new_test": "tests/p7_child_results_compat.rs::scope_end_breaks_cycles_when_a_child_result_closure_captures_its_own_handle",
+          "harness": "tests/compat/p7/concurrency/scope_end_breaks_cycles_when_a_child_result_closure_captures_its_own_handle.c",
+          "status": "runtime-passed",
+          "actual_options": {
+            "heap_bytes": 4096,
+            "fiber_capacity": 8,
+            "frame_capacity": 24,
+            "frame_bytes": 512,
+            "deferred_capacity": 1
+          },
+          "old_postprocessing": "none; generated C heap observer only",
+          "C_generation": "accepted",
+          "strict_C_objects": {
+            "-O0": "compiled-linked",
+            "-O2": "compiled-linked"
+          },
+          "C_runtime": {
+            "-O0": "passed",
+            "-O2": "passed"
+          },
+          "successful_iterations": 1000,
+          "terminal_defect_observed": false,
+          "heap_observation": "all fully released iterations assert heap empty",
+          "old_resource_budgets_preserved": true
+        }
+      ],
+      "status": "source-runtime-verified",
+      "legacy_C_assertions": [
+        "emela_scheduler_run(1)",
+        "result == 1"
+      ],
+      "harness_adaptations": [
+        "stable explicit export names",
+        "function/aggregate ABI type numbers and release symbol resolved from generated public header",
+        "event lock hooks supplied when required",
+        "heap-empty audit after fully released successful iterations"
+      ],
+      "recommended_ledger_status": "replaced",
+      "final_integrated_verification": "required",
+      "source_API_path": "source checker -> normalization -> specialization -> frontend lower -> independent backend -> public C export; no IR edits",
+      "legacy_rust_sha256": "118a273ac7f749dd9eaa294e56cfe913105a1b80ce5b6c8f760efdc6386f2bd0"
+    },
+    {
+      "legacy_test": "emit::fiber::join::closing_nested_scopes_unlinks_join_waiters_before_the_target_completes",
+      "legacy_path": "crates/emela-codegen-emb/tests/fiber/join.rs",
+      "legacy_line": 208,
+      "programs": [
+        "program:d37b1050f30cd1272e2a"
+      ],
+      "original_files": {
+        "program:d37b1050f30cd1272e2a": [
+          {
+            "name": "main.emel",
+            "fixture": "sources/3fb18ffcc526741428327aa1598b208a04597bf9a1ad491b13c4cda41b6bf684.emel",
+            "source_id": "source:3fb18ffcc52674142832",
+            "sha256": "3fb18ffcc526741428327aa1598b208a04597bf9a1ad491b13c4cda41b6bf684"
+          }
+        ]
+      },
+      "legacy_options": {
+        "heap_bytes": 8192,
+        "fiber_capacity": 8,
+        "frame_capacity": 24,
+        "frame_bytes": 512,
+        "deferred_capacity": 8
+      },
+      "source_adaptation": "explicit C export only; original source fixture is byte-preserved",
+      "runtime_variants": [
+        {
+          "program": "program:d37b1050f30cd1272e2a",
+          "source_sha256": "3fb18ffcc526741428327aa1598b208a04597bf9a1ad491b13c4cda41b6bf684",
+          "new_test": "tests/p7_child_results_compat.rs::closing_nested_scopes_unlinks_join_waiters_before_the_target_completes",
+          "harness": "tests/compat/p7/concurrency/closing_nested_scopes_unlinks_join_waiters_before_the_target_completes.c",
+          "status": "runtime-passed",
+          "actual_options": {
+            "heap_bytes": 8192,
+            "fiber_capacity": 8,
+            "frame_capacity": 48,
+            "frame_bytes": 512,
+            "deferred_capacity": 3
+          },
+          "old_postprocessing": "none; generated C heap observer only",
+          "C_generation": "accepted",
+          "strict_C_objects": {
+            "-O0": "compiled-linked",
+            "-O2": "compiled-linked"
+          },
+          "C_runtime": {
+            "-O0": "passed",
+            "-O2": "passed"
+          },
+          "successful_iterations": 1000,
+          "terminal_defect_observed": false,
+          "heap_observation": "all fully released iterations assert heap empty",
+          "old_resource_budgets_preserved": true
+        }
+      ],
+      "status": "source-runtime-verified",
+      "legacy_C_assertions": [
+        "n == 1 && !called++",
+        "called == 1 && !emela_fiber_done(f)",
+        "emela_task_complete_int(pending, 1)",
+        "emela_scheduler_run(1)",
+        "result == 42 && !emela_task_complete_int(pending, 0)"
+      ],
+      "harness_adaptations": [
+        "stable explicit export names",
+        "function/aggregate ABI type numbers and release symbol resolved from generated public header",
+        "event lock hooks supplied when required",
+        "heap-empty audit after fully released successful iterations"
+      ],
+      "recommended_ledger_status": "replaced",
+      "final_integrated_verification": "required",
+      "source_API_path": "source checker -> normalization -> specialization -> frontend lower -> independent backend -> public C export; no IR edits",
+      "legacy_rust_sha256": "35367507790dd3584f346da32b4b855b048883e19360a02221212ec2a6740def"
+    },
+    {
+      "legacy_test": "emit::fiber::join::join_preserves_int64_float_bits_and_bool",
+      "legacy_path": "crates/emela-codegen-emb/tests/fiber/join.rs",
+      "legacy_line": 346,
+      "programs": [
+        "program:e94548e7f90fd4ea8a0d"
+      ],
+      "original_files": {
+        "program:e94548e7f90fd4ea8a0d": [
+          {
+            "name": "main.emel",
+            "fixture": "sources/abc7a58c879a7c589b1c621490a800916c29d3df055cf4cb0814be52d5b594b6.emel",
+            "source_id": "source:abc7a58c879a7c589b1c",
+            "sha256": "abc7a58c879a7c589b1c621490a800916c29d3df055cf4cb0814be52d5b594b6"
+          }
+        ]
+      },
+      "legacy_options": {
+        "heap_bytes": 8192,
+        "fiber_capacity": 8,
+        "frame_capacity": 24,
+        "frame_bytes": 512,
+        "deferred_capacity": 8
+      },
+      "source_adaptation": "explicit C export only; original source fixture is byte-preserved",
+      "runtime_variants": [
+        {
+          "program": "program:e94548e7f90fd4ea8a0d",
+          "source_sha256": "abc7a58c879a7c589b1c621490a800916c29d3df055cf4cb0814be52d5b594b6",
+          "new_test": "tests/p7_child_results_compat.rs::join_preserves_int64_float_bits_and_bool",
+          "harness": "tests/compat/p7/concurrency/join_preserves_int64_float_bits_and_bool.c",
+          "status": "runtime-passed",
+          "actual_options": {
+            "heap_bytes": 4096,
+            "fiber_capacity": 8,
+            "frame_capacity": 24,
+            "frame_bytes": 512,
+            "deferred_capacity": 8
+          },
+          "old_postprocessing": "none; generated C heap observer only",
+          "C_generation": "accepted",
+          "strict_C_objects": {
+            "-O0": "compiled-linked",
+            "-O2": "compiled-linked"
+          },
+          "C_runtime": {
+            "-O0": "passed",
+            "-O2": "passed"
+          },
+          "successful_iterations": 1000,
+          "terminal_defect_observed": false,
+          "heap_observation": "all fully released iterations assert heap empty",
+          "old_resource_budgets_preserved": true
+        }
+      ],
+      "status": "source-runtime-verified",
+      "legacy_C_assertions": [
+        "emela_scheduler_run(1)",
+        "wide == INT64_MIN",
+        "emela_scheduler_run(1)",
+        "memcmp(&input, &real, sizeof(double)) == 0",
+        "emela_scheduler_run(1)",
+        "flag == i % 2"
+      ],
+      "harness_adaptations": [
+        "stable explicit export names",
+        "function/aggregate ABI type numbers and release symbol resolved from generated public header",
+        "event lock hooks supplied when required",
+        "heap-empty audit after fully released successful iterations"
+      ],
+      "recommended_ledger_status": "replaced",
+      "final_integrated_verification": "required",
+      "source_API_path": "source checker -> normalization -> specialization -> frontend lower -> independent backend -> public C export; no IR edits",
+      "legacy_rust_sha256": "35367507790dd3584f346da32b4b855b048883e19360a02221212ec2a6740def"
+    },
+    {
+      "legacy_test": "emit::fiber::join::join_results_own_strings_and_lists_after_scope_and_frame_reuse",
+      "legacy_path": "crates/emela-codegen-emb/tests/fiber/join.rs",
+      "legacy_line": 148,
+      "programs": [
+        "program:ed616eb011fc05d6acbf"
+      ],
+      "original_files": {
+        "program:ed616eb011fc05d6acbf": [
+          {
+            "name": "main.emel",
+            "fixture": "sources/1ad3549206b5ee0c2856da0ff8c4b72c2c1ef668cdc5d1a6af82debbafb5a48b.emel",
+            "source_id": "source:1ad3549206b5ee0c2856",
+            "sha256": "1ad3549206b5ee0c2856da0ff8c4b72c2c1ef668cdc5d1a6af82debbafb5a48b"
+          }
+        ]
+      },
+      "legacy_options": {
+        "heap_bytes": 8192,
+        "fiber_capacity": 8,
+        "frame_capacity": 24,
+        "frame_bytes": 512,
+        "deferred_capacity": 8
+      },
+      "source_adaptation": "explicit C export only; original source fixture is byte-preserved",
+      "runtime_variants": [
+        {
+          "program": "program:ed616eb011fc05d6acbf",
+          "source_sha256": "1ad3549206b5ee0c2856da0ff8c4b72c2c1ef668cdc5d1a6af82debbafb5a48b",
+          "new_test": "tests/p7_child_results_compat.rs::join_results_own_strings_and_lists_after_scope_and_frame_reuse",
+          "harness": "tests/compat/p7/concurrency/join_results_own_strings_and_lists_after_scope_and_frame_reuse.c",
+          "status": "runtime-passed",
+          "actual_options": {
+            "heap_bytes": 4096,
+            "fiber_capacity": 8,
+            "frame_capacity": 24,
+            "frame_bytes": 512,
+            "deferred_capacity": 8
+          },
+          "old_postprocessing": "none; generated C heap observer only",
+          "C_generation": "accepted",
+          "strict_C_objects": {
+            "-O0": "compiled-linked",
+            "-O2": "compiled-linked"
+          },
+          "C_runtime": {
+            "-O0": "passed",
+            "-O2": "passed"
+          },
+          "successful_iterations": 1000,
+          "terminal_defect_observed": false,
+          "heap_observation": "all fully released iterations assert heap empty",
+          "old_resource_budgets_preserved": true
+        }
+      ],
+      "status": "source-runtime-verified",
+      "legacy_C_assertions": [
+        "emela_scheduler_run(1)",
+        "emela_scheduler_run(1)",
+        "text.owner && text.length == 11 && memcmp(text.data, \"-2147483648\", 11) == 0",
+        "emela_export_sum_2(list) == 2 * i + 1"
+      ],
+      "harness_adaptations": [
+        "stable explicit export names",
+        "function/aggregate ABI type numbers and release symbol resolved from generated public header",
+        "event lock hooks supplied when required",
+        "heap-empty audit after fully released successful iterations"
+      ],
+      "recommended_ledger_status": "replaced",
+      "final_integrated_verification": "required",
+      "source_API_path": "source checker -> normalization -> specialization -> frontend lower -> independent backend -> public C export; no IR edits",
+      "legacy_rust_sha256": "35367507790dd3584f346da32b4b855b048883e19360a02221212ec2a6740def"
+    },
+    {
+      "legacy_test": "emit::fiber::join::join_reuses_completed_results_without_yielding_and_waits_for_discarded_unit",
+      "legacy_path": "crates/emela-codegen-emb/tests/fiber/join.rs",
+      "legacy_line": 4,
+      "programs": [
+        "program:5191e9bbbf54e34f3e94"
+      ],
+      "original_files": {
+        "program:5191e9bbbf54e34f3e94": [
+          {
+            "name": "main.emel",
+            "fixture": "sources/4e16d6fb423d21a9b45128415809cc4ecdc97f12ceb845216bb531dfc12a7619.emel",
+            "source_id": "source:4e16d6fb423d21a9b451",
+            "sha256": "4e16d6fb423d21a9b45128415809cc4ecdc97f12ceb845216bb531dfc12a7619"
+          }
+        ]
+      },
+      "legacy_options": {
+        "heap_bytes": 8192,
+        "fiber_capacity": 8,
+        "frame_capacity": 24,
+        "frame_bytes": 512,
+        "deferred_capacity": 8
+      },
+      "source_adaptation": "explicit C export only; original source fixture is byte-preserved",
+      "runtime_variants": [
+        {
+          "program": "program:5191e9bbbf54e34f3e94",
+          "source_sha256": "4e16d6fb423d21a9b45128415809cc4ecdc97f12ceb845216bb531dfc12a7619",
+          "new_test": "tests/p7_child_results_compat.rs::join_reuses_completed_results_without_yielding_and_waits_for_discarded_unit",
+          "harness": "tests/compat/p7/concurrency/join_reuses_completed_results_without_yielding_and_waits_for_discarded_unit.c",
+          "status": "runtime-passed",
+          "actual_options": {
+            "heap_bytes": 4096,
+            "fiber_capacity": 8,
+            "frame_capacity": 24,
+            "frame_bytes": 512,
+            "deferred_capacity": 8
+          },
+          "old_postprocessing": "none; generated C heap observer only",
+          "C_generation": "accepted",
+          "strict_C_objects": {
+            "-O0": "compiled-linked",
+            "-O2": "compiled-linked"
+          },
+          "C_runtime": {
+            "-O0": "passed",
+            "-O2": "passed"
+          },
+          "successful_iterations": 1000,
+          "terminal_defect_observed": false,
+          "heap_observation": "all fully released iterations assert heap empty",
+          "old_resource_budgets_preserved": true
+        }
+      ],
+      "status": "source-runtime-verified",
+      "legacy_C_assertions": [
+        "n == ++order",
+        "emela_scheduler_run(1)",
+        "result == 2 * (i + 1) && order == 4",
+        "emela_scheduler_run(1)",
+        "order == 2"
+      ],
+      "harness_adaptations": [
+        "stable explicit export names",
+        "function/aggregate ABI type numbers and release symbol resolved from generated public header",
+        "event lock hooks supplied when required",
+        "heap-empty audit after fully released successful iterations"
+      ],
+      "recommended_ledger_status": "replaced",
+      "final_integrated_verification": "required",
+      "source_API_path": "source checker -> normalization -> specialization -> frontend lower -> independent backend -> public C export; no IR edits",
+      "legacy_rust_sha256": "35367507790dd3584f346da32b4b855b048883e19360a02221212ec2a6740def",
+      "artifact_observations": [
+        {
+          "C_define": "EMELA_CHILD_WAIT_RUNTIME present; EMELA_DEFERRED_CAPACITY absent",
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "legacy_test": "emit::fiber::join::join_wakes_multiple_waiters_in_fifo_after_the_childs_last_breath",
+      "legacy_path": "crates/emela-codegen-emb/tests/fiber/join.rs",
+      "legacy_line": 78,
+      "programs": [
+        "program:a90d0e707bff9fd0c0d9"
+      ],
+      "original_files": {
+        "program:a90d0e707bff9fd0c0d9": [
+          {
+            "name": "main.emel",
+            "fixture": "sources/ee721482a151acf7e2dc7640812dcc4865b0942afffb9d80a97039673d65c54d.emel",
+            "source_id": "source:ee721482a151acf7e2dc",
+            "sha256": "ee721482a151acf7e2dc7640812dcc4865b0942afffb9d80a97039673d65c54d"
+          }
+        ]
+      },
+      "legacy_options": {
+        "heap_bytes": 8192,
+        "fiber_capacity": 8,
+        "frame_capacity": 24,
+        "frame_bytes": 512,
+        "deferred_capacity": 8
+      },
+      "source_adaptation": "explicit C export only; original source fixture is byte-preserved",
+      "status": "source-runtime-verified",
+      "evidence": "tests/p6_child_waiters.rs::child_await_and_join_waiters_resume_fifo_after_the_child_finishes",
+      "observations": "Existing P6 original-body C observation is re-executed here with the original legacy resource budgets.",
+      "runtime_variants": [
+        {
+          "program": "program:a90d0e707bff9fd0c0d9",
+          "source_sha256": "ee721482a151acf7e2dc7640812dcc4865b0942afffb9d80a97039673d65c54d",
+          "new_test": "tests/p7_child_results_compat.rs::join_wakes_multiple_waiters_in_fifo_after_the_childs_last_breath",
+          "harness": "tests/compat/p7/concurrency/join_wakes_multiple_waiters_in_fifo_after_the_childs_last_breath.c",
+          "status": "runtime-passed",
+          "actual_options": {
+            "heap_bytes": 8192,
+            "fiber_capacity": 8,
+            "frame_capacity": 40,
+            "frame_bytes": 512,
+            "deferred_capacity": 8
+          },
+          "old_postprocessing": "none; generated C heap observer only",
+          "C_generation": "accepted",
+          "strict_C_objects": {
+            "-O0": "compiled-linked",
+            "-O2": "compiled-linked"
+          },
+          "C_runtime": {
+            "-O0": "passed",
+            "-O2": "passed"
+          },
+          "successful_iterations": 1000,
+          "terminal_defect_observed": false,
+          "heap_observation": "all fully released iterations assert heap empty",
+          "old_resource_budgets_preserved": true
+        }
+      ],
+      "legacy_C_assertions": [
+        "n == ++order",
+        "n == 40 && count++ == 0",
+        "order == 3 && count == 1 && result == -1 && !emela_fiber_done(f)",
+        "emela_task_complete_int(task, 42)",
+        "emela_scheduler_run(1)",
+        "result == 126 && order == 7"
+      ],
+      "harness_adaptations": [
+        "stable explicit export names",
+        "function/aggregate ABI type numbers and release symbol resolved from generated public header",
+        "event lock hooks supplied when required",
+        "heap-empty audit after fully released successful iterations"
+      ],
+      "recommended_ledger_status": "replaced",
+      "final_integrated_verification": "required",
+      "source_API_path": "source checker -> normalization -> specialization -> frontend lower -> independent backend -> public C export; no IR edits",
+      "legacy_rust_sha256": "35367507790dd3584f346da32b4b855b048883e19360a02221212ec2a6740def"
+    },
+    {
+      "legacy_test": "emit::fiber::join::leaked_join_callback_rejects_an_ended_scope_after_reusing_execution_slots",
+      "legacy_path": "crates/emela-codegen-emb/tests/fiber/join.rs",
+      "legacy_line": 288,
+      "programs": [
+        "program:a5a2e1ef76d57c840f3c"
+      ],
+      "original_files": {
+        "program:a5a2e1ef76d57c840f3c": [
+          {
+            "name": "main.emel",
+            "fixture": "sources/bd8b968875e5d3ab2d5c229624b82ca88014d925ae9c5202611944dd8d1e1226.emel",
+            "source_id": "source:bd8b968875e5d3ab2d5c",
+            "sha256": "bd8b968875e5d3ab2d5c229624b82ca88014d925ae9c5202611944dd8d1e1226"
+          }
+        ]
+      },
+      "legacy_options": {
+        "heap_bytes": 8192,
+        "fiber_capacity": 8,
+        "frame_capacity": 24,
+        "frame_bytes": 512,
+        "deferred_capacity": 8
+      },
+      "source_adaptation": "explicit C export only; original source fixture is byte-preserved",
+      "runtime_variants": [
+        {
+          "program": "program:a5a2e1ef76d57c840f3c",
+          "source_sha256": "bd8b968875e5d3ab2d5c229624b82ca88014d925ae9c5202611944dd8d1e1226",
+          "new_test": "tests/p7_child_results_compat.rs::leaked_join_callback_rejects_an_ended_scope_after_reusing_execution_slots",
+          "harness": "tests/compat/p7/concurrency/leaked_join_callback_rejects_an_ended_scope_after_reusing_execution_slots.c",
+          "status": "runtime-passed",
+          "actual_options": {
+            "heap_bytes": 4096,
+            "fiber_capacity": 8,
+            "frame_capacity": 24,
+            "frame_bytes": 512,
+            "deferred_capacity": 8
+          },
+          "old_postprocessing": "none",
+          "C_generation": "accepted",
+          "strict_C_objects": {
+            "-O0": "compiled-linked",
+            "-O2": "compiled-linked"
+          },
+          "C_runtime": {
+            "-O0": "passed",
+            "-O2": "passed"
+          },
+          "successful_iterations": 1000,
+          "terminal_defect_observed": true,
+          "heap_observation": "terminal defect follows original process-stop observation; live callback retained intentionally",
+          "old_resource_budgets_preserved": true
+        }
+      ],
+      "status": "source-runtime-verified",
+      "legacy_C_assertions": [
+        "expected && k == EMELA_DEFECT_PANIC && n == 37",
+        "memcmp(m, \"fiber was joined after its scope ended\", n) == 0",
+        "emela_scheduler_run(1)",
+        "emela_scheduler_run(1)"
+      ],
+      "harness_adaptations": [
+        "stable explicit export names",
+        "function/aggregate ABI type numbers and release symbol resolved from generated public header",
+        "event lock hooks supplied when required",
+        "heap-empty audit after fully released successful iterations"
+      ],
+      "recommended_ledger_status": "replaced",
+      "final_integrated_verification": "required",
+      "source_API_path": "source checker -> normalization -> specialization -> frontend lower -> independent backend -> public C export; no IR edits",
+      "legacy_rust_sha256": "35367507790dd3584f346da32b4b855b048883e19360a02221212ec2a6740def"
+    }
+  ],
+  "execution": {
+    "Rust_test_profile": "CARGO_PROFILE_TEST_OPT_LEVEL=1",
+    "C_flags": [
+      "-std=c11",
+      "-Wall",
+      "-Werror",
+      "-O0 and -O2 (both mandatory)"
+    ],
+    "test_targets": [
+      "p7_deferred_compat: 14 passed",
+      "p7_child_results_compat: 18 passed"
+    ],
+    "source_body_policy": "split_inclusive preserves every original byte and inserts only explicit export attributes",
+    "strict_clippy": "workspace/all-targets -D warnings passed",
+    "main_ledger_modified": false
+  },
+  "counts": {
+    "legacy_tests": 30,
+    "source_programs": 33,
+    "C_runtime_variants": 32,
+    "legacy_artifact_only_programs": 1,
+    "runtime_failures": 0,
+    "ignored_tests": 0
+  }
+}

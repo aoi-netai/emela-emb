@@ -1,0 +1,1729 @@
+{
+  "kind": "proposal_only_no_canonical_ledger_changes",
+  "fixed_revision": "c34c0aeefdd966d854371b3110db00a47798751d",
+  "scope": {
+    "legacy_tests": 115,
+    "ir_reviewed": 86,
+    "source_delegated": 29,
+    "source_owner": "root; normal source corpus crosswalk remains a separate report"
+  },
+  "classification_method": "Exact target::test name membership in saved normal-source manifest; all86 remaining fixed-old test bodies were read via git show at the fixed revision. No dirty old checkout files are inputs.",
+  "verification_layers": [
+    "IR input rejection/normalization",
+    "source-to-private-IR replacements",
+    "strict generated C compilation and runtime at -O0/-O2; no compiler-absent skip"
+  ],
+  "status_counts": {
+    "proposed_verified": 82,
+    "proposed_verified_representation_replaced": 2,
+    "proposed_not_applicable_absent_selector": 1,
+    "proposed_verified_policy_replacement": 1
+  },
+  "ir_tests": [
+    {
+      "target": "emit",
+      "name": "adapts_a_function_value_to_effect_evidence_and_failure_call_abis",
+      "legacy_path": "tests/emit.rs",
+      "legacy_key": "emit::adapts_a_function_value_to_effect_evidence_and_failure_call_abis",
+      "legacy_ledger_index": 0,
+      "expected_observation": "A pure function value widened to evidence+failure ABI returns 42 through an indirect call.",
+      "proposed_status": "proposed_verified",
+      "evidence": [
+        {
+          "path": "crates/emela-emb-compiler/src/backend/lower/function_tests.rs",
+          "symbol": "function_coercion_adapts_unit_erasure_evidence_and_failure_abi",
+          "layer": "IR/C runtime"
+        }
+      ]
+    },
+    {
+      "target": "emit",
+      "name": "allocates_and_releases_lists_in_the_fixed_heap",
+      "legacy_path": "tests/emit.rs",
+      "legacy_key": "emit::allocates_and_releases_lists_in_the_fixed_heap",
+      "legacy_ledger_index": 1,
+      "expected_observation": "Return List[Int](4,5), release it externally 1000 times in heap1024 without exhaustion.",
+      "proposed_status": "proposed_verified",
+      "evidence": [
+        {
+          "path": "crates/emela-emb-compiler/src/backend/lower/memory_tests.rs",
+          "symbol": "list_string_bytes_and_any_release_owned_values_after_repeated_calls",
+          "layer": "IR/C runtime"
+        },
+        {
+          "path": "crates/emela-emb-compiler/src/backend/lower/p7_list_alias_tests.rs",
+          "symbol": "returned_lists_shared_tails_and_inline_list_owners_reuse_the_old_1024_byte_heap",
+          "layer": "IR/C runtime"
+        }
+      ],
+      "reason": "Direct fixed-old shape and original budget are preserved in the dedicated List/captured-failure module. Normal C calls repeat1000 times; owned paths verify all heap blocks free after each call. The expected fatal indirect failure is invoked once after the successful loop; heap0 refusal is an input diagnostic assertion."
+    },
+    {
+      "target": "emit",
+      "name": "any_boxes_retain_managed_list_payloads_until_the_box_is_released",
+      "legacy_path": "tests/emit.rs",
+      "legacy_key": "emit::any_boxes_retain_managed_list_payloads_until_the_box_is_released",
+      "legacy_ledger_index": 2,
+      "expected_observation": "Box managed List[Int](17) in Any, unbox, observe head17 while retaining/releasing its payload.",
+      "proposed_status": "proposed_verified",
+      "evidence": [
+        {
+          "path": "crates/emela-emb-compiler/src/backend/lower/memory_tests.rs",
+          "symbol": "any_boxes_retain_managed_lists_and_release_their_payloads",
+          "layer": "IR/C runtime"
+        }
+      ]
+    },
+    {
+      "target": "emit",
+      "name": "binding_metadata::imported_c_bindings_preserve_symbols_for_named_file_and_bundled_modules",
+      "legacy_path": "tests/binding_metadata/mod.rs",
+      "legacy_key": "emit::binding_metadata::imported_c_bindings_preserve_symbols_for_named_file_and_bundled_modules",
+      "legacy_ledger_index": 3,
+      "expected_observation": "Global, named import, file import and bundled import preserve the host C symbol.",
+      "proposed_status": "proposed_verified",
+      "evidence": [
+        {
+          "path": "crates/emela-emb-compiler/src/backend/lower/p7_binding_tests.rs",
+          "symbol": "global_named_file_and_bundled_host_metadata_preserve_the_external_c_symbol",
+          "layer": "IR/C runtime"
+        }
+      ]
+    },
+    {
+      "target": "emit",
+      "name": "binding_metadata::named_enum_fields_preserve_payload_order_in_generated_c",
+      "legacy_path": "tests/binding_metadata/mod.rs",
+      "legacy_key": "emit::binding_metadata::named_enum_fields_preserve_payload_order_in_generated_c",
+      "legacy_ledger_index": 4,
+      "expected_observation": "Named payload declaration order remains f0=7/f1=42 at the C boundary.",
+      "proposed_status": "proposed_verified",
+      "evidence": [
+        {
+          "path": "crates/emela-emb-compiler/src/backend/lower/p7_data_tests.rs",
+          "symbol": "legacy_inline_layouts_preserve_generic_fields_tags_and_unit_positions_at_the_c_boundary",
+          "layer": "IR/C runtime"
+        }
+      ]
+    },
+    {
+      "target": "emit",
+      "name": "builtin_audit::discarded_float_rounding_preserves_the_out_of_range_defect",
+      "legacy_path": "tests/builtin_audit/mod.rs",
+      "legacy_key": "emit::builtin_audit::discarded_float_rounding_preserves_the_out_of_range_defect",
+      "legacy_ledger_index": 5,
+      "expected_observation": "Discarded Float.floor(NaN) still calls the Float-to-Int defect hook.",
+      "proposed_status": "proposed_verified",
+      "evidence": [
+        {
+          "path": "crates/emela-emb-compiler/tests/p2_compat.rs",
+          "symbol": "legacy_numeric_formatting_rounding_and_unused_defects_execute",
+          "layer": "source/C runtime"
+        }
+      ],
+      "reason": "numeric-format-harness.c checks all four rounding operations in used/discarded forms against five invalid values: exactly40 defects, with kind and message."
+    },
+    {
+      "target": "emit",
+      "name": "builtin_audit::discarded_runtime_show_string_keeps_its_capacity_check",
+      "legacy_path": "tests/builtin_audit/mod.rs",
+      "legacy_key": "emit::builtin_audit::discarded_runtime_show_string_keeps_its_capacity_check",
+      "legacy_ledger_index": 6,
+      "expected_observation": "Discarded Runtime ShowString still raises its output capacity defect.",
+      "proposed_status": "proposed_verified",
+      "evidence": [
+        {
+          "path": "crates/emela-emb-compiler/src/backend/lower/p7_discarded_tests.rs",
+          "symbol": "discarded_runtime_show_string_still_checks_its_output_capacity",
+          "layer": "IR/C runtime"
+        }
+      ]
+    },
+    {
+      "target": "emit",
+      "name": "builtin_audit::discarded_string_chars_still_builds_and_releases_its_owned_list",
+      "legacy_path": "tests/builtin_audit/mod.rs",
+      "legacy_key": "emit::builtin_audit::discarded_string_chars_still_builds_and_releases_its_owned_list",
+      "legacy_ledger_index": 7,
+      "expected_observation": "Discarded StringChars builds the owned list and releases it before the next statement.",
+      "proposed_status": "proposed_verified",
+      "evidence": [
+        {
+          "path": "crates/emela-emb-compiler/src/backend/lower/p7_evidence_tests.rs",
+          "symbol": "discarded_handler_and_evidence_constructors_release_before_the_next_statement",
+          "layer": "IR/C runtime"
+        }
+      ],
+      "reason": "The chars arm repeats1000 allocations in one function, checks zero live blocks immediately after each discard, and repeats the call1000 times."
+    },
+    {
+      "target": "emit",
+      "name": "builtin_audit::retire::retired_handler_aliases_keep_the_active_check_in_native_and_suspend_callers",
+      "legacy_path": "tests/builtin_audit/retire.rs",
+      "legacy_key": "emit::builtin_audit::retire::retired_handler_aliases_keep_the_active_check_in_native_and_suspend_callers",
+      "legacy_ledger_index": 8,
+      "expected_observation": "Retired handlers reached through direct/evidence/coerce/tuple/argument aliases fail in both native and suspend callers.",
+      "proposed_status": "proposed_verified",
+      "evidence": [
+        {
+          "path": "crates/emela-emb-compiler/src/backend/lower/p7_handler_lifetime_tests.rs",
+          "symbol": "retirement_keeps_active_checks_through_all_aliases_in_native_and_suspend_callers",
+          "layer": "IR/C runtime"
+        }
+      ]
+    },
+    {
+      "target": "emit",
+      "name": "bytes::bytes_decoding_checks_string_capacity_before_truncating_the_length",
+      "legacy_path": "tests/bytes/mod.rs",
+      "legacy_key": "emit::bytes::bytes_decoding_checks_string_capacity_before_truncating_the_length",
+      "legacy_ledger_index": 10,
+      "expected_observation": "Bytes.decode checks the original uint32 length70000 before narrowing to a capacity8 String.",
+      "proposed_status": "proposed_verified",
+      "evidence": [
+        {
+          "path": "crates/emela-emb-compiler/tests/p3_bytes.rs",
+          "symbol": "bytes_decode_checks_the_full_u32_length_before_narrowing_to_string",
+          "layer": "source/C runtime"
+        }
+      ]
+    },
+    {
+      "target": "emit",
+      "name": "bytes::bytes_finite_flow_derivations_compare_and_display_unsigned_bytes",
+      "legacy_path": "tests/bytes/mod.rs",
+      "legacy_key": "emit::bytes::bytes_finite_flow_derivations_compare_and_display_unsigned_bytes",
+      "legacy_ledger_index": 14,
+      "expected_observation": "Derived Bytes equality compares unsigned128/255 correctly; Show emits Bytes.hex(\"0080ff\").",
+      "proposed_status": "proposed_verified",
+      "evidence": [
+        {
+          "path": "crates/emela-emb-compiler/src/backend/lower/p7_misc_value_tests.rs",
+          "symbol": "derived_bytes_equality_and_display_keep_unsigned_values_at_the_c_boundary",
+          "layer": "IR/C runtime"
+        }
+      ]
+    },
+    {
+      "target": "emit",
+      "name": "cell::cell_references_in_native_error_payloads_outlive_the_failing_frame",
+      "legacy_path": "tests/cell/mod.rs",
+      "legacy_key": "emit::cell::cell_references_in_native_error_payloads_outlive_the_failing_frame",
+      "legacy_ledger_index": 22,
+      "expected_observation": "A Cell retained in an error payload survives its failing frame and remains readable.",
+      "proposed_status": "proposed_verified",
+      "evidence": [
+        {
+          "path": "crates/emela-emb-compiler/src/backend/lower/cell_tests.rs",
+          "symbol": "cell_references_in_error_payloads_outlive_the_failing_frame",
+          "layer": "IR/C runtime"
+        }
+      ]
+    },
+    {
+      "target": "emit",
+      "name": "cell::discarded_cell_construction_and_reads_release_their_owned_contents",
+      "legacy_path": "tests/cell/mod.rs",
+      "legacy_key": "emit::cell::discarded_cell_construction_and_reads_release_their_owned_contents",
+      "legacy_ledger_index": 23,
+      "expected_observation": "Discarded CellNew/CellGet release their managed contents.",
+      "proposed_status": "proposed_verified",
+      "evidence": [
+        {
+          "path": "crates/emela-emb-compiler/src/backend/lower/cell_tests.rs",
+          "symbol": "discarded_cell_construction_and_reads_release_owned_contents",
+          "layer": "IR/C runtime"
+        }
+      ]
+    },
+    {
+      "target": "emit",
+      "name": "cell::unit_cells_keep_a_shared_heap_identity_without_reading_a_void_payload",
+      "legacy_path": "tests/cell/mod.rs",
+      "legacy_key": "emit::cell::unit_cells_keep_a_shared_heap_identity_without_reading_a_void_payload",
+      "legacy_ledger_index": 24,
+      "expected_observation": "Unit cells have shared heap identity with no void payload reads, and release after the last root.",
+      "proposed_status": "proposed_verified",
+      "evidence": [
+        {
+          "path": "crates/emela-emb-compiler/src/backend/lower/cell_tests.rs",
+          "symbol": "unit_cells_have_shared_identity_and_release_after_the_last_external_root",
+          "layer": "IR/C runtime"
+        }
+      ]
+    },
+    {
+      "target": "emit",
+      "name": "compiles_direct_calls_to_internal_and_external_c_functions",
+      "legacy_path": "tests/emit.rs",
+      "legacy_key": "emit::compiles_direct_calls_to_internal_and_external_c_functions",
+      "legacy_ledger_index": 25,
+      "expected_observation": "Direct internal and scalar external calls preserve parameters and return42.",
+      "proposed_status": "proposed_verified",
+      "evidence": [
+        {
+          "path": "crates/emela-emb-compiler/src/backend/lower/tests.rs",
+          "symbol": "tail_recursion_uses_parallel_parameter_assignment_and_scalar_external_calls",
+          "layer": "IR/C runtime"
+        }
+      ]
+    },
+    {
+      "target": "emit",
+      "name": "compiles_if_statements_and_boolean_short_circuiting",
+      "legacy_path": "tests/emit.rs",
+      "legacy_key": "emit::compiles_if_statements_and_boolean_short_circuiting",
+      "legacy_ledger_index": 26,
+      "expected_observation": "If(1<2) returns42; False&&True and False||True yield False/True with short circuiting.",
+      "proposed_status": "proposed_verified",
+      "evidence": [
+        {
+          "path": "crates/emela-emb-compiler/tests/p1.rs",
+          "symbol": "short_circuiting_and_argument_evaluation_preserve_side_effect_order",
+          "layer": "source/C runtime"
+        },
+        {
+          "path": "crates/emela-emb-compiler/tests/p1.rs",
+          "symbol": "modules_internal_calls_branches_and_tail_recursion_execute",
+          "layer": "source/C runtime"
+        }
+      ]
+    },
+    {
+      "target": "emit",
+      "name": "constructs_inline_tuples_and_keeps_unit_field_positions",
+      "legacy_path": "tests/emit.rs",
+      "legacy_key": "emit::constructs_inline_tuples_and_keeps_unit_field_positions",
+      "legacy_ledger_index": 29,
+      "expected_observation": "Inline tuple(Int64,Unit,Bool) preserves f0=91/f2=True; Unit does not compress indices.",
+      "proposed_status": "proposed_verified",
+      "evidence": [
+        {
+          "path": "crates/emela-emb-compiler/src/backend/lower/p7_data_tests.rs",
+          "symbol": "legacy_inline_layouts_preserve_generic_fields_tags_and_unit_positions_at_the_c_boundary",
+          "layer": "IR/C runtime"
+        }
+      ]
+    },
+    {
+      "target": "emit",
+      "name": "constructs_payload_and_unit_enum_variants_as_inline_values",
+      "legacy_path": "tests/emit.rs",
+      "legacy_key": "emit::constructs_payload_and_unit_enum_variants_as_inline_values",
+      "legacy_ledger_index": 30,
+      "expected_observation": "Payload Some42 and unit None preserve tags0/1 and the Int64 payload.",
+      "proposed_status": "proposed_verified",
+      "evidence": [
+        {
+          "path": "crates/emela-emb-compiler/src/backend/lower/p7_data_tests.rs",
+          "symbol": "legacy_inline_layouts_preserve_generic_fields_tags_and_unit_positions_at_the_c_boundary",
+          "layer": "IR/C runtime"
+        }
+      ]
+    },
+    {
+      "target": "emit",
+      "name": "debug_print_calls_the_board_hook_with_the_string_view",
+      "legacy_path": "tests/emit.rs",
+      "legacy_key": "emit::debug_print_calls_the_board_hook_with_the_string_view",
+      "legacy_ledger_index": 31,
+      "expected_observation": "Runtime DebugPrint passes the original length3 abc view to the board hook; only debug board API is requested.",
+      "proposed_status": "proposed_verified",
+      "evidence": [
+        {
+          "path": "crates/emela-emb-compiler/src/backend/lower/p7_misc_value_tests.rs",
+          "symbol": "debug_print_passes_the_original_string_view_to_the_board_hook",
+          "layer": "IR/C runtime"
+        }
+      ]
+    },
+    {
+      "target": "emit",
+      "name": "deferred::discarded_deferreds_reuse_one_slot_within_a_long_lived_scope",
+      "legacy_path": "tests/deferred/mod.rs",
+      "legacy_key": "emit::deferred::discarded_deferreds_reuse_one_slot_within_a_long_lived_scope",
+      "legacy_ledger_index": 34,
+      "expected_observation": "Discarded Deferreds reuse the only pool slot during a long-lived scope.",
+      "proposed_status": "proposed_verified",
+      "evidence": [
+        {
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_deferred_tests.rs",
+          "symbol": "discarded_deferreds_reuse_one_slot_in_a_long_lived_scope",
+          "layer": "IR/C runtime"
+        }
+      ]
+    },
+    {
+      "target": "emit",
+      "name": "dynamic_float_formatting_uses_a_bounded_runtime_and_float_parse_uses_the_bounded_parser",
+      "legacy_path": "tests/emit.rs",
+      "legacy_key": "emit::dynamic_float_formatting_uses_a_bounded_runtime_and_float_parse_uses_the_bounded_parser",
+      "legacy_ledger_index": 36,
+      "expected_observation": "Float formatting has bounded scratch and exact tiny/long/NaN/Infinity output; bounded Float parser preserves old precision and invalid-input behavior.",
+      "proposed_status": "proposed_verified",
+      "evidence": [
+        {
+          "path": "crates/emela-emb-compiler/tests/p2_compat.rs",
+          "symbol": "legacy_numeric_formatting_rounding_and_unused_defects_execute",
+          "layer": "source/C runtime"
+        },
+        {
+          "path": "crates/emela-emb-compiler/tests/p2_parse.rs",
+          "symbol": "numeric_and_bool_parse_preserve_precision_and_original_error_input",
+          "layer": "source/C runtime"
+        }
+      ],
+      "reason": "numeric-format-harness.c has exact old formatting values; float_parse_cases.rs retains the long-significand and deterministic parser case corpus. No snprintf/malloc in generated formatting C."
+    },
+    {
+      "target": "emit",
+      "name": "dynamic_string_from_code_point_checks_capacity_before_writing",
+      "legacy_path": "tests/emit.rs",
+      "legacy_key": "emit::dynamic_string_from_code_point_checks_capacity_before_writing",
+      "legacy_ledger_index": 37,
+      "expected_observation": "String.from_code_point(0x20ac), capacity2, defects before writing even if only the Option tag is observed.",
+      "proposed_status": "proposed_verified",
+      "evidence": [
+        {
+          "path": "crates/emela-emb-compiler/tests/p2_standard_api.rs",
+          "symbol": "code_point_capacity_defects_are_preserved_when_only_the_tag_or_no_value_is_used",
+          "layer": "source/C runtime"
+        }
+      ]
+    },
+    {
+      "target": "emit",
+      "name": "emits_a_static_string_const_as_a_view",
+      "legacy_path": "tests/emit.rs",
+      "legacy_key": "emit::emits_a_static_string_const_as_a_view",
+      "legacy_ledger_index": 38,
+      "expected_observation": "Static String const a\\0é is an immutable four-byte view.",
+      "proposed_status": "proposed_verified",
+      "evidence": [
+        {
+          "path": "crates/emela-emb-compiler/src/backend/lower/p7_misc_value_tests.rs",
+          "symbol": "static_string_constant_returns_a_nul_and_unicode_view_without_an_owner",
+          "layer": "IR/C runtime"
+        }
+      ],
+      "reason": "Exact old a\\0é byte view, static/no owner, repeated1000 times."
+    },
+    {
+      "target": "emit",
+      "name": "emits_and_runs_a_block_that_yields_a_value",
+      "legacy_path": "tests/emit.rs",
+      "legacy_key": "emit::emits_and_runs_a_block_that_yields_a_value",
+      "legacy_ledger_index": 39,
+      "expected_observation": "Structured Block Yield and Break to an enclosing block return their declared result.",
+      "proposed_status": "proposed_verified",
+      "evidence": [
+        {
+          "path": "crates/emela-emb-compiler/src/backend/lower/tests.rs",
+          "symbol": "block_yield_and_break_to_enclosing_block_execute",
+          "layer": "IR/C runtime"
+        }
+      ]
+    },
+    {
+      "target": "emit",
+      "name": "emits_and_runs_a_loop_with_an_initial_value_and_yield",
+      "legacy_path": "tests/emit.rs",
+      "legacy_key": "emit::emits_and_runs_a_loop_with_an_initial_value_and_yield",
+      "legacy_ledger_index": 40,
+      "expected_observation": "Loop initial values, Yield and parallel multiple-variable Recur preserve their results.",
+      "proposed_status": "proposed_verified",
+      "evidence": [
+        {
+          "path": "crates/emela-emb-compiler/src/backend/lower/tests.rs",
+          "symbol": "loop_initial_values_yield_and_multiple_recur_variables_execute",
+          "layer": "IR/C runtime"
+        }
+      ]
+    },
+    {
+      "target": "emit",
+      "name": "emits_and_runs_break_to_an_enclosing_block",
+      "legacy_path": "tests/emit.rs",
+      "legacy_key": "emit::emits_and_runs_break_to_an_enclosing_block",
+      "legacy_ledger_index": 41,
+      "expected_observation": "Structured Block Yield and Break to an enclosing block return their declared result.",
+      "proposed_status": "proposed_verified",
+      "evidence": [
+        {
+          "path": "crates/emela-emb-compiler/src/backend/lower/tests.rs",
+          "symbol": "block_yield_and_break_to_enclosing_block_execute",
+          "layer": "IR/C runtime"
+        }
+      ]
+    },
+    {
+      "target": "emit",
+      "name": "emits_and_runs_exhaustive_payload_enum_switch_and_defects_on_invalid_tag",
+      "legacy_path": "tests/emit.rs",
+      "legacy_key": "emit::emits_and_runs_exhaustive_payload_enum_switch_and_defects_on_invalid_tag",
+      "legacy_ledger_index": 42,
+      "expected_observation": "Payload enum branches return71/82; invalidtag7 reaches exact NoMatch/no match hook.",
+      "proposed_status": "proposed_verified",
+      "evidence": [
+        {
+          "path": "crates/emela-emb-compiler/src/backend/lower/p7_data_tests.rs",
+          "symbol": "legacy_literal_and_enum_switches_cover_numeric_extremes_and_reject_invalid_tags",
+          "layer": "IR/C runtime"
+        }
+      ]
+    },
+    {
+      "target": "emit",
+      "name": "emits_and_runs_float_constants_including_non_finite_values",
+      "legacy_path": "tests/emit.rs",
+      "legacy_key": "emit::emits_and_runs_float_constants_including_non_finite_values",
+      "legacy_ledger_index": 43,
+      "expected_observation": "Float constants preserve finite values, signed zero, infinities and NaN.",
+      "proposed_status": "proposed_verified",
+      "evidence": [
+        {
+          "path": "crates/emela-emb-compiler/src/backend/lower/tests.rs",
+          "symbol": "float_constant_bits_and_non_finite_values_execute",
+          "layer": "IR/C runtime"
+        }
+      ]
+    },
+    {
+      "target": "emit",
+      "name": "emits_and_runs_float_primitive_operations",
+      "legacy_path": "tests/emit.rs",
+      "legacy_key": "emit::emits_and_runs_float_primitive_operations",
+      "legacy_ledger_index": 44,
+      "expected_observation": "All old F64 primitive cases preserve Add/Sub/Mul/Div/Rem/Neg, six comparisons and NaN equality/inequality.",
+      "proposed_status": "proposed_verified",
+      "evidence": [
+        {
+          "path": "crates/emela-emb-compiler/src/backend/lower/p7_misc_value_tests.rs",
+          "symbol": "float_primitive_cases_keep_the_fixed_old_arithmetic_comparison_and_nan_results",
+          "layer": "IR/C runtime"
+        }
+      ],
+      "reason": "The case table is copied from the fixed old test, using the private contract without any legacy dependency."
+    },
+    {
+      "target": "emit",
+      "name": "emits_and_runs_int32_and_int64_literal_switches",
+      "legacy_path": "tests/emit.rs",
+      "legacy_key": "emit::emits_and_runs_int32_and_int64_literal_switches",
+      "legacy_ledger_index": 45,
+      "expected_observation": "Int32 MIN/0/other switch yields11/22/33; Int64 MIN/MAX/other yields44/55/66.",
+      "proposed_status": "proposed_verified",
+      "evidence": [
+        {
+          "path": "crates/emela-emb-compiler/src/backend/lower/p7_data_tests.rs",
+          "symbol": "legacy_literal_and_enum_switches_cover_numeric_extremes_and_reject_invalid_tags",
+          "layer": "IR/C runtime"
+        }
+      ]
+    },
+    {
+      "target": "emit",
+      "name": "emits_and_runs_int32_primitive_operations",
+      "legacy_path": "tests/emit.rs",
+      "legacy_key": "emit::emits_and_runs_int32_primitive_operations",
+      "legacy_ledger_index": 46,
+      "expected_observation": "Int32 arithmetic wraps MAX+1/MIN-1/MAX*2/-MIN; Not and ordered/equality comparisons match the fixed old table.",
+      "proposed_status": "proposed_verified",
+      "evidence": [
+        {
+          "path": "crates/emela-emb-compiler/tests/p1.rs",
+          "symbol": "scalar_numeric_boundaries_execute_with_legacy_semantics",
+          "layer": "source/C runtime"
+        },
+        {
+          "path": "crates/emela-emb-compiler/tests/p1.rs",
+          "symbol": "short_circuiting_and_argument_evaluation_preserve_side_effect_order",
+          "layer": "source/C runtime"
+        }
+      ]
+    },
+    {
+      "target": "emit",
+      "name": "emits_and_runs_int64_constants_at_the_signed_boundaries",
+      "legacy_path": "tests/emit.rs",
+      "legacy_key": "emit::emits_and_runs_int64_constants_at_the_signed_boundaries",
+      "legacy_ledger_index": 47,
+      "expected_observation": "Int64 MIN/MAX/-1 constants preserve signed C values.",
+      "proposed_status": "proposed_verified",
+      "evidence": [
+        {
+          "path": "crates/emela-emb-compiler/tests/p1.rs",
+          "symbol": "scalar_numeric_boundaries_execute_with_legacy_semantics",
+          "layer": "source/C runtime"
+        }
+      ]
+    },
+    {
+      "target": "emit",
+      "name": "emits_and_runs_recur_with_multiple_loop_variables",
+      "legacy_path": "tests/emit.rs",
+      "legacy_key": "emit::emits_and_runs_recur_with_multiple_loop_variables",
+      "legacy_ledger_index": 48,
+      "expected_observation": "Loop initial values, Yield and parallel multiple-variable Recur preserve their results.",
+      "proposed_status": "proposed_verified",
+      "evidence": [
+        {
+          "path": "crates/emela-emb-compiler/src/backend/lower/tests.rs",
+          "symbol": "loop_initial_values_yield_and_multiple_recur_variables_execute",
+          "layer": "IR/C runtime"
+        }
+      ]
+    },
+    {
+      "target": "emit",
+      "name": "emits_and_runs_switches_on_nullary_enum_representations",
+      "legacy_path": "tests/emit.rs",
+      "legacy_key": "emit::emits_and_runs_switches_on_nullary_enum_representations",
+      "legacy_ledger_index": 49,
+      "expected_observation": "Nullary enum scalar switch maps Red/Blue to3/5.",
+      "proposed_status": "proposed_verified",
+      "evidence": [
+        {
+          "path": "crates/emela-emb-compiler/src/backend/lower/p7_data_tests.rs",
+          "symbol": "legacy_literal_and_enum_switches_cover_numeric_extremes_and_reject_invalid_tags",
+          "layer": "IR/C runtime"
+        }
+      ]
+    },
+    {
+      "target": "emit",
+      "name": "emits_c_for_a_function_returning_an_int_constant",
+      "legacy_path": "tests/emit.rs",
+      "legacy_key": "emit::emits_c_for_a_function_returning_an_int_constant",
+      "legacy_ledger_index": 50,
+      "expected_observation": "A public constant-returning private-IR function emits C and returns42.",
+      "proposed_status": "proposed_verified",
+      "evidence": [
+        {
+          "path": "crates/emela-emb-compiler/src/backend/lower/tests.rs",
+          "symbol": "private_entry_remains_reachable_beside_an_export",
+          "layer": "IR/C runtime"
+        }
+      ]
+    },
+    {
+      "target": "emit",
+      "name": "emits_empty_list_and_checks_list_emptiness",
+      "legacy_path": "tests/emit.rs",
+      "legacy_key": "emit::emits_empty_list_and_checks_list_emptiness",
+      "legacy_ledger_index": 51,
+      "expected_observation": "Empty List returns NULL; ListIsEmpty is True for NULL and False for a non-null borrowed pointer.",
+      "proposed_status": "proposed_verified",
+      "evidence": [
+        {
+          "path": "crates/emela-emb-compiler/src/backend/lower/p7_list_alias_tests.rs",
+          "symbol": "empty_lists_keep_the_null_c_boundary_without_requiring_a_heap",
+          "layer": "IR/C runtime"
+        }
+      ],
+      "reason": "Direct fixed-old shape and original budget are preserved in the dedicated List/captured-failure module. Normal C calls repeat1000 times; owned paths verify all heap blocks free after each call. The expected fatal indirect failure is invoked once after the successful loop; heap0 refusal is an input diagnostic assertion."
+    },
+    {
+      "target": "emit",
+      "name": "emits_int32_division_and_remainder_with_emela_semantics",
+      "legacy_path": "tests/emit.rs",
+      "legacy_key": "emit::emits_int32_division_and_remainder_with_emela_semantics",
+      "legacy_ledger_index": 52,
+      "expected_observation": "Int32 -7/3=-2 and -7%3=-1; MIN/-1 wraps to MIN and remainder0.",
+      "proposed_status": "proposed_verified",
+      "evidence": [
+        {
+          "path": "crates/emela-emb-compiler/tests/p1.rs",
+          "symbol": "scalar_numeric_boundaries_execute_with_legacy_semantics",
+          "layer": "source/C runtime"
+        }
+      ]
+    },
+    {
+      "target": "emit",
+      "name": "fiber::cause::compile_flow_keeps_rejecting_a_cause_failure_without_a_channel",
+      "legacy_path": "tests/fiber/cause.rs",
+      "legacy_key": "emit::fiber::cause::compile_flow_keeps_rejecting_a_cause_failure_without_a_channel",
+      "legacy_ledger_index": 59,
+      "expected_observation": "CauseRaise cannot fail without an explicit failure edge and a propagation channel.",
+      "proposed_status": "proposed_verified",
+      "evidence": [
+        {
+          "path": "crates/emela-emb-compiler/src/backend/lower/p7_contract_tests.rs",
+          "symbol": "cause_raise_requires_a_failure_edge_and_a_propagation_channel",
+          "layer": "IR/C runtime"
+        }
+      ]
+    },
+    {
+      "target": "emit",
+      "name": "fiber::failure::caught_failure_inside_suspending_release_does_not_replace_the_original_error",
+      "legacy_path": "tests/fiber/failure.rs",
+      "legacy_key": "emit::fiber::failure::caught_failure_inside_suspending_release_does_not_replace_the_original_error",
+      "legacy_ledger_index": 60,
+      "expected_observation": "A separately caught failure during suspending cleanup does not replace the original failing payload.",
+      "proposed_status": "proposed_verified",
+      "evidence": [
+        {
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend_tests.rs",
+          "symbol": "suspending_cleanup_preserves_the_failure_until_an_outer_handler_runs",
+          "layer": "IR/C runtime"
+        }
+      ],
+      "reason": "Uses managed String payloads42 and7, observes nested cleanup recovery, waits on the external cleanup task, then recovers the original42 and verifies heap empty1000 times."
+    },
+    {
+      "target": "emit",
+      "name": "fiber::function_aggregate::any_fields_nested_in_error_payloads_use_owned_boxes_and_indirect_failure_channels",
+      "legacy_path": "tests/fiber/function_aggregate.rs",
+      "legacy_key": "emit::fiber::function_aggregate::any_fields_nested_in_error_payloads_use_owned_boxes_and_indirect_failure_channels",
+      "legacy_ledger_index": 61,
+      "expected_observation": "An Any nested in a failing Pair payload preserves its owned box through indirect success and failure, yielding42.",
+      "proposed_status": "proposed_verified",
+      "evidence": [
+        {
+          "path": "crates/emela-emb-compiler/src/backend/lower/p7_aggregate_failure_tests.rs",
+          "symbol": "owned_any_nested_in_error_payloads_survives_indirect_success_and_failure",
+          "layer": "IR/C runtime"
+        }
+      ]
+    },
+    {
+      "target": "emit",
+      "name": "fiber::function_aggregate::growing_generic_recursion_through_a_function_signature_uses_owned_lazy_payloads",
+      "legacy_path": "tests/fiber/function_aggregate.rs",
+      "legacy_key": "emit::fiber::function_aggregate::growing_generic_recursion_through_a_function_signature_uses_owned_lazy_payloads",
+      "legacy_ledger_index": 62,
+      "expected_observation": "Grow[A] recursion through fn()->Grow[List[A]] remains finite/owned and its projected callback yields42.",
+      "proposed_status": "proposed_verified",
+      "evidence": [
+        {
+          "path": "crates/emela-emb-compiler/src/backend/lower/p7_aggregate_failure_tests.rs",
+          "symbol": "growing_generic_arguments_through_function_results_keep_owned_lazy_payloads",
+          "layer": "IR/C runtime"
+        }
+      ]
+    },
+    {
+      "target": "emit",
+      "name": "fiber::protect::suspend_cleanup_waits_for_an_external_task_before_publishing_the_result",
+      "legacy_path": "tests/fiber/protect.rs",
+      "legacy_key": "emit::fiber::protect::suspend_cleanup_waits_for_an_external_task_before_publishing_the_result",
+      "legacy_ledger_index": 66,
+      "expected_observation": "Suspending cleanup must finish its external task before the original result becomes visible.",
+      "proposed_status": "proposed_verified",
+      "evidence": [
+        {
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend_tests.rs",
+          "symbol": "suspending_cleanup_delays_delivery_of_the_original_result",
+          "layer": "IR/C runtime"
+        }
+      ]
+    },
+    {
+      "target": "emit",
+      "name": "float_from_int_converts_the_full_signed_range_exactly",
+      "legacy_path": "tests/emit.rs",
+      "legacy_key": "emit::float_from_int_converts_the_full_signed_range_exactly",
+      "legacy_ledger_index": 67,
+      "expected_observation": "Float.from_int converts Int32 MIN/MAX/-1 exactly.",
+      "proposed_status": "proposed_verified",
+      "evidence": [
+        {
+          "path": "crates/emela-emb-compiler/tests/p1.rs",
+          "symbol": "scalar_numeric_boundaries_execute_with_legacy_semantics",
+          "layer": "source/C runtime"
+        }
+      ]
+    },
+    {
+      "target": "emit",
+      "name": "float_rounding_builtins_match_spec_and_defect_out_of_range",
+      "legacy_path": "tests/emit.rs",
+      "legacy_key": "emit::float_rounding_builtins_match_spec_and_defect_out_of_range",
+      "legacy_ledger_index": 68,
+      "expected_observation": "Floor/Ceil/Round/Truncate preserve signed rounding; NaN and out-of-range conversions call the exact defect hook.",
+      "proposed_status": "proposed_verified",
+      "evidence": [
+        {
+          "path": "crates/emela-emb-compiler/tests/p2_compat.rs",
+          "symbol": "legacy_numeric_formatting_rounding_and_unused_defects_execute",
+          "layer": "source/C runtime"
+        }
+      ]
+    },
+    {
+      "target": "emit",
+      "name": "float_to_string_constant_contributes_its_exact_append_bound",
+      "legacy_path": "tests/emit.rs",
+      "legacy_key": "emit::float_to_string_constant_contributes_its_exact_append_bound",
+      "legacy_ledger_index": 69,
+      "expected_observation": "A constant Float.to_string contribution uses its exact append bound19.",
+      "proposed_status": "proposed_verified",
+      "evidence": [
+        {
+          "path": "crates/emela-emb-compiler/src/backend/lower/p7_string_frame_tests.rs",
+          "symbol": "constant_numeric_and_string_values_fold_and_constant_float_append_keeps_its_exact_bound",
+          "layer": "IR/C runtime"
+        }
+      ]
+    },
+    {
+      "target": "emit",
+      "name": "int32_division_by_zero_calls_the_board_defect_hook",
+      "legacy_path": "tests/emit.rs",
+      "legacy_key": "emit::int32_division_by_zero_calls_the_board_defect_hook",
+      "legacy_ledger_index": 70,
+      "expected_observation": "Int32 division by zero invokes the exact division-by-zero kind and sixteen-byte message.",
+      "proposed_status": "proposed_verified",
+      "evidence": [
+        {
+          "path": "crates/emela-emb-compiler/tests/p1.rs",
+          "symbol": "unused_division_remainder_and_negative_shifts_still_raise_defects",
+          "layer": "source/C runtime"
+        }
+      ]
+    },
+    {
+      "target": "emit",
+      "name": "int64_bitwise_builtins_match_signed_64_bit_semantics",
+      "legacy_path": "tests/emit.rs",
+      "legacy_key": "emit::int64_bitwise_builtins_match_signed_64_bit_semantics",
+      "legacy_ledger_index": 71,
+      "expected_observation": "Int64 AND/OR/XOR/NOT preserve signed64-bit behavior and exact old boundary values.",
+      "proposed_status": "proposed_verified",
+      "evidence": [
+        {
+          "path": "crates/emela-emb-compiler/tests/p1.rs",
+          "symbol": "scalar_numeric_boundaries_execute_with_legacy_semantics",
+          "layer": "source/C runtime"
+        }
+      ]
+    },
+    {
+      "target": "emit",
+      "name": "int64_conversions_preserve_sign_and_keep_the_low_32_bits",
+      "legacy_path": "tests/emit.rs",
+      "legacy_key": "emit::int64_conversions_preserve_sign_and_keep_the_low_32_bits",
+      "legacy_ledger_index": 72,
+      "expected_observation": "Int64 conversions sign-extend Int32 MIN/MAX and preserve low32bits on narrowing, including -1/MIN.",
+      "proposed_status": "proposed_verified",
+      "evidence": [
+        {
+          "path": "crates/emela-emb-compiler/tests/p1.rs",
+          "symbol": "scalar_numeric_boundaries_execute_with_legacy_semantics",
+          "layer": "source/C runtime"
+        }
+      ]
+    },
+    {
+      "target": "emit",
+      "name": "int64_shift_builtins_handle_width_and_negative_amount_boundaries",
+      "legacy_path": "tests/emit.rs",
+      "legacy_key": "emit::int64_shift_builtins_handle_width_and_negative_amount_boundaries",
+      "legacy_ledger_index": 73,
+      "expected_observation": "Int64 shifts preserve sign, zero/saturate at width64, and reject INT32_MIN shift amounts.",
+      "proposed_status": "proposed_verified",
+      "evidence": [
+        {
+          "path": "crates/emela-emb-compiler/tests/p1.rs",
+          "symbol": "scalar_numeric_boundaries_execute_with_legacy_semantics",
+          "layer": "source/C runtime"
+        },
+        {
+          "path": "crates/emela-emb-compiler/tests/p1.rs",
+          "symbol": "unused_division_remainder_and_negative_shifts_still_raise_defects",
+          "layer": "source/C runtime"
+        }
+      ]
+    },
+    {
+      "target": "emit",
+      "name": "int64_to_string_uses_twenty_byte_scratch_and_matches_decimal_output",
+      "legacy_path": "tests/emit.rs",
+      "legacy_key": "emit::int64_to_string_uses_twenty_byte_scratch_and_matches_decimal_output",
+      "legacy_ledger_index": 74,
+      "expected_observation": "Int64.to_string matches MIN/MAX/0 and uses exactly20 bytes of scratch.",
+      "proposed_status": "proposed_verified",
+      "evidence": [
+        {
+          "path": "crates/emela-emb-compiler/tests/p2_compat.rs",
+          "symbol": "legacy_numeric_formatting_rounding_and_unused_defects_execute",
+          "layer": "source/C runtime"
+        },
+        {
+          "path": "crates/emela-emb-compiler/src/backend/lower/p7_misc_value_tests.rs",
+          "symbol": "int64_decimal_conversion_uses_exactly_twenty_bytes_of_scratch",
+          "layer": "IR/C runtime"
+        }
+      ],
+      "reason": "The generated C declares char emela_string_buffer_0[20]; MIN/MAX/0 decimal outputs are checked1000 times."
+    },
+    {
+      "target": "emit",
+      "name": "int_bitwise_builtins_match_signed_32_bit_semantics",
+      "legacy_path": "tests/emit.rs",
+      "legacy_key": "emit::int_bitwise_builtins_match_signed_32_bit_semantics",
+      "legacy_ledger_index": 75,
+      "expected_observation": "Int32 AND/OR/XOR/NOT preserve exact old signed32-bit boundary values.",
+      "proposed_status": "proposed_verified",
+      "evidence": [
+        {
+          "path": "crates/emela-emb-compiler/tests/p1.rs",
+          "symbol": "scalar_numeric_boundaries_execute_with_legacy_semantics",
+          "layer": "source/C runtime"
+        }
+      ]
+    },
+    {
+      "target": "emit",
+      "name": "int_checked_add_returns_some_or_none_at_int_boundaries",
+      "legacy_path": "tests/emit.rs",
+      "legacy_key": "emit::int_checked_add_returns_some_or_none_at_int_boundaries",
+      "legacy_ledger_index": 76,
+      "expected_observation": "Int.checked_add returns None for MAX+1/MIN-1 and Some(MAX)/Some(-1) for MAX+0/-2+1.",
+      "proposed_status": "proposed_verified",
+      "evidence": [
+        {
+          "path": "crates/emela-emb-compiler/tests/p2_standard_api.rs",
+          "symbol": "standard_parameter_names_and_float_total_order_match_fixed_core",
+          "layer": "source/C runtime"
+        },
+        {
+          "path": "crates/emela-emb-compiler/src/backend/lower/p7_misc_value_tests.rs",
+          "symbol": "checked_add_preserves_all_four_legacy_option_boundaries",
+          "layer": "IR/C runtime"
+        }
+      ],
+      "reason": "All four original tag/payload observations are inspected directly at the C boundary1000 times."
+    },
+    {
+      "target": "emit",
+      "name": "int_parse_accepts_decimal_signs_and_rejects_invalid_or_overflowing_text",
+      "legacy_path": "tests/emit.rs",
+      "legacy_key": "emit::int_parse_accepts_decimal_signs_and_rejects_invalid_or_overflowing_text",
+      "legacy_ledger_index": 77,
+      "expected_observation": "Int.parse accepts signed decimal MIN/MAX and rejects overflow, whitespace, sign-only, trailing data and empty input.",
+      "proposed_status": "proposed_verified",
+      "evidence": [
+        {
+          "path": "crates/emela-emb-compiler/tests/p2_parse.rs",
+          "symbol": "numeric_and_bool_parse_preserve_precision_and_original_error_input",
+          "layer": "source/C runtime"
+        }
+      ]
+    },
+    {
+      "target": "emit",
+      "name": "int_shift_builtins_handle_width_and_negative_amount_boundaries",
+      "legacy_path": "tests/emit.rs",
+      "legacy_key": "emit::int_shift_builtins_handle_width_and_negative_amount_boundaries",
+      "legacy_ledger_index": 78,
+      "expected_observation": "Int32 shifts preserve sign, zero/saturate at width32, and reject INT32_MIN shift amounts.",
+      "proposed_status": "proposed_verified",
+      "evidence": [
+        {
+          "path": "crates/emela-emb-compiler/tests/p1.rs",
+          "symbol": "scalar_numeric_boundaries_execute_with_legacy_semantics",
+          "layer": "source/C runtime"
+        },
+        {
+          "path": "crates/emela-emb-compiler/tests/p1.rs",
+          "symbol": "unused_division_remainder_and_negative_shifts_still_raise_defects",
+          "layer": "source/C runtime"
+        }
+      ]
+    },
+    {
+      "target": "emit",
+      "name": "propagates_failure_from_a_captured_closure_through_its_indirect_call",
+      "legacy_path": "tests/emit.rs",
+      "legacy_key": "emit::propagates_failure_from_a_captured_closure_through_its_indirect_call",
+      "legacy_ledger_index": 79,
+      "expected_observation": "Captured failing closure: capture40 plus argument2 returns42; argument0 propagates ClosureError73 to the unhandled-error hook.",
+      "proposed_status": "proposed_verified",
+      "evidence": [
+        {
+          "path": "crates/emela-emb-compiler/src/backend/lower/function_tests.rs",
+          "symbol": "function_coercion_adapts_unit_erasure_evidence_and_failure_abi",
+          "layer": "IR/C runtime"
+        },
+        {
+          "path": "crates/emela-emb-compiler/src/backend/lower/p7_list_alias_tests.rs",
+          "symbol": "captured_closure_success_and_propagated_failure_use_the_original_indirect_call_abi",
+          "layer": "IR/C runtime"
+        }
+      ],
+      "reason": "Direct fixed-old shape and original budget are preserved in the dedicated List/captured-failure module. Normal C calls repeat1000 times; owned paths verify all heap blocks free after each call. The expected fatal indirect failure is invoked once after the successful loop; heap0 refusal is an input diagnostic assertion."
+    },
+    {
+      "target": "emit",
+      "name": "reads_generic_enum_fields_from_inline_values",
+      "legacy_path": "tests/emit.rs",
+      "legacy_key": "emit::reads_generic_enum_fields_from_inline_values",
+      "legacy_ledger_index": 80,
+      "expected_observation": "Inline Boxed[Int64] generic field reads73.",
+      "proposed_status": "proposed_verified",
+      "evidence": [
+        {
+          "path": "crates/emela-emb-compiler/src/backend/lower/p7_data_tests.rs",
+          "symbol": "legacy_inline_layouts_preserve_generic_fields_tags_and_unit_positions_at_the_c_boundary",
+          "layer": "IR/C runtime"
+        }
+      ]
+    },
+    {
+      "target": "emit",
+      "name": "reads_list_heads_and_keeps_shared_tails_alive",
+      "legacy_path": "tests/emit.rs",
+      "legacy_key": "emit::reads_list_heads_and_keeps_shared_tails_alive",
+      "legacy_ledger_index": 81,
+      "expected_observation": "List10/20/30 survives a returned identity alias/shared tail; first+second=30; discarded Unit head is valid, heap1024.",
+      "proposed_status": "proposed_verified",
+      "evidence": [
+        {
+          "path": "crates/emela-emb-compiler/src/backend/lower/memory_tests.rs",
+          "symbol": "list_string_bytes_and_any_release_owned_values_after_repeated_calls",
+          "layer": "IR/C runtime"
+        },
+        {
+          "path": "crates/emela-emb-compiler/src/backend/lower/p7_list_alias_tests.rs",
+          "symbol": "returned_lists_shared_tails_and_inline_list_owners_reuse_the_old_1024_byte_heap",
+          "layer": "IR/C runtime"
+        }
+      ],
+      "reason": "Direct fixed-old shape and original budget are preserved in the dedicated List/captured-failure module. Normal C calls repeat1000 times; owned paths verify all heap blocks free after each call. The expected fatal indirect failure is invoked once after the successful loop; heap0 refusal is an input diagnostic assertion."
+    },
+    {
+      "target": "emit",
+      "name": "reads_tags_from_payload_and_nullary_enums",
+      "legacy_path": "tests/emit.rs",
+      "legacy_key": "emit::reads_tags_from_payload_and_nullary_enums",
+      "legacy_ledger_index": 82,
+      "expected_observation": "Payload and nullary enums expose correct tags0/1.",
+      "proposed_status": "proposed_verified",
+      "evidence": [
+        {
+          "path": "crates/emela-emb-compiler/src/backend/lower/p7_data_tests.rs",
+          "symbol": "legacy_inline_layouts_preserve_generic_fields_tags_and_unit_positions_at_the_c_boundary",
+          "layer": "IR/C runtime"
+        }
+      ]
+    },
+    {
+      "target": "emit",
+      "name": "reads_tuple_fields_and_ignores_unit_projections",
+      "legacy_path": "tests/emit.rs",
+      "legacy_key": "emit::reads_tuple_fields_and_ignores_unit_projections",
+      "legacy_ledger_index": 83,
+      "expected_observation": "TupleGet preserves declared Unit positions and ignores a discarded Unit projection.",
+      "proposed_status": "proposed_verified",
+      "evidence": [
+        {
+          "path": "crates/emela-emb-compiler/src/backend/lower/p7_data_tests.rs",
+          "symbol": "legacy_inline_layouts_preserve_generic_fields_tags_and_unit_positions_at_the_c_boundary",
+          "layer": "IR/C runtime"
+        }
+      ]
+    },
+    {
+      "target": "emit",
+      "name": "requires_fixed_heap_capacity_for_returned_list_aliases",
+      "legacy_path": "tests/emit.rs",
+      "legacy_key": "emit::requires_fixed_heap_capacity_for_returned_list_aliases",
+      "legacy_ledger_index": 84,
+      "expected_observation": "Returning a borrowed List alias with heap_bytes0 is rejected Unsupported before C planning.",
+      "proposed_status": "proposed_verified",
+      "evidence": [
+        {
+          "path": "crates/emela-emb-compiler/src/backend/lower/p7_list_alias_tests.rs",
+          "symbol": "returning_a_borrowed_list_alias_requires_reference_management_capacity",
+          "layer": "IR input rejection"
+        }
+      ],
+      "reason": "Direct fixed-old shape and original budget are preserved in the dedicated List/captured-failure module. Normal C calls repeat1000 times; owned paths verify all heap blocks free after each call. The expected fatal indirect failure is invoked once after the successful loop; heap0 refusal is an input diagnostic assertion."
+    },
+    {
+      "target": "emit",
+      "name": "sends_dynamic_defect_string_views_to_the_board_hook",
+      "legacy_path": "tests/emit.rs",
+      "legacy_key": "emit::sends_dynamic_defect_string_views_to_the_board_hook",
+      "legacy_ledger_index": 85,
+      "expected_observation": "Dynamic Defect passes offset string view bytes, exact length and embedded NUL unchanged to Panic hook.",
+      "proposed_status": "proposed_verified",
+      "evidence": [
+        {
+          "path": "crates/emela-emb-compiler/src/backend/lower/p7_misc_value_tests.rs",
+          "symbol": "dynamic_defect_preserves_an_offset_string_view_and_embedded_nul",
+          "layer": "IR/C runtime"
+        }
+      ]
+    },
+    {
+      "target": "emit",
+      "name": "statically_evaluates_float_rounding_builtin",
+      "legacy_path": "tests/emit.rs",
+      "legacy_key": "emit::statically_evaluates_float_rounding_builtin",
+      "legacy_ledger_index": 86,
+      "expected_observation": "Static Float rounding and String append are evaluated, preserving their results without the runtime append helper.",
+      "proposed_status": "proposed_verified",
+      "evidence": [
+        {
+          "path": "crates/emela-emb-compiler/src/backend/lower/p7_string_frame_tests.rs",
+          "symbol": "constant_numeric_and_string_values_fold_and_constant_float_append_keeps_its_exact_bound",
+          "layer": "IR/C runtime"
+        }
+      ]
+    },
+    {
+      "target": "emit",
+      "name": "statically_evaluates_string_append_in_const_functions",
+      "legacy_path": "tests/emit.rs",
+      "legacy_key": "emit::statically_evaluates_string_append_in_const_functions",
+      "legacy_ledger_index": 87,
+      "expected_observation": "Static Float rounding and String append are evaluated, preserving their results without the runtime append helper.",
+      "proposed_status": "proposed_verified",
+      "evidence": [
+        {
+          "path": "crates/emela-emb-compiler/src/backend/lower/p7_string_frame_tests.rs",
+          "symbol": "constant_numeric_and_string_values_fold_and_constant_float_append_keeps_its_exact_bound",
+          "layer": "IR/C runtime"
+        }
+      ]
+    },
+    {
+      "target": "emit",
+      "name": "stores_and_releases_list_references_inside_tuples_and_list_elements",
+      "legacy_path": "tests/emit.rs",
+      "legacy_key": "emit::stores_and_releases_list_references_inside_tuples_and_list_elements",
+      "legacy_ledger_index": 88,
+      "expected_observation": "List references nested in tuples and list elements yield42/73, and externally returned tuple(List5) releases1000 times, heap1024.",
+      "proposed_status": "proposed_verified",
+      "evidence": [
+        {
+          "path": "crates/emela-emb-compiler/tests/p3_ownership.rs",
+          "symbol": "strings_in_nested_lists_and_error_payloads_outlive_their_original_owners",
+          "layer": "source/C runtime"
+        },
+        {
+          "path": "crates/emela-emb-compiler/src/backend/lower/p7_list_alias_tests.rs",
+          "symbol": "returned_lists_shared_tails_and_inline_list_owners_reuse_the_old_1024_byte_heap",
+          "layer": "IR/C runtime"
+        }
+      ],
+      "reason": "Direct fixed-old shape and original budget are preserved in the dedicated List/captured-failure module. Normal C calls repeat1000 times; owned paths verify all heap blocks free after each call. The expected fatal indirect failure is invoked once after the successful loop; heap0 refusal is an input diagnostic assertion."
+    },
+    {
+      "target": "emit",
+      "name": "string_byte_size_counts_utf8_bytes_from_a_view",
+      "legacy_path": "tests/emit.rs",
+      "legacy_key": "emit::string_byte_size_counts_utf8_bytes_from_a_view",
+      "legacy_ledger_index": 90,
+      "expected_observation": "String.byte_size reads the byte length of a UTF8 view, independently of cluster count.",
+      "proposed_status": "proposed_verified",
+      "evidence": [
+        {
+          "path": "crates/emela-emb-compiler/tests/p3_memory_api.rs",
+          "symbol": "strings_lists_and_trusted_bytes_pure_apis_execute",
+          "layer": "source/C runtime"
+        },
+        {
+          "path": "crates/emela-emb-compiler/tests/p2_standard_api.rs",
+          "symbol": "standard_parameter_names_and_float_total_order_match_fixed_core",
+          "layer": "source/C runtime"
+        }
+      ]
+    },
+    {
+      "target": "emit",
+      "name": "string_code_points_builds_and_releases_a_list_in_code_point_order",
+      "legacy_path": "tests/emit.rs",
+      "legacy_key": "emit::string_code_points_builds_and_releases_a_list_in_code_point_order",
+      "legacy_ledger_index": 91,
+      "expected_observation": "String.code_points preserves scalar order, empty input and invalid-UTF8 defects; owned list results require a fixed heap.",
+      "proposed_status": "proposed_verified",
+      "evidence": [
+        {
+          "path": "crates/emela-emb-compiler/tests/p3_unicode.rs",
+          "symbol": "every_unicode_18_cluster_boundary_and_code_point_survives_owned_lists",
+          "layer": "source/C runtime"
+        },
+        {
+          "path": "crates/emela-emb-compiler/tests/p3_unicode.rs",
+          "symbol": "discarded_unicode_lists_preserve_invalid_utf8_defects",
+          "layer": "source/C runtime"
+        },
+        {
+          "path": "crates/emela-emb-compiler/src/backend/lower/p7_misc_value_tests.rs",
+          "symbol": "code_point_lists_require_a_heap_even_when_only_the_head_is_returned",
+          "layer": "IR input rejection"
+        }
+      ],
+      "reason": "Exact StringCodePoints scalar-head shape rejects heap0 before generation; the existing Unicode and malformed-input observations remain referenced."
+    },
+    {
+      "target": "emit",
+      "name": "string_comparison::all_constant_comparisons_match_runtime_order_without_emitting_the_helper",
+      "legacy_path": "tests/string_comparison/mod.rs",
+      "legacy_key": "emit::string_comparison::all_constant_comparisons_match_runtime_order_without_emitting_the_helper",
+      "legacy_ledger_index": 92,
+      "expected_observation": "All constant String comparisons use byte/runtime ordering and fold without emitting the comparison helper.",
+      "proposed_status": "proposed_verified",
+      "evidence": [
+        {
+          "path": "crates/emela-emb-compiler/tests/p2_static_strings.rs",
+          "symbol": "every_legacy_constant_string_comparison_folds_without_a_runtime_helper",
+          "layer": "source/C runtime"
+        }
+      ]
+    },
+    {
+      "target": "emit",
+      "name": "string_join_reads_split_views_into_a_bounded_stack_buffer",
+      "legacy_path": "tests/emit.rs",
+      "legacy_key": "emit::string_join_reads_split_views_into_a_bounded_stack_buffer",
+      "legacy_ledger_index": 93,
+      "expected_observation": "String.split keeps views; String.join fills a bounded buffer and defects when capacity is too short.",
+      "proposed_status": "proposed_verified",
+      "evidence": [
+        {
+          "path": "crates/emela-emb-compiler/tests/p3_memory_api.rs",
+          "symbol": "strings_lists_and_trusted_bytes_pure_apis_execute",
+          "layer": "source/C runtime"
+        },
+        {
+          "path": "crates/emela-emb-compiler/src/backend/lower/memory_tests.rs",
+          "symbol": "list_string_bytes_and_any_release_owned_values_after_repeated_calls",
+          "layer": "IR/C runtime"
+        },
+        {
+          "path": "crates/emela-emb-compiler/src/backend/lower/p7_string_frame_tests.rs",
+          "symbol": "split_views_and_distinct_join_results_survive_a_real_suspension_with_nul_and_unicode",
+          "layer": "IR/C runtime"
+        },
+        {
+          "path": "crates/emela-emb-compiler/src/backend/lower/p7_misc_value_tests.rs",
+          "symbol": "split_join_keeps_the_old_multibyte_value_and_capacity_five_defect",
+          "layer": "IR/C runtime"
+        }
+      ],
+      "reason": "Exact alpha::βeta success1000/heap2048/heapempty and capacity5 alpha::beta StringJoin defect; append is not substituted."
+    },
+    {
+      "target": "emit",
+      "name": "string_length_uses_unicode_18_extended_grapheme_clusters",
+      "legacy_path": "tests/emit.rs",
+      "legacy_key": "emit::string_length_uses_unicode_18_extended_grapheme_clusters",
+      "legacy_ledger_index": 94,
+      "expected_observation": "Unicode18 extended grapheme clusters match CRLF/Hangul/ZWJ/flags/Indic and malformed UTF8 defects.",
+      "proposed_status": "proposed_verified",
+      "evidence": [
+        {
+          "path": "crates/emela-emb-compiler/tests/p2_compat.rs",
+          "symbol": "source_string_length_matches_every_unicode_18_grapheme_vector",
+          "layer": "source/C runtime"
+        },
+        {
+          "path": "crates/emela-emb-compiler/tests/p2_compat.rs",
+          "symbol": "malformed_utf8_string_length_raises_the_legacy_defect",
+          "layer": "source/C runtime"
+        }
+      ]
+    },
+    {
+      "target": "emit",
+      "name": "string_search_predicates_match_utf8_substrings_without_copying",
+      "legacy_path": "tests/emit.rs",
+      "legacy_key": "emit::string_search_predicates_match_utf8_substrings_without_copying",
+      "legacy_ledger_index": 95,
+      "expected_observation": "UTF8 contains/starts/ends operate on byte views and accept empty substrings without copying.",
+      "proposed_status": "proposed_verified",
+      "evidence": [
+        {
+          "path": "crates/emela-emb-compiler/tests/p2_compat.rs",
+          "symbol": "legacy_string_views_comparisons_append_and_bounded_returns_execute",
+          "layer": "source/C runtime"
+        },
+        {
+          "path": "crates/emela-emb-compiler/tests/p3_ownership.rs",
+          "symbol": "owned_string_subviews_compare_without_allocating_or_changing_their_owner",
+          "layer": "source/C runtime"
+        }
+      ]
+    },
+    {
+      "target": "emit",
+      "name": "suspend::coerce_adapts_sync_and_suspend_function_values_to_a_suspend_evidence_abi",
+      "legacy_path": "tests/suspend/mod.rs",
+      "legacy_key": "emit::suspend::coerce_adapts_sync_and_suspend_function_values_to_a_suspend_evidence_abi",
+      "legacy_ledger_index": 96,
+      "expected_observation": "suspend::coerce adapts sync and suspend function values to a suspend evidence abi",
+      "proposed_status": "proposed_verified",
+      "evidence": [
+        {
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend_tests.rs",
+          "symbol": "function_coercions_adapt_sync_and_suspend_values_to_suspending_evidence_calls",
+          "layer": "IR/C runtime"
+        }
+      ],
+      "reason": "The corresponding fixed old fixture was compared and directly ported during P5; this is explicit sync/suspend ABI evidence, not inference from a pure-call test."
+    },
+    {
+      "target": "emit",
+      "name": "suspend::constructing_an_immediate_handler_does_not_emit_a_scheduler",
+      "legacy_path": "tests/suspend/mod.rs",
+      "legacy_key": "emit::suspend::constructing_an_immediate_handler_does_not_emit_a_scheduler",
+      "legacy_ledger_index": 97,
+      "expected_observation": "suspend::constructing an immediate handler does not emit a scheduler",
+      "proposed_status": "proposed_verified",
+      "evidence": [
+        {
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend_tests.rs",
+          "symbol": "constructing_an_immediate_handler_keeps_scheduler_storage_omitted",
+          "layer": "IR/C runtime"
+        }
+      ],
+      "reason": "The corresponding fixed old fixture was compared and directly ported during P5; this is explicit sync/suspend ABI evidence, not inference from a pure-call test."
+    },
+    {
+      "target": "emit",
+      "name": "suspend::suspend_fnrefs_dispatch_to_external_tasks_and_internal_frames",
+      "legacy_path": "tests/suspend/mod.rs",
+      "legacy_key": "emit::suspend::suspend_fnrefs_dispatch_to_external_tasks_and_internal_frames",
+      "legacy_ledger_index": 98,
+      "expected_observation": "suspend::suspend fnrefs dispatch to external tasks and internal frames",
+      "proposed_status": "proposed_verified",
+      "evidence": [
+        {
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend_tests.rs",
+          "symbol": "suspending_function_references_dispatch_to_external_tasks_then_internal_frames",
+          "layer": "IR/C runtime"
+        }
+      ],
+      "reason": "The corresponding fixed old fixture was compared and directly ported during P5; this is explicit sync/suspend ABI evidence, not inference from a pure-call test."
+    },
+    {
+      "target": "emit",
+      "name": "suspend::sync_string_producers_coerced_to_suspend_values_keep_their_backing_and_small_buffer",
+      "legacy_path": "tests/suspend/mod.rs",
+      "legacy_key": "emit::suspend::sync_string_producers_coerced_to_suspend_values_keep_their_backing_and_small_buffer",
+      "legacy_ledger_index": 99,
+      "expected_observation": "suspend::sync string producers coerced to suspend values keep their backing and small buffer",
+      "proposed_status": "proposed_verified",
+      "evidence": [
+        {
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend_tests.rs",
+          "symbol": "synchronous_string_producers_coerced_to_suspend_values_keep_small_buffers_and_owned_results",
+          "layer": "IR/C runtime"
+        }
+      ],
+      "reason": "The corresponding fixed old fixture was compared and directly ported during P5; this is explicit sync/suspend ABI evidence, not inference from a pure-call test."
+    },
+    {
+      "target": "emit",
+      "name": "value_audit::discarded::discarded_evidence_extensions_release_their_handler_references_immediately",
+      "legacy_path": "tests/value_audit/discarded.rs",
+      "legacy_key": "emit::value_audit::discarded::discarded_evidence_extensions_release_their_handler_references_immediately",
+      "legacy_ledger_index": 101,
+      "expected_observation": "Discarded EvExtend immediately releases its references before the next statement.",
+      "proposed_status": "proposed_verified",
+      "evidence": [
+        {
+          "path": "crates/emela-emb-compiler/src/backend/lower/p7_evidence_tests.rs",
+          "symbol": "discarded_handler_and_evidence_constructors_release_before_the_next_statement",
+          "layer": "IR/C runtime"
+        }
+      ]
+    },
+    {
+      "target": "emit",
+      "name": "value_audit::discarded::unused_dynamic_evidence_lookup_keeps_validation_and_the_callers_owner",
+      "legacy_path": "tests/value_audit/discarded.rs",
+      "legacy_key": "emit::value_audit::discarded::unused_dynamic_evidence_lookup_keeps_validation_and_the_callers_owner",
+      "legacy_ledger_index": 102,
+      "expected_observation": "Unused dynamic EvLookup preserves validation and the borrowed caller owner; NULL/missing evidence defects.",
+      "proposed_status": "proposed_verified",
+      "evidence": [
+        {
+          "path": "crates/emela-emb-compiler/src/backend/lower/p7_evidence_tests.rs",
+          "symbol": "discarded_dynamic_evidence_lookup_checks_missing_handlers_without_releasing_the_caller",
+          "layer": "IR/C runtime"
+        }
+      ]
+    },
+    {
+      "target": "emit",
+      "name": "value_audit::discarded_integer_division_and_remainder_still_raise_defects_in_sync_and_suspend_code",
+      "legacy_path": "tests/value_audit/mod.rs",
+      "legacy_key": "emit::value_audit::discarded_integer_division_and_remainder_still_raise_defects_in_sync_and_suspend_code",
+      "legacy_ledger_index": 103,
+      "expected_observation": "Discarded I32/I64 Div/Rem by zero raises DivisionByZero in both native and suspend callers.",
+      "proposed_status": "proposed_verified",
+      "evidence": [
+        {
+          "path": "crates/emela-emb-compiler/src/backend/lower/p7_misc_value_tests.rs",
+          "symbol": "discarded_integer_division_and_remainder_keep_defects_in_native_and_suspend_callers",
+          "layer": "IR/C runtime"
+        }
+      ]
+    },
+    {
+      "target": "flow",
+      "name": "isr_entries_reject_reachable_hold_and_unhold_in_direct_and_nested_calls",
+      "legacy_path": "tests/flow.rs",
+      "legacy_key": "flow::isr_entries_reject_reachable_hold_and_unhold_in_direct_and_nested_calls",
+      "legacy_ledger_index": 104,
+      "expected_observation": "Reachable direct/nested Hold/Unhold are rejected from ISR entries whether or not another root requires unwind runtime.",
+      "proposed_status": "proposed_verified",
+      "evidence": [
+        {
+          "path": "crates/emela-emb-compiler/src/backend/lower/p7_contract_tests.rs",
+          "symbol": "interrupt_masks_are_rejected_from_nested_isr_entries_with_or_without_unwind_runtime",
+          "layer": "IR input rejection"
+        }
+      ]
+    },
+    {
+      "target": "flow",
+      "name": "lowers_and_verifies_core_as_flow_ir",
+      "legacy_path": "tests/flow.rs",
+      "legacy_key": "flow::lowers_and_verifies_core_as_flow_ir",
+      "legacy_ledger_index": 105,
+      "expected_observation": "Source/Core lowering produces a valid function graph and successful backend input validation.",
+      "proposed_status": "proposed_verified_representation_replaced",
+      "evidence": [
+        {
+          "path": "crates/emela-emb-compiler/tests/p1.rs",
+          "symbol": "modules_internal_calls_branches_and_tail_recursion_execute",
+          "layer": "source/C runtime"
+        }
+      ],
+      "reason": "The compiler owns typed IR and private contract Program; no public core/lir crate or flow_from_core boundary remains. compile_sources executes frontend normalization/specialization/lowering plus input validation before C. Stage equality is tracked separately below."
+    },
+    {
+      "target": "flow",
+      "name": "rejects_every_heap_stage_before_codegen",
+      "legacy_path": "tests/flow.rs",
+      "legacy_key": "flow::rejects_every_heap_stage_before_codegen",
+      "legacy_ledger_index": 106,
+      "expected_observation": "Heap-stage input is rejected before code generation.",
+      "proposed_status": "proposed_not_applicable_absent_selector",
+      "evidence": [],
+      "reason": "Only the Stage selector and Module.stage field are absent from the independent Program representation. No selector can claim a lowered stage. This exception does NOT apply to retained Unwind/environment/refcount nodes, which have explicit negative tests."
+    },
+    {
+      "target": "flow",
+      "name": "rejects_heap_only_failure_handle_at_flow_stage",
+      "legacy_path": "tests/flow.rs",
+      "legacy_key": "flow::rejects_heap_only_failure_handle_at_flow_stage",
+      "legacy_ledger_index": 107,
+      "expected_observation": "Old policy rejected OnFail::Handle at Flow stage; independent policy validates and normalizes local Handle into Block/Break before runtime planning.",
+      "proposed_status": "proposed_verified_policy_replacement",
+      "evidence": [
+        {
+          "path": "crates/emela-emb-compiler/src/backend/lower/p7_contract_tests.rs",
+          "symbol": "local_failure_handlers_are_validated_and_normalized_in_sync_and_suspend_calls",
+          "layer": "IR input acceptance/rejection and C runtime"
+        }
+      ],
+      "reason": "Native/suspend success bypasses handler; failure runs it once; normalization eliminates Handle. Wrong error type, wrong handler result type and escaped error local reject. Handle is present and permitted, never N/A."
+    },
+    {
+      "target": "flow",
+      "name": "rejects_heap_only_runtime_operations_at_flow_stage",
+      "legacy_path": "tests/flow.rs",
+      "legacy_key": "flow::rejects_heap_only_runtime_operations_at_flow_stage",
+      "legacy_ledger_index": 108,
+      "expected_observation": "All six retained heap Runtime operations reject in native and suspend raw input before planning.",
+      "proposed_status": "proposed_verified",
+      "evidence": [
+        {
+          "path": "crates/emela-emb-compiler/src/backend/lower/p7_input_tests.rs",
+          "symbol": "residual_heap_runtime_operations_are_rejected_in_native_and_suspending_input",
+          "layer": "IR input rejection"
+        }
+      ]
+    },
+    {
+      "target": "flow",
+      "name": "rejects_heap_only_unwind_and_explicit_landing_edges_at_flow_stage",
+      "legacy_path": "tests/flow.rs",
+      "legacy_key": "flow::rejects_heap_only_unwind_and_explicit_landing_edges_at_flow_stage",
+      "legacy_ledger_index": 109,
+      "expected_observation": "Retained TermUnwind and explicit defect/suspend landing edges reject before planning.",
+      "proposed_status": "proposed_verified",
+      "evidence": [
+        {
+          "path": "crates/emela-emb-compiler/src/backend/lower/p7_contract_tests.rs",
+          "symbol": "unwind_environment_values_and_refcount_statements_are_rejected_as_input",
+          "layer": "IR input rejection"
+        },
+        {
+          "path": "crates/emela-emb-compiler/src/backend/lower/p7_input_tests.rs",
+          "symbol": "explicit_defect_and_suspension_landing_edges_are_rejected_before_planning",
+          "layer": "IR input rejection"
+        }
+      ]
+    },
+    {
+      "target": "flow",
+      "name": "rejects_heap_only_values_and_reference_count_statements_at_flow_stage",
+      "legacy_path": "tests/flow.rs",
+      "legacy_key": "flow::rejects_heap_only_values_and_reference_count_statements_at_flow_stage",
+      "legacy_ledger_index": 110,
+      "expected_observation": "Retained MakeClosure/EnvGet/Dup/Drop/Function.env reject in native and suspend raw input.",
+      "proposed_status": "proposed_verified",
+      "evidence": [
+        {
+          "path": "crates/emela-emb-compiler/src/backend/lower/p7_contract_tests.rs",
+          "symbol": "unwind_environment_values_and_refcount_statements_are_rejected_as_input",
+          "layer": "IR input rejection"
+        }
+      ]
+    },
+    {
+      "target": "flow",
+      "name": "rejects_source_builtins_that_must_lower_to_flow_control_or_runtime",
+      "legacy_path": "tests/flow.rs",
+      "legacy_key": "flow::rejects_source_builtins_that_must_lower_to_flow_control_or_runtime",
+      "legacy_ledger_index": 111,
+      "expected_observation": "All eight source builtin tags transform to control/runtime forms; retained source-level residuals are rejected before emission.",
+      "proposed_status": "proposed_verified_representation_replaced",
+      "evidence": [
+        {
+          "path": "crates/emela-emb-compiler/src/backend/lower/source_builtin_tests.rs",
+          "symbol": "rejects_all_eight_residual_source_builtins_before_emission",
+          "layer": "typed IR rejection"
+        },
+        {
+          "path": "crates/emela-emb-compiler/src/backend/lower/source_builtin_tests.rs",
+          "symbol": "source_debug_display_assert_and_defect_operations_leave_no_residual_builtins",
+          "layer": "source to typed/private IR"
+        }
+      ],
+      "reason": "Reference is root feature40f34c0, already integrated in combined. The frontend retains its intrinsic tag enum; the backend enum deliberately carries only lowered runtime operations. Both transformation and residual rejection are directly asserted, rather than assigning the behavior N/A."
+    },
+    {
+      "target": "lib",
+      "name": "compiler::separation_tests::common_entries_supply_dynamic_string_output_buffers",
+      "legacy_path": "src/compiler/tests/separation.rs",
+      "legacy_key": "lib::compiler::separation_tests::common_entries_supply_dynamic_string_output_buffers",
+      "legacy_ledger_index": 113,
+      "expected_observation": "Selected entry has dynamic String result capacity2/64/512, no stack owner escape, and explicit tiny caller buffer receives42.",
+      "proposed_status": "proposed_verified",
+      "evidence": [
+        {
+          "path": "crates/emela-emb-compiler/src/backend/lower/p7_string_frame_tests.rs",
+          "symbol": "selected_entry_supplies_dynamic_string_buffers_at_minimum_and_maximum_capacities",
+          "layer": "IR/C runtime"
+        }
+      ]
+    }
+  ],
+  "source_tests_delegated": [
+    {
+      "target": "emit",
+      "name": "bytes::bytes_captured_in_closures_and_state_keep_their_owners",
+      "legacy_path": "tests/bytes/mod.rs"
+    },
+    {
+      "target": "emit",
+      "name": "bytes::bytes_dynamic_capacity_is_independent_of_string_capacity",
+      "legacy_path": "tests/bytes/mod.rs"
+    },
+    {
+      "target": "emit",
+      "name": "bytes::bytes_external_adapters_snapshot_borrowed_data_and_transfer_owned_data",
+      "legacy_path": "tests/bytes/mod.rs"
+    },
+    {
+      "target": "emit",
+      "name": "bytes::bytes_external_tasks_snapshot_arguments_and_results_and_release_cancelled_contexts",
+      "legacy_path": "tests/bytes/mod.rs"
+    },
+    {
+      "target": "emit",
+      "name": "bytes::bytes_list_round_trips_and_invalid_elements_reclaim_every_allocation",
+      "legacy_path": "tests/bytes/mod.rs"
+    },
+    {
+      "target": "emit",
+      "name": "bytes::bytes_require_a_fixed_heap_and_defect_when_its_capacity_is_exhausted",
+      "legacy_path": "tests/bytes/mod.rs"
+    },
+    {
+      "target": "emit",
+      "name": "bytes::bytes_returns_lists_and_aliases_preserve_ownership_and_release_the_heap",
+      "legacy_path": "tests/bytes/mod.rs"
+    },
+    {
+      "target": "emit",
+      "name": "bytes::bytes_size_and_get_are_heapless_and_keep_lengths_above_u16",
+      "legacy_path": "tests/bytes/mod.rs"
+    },
+    {
+      "target": "emit",
+      "name": "bytes::bytes_std_corpus_matches_other_targets_including_const_traits_and_invalid_utf8",
+      "legacy_path": "tests/bytes/mod.rs"
+    },
+    {
+      "target": "emit",
+      "name": "bytes::bytes_survive_suspension_and_release_on_completion_and_cancellation",
+      "legacy_path": "tests/bytes/mod.rs"
+    },
+    {
+      "target": "emit",
+      "name": "bytes::discarded_bytes_still_check_capacity_and_release_owned_results",
+      "legacy_path": "tests/bytes/mod.rs"
+    },
+    {
+      "target": "emit",
+      "name": "completion_types::finite_changing_recursive_enum_arguments_run_with_owned_back_edges",
+      "legacy_path": "tests/completion_types/mod.rs"
+    },
+    {
+      "target": "emit",
+      "name": "const_runtime::canonical_const_roots_include_dependency_specializations_until_they_reach_a_fixed_point",
+      "legacy_path": "tests/const_runtime/mod.rs"
+    },
+    {
+      "target": "emit",
+      "name": "deferred::await_preserves_string_and_list_results_past_frame_and_scope_reuse",
+      "legacy_path": "tests/deferred/mod.rs"
+    },
+    {
+      "target": "emit",
+      "name": "deferred::complete_copies_borrowed_string_and_poll_retains_it_past_scope_end",
+      "legacy_path": "tests/deferred/mod.rs"
+    },
+    {
+      "target": "emit",
+      "name": "deferred::poll_observes_empty_and_first_value_for_scalar_and_unit_without_yielding",
+      "legacy_path": "tests/deferred/mod.rs"
+    },
+    {
+      "target": "emit",
+      "name": "fiber::aggregate_abi::scope_returns_string_enum_exits_after_success_or_interruption_and_frame_reuse",
+      "legacy_path": "tests/fiber/aggregate_abi.rs"
+    },
+    {
+      "target": "emit",
+      "name": "fiber::attempt::attempt_captures_sync_failure_and_returns_owned_cause",
+      "legacy_path": "tests/fiber/attempt.rs"
+    },
+    {
+      "target": "emit",
+      "name": "fiber::await_::await_returns_success_and_can_mix_with_repeated_join_without_yielding",
+      "legacy_path": "tests/fiber/await_.rs"
+    },
+    {
+      "target": "emit",
+      "name": "fiber::cause::cause_kind_reads_failure_without_consuming_the_cause",
+      "legacy_path": "tests/fiber/cause.rs"
+    },
+    {
+      "target": "emit",
+      "name": "fiber::cause::cause_raise_preserves_the_error_and_runs_native_cleanup_before_escape",
+      "legacy_path": "tests/fiber/cause.rs"
+    },
+    {
+      "target": "emit",
+      "name": "fiber::cause::cause_to_string_uses_error_show_and_caller_output_buffer",
+      "legacy_path": "tests/fiber/cause.rs"
+    },
+    {
+      "target": "emit",
+      "name": "fiber::interrupt::interrupt_waits_for_suspending_cleanup_and_ignores_old_task_notifications",
+      "legacy_path": "tests/fiber/interrupt.rs"
+    },
+    {
+      "target": "emit",
+      "name": "fiber::join::join_results_own_strings_and_lists_after_scope_and_frame_reuse",
+      "legacy_path": "tests/fiber/join.rs"
+    },
+    {
+      "target": "emit",
+      "name": "fiber::join::join_reuses_completed_results_without_yielding_and_waits_for_discarded_unit",
+      "legacy_path": "tests/fiber/join.rs"
+    },
+    {
+      "target": "emit",
+      "name": "string_append::literal_prefixes_are_copied_without_treating_readonly_bytes_as_writable_output",
+      "legacy_path": "tests/string_append/mod.rs"
+    },
+    {
+      "target": "emit",
+      "name": "synchronous_exhaustive_matches_and_list_loops_accept_unreachable_terminators",
+      "legacy_path": "tests/emit.rs"
+    },
+    {
+      "target": "lib",
+      "name": "compiler::separation_tests::common_closure_lowering_is_shared_and_native_managed_values_run",
+      "legacy_path": "src/compiler/tests/separation.rs"
+    },
+    {
+      "target": "lib",
+      "name": "compiler::separation_tests::string_plans_preserve_aliases_while_other_buffers_and_calls_are_live",
+      "legacy_path": "src/compiler/tests/separation.rs"
+    }
+  ],
+  "additional_context_evidence": [
+    {
+      "id": "emela_lir::Term::Unreachable",
+      "modes": [
+        "sync",
+        "suspend"
+      ],
+      "path": "crates/emela-emb-compiler/src/backend/lower/p7_misc_value_tests.rs",
+      "symbol": "unreachable_terms_raise_the_native_or_scheduler_defect_when_reached",
+      "observation": "Directly reached native node emits ASSERT/unreachable code; suspend node emits ASSERT/invalid scheduler state. Fatal hook executes once per C binary/optimization, not a1000-loop success claim."
+    },
+    {
+      "id": "emela_lir::Value::Fiber.on_fail",
+      "modes": [
+        "Handle",
+        "Break"
+      ],
+      "path": "crates/emela-emb-compiler/src/backend/lower/p7_fiber_edge_tests.rs",
+      "symbols": [
+        "lifting_a_closure_collects_and_remaps_fiber_local_failure_handlers",
+        "lifting_a_closure_remaps_fiber_failure_break_labels_and_their_result_locals"
+      ],
+      "observation": "Parent Var/Seq/Label arenas have11 padding entries. Lifted closure recovers captured typed error42 from CauseRaise through local Handle or enclosing Break; heap4096, each1000 calls, all free."
+    },
+    {
+      "id": "emela_lir::Term::Defect",
+      "modes": [
+        "sync",
+        "suspend"
+      ],
+      "path": "crates/emela-emb-compiler/src/backend/lower/p7_misc_value_tests.rs",
+      "symbol": "dynamic_defect_preserves_an_offset_string_view_and_embedded_nul",
+      "observation": "Both direct native and scheduler-frame defect preserve offset view bytes a,NUL,b and exact Panic kind/length3. Suspending input uses heap2048 to preserve its String argument. Fatal hook executes once per mode/optimization; no post-defect heap-free claim."
+    }
+  ],
+  "remaining_work": [
+    "Canonical115 legacy-test ledger promotion remains root-owned: this report covers only86 IR tests; the29 source tests have a separate review.",
+    "Post-source cleanup12 is complete in separate commit88677b6 and report docs/reports/p7-cleanup-ir-seam-compat.json. It is source→IR seam→C evidence, not pure source.",
+    "The structured122 context audit is delegated to frontend; Stage5 is root-owned. The86-test proposal does not itself claim all226 contexts complete."
+  ],
+  "validation": {
+    "backend_tests_passed": 115,
+    "backend_tests_failed": 0,
+    "backend_tests_ignored": 0,
+    "focused_new_list_tests_passed": 4,
+    "strict_clippy_workspace_all_targets": "passed",
+    "actual_rust_1_85_workspace_all_targets": "passed",
+    "fmt_diff": "passed",
+    "C_flags": [
+      "-std=c11",
+      "-Wall",
+      "-Wextra",
+      "-Werror"
+    ],
+    "optimizations": [
+      "-O0",
+      "-O2"
+    ]
+  }
+}

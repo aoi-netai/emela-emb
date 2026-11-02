@@ -447,3 +447,131 @@ P6のchild waiter/reclaim追加は`tests/p6_child_waiters.rs`で固定旧source�
 `tests/p6_scope_lifecycle.rs`は、この4 sourceのpublic関数へ明示C exportだけを追加し、固定旧`crates/emela-codegen-emb/tests/fiber/await_.rs`、`tests/deferred/mod.rs`、`tests/fiber/interrupt.rs`、`tests/fiber/child_reclaim.rs`のC観測を接続する。C harnessはexport名・明示task adapter・必要なevent lock hook・heap監査へ適応した。1024 byte/frame、128 frameを指定し、元のchild回収用heap 2048/4096 byte・fiber容量4を維持する。ready join/awaitのscope close、Deferred待機列のhead/middle/tail取消、release後のinterrupt FIFO、完了childの即時回収と保持handleの再join/awaitを、両最適化・各1000回で確認する。
 
 child数と取消flagの観測、および弱child link・cycleの直接検査は`completed-instrument.c`を生成Cへ追加する旧test由来のprivate C seamであり、公開source APIの保証と区別する。追加のsource差分回帰では既存child localの単独参照を挟み、その後もhandleを使用できることを検証する。未使用の新しい関数呼出し結果は既存の所有権passへ破棄を伝え、待機frameへ不要なchild handleを残さない。raw IRのDrop/Dup許可範囲は変更しない。
+## P7 external typeの独立frontend接続
+
+固定旧spec 12.3のbare `@external type`をopaqueなhost pointerとして受理する。同一のbare注釈の重複は許可し、属性引数・field・enum・構築・field参照・constructor pattern・型引数の不一致はsourceで拒否する。外部型にはconstructorを登録せず、既存backendのexternal enum表現へ渡す。
+
+外部generic関数は具体化後のC署名を検査する。Handle[Int]/Handle[String]のような同じpointer ABIは共有し、Int/Int64のような同一C symbolの不適合署名はbackendで拒否する。generic関数自体のC exportは引き続き具体wrapperを必要とする。
+
+`tests/p7_external_types.rs`ではBorrowed/Owned adapter両方でpointer identity・NULL・phantom type引数・constの一度だけの初期化をheapなし・1000回・C両最適化で確認する。Emelaからhost objectを解放・検査する処理は追加しない。汎化const HANDLEそのものの共有は、後述のgeneric const回帰で検証する。
+
+| 固定参照 | SHA-256 |
+| --- | --- |
+| `spec/language/12-external.md` | `ecc02ca3688fcb9d8e2edbb1dfc314ba0f4af43429d5382da5cb2e9126a376c8` |
+| `crates/emela-codegen-emb/tests/const_runtime/external.rs` | `989a731d161ea029a97df999869410fadaa0126cd970b0fa79083b483ef2e95c` |
+
+## P7の外部exportと同期adapter所有権
+
+固定revision `c34c0aeefdd966d854371b3110db00a47798751d` の外部export正規化を独自backendへ適応する。公開関数のIDとC aliasを維持した通常wrapperから、非公開のexternal宣言を呼ぶ。失敗・中断フラグ、Unit引数消去とNever戻り型を維持し、元入力の検証後に正規化する。旧FnBuilderやCore/LIR crateは取り込まない。
+
+| 参照元 | SHA-256 |
+| --- | --- |
+| `crates/emela-codegen-emb/src/compiler/lower/exports.rs` | `1df3df2de5703a092fb53e0902c8fcdedae464a5a6908ce4aeb7a7f61367172e` |
+| `crates/emela-codegen-emb/tests/sync_external/buffers.rs` | `a0de76ecb00a12d4596324542161e9be4bc055ee93dcb2387faa99f43bb6bcec` |
+| `crates/emela-codegen-emb/tests/sync_external/failure.rs` | `b38606addc896b15787f9a1268475d8af84ff60fa3052fbda95d4a9c59aafc2b` |
+
+`tests/p7_external_values.rs`は、直接export・通常呼出し・関数値・結果破棄の各経路から同期adapterへ接続する。StringBufferはcaller storageを使い、関数値から返した結果は所有化する。容量不足・別buffer・不正owner・容量超過lengthをheapなしで拒否する。Borrowed/Ownedの失敗payloadは元inputを書き換えても生存し、成功channelに置いた無効pointerを読まない。埋込みNUL・1000回の全heap回収・C両最適化を確認する。中断関数値とtask境界はP5/P6の試験も併用する。
+## P7の汎化constとcanonical root
+
+固定revisionのspec 5.6に従い、constの結果型に残る型変数を汎化し、参照ごとに具体化する。初期化はsource宣言ごとに共有する。複数の具体型から参照されるconstには、通常の型引数をAny、error/effect行引数をopaqueな行要約へ置換したcanonical rootを追加する。canonical bodyから新しいconst依存の具体化が生じるため、共有rootの発見を固定点まで繰り返す。
+
+旧版の到達不能な関数名markerは使わず、typed functionの`origin`と`canonical_const`、backend functionの`canonical_const`、`Program.const_function_groups`で対応を表す。通常の汎用関数参照と入れ子closureの出自も保持し、既存のconst bridgeで同じ初期値から型ごとのcallable/captureを構築する。bridge対象のgetterはcanonical initializerへの仮の辺を保持し、closure変換と到達解析の後に専用getterへ置換する。最終到達集合にないconst outcome・runtime const・familyは出力対象から外す。
+
+| 固定参照 | SHA-256 |
+| --- | --- |
+| `crates/emela-codegen-emb/src/input/upstream/const_origins.rs` | `2c83450294984444662e7cc0d4d93a7da0f9ecabcc88231bec3640c8c611136e` |
+| `crates/emela-codegen-emb/src/compiler/lower/const_bridge.rs` | `70a762af004ad560c3fface7558b20dfa78b50ed4ff26c30ca81e33d1039a657` |
+
+上記2ファイルのroot固定点・bridge保持の契約を独立frontend/backendの明示metadataへ適応した。新規依存と旧checkoutへのビルド時参照はない。Apache-2.0、repository rootのLICENSEに従う。
+
+`tests/p7_generic_consts.rs`はList[Int]/List[String]の共有、通常のgeneric FnRef、依存rootの固定点、入れ子capture・高階callbackのerror/effect行、source名が一度だけ付く共有defect、自己参照後の再試行、96byte heapでのbridge失敗のキャッシュをC両最適化で確認する。外部Handle[Int]/Handle[String]の共有ではBorrowed/Owned・NULL/非NULLをheapなしで各1000回確認する。`compat/p7/polymorphic-consts.emel`は固定旧`source_polymorphic_consts_share_initialization_and_specialize_callable_families`の入力（元SHA-256 `c9f0f411c6dcdc3595139fa3e214523be9e023c3b2f44b16b16a07f32cdf0953`）にC exportを加えた。未使用constから生成されたcontext helperのstrict C警告も独立回帰に含める。
+
+固定旧generic constの8入力は`tests/compat/p7/generic-consts/`へ本文をhash一致のまま保存した。`tests/p7_legacy_generic_consts.rs`はpub関数の直前へ明示C exportだけを加え、全8入力をsourceから生成しC両最適化で各1000回実行する。initializer回数、関数参照、nested capture、高階callback、失敗キャッシュ、毎回再試行する自己参照とheap解放を観測する。`docs/reports/p7-generic-const-compat.json`には元program ID/source hash・source検査/C生成/strict C object/runtimeを別々に記録する。元corpusの凍結baselineの判定は書き換えない。
+
+P6 sourceとの交差は`tests/p7_const_fibers.rs`で確認する。同じAPPLY/IDENTITY const familyを、純粋なString callbackと中断するScope callbackへ具体化し、Read evidenceをfork子まで渡してjoin後に42を得る。純粋exportと中断exportを各1000回実行して全heap解放を確認し、Cの両最適化で検証する。canonical_constはFunction単位のmetadataであり、Evidence/Provide.baseを走査する既存normalization/specialize/lowerを変更しない。
+## P7 Embeddedの宣言とBoard handler
+
+固定revisionの次の6moduleを本文変更なしで独立供給する。Boardの予約external symbolはcompiler所有moduleの宣言名とsymbolが一致する場合だけ許可する。C service bridgeは採用済みbackendを使い、board package・HAL・本体checkoutを依存にしない。
+
+| 旧source | SHA-256 |
+| --- | --- |
+| `crates/emela-codegen-emb/lib/embedded/peripheral.emel` | `8f8c8587636a9cbbf8007e73b4e5306ffbfbf07630cfee84481805e1693278a8` |
+| `crates/emela-codegen-emb/lib/embedded/gpio.emel` | `b0628f656a4e25a67f10e4db89271a1e60cba3ee3c78f6bc0d45de3946ee4cda` |
+| `crates/emela-codegen-emb/lib/embedded/uart.emel` | `49679fa4b32535805c085c1434ed4dd0f99c50b39d83f6f79136277148dec2c5` |
+| `crates/emela-codegen-emb/lib/embedded/i2c.emel` | `89f38481c5f5513fa30007a0da8bbd28089b8d258888bf3a3a71f07b18291572` |
+| `crates/emela-codegen-emb/lib/embedded/spi.emel` | `c39a3023e9c2258ecdcb01378011355e961b4140aa2ad11eb616e4357e1c25bc` |
+| `crates/emela-codegen-emb/lib/embedded/board.emel` | `f86e8766b31c3611547428d7078b6c47cae44c7f924e4ee1aeba3c46774de2f5` |
+
+BoardのC型名は固定旧の `Embedded.<module>.<type>` 名義から決まるため、compiler所有のEmbedded dataもmodule名を保持する。基本型の既存名は変更しない。
+
+以下の固定旧試験を `tests/compat/p7/embedded.emel` / `embedded-harness.c`、`tests/p7_services.rs`、`src/backend/lower/service_tests.rs` へ適応する。sourceの公開4関数へ明示exportを追加し、Cのall呼出し名をstartへ対応付ける。旧64反復を1000へ増やし、23operation、エラーcode、転送要素/容量/受信長境界、所有List、Clock通知、ConsoleのNULを維持する。pure Clock.nowのtask runtime省略と不正service署名は独自IRで確認し、sourceのhandler全operation表とは分ける。
+
+| 旧fixture | SHA-256 |
+| --- | --- |
+| `crates/emela-codegen-emb/tests/embedded_peripherals/exercise.emel` | `14869b54f4f331b95ba83c9f2d286d5647ab3ef6e17fa4dbf07386165b7ea937` |
+| `crates/emela-codegen-emb/tests/embedded_peripherals/harness.c` | `c28513c23ed2e05622d2f66d321aa2ade2b46bb36695aeceb1ced40b62ac63ec` |
+| `crates/emela-codegen-emb/tests/embedded_peripherals/mod.rs` | `60a47949658c43d5115d41b636d0102aecaf255e862e84365dfe4084c72e60cb` |
+| `crates/emela-codegen-emb/tests/embedded_peripherals/clock.rs` | `57aafc360bf0de60b80041d0cedcd47ba351c64dcf324ba43be53e16136f2ad1` |
+| `crates/emela-codegen-emb/tests/embedded_peripherals/diagnostics.rs` | `df7be1d780bf86b769b39666f50c4ce60585105e87b3b8a46c1dc73874bcbb79` |
+## P7のISR境界の検証
+
+固定revision `c34c0aeefdd966d854371b3110db00a47798751d` の次の試験を参照し、入力を独立sourceまたは独自IRへ再構成する。旧crate・builder・frontendを試験依存に追加しない。
+
+| 旧試験 | SHA-256 | 新しい確認先 |
+| --- | --- | --- |
+| `crates/emela-codegen-emb/tests/flow.rs` | `8fcb504820e56fec12c7e3773c8ff0eb81a6a3b46b412183896eed2b918b9537` | `backend/lower/isr_tests.rs` |
+| `crates/emela-codegen-emb/tests/external_scalar/mod.rs` | `b5dd612258fa7c60532ec948c81728b3902a56cd72c3adf90ea778845089f2d4` | `tests/p7_isr.rs` |
+| `crates/emela-codegen-emb/tests/sync_external/boundary.rs` | `0a4af7d9cceda616973bf343880012afcc29d770ba86195bbc3ab996ecaf1079` | `tests/p7_isr.rs` |
+| `crates/emela-codegen-emb/tests/const_runtime/mod.rs` | `ff5b61e9ed98cabfc8bb2212d2b310dbac026de0d4c9e17ee0bfbbb296d751a4` | `tests/p7_isr.rs` |
+| `crates/emela-codegen-emb/tests/string_comparison/mod.rs` | `a3794bb28614f61ae828d2bce7a200649e102866e111700101926cbc646d737d` | `tests/p7_isr.rs` |
+
+ISR入口は明示exportされたEmela名で選び、C公開aliasと区別する。externalは実際のadapter C symbolを許可リストに要求する。到達する再帰・heap割当・所有aggregate・動的call・runtime constを拒否し、静的const・借用String比較・heapを触らないBytes.sizeは維持する。元のFloat全bitパターン（負ゼロ・NaN payload・無限大・subnormal）、Int端値と1000回反復をC両最適化で確認する。捨てたCellNewも独自IRから拒否する。
+
+## P7の残余source操作の検証
+
+旧8source builtin（AssertFail/Dbg/DebugPrint/Inspect/Panic/ShowNested/ShowString/Todo）はsource機能として維持する。`source_builtin_tests.rs`はsourceから独自lowerを通してこれらが後段に残らないことと、未変換の8操作を不正IRとして後段で拒否することを確認する。Cでの表示・副作用順・assert/defect hookは既存 `p1.rs`、`p2_debug.rs`、`p2_traits.rs`、`p4_function_values.rs` の試験で観測する。
+
+P7統合では、external opaque宣言のconstructorを消去するときにrecord属性も外す。外部型には構造fieldがなく、receiver関数の検査やdot callでrecord fieldを参照しない。`p7_external_types`のfield/method/update拒否とpointer受渡し、`p7_const_fibers`のScope/Fiber sourceを併用し、record updateとの組合せでpanicしないことを確認する。
+
+P7の`tests/p7_legacy_traits.rs`は固定旧`release_0_24/traits.emel`全体（corpus program `dc3d2de098f1b7e80a21`、source SHA-256 `c2cacb8eb0a458543a2c75f44e74015be514f14c24db2ca938af34204d514b74`）を本文変更なしで読み、7個のpub関数に明示exportだけを加える。P2の同期抽出に含めなかったFiber/Cause・debug・通常/derived/未定義Showを同じ入力で確認する。旧`release_0_24/mod.rs`（SHA-256 `306126db1413bac6f4dc96aff3ccb64cade5f2407f84ab5ae7048ba49971377b`）の3試験を、通常1000回の全heap回収と公開failure即時defectの2試験へ統合した。C両最適化で旧の値・NUL/Unicode escape・debug順序・Cause文字列・停止hook文言を維持する。
+
+P7の`backend/lower/p7_const_source_tests.rs`は保存済み旧sourceのconst残件を本文のまま読み、明示exportだけを加える。旧recursive/aggregate const、初回破棄、nested defect/self retry、heap/adapter容量defect、巨大static String fallback、ISR static/runtime差を検証する。GC試験は固定旧`examples/support/gc_anchor.rs`（SHA-256 `01c076eb48367d0df62f57175e2fadf2e16b8cc4dadd7e7950b7c4a7211fa708`）と同じCell[Any]のtest専用IR functionを通常source pipeline後へ加える。旧heap容量、外部String3policy・aggregateのboard解放、1000回の所有値保持とGC後baselineを維持する。旧14試験の入力・新試験・差分は`docs/reports/p7-const-corpus-compat.json`に記録し、純sourceとGC後処理を区別する。
+
+## P7 Deferredの旧source観測
+
+固定revisionの`crates/emela-codegen-emb/tests/deferred/mod.rs`（SHA-256 `0e343dcede15b37c59d08286561faeff8a3fb534b23f2c6f601ae0e1c0d52616`）の13旧source試験を、`p7_deferred_compat.rs`の14実C入力と1つのartifact-only入力へ移植する。保存済みcorpus本文をbyte単位で保ち、public関数へC export属性だけを挿入する。C harnessは公開名と型番号を生成headerへ対応付け、event lock hookとheap観測を加える。旧heap/frame 512 byte・frame/fiber/Deferred容量・String容量の指定を維持する。
+
+completeの一度だけの格納、空/Unit/Bool/tuple/Int64/Floatのpoll/await、String/List所有とscope/frame再使用、FIFO、取消時のDeferred待機列、再利用slotへ向くleaked callbackのscope終了診断、cycle回収、resume後operation tailの破棄を観測する。成功系は1000回の全heap回収を確認し、旧のterminal defect系は同じ停止hookと文言を確認する。constructorの容量0拒否・pool省略macroは旧artifact検査として残す。C両最適化を必須実行し、source後のIR変更は行わない。旧assertと入力hash、resource budget、実行結果の対応は`docs/reports/p7-concurrency-corpus-compat.json`へ記録する。
+
+同じ固定revisionの`crates/emela-codegen-emb/tests/fiber/join.rs`（SHA-256 `35367507790dd3584f346da32b4b855b048883e19360a02221212ec2a6740def`）と`fiber/await_.rs`（SHA-256 `118a273ac7f749dd9eaa294e56cfe913105a1b80ce5b6c8f760efdc6386f2bd0`）の17旧source試験は、`p7_child_results_compat.rs`の18入力で同様に検証する。旧frame 512 byteとheap・pool容量を維持し、P6へ移植済みのFIFOとready closeも旧resource budgetで再実行する。完了結果の反復join/await、discarded Unit、String/Listと返却Exitの所有、Int64/Float bit・Bool、inline Exitの通常call返却、waitのresume境界、取消時待機列、自己handleをcaptureする結果closureのcycle、leaked callbackのscope終了診断を確認する。runtime macroの有無も旧assertどおり検査する。全体で30旧試験・32実C入力と1 artifact-only入力となり、terminal停止観測と1000回の正常解放観測を別々に記録する。
+
+## P7: State・Fiber・Deferred・外部taskの統合
+
+固定旧 `tests/fiber/integration.rs` と `examples/support/phase7_integration_flow.rs` の2試験を独立frontendへ接続した。原本文と旧managed String置換、request外部化、任意のGC anchorを保持し、C公開名だけを適応する。[対応と観測](reports/p7-integration-corpus-compat.json) を参照。旧4096byte heap等の容量のまま、GC有無・成功/失敗/取消/NULL出力・1000反復・全heap回収をC両最適化で確認した。
+
+この入力でclosure変換時のFiber失敗辺の収集・ID再割当て漏れを検出した。Callと同じくFiberのHandle/Breakを新arenaへ移し、親SeqIdを誤って再利用して走査が循環する不具合を修正する。試験用の旧checkout・旧compiler依存は追加しない。
+
+## P7: 元sourceによる外部scalar・String・aggregate・taskの所有権
+
+固定旧 `tests/external_scalar/mod.rs`、`tests/sync_external/{mod,values}.rs`、`tests/task_values/managed.rs` の正常source5試験を `tests/p7_legacy_externals.rs` へ移した。元本文は既存corpusを参照し、明示C exportだけを追加する。旧1024/4096byte heapとframe/pool容量を保ち、mixed Int64/Float bits、board側で保持するString、tuple/Listのfield所有、型付きtaskのproducer/release・取消・NULL出力をC両最適化・1000反復で確認した。[対応表](reports/p7-external-source-compat.json) に入力hashと各観測を記録する。
+
+## P7: 標準サービスとnative C試験fixture
+
+`tests/compat/p7/native-services.c` は固定旧 `src/platform/native.c` のbyte一致コピーであり、compiler生成物を検証するC providerとしてのみ使う。platformのRust API・build planner・package依存は導入しない。Clock/Consoleの2原sourceを明示exportへ適応し、旧4096byte heap・2048byte frameとnative timerの取消/slot再利用をC両最適化で確認した。旧100回のtimer試験は1000回へ増やし、毎回のheap回収を追加した。既存の全Embedded操作試験とClock境界試験も原観測・旧容量へ照合し、[対応表](reports/p7-services-source-compat.json) に記録した。
+
+## P7: Scope原文7試験のC観測
+
+固定旧 `tests/fiber/mod.rs` の正常source7試験を `tests/p7_scope_compat.rs` へ移し、[原文hash・旧Options・C本文の対応](reports/p7-scope-source-compat.json) を保存した。子開始の順序、unstarted取消、完了通知とScope再利用、入れ子task取消、Scope地点evidenceとsibling fork、pool不足defect、String/List captureを元のC assertionで確認する。明示C export以外にsource本文を変えず、旧512byte frameとheap/fiber/task/event容量を保ち、C両最適化で成功した。
+P7の`p7_payload_compat.rs`は固定旧`tests/fiber/payload.rs`のsource3入力を保存済みcorpusから読み、exportだけを加えて旧C観測を実行する。String/Listエラーpayloadの所有、suspend cleanup、直接/間接failure、取消とstale通知を旧heap/frame 512 byteで確認する。root取消は旧試験どおり生成Cのprivate flag hookを使い、IR変更は行わない。対応は`docs/reports/p7-cleanup-source-compat.json`へ記録する。
+
+同じfailure handlerを複数箇所へ出力するとevidence検索のgoto labelが重複するため、検索をlocal scope内のwhile・NULL診断・代入へ適応した。中断frameの値fieldへ所有flagを交互に挟むpaddingも除き、error/guard/各値のflagをまとめた。field名・型と所有処理は保持し、旧List error入力のframeは544 byteから512 byteとなる。frame容量を増やす代用はせず、C両最適化の旧上限assertと1000回のheap回収を通す。
+
+`p7_failure_compat.rs`、`p7_interrupt_compat.rs`、`p7_protect_compat.rs`は、同じ固定版のfailure/interrupt/protect source21試験も旧C期待値とresource budgetで実行する。親子の失敗伝播・release待機・resume前後のfailure・error表示・古いtask通知・待機列順序・中断Causeの所有・未開始child・operation tailと中断cleanupの停止方針を観測する。P6のinterrupt FIFO入力も旧512 byte/frameのbudgetで再実行する。payloadを含むsource API側24試験は、この対応表でsource後のIR変更なしと明記する。旧試験がHold/Protect cleanup移動/失敗external置換を行う別12件は`p7-cleanup-source-seams.json`へ分離して担当間で検証し、これら24件の成功へ混ぜない。
+
+## P7: aggregateと関数値の旧source境界
+
+固定旧 `tests/fiber/{aggregate,aggregate_abi,function_aggregate}.rs` の正常source12試験を13個のC実行へ接続した。[対応表](reports/p7-aggregate-source-compat.json) は元本文、C assertion、旧heap/frame/pool設定を記録する。sourceには明示C exportだけを加え、C型・関数・release名は生成headerから解決する。String/Option/List/tuple/enum/functionのnative・suspend・Scope/Deferred・handler resume・失敗・取消・NULL出力をC両最適化で確認し、所有経路は1000回の全heap回収を維持する。heaplessな借用tupleと関数aggregate、heap未指定時の所有producer拒否も元の観測どおり検証する。
+
+Deferred aggregateの768byte frame不足は、所有flagを値fieldの後ろへ配置する修正によって旧容量のまま解消した。P5中断6試験とP7payload3試験を併せて実行し、frame配置の変更後も成功した。
+
+P7 frontend補完: 固定旧 `tests/frontend.rs` の2拒否・2正常sourceと `tests/sources.rs` の6標準module供給/構文観測を `tests/p7_services.rs` と `docs/reports/p7-frontend-source-compat.json` へ対応付けた。正常原文は既存hash fixtureを使い、拒否原文とfilenameも保持する。Pome/driver/Coreへの依存は追加せず、独立Module診断・明示entryへ適応した。

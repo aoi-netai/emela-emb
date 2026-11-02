@@ -1,0 +1,100 @@
+{
+  "source_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+  "baseline_revision": "c34c0aeefdd966d854371b3110db00a47798751d",
+  "source_crates_tree": "cf2ce7cde85c1432e196d4a920df096747b74216",
+  "date": "2026-11-03",
+  "environment": {
+    "OS": "Linux 6.18.54.1-microsoft-standard-WSL2",
+    "target": "x86_64-unknown-linux-gnu",
+    "rustc": "rustc 1.99.1 (58cf8f9c3 2026-10-13)",
+    "cargo": "cargo 1.99.1 (5f94df478 2026-08-27)",
+    "C_compiler": "cc (Ubuntu 11.4.0-1ubuntu1~22.04.3) 11.4.0",
+    "actual_MSRV": "rustc 1.85.0 (4d91de4e4 2025-02-17)"
+  },
+  "standalone": {
+    "passed": true,
+    "tests_passed": 607,
+    "tests_failed": 0,
+    "tests_ignored": 0,
+    "target_batches_including_doc": 80,
+    "exit_code": 0,
+    "snapshot": "/tmp/emela-emb-standalone-cepa5r5t/repo",
+    "original_workspace_inaccessible": true,
+    "isolation": "Linux Landlock; no original Emela workspace reads; fresh Cargo home; only locked third-party temporary vendor",
+    "workspace_members": [
+      "emela-emb-compiler",
+      "emela-emb-cli"
+    ],
+    "Rust_test_profile": "CARGO_PROFILE_TEST_OPT_LEVEL=1",
+    "C_flags": [
+      "-std=c11",
+      "-Wall",
+      "-Werror"
+    ],
+    "IR_helper_additional_C_flags": [
+      "-Wextra"
+    ],
+    "C_optimizations": [
+      "-O0",
+      "-O2"
+    ],
+    "C_compiler_absent_skip": false,
+    "commands": [
+      "cargo metadata --format-version 1 --locked --offline",
+      "cargo build --workspace --locked --offline",
+      "cargo test --workspace --locked --offline",
+      "cargo run --locked --offline -p emela-emb-cli -- build examples/minimal/main.emel --out-dir generated",
+      "cc -std=c11 -Wall -Werror -O0/-O2 -Igenerated generated/emela_embedded.c generated/harness.c -lm -o minimal; execute and assert answer()==42"
+    ],
+    "local_log": ".local/experiment/p7-final-standalone.log",
+    "snapshot_regular_files_byte_verified": 927,
+    "started_JST": "2026-11-03T02:49:41.525+09:00",
+    "finished_JST": "2026-11-03T03:08:45.557+09:00",
+    "elapsed_seconds": 1144.031
+  },
+  "static_checks": {
+    "passed": true,
+    "source_checkpoint": "d67dd4a",
+    "source_crates_tree_matches_final_snapshot": true,
+    "Cargo_toml_and_lock_unchanged": true,
+    "commands": [
+      "cargo clippy --workspace --all-targets --locked --offline -- -D warnings",
+      "actual cargo/rustc 1.85.0 check --workspace --all-targets --locked --offline",
+      "cargo fmt --all --check",
+      "git diff --check"
+    ],
+    "evidence": "docs/reports/p7-backend-proof-integration.json"
+  },
+  "final_document_checks": {
+    "status": "passed",
+    "coverage_ledger_tests_passed": 2,
+    "coverage_ledger_tests_failed": 0,
+    "implementation_test_paths_and_symbols": "all exist",
+    "fixed_sets": "428/226/115/10 match with no missing/extra/duplicate IDs",
+    "source_crosswalk_reproduction": "passed; 174 normal + 3 additional; open 0",
+    "completion_audit_reproduction": "passed; all 428/226/115/10 final; open obligations 0",
+    "completion_audit_ledger_revision": "27fa16abe8fb3daa9e9135e0ce4a2bf28229632a",
+    "reference_paths": 867,
+    "missing_reference_paths": 0,
+    "symbol_components_missing": 0,
+    "fmt_and_diff": "passed",
+    "fresh_single_branch_clone": {
+      "passed": true,
+      "snapshot_revision": "552f28a",
+      "method": "git bundle of feat/compiler-07-completion only, then a fresh git clone; both audit --check commands succeeded without orphaned feature commits or upstream checkout"
+    }
+  },
+  "scope": {
+    "records": 428,
+    "contexts": 226,
+    "legacy_related_tests": 115,
+    "requirements": 10,
+    "legacy_normal_source_tests": 174,
+    "additional_source_rejection_parse_tests": 3,
+    "distinct_saved_programs": 169,
+    "source_observations_open": 0,
+    "old_IR_related_tests": 86,
+    "old_source_related_tests": 29
+  },
+  "observation_policy": "Original runtime, source-to-IR-adapted runtime, diagnostics, artifacts and frontend-only observations remain separate. Fatal defects execute once per C binary; normal managed paths repeat and check full reclamation or persistent const-root stability. Full equality for arbitrary Emela inputs is not claimed."
+}

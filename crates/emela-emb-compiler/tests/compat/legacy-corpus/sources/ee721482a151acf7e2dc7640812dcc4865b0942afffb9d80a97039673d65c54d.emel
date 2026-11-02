@@ -1,0 +1,30 @@
+
+import Std.Fiber.{Fiber}
+@external(c, "host_wait")
+suspend fn wait(n: Int) -> Int
+@external(c, "mark")
+fn mark(n: Int) -> () use {}
+effect Wait { suspend fn get(n: Int) -> Int }
+handler Waiting: Wait { suspend fn get(n, resume) { resume(wait(n)) } }
+pub fn work() -> Int use Async {
+  with Waiting {
+    Fiber.scope(fn() {
+      child = Fiber.fork(fn() { value = (use Wait).get(40)
+        mark(4)
+        value })
+      a = Fiber.fork(fn() { mark(1)
+        v = Fiber.join(child)
+        mark(5)
+        v })
+      b = Fiber.fork(fn() { mark(2)
+        v = Fiber.join(child)
+        mark(6)
+        v })
+      c = Fiber.fork(fn() { mark(3)
+        v = Fiber.join(child)
+        mark(7)
+        v })
+      Fiber.join(a) + Fiber.join(b) + Fiber.join(c)
+    })
+  }
+}

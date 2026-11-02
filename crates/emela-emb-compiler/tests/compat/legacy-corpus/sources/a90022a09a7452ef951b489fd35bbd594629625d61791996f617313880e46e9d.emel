@@ -1,0 +1,44 @@
+
+import Std.Fiber.{Fiber, Success, Failure}
+import Std.Cause.{Cause, Fail, Die, Interrupt}
+@external(c, "host_wait")
+suspend fn wait(n: Int) -> Int
+@external(c, "mark")
+fn mark(n: Int) -> () use {}
+error Boom(n: Int) derive Show
+effect Wait { suspend fn get(n: Int) -> Int }
+handler Waiting: Wait { suspend fn get(n,resume) { resume(wait(n)) } }
+effect Resource { fn read() -> Int }
+handler Res: Resource { fn read() { 0 }
+ release { mark(2) }
+}
+fn failure() -> Int fails Boom { fail Boom(n: 42) }
+fn cleanup(c: Cause[{}]) -> () { mark(1)
+ Cause.raise(c)
+ mark(99)
+}
+fn protected(c: Cause[{}]) -> Int fails Boom { with Res { failure()
+ cleanup(c)
+ 0 } }
+pub fn make() -> Cause[{}] use Async { with Waiting { Fiber.scope(fn() {
+ child = Fiber.fork(fn() { (use Wait).get(1) })
+ (use Wait).get(2)
+ Fiber.interrupt(child)
+ Fiber.await(child) match { Success(_) -> panic("unexpected")
+  Failure(c) -> c
+ }
+}) } }
+pub fn work(c: Cause[{}], failing: Bool) -> Int use Async { with Waiting {
+ Fiber.scope(fn() {
+  if failing { fail Boom(n: 0) }
+  child = Fiber.fork(fn() { protected(c) })
+  Fiber.await(child) match { Success(n) -> n
+   Failure(again) -> Cause.kind(again) match { Interrupt -> 42
+    Fail -> -2
+    Die -> -3
+   }
+  }
+ }) escape { Boom(n) -> { mark(3)
+  n
+ } }
+} }

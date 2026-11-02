@@ -1,0 +1,9 @@
+
+pub fn classify(n: Int) -> Int {
+  value = if n > 0 { Some(n) } else { None }
+  value match {
+    Some(x) -> x + 1
+    None -> 0
+  }
+}
+pub fn length() -> Int { List.length([1, 2, 3]) }

@@ -1,0 +1,16 @@
+
+import Std.Fiber.{Fiber, Success, Failure}
+import Std.Cause.{Cause, CauseKind, Fail, Die, Interrupt}
+error Boom(n: Int) derive Show
+pub fn kind(n: Int) -> Int {
+ Fiber.attempt(fn() { fail Boom(n: n) }) match {
+  Success(_) -> 0
+  Failure(c) -> {
+   Cause.kind(c)
+   Cause.kind(c) match { Fail -> 42
+    Die -> 1
+    Interrupt -> 2
+   }
+  }
+ }
+}

@@ -1,0 +1,26 @@
+
+import Std.Fiber.{Fiber, Scope, Success, Failure}
+import Std.Deferred.{Deferred}
+@external(c, "mark")
+fn mark(n: Int) -> () use {}
+effect Marker { fn read() -> Int }
+handler Resource: Marker { fn read() { 1 }
+  release { mark(4) } }
+pub fn work() -> Bool use Async {
+  Fiber.scope(fn() {
+    stop: Deferred[Int] = (use Scope).deferred()
+    child = Fiber.fork(fn() { with Resource { mark(1)
+      Deferred.await(stop) } })
+    a = Fiber.fork(fn() { mark(2)
+      result = Fiber.await(child) match { Failure(_) -> True
+        Success(_) -> False }
+      mark(5)
+      result })
+    b = Fiber.fork(fn() { mark(3)
+      Fiber.interrupt(child)
+      mark(6) })
+    result = Fiber.join(a)
+    Fiber.join(b)
+    result
+  })
+}

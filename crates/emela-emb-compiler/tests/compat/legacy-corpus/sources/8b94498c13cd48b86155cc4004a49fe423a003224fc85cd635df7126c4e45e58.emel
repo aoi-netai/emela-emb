@@ -1,0 +1,36 @@
+
+import Std.Fiber.{Fiber, Success, Failure}
+import Std.Cause.{Cause}
+@external(c, "host_wait")
+suspend fn wait(n: Int) -> Int
+@external(c, "mark")
+fn mark(n: Int) -> () use {}
+error Boom(n: Int) derive Show
+effect Wait { suspend fn get(n: Int) -> Int }
+handler Waiting: Wait { suspend fn get(n,resume) { resume(wait(n)) } }
+fn bounce(c: Cause[{}]) -> () { Cause.raise(c) }
+fn bounce_async(c: Cause[{}]) -> () use Wait { (use Wait).get(3)
+ Cause.raise(c)
+}
+fn cleanup(child: Fiber[Int], asynchronous: Bool) -> () use {Async, Wait} {
+ mark(1)
+ Fiber.await(child) match { Success(_) -> mark(99)
+  Failure(c) -> if asynchronous { bounce_async(c) } else { bounce(c) }
+ }
+ mark(98)
+}
+fn protected(child: Fiber[Int], asynchronous: Bool) -> Int use {Async, Wait} {
+ (use Wait).get(2)
+ cleanup(child, asynchronous)
+ 0
+}
+pub fn work(asynchronous: Bool) -> Int use Async {
+ with Waiting { Fiber.scope(fn() {
+  child = Fiber.fork(fn() { (use Wait).get(1)
+   fail Boom(n: 42)
+  })
+  protected(child, asynchronous)
+ }) escape { Boom(n) -> { mark(2)
+  n
+ } } }
+}

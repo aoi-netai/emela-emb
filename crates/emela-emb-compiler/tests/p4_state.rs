@@ -12,7 +12,7 @@ fn state_shares_owned_values_with_escaped_closures_and_reclaims_every_run() {
         )],
         "main.emel",
         &Options::default()
-            .with_heap_bytes(32768)
+            .with_heap_bytes(8192)
             .with_string_capacity(256),
     )
     .unwrap_or_else(|errors| panic!("State source rejected: {errors:#?}"));

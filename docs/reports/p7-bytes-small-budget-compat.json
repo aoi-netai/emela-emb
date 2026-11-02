@@ -1,0 +1,253 @@
+{
+  "fixed_revision": "c34c0aeefdd966d854371b3110db00a47798751d",
+  "compiler_checkpoint": "5aaff79010384b74140f407642308349483c34f5",
+  "programs": [
+    {
+      "id": "program:545fcfac2473e3be10a5",
+      "files": [
+        {
+          "name": "main.emel",
+          "fixture": "crates/emela-emb-compiler/tests/compat/legacy-corpus/sources/46fb4b235a62d634127604b9022151cb4216168e84908f7a5a5c85dc286ac0c0.emel",
+          "source_id": "source:46fb4b235a62d6341276",
+          "sha256": "46fb4b235a62d634127604b9022151cb4216168e84908f7a5a5c85dc286ac0c0"
+        }
+      ],
+      "legacy_tests": [
+        "emit::bytes::bytes_captured_in_closures_and_state_keep_their_owners"
+      ],
+      "route": "existing-source-observation-replacement",
+      "new_test": {
+        "kind": "source_test",
+        "path": "crates/emela-emb-compiler/tests/p4_state.rs",
+        "symbol": "state_shares_owned_values_with_escaped_closures_and_reclaims_every_run"
+      },
+      "source_adaptation": "Existing broader source/C observations encompass the old input APIs and exact assertions. Original fixture hash retained for provenance; this is not an original-body runtime claim.",
+      "observations": {
+        "source_check": "passed",
+        "C_generation": "passed",
+        "C_runtime_O0": "passed",
+        "C_runtime_O2": "passed",
+        "heap_empty_after_each_fully_released_route": true
+      },
+      "runtime_assertions": [
+        "Same capturedBytes and sharedBytes source bodies preservea/NUL/b after caller overwrite, then6byte doubledBytes after sourceowner release.",
+        "Existing larger State corpus is now tested at old8192heap for1000rounds, allheapfree."
+      ]
+    },
+    {
+      "id": "program:e7a338aa5771b67698db",
+      "files": [
+        {
+          "name": "main.emel",
+          "fixture": "crates/emela-emb-compiler/tests/compat/legacy-corpus/sources/c506ba1caba04956c992ea5305f2c676188e80e2026734b8772091d2d5162fb4.emel",
+          "source_id": "source:c506ba1caba04956c992",
+          "sha256": "c506ba1caba04956c992ea5305f2c676188e80e2026734b8772091d2d5162fb4"
+        }
+      ],
+      "legacy_tests": [
+        "emit::bytes::bytes_dynamic_capacity_is_independent_of_string_capacity"
+      ],
+      "route": "existing-source-observation-replacement",
+      "new_test": {
+        "kind": "source_test",
+        "path": "crates/emela-emb-compiler/tests/p3_bytes.rs",
+        "symbol": "bytes_ownership_snapshots_aliases_and_invalid_list_elements_release_every_allocation"
+      },
+      "source_adaptation": "Existing broader source/C observations encompass the old input APIs and exact assertions. Original fixture hash retained for provenance; this is not an original-body runtime claim.",
+      "observations": {
+        "source_check": "passed",
+        "C_generation": "passed",
+        "C_runtime_O0": "passed",
+        "C_runtime_O2": "passed",
+        "heap_empty_after_each_fully_released_route": true
+      },
+      "runtime_assertions": [
+        "Old262144heap/String1, Bytes.slice(-1,100000) copiesfull70000byte view independent of Stringcapacity;3rounds exactly asold, fullheapfree."
+      ]
+    },
+    {
+      "id": "program:738c3317d1a9dca5984d",
+      "files": [
+        {
+          "name": "main.emel",
+          "fixture": "crates/emela-emb-compiler/tests/compat/legacy-corpus/sources/acf6256009e2b7a22dc4d7ad89bfcb556e7a2e776c83729efcc201af94500fc8.emel",
+          "source_id": "source:acf6256009e2b7a22dc4",
+          "sha256": "acf6256009e2b7a22dc4d7ad89bfcb556e7a2e776c83729efcc201af94500fc8"
+        }
+      ],
+      "legacy_tests": [
+        "emit::bytes::bytes_external_adapters_snapshot_borrowed_data_and_transfer_owned_data"
+      ],
+      "route": "existing-source-observation-replacement",
+      "new_test": {
+        "kind": "source_test",
+        "path": "crates/emela-emb-compiler/tests/p3_bytes.rs",
+        "symbol": "bytes_external_adapters_snapshot_borrowed_data_and_transfer_owned_data"
+      },
+      "source_adaptation": "Existing broader source/C observations encompass the old input APIs and exact assertions. Original fixture hash retained for provenance; this is not an original-body runtime claim.",
+      "observations": {
+        "source_check": "passed",
+        "C_generation": "passed",
+        "C_runtime_O0": "passed",
+        "C_runtime_O2": "passed",
+        "heap_empty_after_each_fully_released_route": true
+      },
+      "runtime_assertions": [
+        "Old4096heap, Borrowed+Owned both preserve two sequentialstatic-buffer results1/2 and unsigned255/NUL with500repetitions each and fullheapfree.",
+        "NewOwned fixture creates its already-ownedBytes through the public exporter rather than the old private emela_external_own helper; ownership/byte observations are identical."
+      ]
+    },
+    {
+      "id": "program:ee5ba136321c839df89e",
+      "files": [
+        {
+          "name": "main.emel",
+          "fixture": "crates/emela-emb-compiler/tests/compat/legacy-corpus/sources/17515e0687dd97fa74b8c3ad7f3f37977a9ec69e858c784f9d87ea60fa1f7e39.emel",
+          "source_id": "source:17515e0687dd97fa74b8",
+          "sha256": "17515e0687dd97fa74b8c3ad7f3f37977a9ec69e858c784f9d87ea60fa1f7e39"
+        }
+      ],
+      "legacy_tests": [
+        "emit::bytes::bytes_list_round_trips_and_invalid_elements_reclaim_every_allocation"
+      ],
+      "route": "existing-source-observation-replacement",
+      "new_test": {
+        "kind": "source_test",
+        "path": "crates/emela-emb-compiler/tests/p3_bytes.rs",
+        "symbol": "bytes_ownership_snapshots_aliases_and_invalid_list_elements_release_every_allocation"
+      },
+      "source_adaptation": "Existing broader source/C observations encompass the old input APIs and exact assertions. Original fixture hash retained for provenance; this is not an original-body runtime claim.",
+      "observations": {
+        "source_check": "passed",
+        "C_generation": "passed",
+        "C_runtime_O0": "passed",
+        "C_runtime_O2": "passed",
+        "heap_empty_after_each_fully_released_route": true
+      },
+      "runtime_assertions": [
+        "Old4096heap is now directly executed in addition tolarge-output262144corpus.",
+        "Allold0/128/255/-1/256 produceTrue and reclaim partial/full List/Byte allocations500times."
+      ]
+    },
+    {
+      "id": "program:36dfa29b6881b628bddb",
+      "files": [
+        {
+          "name": "main.emel",
+          "fixture": "crates/emela-emb-compiler/tests/compat/legacy-corpus/sources/da3390d21542d59b21e579b4e85127c50ec7587fe49ae975e040b50f70fbc110.emel",
+          "source_id": "source:da3390d21542d59b21e5",
+          "sha256": "da3390d21542d59b21e579b4e85127c50ec7587fe49ae975e040b50f70fbc110"
+        }
+      ],
+      "legacy_tests": [
+        "emit::bytes::bytes_require_a_fixed_heap_and_defect_when_its_capacity_is_exhausted"
+      ],
+      "route": "existing-source-observation-replacement",
+      "new_test": {
+        "kind": "source_test",
+        "path": "crates/emela-emb-compiler/tests/p3_bytes.rs",
+        "symbol": "bytes_owned_results_require_a_heap_even_when_the_result_is_discarded"
+      },
+      "source_adaptation": "Existing broader source/C observations encompass the old input APIs and exact assertions. Original fixture hash retained for provenance; this is not an original-body runtime claim.",
+      "observations": {
+        "source_check": "passed",
+        "C_generation": "passed",
+        "C_runtime_O0": "passed",
+        "C_runtime_O2": "passed",
+        "terminal_defect_observed": true,
+        "heap_observation": "Old terminal HeapExhausted observation; no successful return or reclamation claim for this route."
+      },
+      "runtime_assertions": [
+        "Equivalent Bytes.encode_utf8 source allocation rejects heap0 before emission.",
+        "Old128heap plus1024byte input terminates in HeapExhausted; newexistingdiscard source also proves discardedallocation retains that check. OldC discards make return; no owningvalue is expected after terminaldefect."
+      ]
+    },
+    {
+      "id": "program:831e8ca3bfd2e879fe38",
+      "files": [
+        {
+          "name": "main.emel",
+          "fixture": "crates/emela-emb-compiler/tests/compat/legacy-corpus/sources/dac039194f9149e72917cea044b5d1ae70b34ee11628e0e893b37ab6a506c2bd.emel",
+          "source_id": "source:dac039194f9149e72917",
+          "sha256": "dac039194f9149e72917cea044b5d1ae70b34ee11628e0e893b37ab6a506c2bd"
+        }
+      ],
+      "legacy_tests": [
+        "emit::bytes::bytes_returns_lists_and_aliases_preserve_ownership_and_release_the_heap"
+      ],
+      "route": "existing-source-observation-replacement",
+      "new_test": {
+        "kind": "source_test",
+        "path": "crates/emela-emb-compiler/tests/p3_bytes.rs",
+        "symbol": "bytes_ownership_snapshots_aliases_and_invalid_list_elements_release_every_allocation"
+      },
+      "source_adaptation": "Existing broader source/C observations encompass the old input APIs and exact assertions. Original fixture hash retained for provenance; this is not an original-body runtime claim.",
+      "observations": {
+        "source_check": "passed",
+        "C_generation": "passed",
+        "C_runtime_O0": "passed",
+        "C_runtime_O2": "passed",
+        "heap_empty_after_each_fully_released_route": true
+      },
+      "runtime_assertions": [
+        "Old4096heap/String1 is now directly executed in addition tolarge-output262144corpus.",
+        "Alloldmake/copy/slice/concat/List aliases, callerinput overwrite, returnedvalues surviving sourceownerrelease and borrowed0/128/255 snapshot match;500fullheapfree rounds.",
+        "BroaderexistingC additionallyreads retainedList head andchecksowning return."
+      ]
+    },
+    {
+      "id": "program:e002041e4a426285da18",
+      "files": [
+        {
+          "name": "main.emel",
+          "fixture": "crates/emela-emb-compiler/tests/compat/legacy-corpus/sources/f3d342101359f4d5eab67a0a64585f0c4af4901600e6bae3f9f9d5b3e89a8bba.emel",
+          "source_id": "source:f3d342101359f4d5eab6",
+          "sha256": "f3d342101359f4d5eab67a0a64585f0c4af4901600e6bae3f9f9d5b3e89a8bba"
+        }
+      ],
+      "legacy_tests": [
+        "emit::bytes::discarded_bytes_still_check_capacity_and_release_owned_results"
+      ],
+      "route": "existing-source-observation-replacement",
+      "new_test": {
+        "kind": "source_test",
+        "path": "crates/emela-emb-compiler/tests/p3_bytes.rs",
+        "symbol": "bytes_ownership_snapshots_aliases_and_invalid_list_elements_release_every_allocation"
+      },
+      "source_adaptation": "Existing broader source/C observations encompass the old input APIs and exact assertions. Original fixture hash retained for provenance; this is not an original-body runtime claim.",
+      "observations": {
+        "source_check": "passed",
+        "C_generation": "passed",
+        "C_runtime_O0": "passed",
+        "C_runtime_O2": "passed",
+        "heap_empty_after_each_fully_released_route": true
+      },
+      "runtime_assertions": [
+        "Discarded Bytes.encode_utf8 retains HeapExhausted atold128heap/1024byte input (existingterminaltest).",
+        "Newadditionalold256heap run checks1000abc inputs fullyreclaimed. Source body is the same unusedencode followed byUnit."
+      ]
+    }
+  ],
+  "policy": "Seven P5-ledger replacements rechecked against fixed-old C assertions. New executions add missing small-budget observations rather than duplicate the complete corpus. Existing test names/counts retained.",
+  "run": {
+    "commands": [
+      "CARGO_PROFILE_TEST_OPT_LEVEL=1 cargo test -p emela-emb-compiler --test p3_bytes --locked --offline",
+      "CARGO_PROFILE_TEST_OPT_LEVEL=1 cargo test -p emela-emb-compiler --test p4_state --locked --offline"
+    ],
+    "passed": 8,
+    "failed": 0,
+    "ignored": 0,
+    "C_flags": [
+      "-std=c11",
+      "-Wall",
+      "-Werror"
+    ],
+    "C_optimizations": [
+      "-O0",
+      "-O2"
+    ],
+    "strict_clippy_all_targets": "passed",
+    "MSRV_1_85_all_targets": "passed",
+    "fmt_diff": "passed"
+  }
+}

@@ -13,6 +13,15 @@ impl<'a> Source<'a> {
 }
 
 pub(crate) const CORE_MODULES: &[(&str, &str)] = &[
+    (
+        "Embedded.Peripheral",
+        include_str!("../lib/embedded/peripheral.emel"),
+    ),
+    ("Embedded.Gpio", include_str!("../lib/embedded/gpio.emel")),
+    ("Embedded.Uart", include_str!("../lib/embedded/uart.emel")),
+    ("Embedded.I2c", include_str!("../lib/embedded/i2c.emel")),
+    ("Embedded.Spi", include_str!("../lib/embedded/spi.emel")),
+    ("Embedded.Board", include_str!("../lib/embedded/board.emel")),
     ("Prelude", include_str!("../lib/core/prelude.emel")),
     ("Option", include_str!("../lib/core/option.emel")),
     ("List", include_str!("../lib/core/list.emel")),
@@ -181,6 +190,35 @@ pub(crate) fn intrinsic(module: &str, name: &str) -> Option<Intrinsic> {
 /// A user module or a different declaration cannot select these bindings.
 pub(crate) fn external_symbol(module: &str, name: &str) -> Option<&'static str> {
     match (module, name) {
+        ("Embedded.Board", "gpio_configure") => Some("__emela_peripheral_gpio_configure"),
+        ("Embedded.Board", "gpio_read") => Some("__emela_peripheral_gpio_read"),
+        ("Embedded.Board", "gpio_write") => Some("__emela_peripheral_gpio_write"),
+        ("Embedded.Board", "gpio_toggle") => Some("__emela_peripheral_gpio_toggle"),
+        ("Embedded.Board", "gpio_enable_interrupt") => {
+            Some("__emela_peripheral_gpio_enable_interrupt")
+        }
+        ("Embedded.Board", "gpio_disable_interrupt") => {
+            Some("__emela_peripheral_gpio_disable_interrupt")
+        }
+        ("Embedded.Board", "uart_configure") => Some("__emela_peripheral_uart_configure"),
+        ("Embedded.Board", "uart_transmit") => Some("__emela_peripheral_uart_transmit"),
+        ("Embedded.Board", "uart_receive") => Some("__emela_peripheral_uart_receive"),
+        ("Embedded.Board", "i2c_configure") => Some("__emela_peripheral_i2c_configure"),
+        ("Embedded.Board", "i2c_master_transmit") => Some("__emela_peripheral_i2c_master_transmit"),
+        ("Embedded.Board", "i2c_master_receive") => Some("__emela_peripheral_i2c_master_receive"),
+        ("Embedded.Board", "i2c_memory_write") => Some("__emela_peripheral_i2c_memory_write"),
+        ("Embedded.Board", "i2c_memory_read") => Some("__emela_peripheral_i2c_memory_read"),
+        ("Embedded.Board", "i2c_is_device_ready") => Some("__emela_peripheral_i2c_is_device_ready"),
+        ("Embedded.Board", "spi_configure") => Some("__emela_peripheral_spi_configure"),
+        ("Embedded.Board", "spi_transmit") => Some("__emela_peripheral_spi_transmit"),
+        ("Embedded.Board", "spi_receive") => Some("__emela_peripheral_spi_receive"),
+        ("Embedded.Board", "spi_transfer") => Some("__emela_peripheral_spi_transfer"),
+        ("Embedded.Board", "clock_sleep") => Some("__emela_peripheral_clock_sleep"),
+        ("Embedded.Board", "clock_now") => Some("__emela_peripheral_clock_now"),
+        ("Embedded.Board", "console_print_line") => Some("__emela_peripheral_console_print_line"),
+        ("Embedded.Board", "console_print_error_line") => {
+            Some("__emela_peripheral_console_print_error_line")
+        }
         ("Std.Clock", "now_milliseconds") => Some("emela_clock_now_milliseconds"),
         ("Std.Clock", "sleep_milliseconds") => Some("emela_clock_sleep"),
         ("Std.Clock", "when_stalled") => Some("emela_clock_when_stalled"),

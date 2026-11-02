@@ -1,0 +1,15 @@
+
+@external(c, "host_wait")
+suspend fn wait(n: Int) -> Int
+effect Wait { suspend fn get(n: Int) -> Int }
+handler Waiting: Wait { suspend fn get(n, resume) { resume(wait(n)) } }
+effect Finish { suspend fn go() -> () }
+handler Finishing: Finish { suspend fn go(resume) {
+  resume(())
+  (use Wait).get(1)
+  ()
+} }
+effect Marker { fn read() -> Int }
+handler Resource: Marker { fn read() { 1 }
+  release { (use Finish).go() } }
+pub fn work() -> Int use Async { with Waiting, Finishing, Resource { 42 } }

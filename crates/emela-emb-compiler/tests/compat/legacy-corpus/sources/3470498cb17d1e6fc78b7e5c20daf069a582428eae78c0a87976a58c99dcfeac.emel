@@ -1,0 +1,4 @@
+
+const VALUE = [1, 2, 3]
+pub fn read() -> Int { VALUE match { [head, ..tail] -> head
+_ -> 0 } }

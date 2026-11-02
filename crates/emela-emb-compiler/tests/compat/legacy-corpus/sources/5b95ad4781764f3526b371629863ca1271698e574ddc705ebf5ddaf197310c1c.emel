@@ -1,0 +1,8 @@
+
+@external(c,"host_echo")
+fn echo(s: String) -> String use {}
+pub fn direct(s: String) -> String { echo(s) }
+pub fn indirect(s: String) -> String { f = echo
+ f(s) }
+pub fn discard(s: String) -> () { echo(s)
+ () }

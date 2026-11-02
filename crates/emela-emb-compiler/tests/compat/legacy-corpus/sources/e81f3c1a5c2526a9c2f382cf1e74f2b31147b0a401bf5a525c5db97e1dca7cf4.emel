@@ -1,0 +1,7 @@
+
+import Std.Fiber.{Fiber}
+pub fn work() -> Int use Async {
+  Fiber.scope(fn() { child = Fiber.fork(fn() { 42 })
+    Fiber.interrupt(child)
+    Fiber.join(child) })
+}

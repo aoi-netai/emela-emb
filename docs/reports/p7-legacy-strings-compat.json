@@ -1,0 +1,157 @@
+{
+  "fixed_revision": "c34c0aeefdd966d854371b3110db00a47798751d",
+  "compiler_checkpoint": "31bc9976bc57cdee06fe8a61d794f0b27e5b0321",
+  "programs": [
+    {
+      "id": "program:b1c877211529f5d06063",
+      "files": [
+        {
+          "name": "main.emel",
+          "fixture": "crates/emela-emb-compiler/tests/compat/legacy-corpus/sources/f130a10826818eb4cd74a4f09c9b54642108c6f3a94702482108085d6d932e76.emel",
+          "source_id": "source:f130a10826818eb4cd74",
+          "sha256": "f130a10826818eb4cd74a4f09c9b54642108c6f3a94702482108085d6d932e76"
+        }
+      ],
+      "legacy_tests": [
+        "emit::owned::returned_list_owns_formatted_strings_after_the_producer_stack_returns"
+      ],
+      "route": "existing-source-observation-replacement",
+      "new_test": {
+        "path": "crates/emela-emb-compiler/tests/p3_ownership.rs",
+        "symbol": "strings_in_nested_lists_and_error_payloads_outlive_their_original_owners"
+      },
+      "observations": {
+        "source_check": "passed",
+        "C_generation": "passed",
+        "C_runtime_O0": "passed",
+        "C_runtime_O2": "passed",
+        "iterations": 1000
+      },
+      "runtime_assertions": [
+        "Same store/read List[(String,OptionString)] with Int32MIN returns owned11byte -2147483648 after list release; stack smashed;1000times full heap release.",
+        "Broader existing fixture adds other field/list/error observations. Old1024byte heap now used."
+      ],
+      "options": {
+        "heap_bytes": 1024
+      }
+    },
+    {
+      "id": "program:de1b4707ec70dd24789b",
+      "files": [
+        {
+          "name": "main.emel",
+          "fixture": "crates/emela-emb-compiler/tests/compat/legacy-corpus/sources/bb6461d89d845ae8f21ee6742db31a64cb08b002ad574640e288ba4225baee5f.emel",
+          "source_id": "source:bb6461d89d845ae8f21e",
+          "sha256": "bb6461d89d845ae8f21ee6742db31a64cb08b002ad574640e288ba4225baee5f"
+        }
+      ],
+      "legacy_tests": [
+        "emit::string_comparison::owned_string_views_compare_without_allocating_or_changing_ownership"
+      ],
+      "route": "existing-source-observation-replacement",
+      "new_test": {
+        "path": "crates/emela-emb-compiler/tests/p3_ownership.rs",
+        "symbol": "owned_string_subviews_compare_without_allocating_or_changing_their_owner"
+      },
+      "observations": {
+        "source_check": "passed",
+        "C_generation": "passed",
+        "C_runtime_O0": "passed",
+        "C_runtime_O2": "passed",
+        "iterations": 1000
+      },
+      "runtime_assertions": [
+        "Input x/a/NUL/b/y is copied into List; retained String view survives list/input release.",
+        "Subview a/NUL/b compares with equal/greater strings using all6 operators without heap usage increase, owner then fully reclaimed1000times.",
+        "Old scalar/UTF8/UInt16MAX boundary checks are independently preserved by p2_compat strings harness. Old1024byte heap now used."
+      ],
+      "options": {
+        "heap_bytes": 1024
+      }
+    },
+    {
+      "id": "program:e220b55ef04773e1daaa",
+      "files": [
+        {
+          "name": "main.emel",
+          "fixture": "crates/emela-emb-compiler/tests/compat/legacy-corpus/sources/36887fdd50ace6a21aeb4b08f49cc935bf137db1baeca65beecbe73f157e09e4.emel",
+          "source_id": "source:36887fdd50ace6a21aeb",
+          "sha256": "36887fdd50ace6a21aeb4b08f49cc935bf137db1baeca65beecbe73f157e09e4"
+        }
+      ],
+      "legacy_tests": [
+        "emit::string_comparison::source_comparisons_are_heapless_and_allow_isr_and_constant_space_tail_loops"
+      ],
+      "route": "existing-source-observation-replacement",
+      "new_test": {
+        "path": "crates/emela-emb-compiler/tests/p2_compat.rs",
+        "symbol": "legacy_string_views_comparisons_append_and_bounded_returns_execute"
+      },
+      "observations": {
+        "source_check": "passed",
+        "C_generation": "passed",
+        "C_runtime_O0": "passed",
+        "C_runtime_O2": "passed",
+        "iterations": 1000
+      },
+      "runtime_assertions": [
+        "All6 operators on emptyNULL, NUL, prefixes, Unicode ordered byte sequences and length65535.",
+        "Tail recursion1000000/1000001 uses no heap.",
+        "Missing original-artifact policy is now checked using original body+exports: ISR lt accepted, compare helper emitted, no heap and no char emela_string_buffer. Existing broader C runtime fixture has identical7comparison function bodies."
+      ]
+    },
+    {
+      "id": "program:b325a80621f2be6c4300",
+      "files": [
+        {
+          "name": "main.emel",
+          "fixture": "crates/emela-emb-compiler/tests/compat/legacy-corpus/sources/e73ff5dc6bdbae6166012a370559dc06acda184140c57bffce000b364bb7beca.emel",
+          "source_id": "source:e73ff5dc6bdbae616601",
+          "sha256": "e73ff5dc6bdbae6166012a370559dc06acda184140c57bffce000b364bb7beca"
+        }
+      ],
+      "legacy_tests": [
+        "emit::string_comparison::suspend_source_comparisons_preserve_captured_bytes_and_release_on_completion_and_cancel"
+      ],
+      "route": "original-source",
+      "new_test": {
+        "path": "crates/emela-emb-compiler/tests/p7_legacy_strings.rs",
+        "symbol": "legacy_string_comparisons_preserve_captured_bytes_through_completion_and_cancel"
+      },
+      "observations": {
+        "source_check": "passed",
+        "C_generation": "passed",
+        "C_runtime_O0": "passed",
+        "C_runtime_O2": "passed",
+        "iterations": 1000
+      },
+      "runtime_assertions": [
+        "Original body+export only, captured NUL strings survive caller overwrite before suspension.",
+        "1000times each3routes completion True/NULLoutput/private cancellation, allheap reclaimed.",
+        "Compare helper emitted; no String scratch. Old4096heap/2fibers/8frames/frame512/task1/event1/deferred0."
+      ],
+      "private_C_seam": "Old direct private root cancellation flag, source body unchanged."
+    }
+  ],
+  "policy": "Existing C assertions reused when fully encompassing the fixed-old observations; successful original-body compilation is recorded separately from C runtime of the broader fixture. No source body runtime claim is made for existing-evidence replacements.",
+  "run": {
+    "passed_source_C_tests": 5,
+    "commands": [
+      "p7_legacy_strings (1test)",
+      "p2_compat::legacy_string_views_comparisons_append_and_bounded_returns_execute (1test)",
+      "p3_ownership (3tests including unrelated deep release regression)"
+    ],
+    "C_flags": [
+      "-std=c11",
+      "-Wall",
+      "-Werror"
+    ],
+    "C_optimizations": [
+      "-O0",
+      "-O2"
+    ],
+    "strict_clippy_all_targets": "passed",
+    "MSRV_1_85_all_targets": "passed",
+    "fmt_diff": "passed"
+  }
+}

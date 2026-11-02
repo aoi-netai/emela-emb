@@ -1,0 +1,35 @@
+
+import Std.Fiber.{Fiber}
+@external(c, "host_wait")
+suspend fn wait(n: Int) -> Int
+@external(c, "mark")
+fn mark(n: Int) -> () use {}
+error Boom(n: Int) derive Show
+effect Wait { suspend fn get(n: Int) -> Int }
+handler Waiting: Wait { suspend fn get(n,resume) { resume(wait(n)) } }
+effect Resource { fn read() -> Int }
+handler Res: Resource { fn read() { 0 }
+ release { mark(1)
+  (use Wait).get(4)
+  mark(2)
+ }
+}
+fn late() -> Int fails Boom use Wait { (use Wait).get(1)
+ fail Boom(n: 42)
+}
+fn nested() -> Int fails Boom use {Wait,Async} {
+ with Res { Fiber.scope(fn() { Fiber.scope(fn() {
+  Fiber.fork(late)
+  (use Wait).get(2)
+ }) }) }
+}
+pub fn work() -> Int use Async {
+ with Waiting { Fiber.scope(fn() {
+  child = Fiber.fork(nested)
+  (use Wait).get(3)
+  Fiber.interrupt(child)
+  99
+ }) escape { Boom(n) -> { mark(3)
+  n
+ } } }
+}

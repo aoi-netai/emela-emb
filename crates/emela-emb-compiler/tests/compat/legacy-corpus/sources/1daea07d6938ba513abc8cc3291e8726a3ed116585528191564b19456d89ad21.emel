@@ -1,0 +1,10 @@
+
+import Std.Fiber.{Fiber, Success, Failure}
+import Std.Cause.{Cause}
+enum Wrap[A] { Box(List[A]) } derive Show
+error Boom(value: Wrap[Int]) derive Show
+fn bad() -> Int fails Boom {fail Boom(value: Box([42]))}
+pub fn show() -> String {
+  Fiber.attempt(bad) match {Success(_) -> "unexpected"
+    Failure(cause) -> Cause.to_string(cause)}
+}

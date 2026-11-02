@@ -1,0 +1,9 @@
+
+@external(c,"host_packet")
+fn packet() -> (String,List[String]) use {}
+const VALUE = packet()
+pub fn read() -> (String,List[String]) { VALUE }
+pub fn make(value: String) -> (String,List[String]) { (value,[value]) }
+pub fn first() -> String { (_,values)=VALUE
+ values match { [head,..tail] -> head
+ _ -> "" } }

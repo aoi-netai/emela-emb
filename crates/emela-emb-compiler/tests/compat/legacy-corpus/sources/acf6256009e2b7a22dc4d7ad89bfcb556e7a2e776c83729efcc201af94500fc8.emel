@@ -1,0 +1,5 @@
+
+import Std.Bytes.{Bytes}
+@external(c, "raw")
+fn raw(n: Int) -> Bytes use {}
+pub fn work(n: Int) -> Bytes { raw(n) }

@@ -1,0 +1,2 @@
+const V = 40 + 2
+pub fn read() -> Int { V }

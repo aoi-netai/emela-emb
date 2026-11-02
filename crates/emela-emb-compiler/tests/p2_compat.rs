@@ -13,6 +13,31 @@ const UNICODE: &str = include_str!("compat/p2/unicode.emel");
 
 #[test]
 fn legacy_string_views_comparisons_append_and_bounded_returns_execute() {
+    // The original comparisons-only fixture is also heapless and needs no String
+    // scratch at all. Keep its ISR policy separate from the broader runtime fixture.
+    let original = include_str!(
+        "compat/legacy-corpus/sources/36887fdd50ace6a21aeb4b08f49cc935bf137db1baeca65beecbe73f157e09e4.emel"
+    );
+    let mut comparisons = String::new();
+    for line in original.split_inclusive('\n') {
+        if let Some(header) = line.strip_prefix("pub fn ") {
+            let name = header.split('(').next().unwrap();
+            comparisons.push_str(&format!("@export(c,\"comparison_{name}\")\n"));
+        }
+        comparisons.push_str(line);
+    }
+    let comparison_output = source_output(&comparisons, &Options::default().with_isr_entry("lt"));
+    assert!(
+        comparison_output
+            .c_source
+            .contains("emela_emb_string_compare")
+    );
+    assert!(!comparison_output.c_source.contains("emela_heap_storage"));
+    assert!(
+        !comparison_output
+            .c_source
+            .contains("char emela_string_buffer")
+    );
     let output = source_output(STRINGS, &Options::default().with_string_capacity(64));
     assert!(!output.c_source.contains("emela_heap_storage"));
     compile_and_run(&output, include_str!("compat/p2/strings-harness.c"));

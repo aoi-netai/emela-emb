@@ -1,0 +1,143 @@
+{
+  "fixed_revision": "c34c0aeefdd966d854371b3110db00a47798751d",
+  "compiler_checkpoint": "7bf16f8ede743108ee58ea0cebecd40add013cd7",
+  "source_transform": "Original manifest body unchanged; add explicit C exports only. The standard corpus already preserves the fixed-old bounded input transform.",
+  "programs": [
+    {
+      "id": "program:0e4c492fa71240d47260",
+      "files": [
+        {
+          "name": "main.emel",
+          "fixture": "crates/emela-emb-compiler/tests/compat/legacy-corpus/sources/1ad66c9f12980347b7e4a5d94fa35ad1c5c0f96b6e13e7f48e96e431d5119936.emel",
+          "source_id": "source:1ad66c9f12980347b7e4",
+          "sha256": "1ad66c9f12980347b7e4a5d94fa35ad1c5c0f96b6e13e7f48e96e431d5119936"
+        }
+      ],
+      "legacy_tests": [
+        "emit::bytes::bytes_std_corpus_matches_other_targets_including_const_traits_and_invalid_utf8"
+      ],
+      "observations": {
+        "source_check": "passed",
+        "C_generation": "passed",
+        "C_runtime_O0": "passed",
+        "C_runtime_O2": "passed",
+        "iterations": 1000
+      },
+      "test": "full_legacy_bytes_corpus_preserves_const_traits_and_every_debug_observation",
+      "options": {
+        "heap_bytes": 131072,
+        "string_capacity": 512
+      },
+      "runtime_assertions": [
+        "Full old573byte debug stream exactly matches: hex/list/slice/UTF8valid and invalid/unsigned EqOrdShow/Packet derivedEq/PNGconst/128byte loop.",
+        "1000 executions retain only the persistent PNG const allocation; heap used after each call equals the first run.",
+        "Old embedded input already changes fn main to pubfn and20000 to128. New adaptation adds explicit C alias legacy_bytes only."
+      ]
+    },
+    {
+      "id": "program:896c718072ff9a14cba6",
+      "files": [
+        {
+          "name": "main.emel",
+          "fixture": "crates/emela-emb-compiler/tests/compat/legacy-corpus/sources/94571daa8fcda4685ef21d04748964f732075d256ab472559d3595abcec69f41.emel",
+          "source_id": "source:94571daa8fcda4685ef2",
+          "sha256": "94571daa8fcda4685ef21d04748964f732075d256ab472559d3595abcec69f41"
+        }
+      ],
+      "legacy_tests": [
+        "emit::bytes::bytes_survive_suspension_and_release_on_completion_and_cancellation"
+      ],
+      "observations": {
+        "source_check": "passed",
+        "C_generation": "passed",
+        "C_runtime_O0": "passed",
+        "C_runtime_O2": "passed",
+        "iterations": 1000,
+        "heap_empty_after_each": true
+      },
+      "post_lowering_ir_seam": null,
+      "private_C_seam": "test_cancel directly sets emela_fiber_get(handle)->cancelled, as in the fixed-old harness.",
+      "test": "legacy_bytes_keep_owned_snapshots_across_suspend_null_output_and_cancellation",
+      "options": {
+        "heap_bytes": 4096,
+        "fiber_capacity": 2,
+        "frame_capacity": 8,
+        "frame_bytes": 512,
+        "task_capacity": 1,
+        "event_capacity": 1,
+        "deferred_capacity": 0,
+        "task_adapter": {
+          "host_wait": "board_wait_start"
+        }
+      },
+      "runtime_assertions": [
+        "All3 routes×1000: sourceBytes{1,0,255} is snapshotted before caller overwrites input; completion returns256.",
+        "NULL result and private root cancellation both release every owned byte/frame/task allocation."
+      ]
+    },
+    {
+      "id": "program:b2f1d9d68d3fa5696d8c",
+      "files": [
+        {
+          "name": "main.emel",
+          "fixture": "crates/emela-emb-compiler/tests/compat/legacy-corpus/sources/fcd6d29ec6ec8b5b668b3e8966a27dc8f2bf9884648a9e35390c8ea75f814a04.emel",
+          "source_id": "source:fcd6d29ec6ec8b5b668b",
+          "sha256": "fcd6d29ec6ec8b5b668b3e8966a27dc8f2bf9884648a9e35390c8ea75f814a04"
+        }
+      ],
+      "legacy_tests": [
+        "emit::bytes::bytes_external_tasks_snapshot_arguments_and_results_and_release_cancelled_contexts"
+      ],
+      "observations": {
+        "source_check": "passed",
+        "C_generation": "passed",
+        "C_runtime_O0": "passed",
+        "C_runtime_O2": "passed",
+        "iterations": 1000,
+        "heap_empty_after_each": true
+      },
+      "post_lowering_ir_seam": null,
+      "private_C_seam": "test_cancel directly sets emela_fiber_get(handle)->cancelled, as in the fixed-old harness.",
+      "test": "legacy_bytes_tasks_release_contexts_after_queued_completion_or_cancellation",
+      "options": {
+        "heap_bytes": 4096,
+        "frame_bytes": 1024,
+        "task_adapter": {
+          "host_bytes": "board_bytes_start"
+        }
+      },
+      "runtime_assertions": [
+        "QueuedBytes completion snapshots borrowed source0/128/255 before caller overwrite.",
+        "Wrong scalar kind and duplicate completion rejected; producer and release run outside lock/ISR.",
+        "Cancellation suppresses producer yet releases context exactly once; NULLoutput, owned returnedBytes and full heap reclamation."
+      ]
+    }
+  ],
+  "expected_debug_output": {
+    "path": "crates/emela-emb-compiler/tests/compat/p7/bytes-std.expected",
+    "sha256": "fac20b5ffa8bb472746fca5858a1c75b67acd212ee47f3d6733f0e52c159053e",
+    "old_path": "crates/emela-codegen-emb/tests/bytes/fixtures/bytes.expected",
+    "old_sha256": "bcf9d1a0720d14c672f3065e84cf8bc1f3e2e0c1b4621b542d7bc0a6fa7d3d7b",
+    "transform": "Suffix after --- stderr newline, replace20000 newline with128 newline exactly as fixed-old test."
+  },
+  "test_path": "crates/emela-emb-compiler/tests/p7_legacy_bytes.rs",
+  "test_file_sha256": "df1535e8eddb58348184d95266734a7541358a1914a4196ac17d1af293838cdf",
+  "run": {
+    "command": "CARGO_PROFILE_TEST_OPT_LEVEL=1 cargo test -p emela-emb-compiler --test p7_legacy_bytes --locked --offline",
+    "passed": 3,
+    "failed": 0,
+    "ignored": 0,
+    "C_flags": [
+      "-std=c11",
+      "-Wall",
+      "-Werror"
+    ],
+    "C_optimizations": [
+      "-O0",
+      "-O2"
+    ],
+    "strict_clippy_all_targets": "passed",
+    "MSRV_1_85_all_targets": "passed",
+    "fmt_diff": "passed"
+  }
+}

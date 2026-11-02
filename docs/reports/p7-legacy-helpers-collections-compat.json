@@ -1,0 +1,71 @@
+{
+  "fixed_revision": "c34c0aeefdd966d854371b3110db00a47798751d",
+  "compiler_checkpoint": "db98ac2",
+  "source_transform": "Insert explicit C export before each original concrete pub fn line; original bytes are otherwise preserved by split_inclusive newline processing. C names replace old generated export names.",
+  "heap_bytes": 16384,
+  "string_capacity": 256,
+  "programs": [
+    {
+      "id": "program:5fd9a0434fc95af6ecf6",
+      "files": [
+        {
+          "name": "main.emel",
+          "fixture": "crates/emela-emb-compiler/tests/compat/legacy-corpus/sources/aec1355cd027e7f537cecf16a009001890e7075427332b2744204853c841896f.emel",
+          "sha256": "aec1355cd027e7f537cecf16a009001890e7075427332b2744204853c841896f"
+        }
+      ],
+      "legacy_tests": [
+        "emit::release_0_24::lambda_patterns_and_new_core_helpers_keep_dynamic_semantics"
+      ],
+      "observations": {
+        "source_check": "passed",
+        "C_generation": "passed",
+        "C_runtime_O0": "passed",
+        "C_runtime_O2": "passed",
+        "iterations_per_optimization": 1000,
+        "heap_empty_after_each_call": true
+      },
+      "runtime_assertions": "All original helper harness checks: 4*i+3 / 3*i+3, embedded NUL and Greek lambda ASCII bytes, Int/Int64 MIN wrap and negative maxima, NaN/-0/-Infinity, Bool True/False"
+    },
+    {
+      "id": "program:ad481b3ab9e723eb715a",
+      "files": [
+        {
+          "name": "main.emel",
+          "fixture": "crates/emela-emb-compiler/tests/compat/legacy-corpus/sources/d8521d9bfb49b8efe8d3039e21e481493720654a2545736f224a9d01da23f0aa.emel",
+          "sha256": "d8521d9bfb49b8efe8d3039e21e481493720654a2545736f224a9d01da23f0aa"
+        }
+      ],
+      "legacy_tests": [
+        "emit::release_0_24::ordered_maps_sets_and_rotations_reclaim_persistent_values"
+      ],
+      "observations": {
+        "source_check": "passed",
+        "C_generation": "passed",
+        "C_runtime_O0": "passed",
+        "C_runtime_O2": "passed",
+        "iterations_per_optimization": 1000,
+        "heap_empty_after_each_call": true
+      },
+      "runtime_assertions": "All original collection harness checks: collections(i)==3*i+41, rotations(i)==12*i, all source asserts for persistence/custom keys/Map.update/filter/union/Set operations, heap empty after each export"
+    }
+  ],
+  "test_path": "crates/emela-emb-compiler/tests/p7_legacy_collections_helpers.rs",
+  "test_file_sha256": "a1c9338b26499ee5c95c608af8a0b32296166536f758cc76854a2d313b898d0c",
+  "run": {
+    "command": "CARGO_PROFILE_TEST_OPT_LEVEL=1 cargo test -p emela-emb-compiler --test p7_legacy_collections_helpers --locked --offline",
+    "passed": 2,
+    "failed": 0,
+    "ignored": 0,
+    "C_flags": [
+      "-std=c11",
+      "-Wall",
+      "-Werror"
+    ],
+    "C_optimization_levels": [
+      "-O0",
+      "-O2"
+    ],
+    "C_compile_link_runtime": "passed"
+  }
+}

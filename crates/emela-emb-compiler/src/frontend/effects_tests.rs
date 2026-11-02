@@ -67,6 +67,7 @@ fn function(id: usize, value: ir::Expr) -> ir::Function {
         immediate: false,
         constant: false,
         origin: None,
+        canonical_const: None,
         derivation: None,
         error_show: None,
         name: format!("f{id}"),

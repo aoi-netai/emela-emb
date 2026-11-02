@@ -1,0 +1,426 @@
+{
+  "fixed_revision": "c34c0aeefdd966d854371b3110db00a47798751d",
+  "compiler_checkpoint": "2eaae18d4d5870e6951d5a0117217802b1258aa6",
+  "programs": [
+    {
+      "id": "program:e805431f1035638cad96",
+      "files": [
+        {
+          "name": "main.emel",
+          "fixture": "crates/emela-emb-compiler/tests/compat/legacy-corpus/sources/751aab9621d7200844457b2d0750b398ba29f34ec74d6e3f3c309175aee816a2.emel",
+          "source_id": "source:751aab9621d720084445",
+          "sha256": "751aab9621d7200844457b2d0750b398ba29f34ec74d6e3f3c309175aee816a2"
+        }
+      ],
+      "legacy_tests": [
+        "emit::captures_runtime_values_in_a_fixed_heap_closure_environment"
+      ],
+      "source_adaptation": "Original manifest bytes unchanged; explicit C export attributes only. For original private fn main only, declaration also gains pub to match the already selected old concrete C root. Body unchanged; no generic public functions exported speculatively.",
+      "new_test": {
+        "kind": "source_test",
+        "path": "crates/emela-emb-compiler/tests/p7_legacy_closures_state.rs",
+        "symbol": "legacy_scalar_closure_evidence_state_and_control_sources_keep_old_budgets"
+      },
+      "observations": {
+        "source_check": "passed",
+        "C_generation": "passed",
+        "C_runtime_O0": "passed",
+        "C_runtime_O2": "passed",
+        "iterations": 1000,
+        "heap_empty_after_each_fully_released_route": true
+      },
+      "options": {
+        "heap_bytes": 2048
+      },
+      "runtime_assertions": [
+        "Captured add(40,2)==42.",
+        "Old fixed heap budget preserved,1000fullheapreclamation."
+      ]
+    },
+    {
+      "id": "program:2e02752865a6418a1e52",
+      "files": [
+        {
+          "name": "main.emel",
+          "fixture": "crates/emela-emb-compiler/tests/compat/legacy-corpus/sources/038a9c160aabd27172ce2d8ae4bd2f8f46ce1f8ace172ae549dd868766f85e1b.emel",
+          "source_id": "source:038a9c160aabd27172ce",
+          "sha256": "038a9c160aabd27172ce2d8ae4bd2f8f46ce1f8ace172ae549dd868766f85e1b"
+        }
+      ],
+      "legacy_tests": [
+        "emit::lifts_nested_closures_that_capture_outer_closure_values"
+      ],
+      "source_adaptation": "Original manifest bytes unchanged; explicit C export attributes only. For original private fn main only, declaration also gains pub to match the already selected old concrete C root. Body unchanged; no generic public functions exported speculatively.",
+      "new_test": {
+        "kind": "source_test",
+        "path": "crates/emela-emb-compiler/tests/p7_legacy_closures_state.rs",
+        "symbol": "legacy_scalar_closure_evidence_state_and_control_sources_keep_old_budgets"
+      },
+      "observations": {
+        "source_check": "passed",
+        "C_generation": "passed",
+        "C_runtime_O0": "passed",
+        "C_runtime_O2": "passed",
+        "iterations": 1000,
+        "heap_empty_after_each_fully_released_route": true
+      },
+      "options": {
+        "heap_bytes": 4096
+      },
+      "runtime_assertions": [
+        "Nested outer/inner capture40+1+1==42.",
+        "Old fixed heap budget preserved,1000fullheapreclamation."
+      ]
+    },
+    {
+      "id": "program:31c21eecada04937f501",
+      "files": [
+        {
+          "name": "main.emel",
+          "fixture": "crates/emela-emb-compiler/tests/compat/legacy-corpus/sources/8eab40d3d50b7b5ae57555df046c24872fbb6a5464a1513f4fa8d973c51170ec.emel",
+          "source_id": "source:8eab40d3d50b7b5ae575",
+          "sha256": "8eab40d3d50b7b5ae57555df046c24872fbb6a5464a1513f4fa8d973c51170ec"
+        }
+      ],
+      "legacy_tests": [
+        "emit::dynamically_dispatches_through_a_fixed_heap_evidence_table"
+      ],
+      "source_adaptation": "Original manifest bytes unchanged; explicit C export attributes only. For original private fn main only, declaration also gains pub to match the already selected old concrete C root. Body unchanged; no generic public functions exported speculatively.",
+      "new_test": {
+        "kind": "source_test",
+        "path": "crates/emela-emb-compiler/tests/p7_legacy_closures_state.rs",
+        "symbol": "legacy_scalar_closure_evidence_state_and_control_sources_keep_old_budgets"
+      },
+      "observations": {
+        "source_check": "passed",
+        "C_generation": "passed",
+        "C_runtime_O0": "passed",
+        "C_runtime_O2": "passed",
+        "iterations": 1000,
+        "heap_empty_after_each_fully_released_route": true
+      },
+      "options": {
+        "heap_bytes": 2048
+      },
+      "runtime_assertions": [
+        "Dynamic nested Answer/Other evidence returns41+42==83.",
+        "Old fixed heap budget preserved,1000fullheapreclamation."
+      ]
+    },
+    {
+      "id": "program:9fa3708f819ff8b76dc2",
+      "files": [
+        {
+          "name": "main.emel",
+          "fixture": "crates/emela-emb-compiler/tests/compat/legacy-corpus/sources/f38833ae543c2e6ae94205cdc0a8a539e39997397a486215859291c76000baf0.emel",
+          "source_id": "source:f38833ae543c2e6ae942",
+          "sha256": "f38833ae543c2e6ae94205cdc0a8a539e39997397a486215859291c76000baf0"
+        }
+      ],
+      "legacy_tests": [
+        "emit::passes_dynamic_effect_evidence_to_a_captured_closure"
+      ],
+      "source_adaptation": "Original manifest bytes unchanged; explicit C export attributes only. For original private fn main only, declaration also gains pub to match the already selected old concrete C root. Body unchanged; no generic public functions exported speculatively.",
+      "new_test": {
+        "kind": "source_test",
+        "path": "crates/emela-emb-compiler/tests/p7_legacy_closures_state.rs",
+        "symbol": "legacy_scalar_closure_evidence_state_and_control_sources_keep_old_budgets"
+      },
+      "observations": {
+        "source_check": "passed",
+        "C_generation": "passed",
+        "C_runtime_O0": "passed",
+        "C_runtime_O2": "passed",
+        "iterations": 1000,
+        "heap_empty_after_each_fully_released_route": true
+      },
+      "options": {
+        "heap_bytes": 4096
+      },
+      "runtime_assertions": [
+        "Runtime x40 and dynamically suppliedCounter2 captured by closure return42.",
+        "Old fixed heap budget preserved,1000fullheapreclamation."
+      ]
+    },
+    {
+      "id": "program:903a9b99cfdf07a02684",
+      "files": [
+        {
+          "name": "main.emel",
+          "fixture": "crates/emela-emb-compiler/tests/compat/legacy-corpus/sources/907032ecd7f3419a1812be221308f0d9285d409ec55e9dc61715fa6dc320548f.emel",
+          "source_id": "source:907032ecd7f3419a1812",
+          "sha256": "907032ecd7f3419a1812be221308f0d9285d409ec55e9dc61715fa6dc320548f"
+        }
+      ],
+      "legacy_tests": [
+        "emit::state_run_shares_owned_cell_storage_with_its_handler"
+      ],
+      "source_adaptation": "Original manifest bytes unchanged; explicit C export attributes only. For original private fn main only, declaration also gains pub to match the already selected old concrete C root. Body unchanged; no generic public functions exported speculatively.",
+      "new_test": {
+        "kind": "source_test",
+        "path": "crates/emela-emb-compiler/tests/p7_legacy_closures_state.rs",
+        "symbol": "legacy_scalar_closure_evidence_state_and_control_sources_keep_old_budgets"
+      },
+      "observations": {
+        "source_check": "passed",
+        "C_generation": "passed",
+        "C_runtime_O0": "passed",
+        "C_runtime_O2": "passed",
+        "iterations": 1000,
+        "heap_empty_after_each_fully_released_route": true
+      },
+      "options": {
+        "heap_bytes": 4096
+      },
+      "runtime_assertions": [
+        "State.run set41 returns value41+final41==82.",
+        "Old fixed heap budget preserved,1000fullheapreclamation."
+      ]
+    },
+    {
+      "id": "program:09dfd633dcd1f95f6a18",
+      "files": [
+        {
+          "name": "main.emel",
+          "fixture": "crates/emela-emb-compiler/tests/compat/legacy-corpus/sources/d9d8c32030891a0372b787291a80609d182174a9394eb4288660ca0d5d072e0a.emel",
+          "source_id": "source:d9d8c32030891a0372b7",
+          "sha256": "d9d8c32030891a0372b787291a80609d182174a9394eb4288660ca0d5d072e0a"
+        }
+      ],
+      "legacy_tests": [
+        "emit::synchronous_exhaustive_matches_and_list_loops_accept_unreachable_terminators"
+      ],
+      "source_adaptation": "Original manifest bytes unchanged; explicit C export attributes only. For original private fn main only, declaration also gains pub to match the already selected old concrete C root. Body unchanged; no generic public functions exported speculatively.",
+      "new_test": {
+        "kind": "source_test",
+        "path": "crates/emela-emb-compiler/tests/p7_legacy_closures_state.rs",
+        "symbol": "legacy_scalar_closure_evidence_state_and_control_sources_keep_old_budgets"
+      },
+      "observations": {
+        "source_check": "passed",
+        "C_generation": "passed",
+        "C_runtime_O0": "passed",
+        "C_runtime_O2": "passed",
+        "iterations": 1000,
+        "heap_empty_after_each_fully_released_route": true
+      },
+      "options": {
+        "heap_bytes": 2048
+      },
+      "runtime_assertions": [
+        "Exhaustive Some/None classify(i) gives i+1 or0; List.length3;1000iterations.",
+        "Old fixed heap budget preserved,1000fullheapreclamation."
+      ]
+    },
+    {
+      "id": "program:c587ef1e19686afdfe06",
+      "files": [
+        {
+          "name": "main.emel",
+          "fixture": "crates/emela-emb-compiler/tests/compat/legacy-corpus/sources/9b845aa81a15d730223fde291ab2c0b11ecde36d3df5a6017518e5df66f4a51c.emel",
+          "source_id": "source:9b845aa81a15d730223f",
+          "sha256": "9b845aa81a15d730223fde291ab2c0b11ecde36d3df5a6017518e5df66f4a51c"
+        }
+      ],
+      "legacy_tests": [
+        "lib::compiler::separation_tests::common_closure_lowering_is_shared_and_native_managed_values_run"
+      ],
+      "source_adaptation": "Original manifest bytes unchanged; explicit C export attributes only. For original private fn main only, declaration also gains pub to match the already selected old concrete C root. Body unchanged; no generic public functions exported speculatively.",
+      "new_test": {
+        "kind": "source_test",
+        "path": "crates/emela-emb-compiler/tests/p7_legacy_closures_state.rs",
+        "symbol": "legacy_scalar_closure_evidence_state_and_control_sources_keep_old_budgets"
+      },
+      "observations": {
+        "source_check": "passed",
+        "C_generation": "passed",
+        "C_runtime_O0": "passed",
+        "C_runtime_O2": "passed",
+        "iterations": 1000,
+        "heap_empty_after_each_fully_released_route": true
+      },
+      "options": {
+        "heap_bytes": 2048
+      },
+      "runtime_assertions": [
+        "Shared lowering calculate40+2==42 from original source.",
+        "Old fixed heap budget preserved,1000fullheapreclamation."
+      ]
+    },
+    {
+      "id": "program:45d10a963a24d47032c7",
+      "files": [
+        {
+          "name": "main.emel",
+          "fixture": "crates/emela-emb-compiler/tests/compat/legacy-corpus/sources/596bf6715c9615a3f27037fbc12bb630406c8c90d4d5a73ab83d7491ea0659da.emel",
+          "source_id": "source:596bf6715c9615a3f270",
+          "sha256": "596bf6715c9615a3f27037fbc12bb630406c8c90d4d5a73ab83d7491ea0659da"
+        }
+      ],
+      "legacy_tests": [
+        "emit::cell::shared_cells_keep_string_updates_alive_across_capture_suspend_and_cancellation"
+      ],
+      "source_adaptation": "Original manifest bytes unchanged; explicit C export attributes only. For original private fn main only, declaration also gains pub to match the already selected old concrete C root. Body unchanged; no generic public functions exported speculatively.",
+      "new_test": {
+        "kind": "source_test",
+        "path": "crates/emela-emb-compiler/tests/p7_legacy_closures_state.rs",
+        "symbol": "legacy_shared_state_owns_child_updates_results_failures_and_cancelled_captures"
+      },
+      "observations": {
+        "source_check": "passed",
+        "C_generation": "passed",
+        "C_runtime_O0": "passed",
+        "C_runtime_O2": "passed",
+        "iterations": 1000,
+        "heap_empty_after_each_fully_released_route": true
+      },
+      "options": {
+        "heap_bytes": 8192,
+        "string_capacity": 128,
+        "fiber_capacity": 8,
+        "frame_capacity": 24,
+        "frame_bytes": 1024,
+        "task_capacity": 2,
+        "event_capacity": 2,
+        "deferred_capacity": 0,
+        "task_adapter": {
+          "host_wait": "board_wait_start"
+        }
+      },
+      "runtime_assertions": [
+        "Returned State closure updates twice to83; composite String/List enum result4242.",
+        "Shared State child/parent update order gives31byte 42 child parent/42 child parent; reversed tasks with NULLoutput.",
+        "Typed failure and successful String results42 failure preserved, cancelled failure, cancelled sharedstep0/1 allheapfree1000times.",
+        "Private cancel flag seam retained from old. Old failure-ABI NULL argument to escaped_result removed because new public C wrapper handles failure internally."
+      ]
+    },
+    {
+      "id": "program:f9a6b6eea98c9abe5d11",
+      "files": [
+        {
+          "name": "main.emel",
+          "fixture": "crates/emela-emb-compiler/tests/compat/legacy-corpus/sources/08a1e8380fcaae263306f70073caadbfce6a994072c22581d5abb902a63c7d4c.emel",
+          "source_id": "source:08a1e8380fcaae263306",
+          "sha256": "08a1e8380fcaae263306f70073caadbfce6a994072c22581d5abb902a63c7d4c"
+        }
+      ],
+      "legacy_tests": [
+        "emit::captured_sync_string_producers_return_owned_bytes_with_inferred_scratch"
+      ],
+      "source_adaptation": "Original manifest bytes unchanged; explicit C export attributes only. For original private fn main only, declaration also gains pub to match the already selected old concrete C root. Body unchanged; no generic public functions exported speculatively.",
+      "new_test": {
+        "kind": "source_test",
+        "path": "crates/emela-emb-compiler/tests/p7_legacy_closures_state.rs",
+        "symbol": "legacy_captured_string_producers_keep_owners_and_eleven_byte_scratch"
+      },
+      "observations": {
+        "source_check": "passed",
+        "C_generation": "passed",
+        "C_runtime_O0": "passed",
+        "C_runtime_O2": "passed",
+        "iterations": 1000,
+        "heap_empty_after_each_fully_released_route": true
+      },
+      "options": {
+        "heap_bytes": 2048
+      },
+      "runtime_assertions": [
+        "formatterInt32MIN returned function produces owned11byte -2147483648 after function release.",
+        "capture42 keeps first temporary String after second temporary43 and returns owned42.",
+        "Generated C contains11byte scratch, no256byte emela_string_buffer_0;1000heapfree.",
+        "Function ABI type/release suffix resolved from generated public header; body unchanged."
+      ]
+    },
+    {
+      "id": "program:8e7fb878276e03451814",
+      "files": [
+        {
+          "name": "main.emel",
+          "fixture": "crates/emela-emb-compiler/tests/compat/legacy-corpus/sources/8b5c5d8f9f7c21c0650488a87616d0dff77342a5059bba6fe962eac6d1ce800c.emel",
+          "source_id": "source:8b5c5d8f9f7c21c06504",
+          "sha256": "8b5c5d8f9f7c21c0650488a87616d0dff77342a5059bba6fe962eac6d1ce800c"
+        }
+      ],
+      "legacy_tests": [
+        "lib::compiler::separation_tests::string_plans_preserve_aliases_while_other_buffers_and_calls_are_live"
+      ],
+      "source_adaptation": "Original manifest bytes unchanged; explicit C export attributes only. For original private fn main only, declaration also gains pub to match the already selected old concrete C root. Body unchanged; no generic public functions exported speculatively.",
+      "new_test": {
+        "kind": "source_test",
+        "path": "crates/emela-emb-compiler/tests/p7_legacy_closures_state.rs",
+        "symbol": "legacy_string_plans_preserve_alias_and_consumer_observations"
+      },
+      "observations": {
+        "source_check": "passed",
+        "C_generation": "passed",
+        "C_runtime_O0": "passed",
+        "C_runtime_O2": "passed",
+        "iterations": 1000,
+        "heap_empty_after_each_fully_released_route": true
+      },
+      "options": {
+        "string_capacity": 64,
+        "heap_bytes": 0
+      },
+      "runtime_assertions": [
+        "All5inputs0/41/-1/Int32MIN/MAX give0:1,41:42,-1:0,-2147483648:-2147483647,2147483647:-2147483648.",
+        "1000rounds, exact caller output pointer/length/bytes and NULLowner; heapnotemitted."
+      ]
+    },
+    {
+      "id": "program:3bee0ac6dc33827ec422",
+      "files": [
+        {
+          "name": "main.emel",
+          "fixture": "crates/emela-emb-compiler/tests/compat/legacy-corpus/sources/94acedcb0cb510115d20ea32a8614be8ed88f29a241166aca4d0371835f30099.emel",
+          "source_id": "source:94acedcb0cb510115d20",
+          "sha256": "94acedcb0cb510115d20ea32a8614be8ed88f29a241166aca4d0371835f30099"
+        }
+      ],
+      "legacy_tests": [
+        "lib::compiler::separation_tests::shared_string_helpers_support_multiple_consumers_in_one_translation_unit"
+      ],
+      "source_adaptation": "Original manifest bytes unchanged; explicit C export attributes only. For original private fn main only, declaration also gains pub to match the already selected old concrete C root. Body unchanged; no generic public functions exported speculatively.",
+      "new_test": {
+        "kind": "source_test",
+        "path": "crates/emela-emb-compiler/tests/p7_legacy_closures_state.rs",
+        "symbol": "legacy_string_helpers_preserve_alias_and_consumer_observations"
+      },
+      "observations": {
+        "source_check": "passed",
+        "C_generation": "passed",
+        "C_runtime_O0": "passed",
+        "C_runtime_O2": "passed",
+        "iterations": 1000,
+        "heap_empty_after_each_fully_released_route": true
+      },
+      "options": {
+        "kind": "default",
+        "heap_bytes": 0
+      },
+      "runtime_assertions": [
+        "contains/starts/ends share helpers in one C translation unit and distinguishaba/bab/empty.",
+        "Original defaultOptions preserved,1000rounds strengthened, noheap."
+      ]
+    }
+  ],
+  "test_file_sha256": "638bbe29f625ff079f3db11b588ca2e661f8e74c95e9073c03c7a3503f6e1d8c",
+  "run": {
+    "command": "CARGO_PROFILE_TEST_OPT_LEVEL=1 cargo test -p emela-emb-compiler --test p7_legacy_closures_state --locked --offline",
+    "passed": 5,
+    "failed": 0,
+    "ignored": 0,
+    "C_flags": [
+      "-std=c11",
+      "-Wall",
+      "-Werror"
+    ],
+    "C_optimizations": [
+      "-O0",
+      "-O2"
+    ],
+    "strict_clippy_all_targets": "passed",
+    "MSRV_1_85_all_targets": "passed",
+    "fmt_diff": "passed"
+  }
+}

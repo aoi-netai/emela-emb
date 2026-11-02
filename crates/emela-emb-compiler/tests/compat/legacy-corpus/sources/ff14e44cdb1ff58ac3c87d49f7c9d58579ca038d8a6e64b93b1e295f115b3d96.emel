@@ -1,0 +1,18 @@
+
+import Std.Fiber.{Fiber, Scope}
+import Std.Deferred.{Deferred}
+pub fn once(n: Int) -> Bool use Async {
+  Fiber.scope(fn() {
+    d: Deferred[Int] = (use Scope).deferred()
+    first = Deferred.complete(d, n)
+    second = Deferred.complete(d, n + 1)
+    first && !second
+  })
+}
+pub fn cycle() -> Bool use Async {
+  Fiber.scope(fn() {
+    d: Deferred[fn() -> Bool] = (use Scope).deferred()
+    callback = fn() { Deferred.complete(d, fn() { False }) }
+    Deferred.complete(d, callback)
+  })
+}

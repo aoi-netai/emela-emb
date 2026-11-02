@@ -1,0 +1,142 @@
+{
+  "fixed_revision": "c34c0aeefdd966d854371b3110db00a47798751d",
+  "compiler_checkpoint": "eb074918be66c79cb11aca635a372bd00405fc80",
+  "programs": [
+    {
+      "id": "program:4bd3bbef2dbb773478d2",
+      "files": [
+        {
+          "name": "main.emel",
+          "fixture": "crates/emela-emb-compiler/tests/compat/legacy-corpus/sources/31ff51508cbd03e7ee8068b0ea50b1e9d4fc758df770d7dc88d43b8e6489ff81.emel",
+          "source_id": "source:31ff51508cbd03e7ee80",
+          "sha256": "31ff51508cbd03e7ee8068b0ea50b1e9d4fc758df770d7dc88d43b8e6489ff81"
+        }
+      ],
+      "legacy_tests": [
+        "emit::completion_types::finite_changing_recursive_enum_arguments_run_with_owned_back_edges"
+      ],
+      "new_test": {
+        "kind": "source_test",
+        "path": "crates/emela-emb-compiler/src/backend/lower/p7_recursive_source_tests.rs",
+        "symbol": "finite_recursive_source_shapes_preserve_old_layout_and_heap_budgets"
+      },
+      "source_adaptation": "Original source body unchanged; explicit C export only. Normal checker/normalization/specialization/ABI projection/lowering pipeline, no IR mutation.",
+      "observations": {
+        "source_check": "passed",
+        "C_generation": "passed",
+        "strict_C_objects": {
+          "-O0": "passed",
+          "-O2": "passed"
+        },
+        "C_runtime_O0": "passed",
+        "C_runtime_O2": "passed",
+        "iterations": 1000,
+        "heap_empty_after_each": true
+      },
+      "options": {
+        "heap_bytes": 4096
+      },
+      "runtime_assertions": [
+        "Original finite-changing Nest[Int]/Nest[Bool] source: work(0)==42/work(1)==3, each fully reclaims heap.",
+        "Existing p3 recursive fixture covers the same values plus deeper release at4MiB; this extra run restores the fixed-old4096byte budget."
+      ]
+    },
+    {
+      "id": "program:8f6003cb6b231900471a",
+      "files": [
+        {
+          "name": "main.emel",
+          "fixture": "crates/emela-emb-compiler/tests/compat/legacy-corpus/sources/a3a971f303c79f46b108f2208b4655d6b8661355fcce7147f67f657be400fd07.emel",
+          "source_id": "source:a3a971f303c79f46b108",
+          "sha256": "a3a971f303c79f46b108f2208b4655d6b8661355fcce7147f67f657be400fd07"
+        }
+      ],
+      "legacy_tests": [
+        "emit::value_audit::changing_recursive_type_arguments_with_a_finite_type_graph_are_supported"
+      ],
+      "new_test": {
+        "kind": "source_test",
+        "path": "crates/emela-emb-compiler/src/backend/lower/p7_recursive_source_tests.rs",
+        "symbol": "finite_recursive_source_shapes_preserve_old_layout_and_heap_budgets"
+      },
+      "source_adaptation": "Original source body unchanged; explicit C export only. Normal checker/normalization/specialization/ABI projection/lowering pipeline, no IR mutation.",
+      "observations": {
+        "source_check": "passed",
+        "C_generation": "passed",
+        "strict_C_objects": {
+          "-O0": "passed",
+          "-O2": "passed"
+        }
+      },
+      "assessment": "original-body-artifact-evidence",
+      "options": {
+        "heap_bytes": 2048
+      },
+      "runtime_assertions": [
+        "Fixed-old test only checks successful Flow and C generation for exported make()->Nest[Int].",
+        "New test compiles/links the resulting finite C aggregate layout with strict C and an empty main; no make-value runtime is claimed."
+      ]
+    },
+    {
+      "id": "program:3e99d1b04faf8e90bba0",
+      "files": [
+        {
+          "name": "main.emel",
+          "fixture": "crates/emela-emb-compiler/tests/compat/legacy-corpus/sources/1daea07d6938ba513abc8cc3291e8726a3ed116585528191564b19456d89ad21.emel",
+          "source_id": "source:1daea07d6938ba513abc",
+          "sha256": "1daea07d6938ba513abc8cc3291e8726a3ed116585528191564b19456d89ad21"
+        }
+      ],
+      "legacy_tests": [
+        "emit::completion_types::derived::nested_generic_error_payloads_have_finite_display_functions"
+      ],
+      "new_test": {
+        "kind": "source_test",
+        "path": "crates/emela-emb-compiler/src/backend/lower/p7_recursive_source_tests.rs",
+        "symbol": "nested_generic_error_source_keeps_one_finite_show_mapping_and_exact_text"
+      },
+      "source_adaptation": "Original source body unchanged; explicit C export only. Normal checker/normalization/specialization/ABI projection/lowering pipeline, no IR mutation.",
+      "observations": {
+        "source_check": "passed",
+        "C_generation": "passed",
+        "strict_C_objects": {
+          "-O0": "passed",
+          "-O2": "passed"
+        },
+        "C_runtime_O0": "passed",
+        "C_runtime_O2": "passed",
+        "iterations": 1000,
+        "heap_empty_after_each": true
+      },
+      "options": {
+        "heap_bytes": 2048,
+        "string_capacity": 128
+      },
+      "runtime_assertions": [
+        "Exact error: Boom(value: Box([42])) text and1000fullheapreclamation.",
+        "Old public-root metadata bounds map to reachable emitted_functions:14<64 and exactly1emittederrorShow Main.Boom.",
+        "New Program holds169functions including unused compiler-owned sources; its3totalShow mappings include unused ParseError/PeripheralError. Those extra2are not emitted. No broad count weakening or unsupported claim."
+      ]
+    }
+  ],
+  "test_file_sha256": "57f8882ff2b3a9b19aa035f9cdc271fc08faa46aad9d5dbd30bbf5a055cc7c0a",
+  "run": {
+    "command": "CARGO_PROFILE_TEST_OPT_LEVEL=1 cargo test -p emela-emb-compiler --lib p7_recursive_source --locked --offline",
+    "passed": 2,
+    "failed": 0,
+    "ignored": 0,
+    "C_flags": [
+      "-std=c11",
+      "-Wall",
+      "-Wextra",
+      "-Werror"
+    ],
+    "C_optimizations": [
+      "-O0",
+      "-O2"
+    ],
+    "strict_clippy_all_targets": "passed",
+    "MSRV_1_85_all_targets": "passed",
+    "fmt_diff": "passed"
+  }
+}

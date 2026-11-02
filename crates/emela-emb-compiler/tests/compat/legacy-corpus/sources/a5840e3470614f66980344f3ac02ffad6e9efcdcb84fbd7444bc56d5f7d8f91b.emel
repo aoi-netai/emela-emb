@@ -1,0 +1,10 @@
+
+import Std.Fiber.{Fiber, Exit, Success, Failure}
+fn terminal(child: Fiber[Int]) -> Exit[Int, {}] use Async { Fiber.await(child) }
+pub fn work(n: Int) -> Int use Async {
+  Fiber.scope(fn() {
+    child = Fiber.fork(fn() { n })
+    terminal(child) match { Success(v) -> v
+      Failure(_) -> -1 }
+  })
+}

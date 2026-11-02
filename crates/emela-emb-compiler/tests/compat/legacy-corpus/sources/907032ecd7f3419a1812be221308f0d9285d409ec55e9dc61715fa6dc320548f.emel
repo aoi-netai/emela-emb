@@ -1,0 +1,9 @@
+import Std.State.{State}
+pub fn main() -> Int {
+(value, final) = State.run(1, fn() {
+state = use State[Int]
+state.set(41)
+state.get()
+})
+value + final
+}

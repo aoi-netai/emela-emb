@@ -12,8 +12,48 @@ mod fibers;
 mod functions;
 #[path = "handler_tests.rs"]
 mod handlers;
+#[path = "isr_tests.rs"]
+mod isr;
 #[path = "memory_tests.rs"]
 mod memory;
+#[path = "p7_aggregate_failure_tests.rs"]
+mod p7_aggregate_failures;
+#[path = "p7_binding_tests.rs"]
+mod p7_bindings;
+#[path = "p7_cause_source_seam_tests.rs"]
+mod p7_cause_source_seams;
+#[path = "p7_cleanup_source_seam_tests.rs"]
+mod p7_cleanup_source_seams;
+#[path = "p7_const_source_tests.rs"]
+mod p7_const_source;
+#[path = "p7_contract_tests.rs"]
+mod p7_contract;
+#[path = "p7_data_tests.rs"]
+mod p7_data;
+#[path = "p7_discarded_tests.rs"]
+mod p7_discarded;
+#[path = "p7_evidence_tests.rs"]
+mod p7_evidence;
+#[path = "p7_input_tests.rs"]
+mod p7_input;
+#[path = "p7_integration_tests.rs"]
+mod p7_integration;
+#[path = "p7_list_alias_tests.rs"]
+mod p7_list_aliases;
+#[path = "p7_misc_value_tests.rs"]
+mod p7_misc_values;
+#[path = "p7_recursive_source_tests.rs"]
+mod p7_recursive_source;
+#[path = "p7_source_seams.rs"]
+mod p7_source_seams;
+#[path = "p7_string_frame_tests.rs"]
+mod p7_string_frames;
+#[path = "p7_switch_frame_tests.rs"]
+mod p7_switch_frames;
+#[path = "service_tests.rs"]
+mod services;
+#[path = "source_builtin_tests.rs"]
+mod source_builtins;
 #[path = "suspend_tests.rs"]
 mod suspend;
 
@@ -1393,4 +1433,19 @@ fn unit_enum_uses_the_scalar_tag_representation() {
     p.functions.alloc(f);
     let output = crate::backend::compile_program(p, &Options::default()).unwrap();
     execute(&output, DEFECT_HARNESS, 0);
+}
+
+fn audit_owned_heap(output: &mut Output) {
+    if !output.c_source.contains("emela_heap_storage") {
+        output
+            .files
+            .iter_mut()
+            .find(|file| file.path == "emela_embedded.c")
+            .unwrap()
+            .contents
+            .push_str("\nint test_heap_empty(void){return 1;}\n");
+        return;
+    }
+    output.files.iter_mut().find(|file| file.path == "emela_embedded.c").unwrap().contents.push_str(
+        "\nint test_heap_empty(void){for(unsigned char*p=emela_heap_storage;emela_heap_initialized&&p<emela_heap_end();){emela_heap_block*b=(emela_heap_block*)(void*)p;if(!b->is_free)return 0;p+=b->size;}return 1;}\n");
 }

@@ -1,0 +1,9 @@
+
+effect Wait { suspend fn get(n: Int) -> Int }
+handler Twice: Wait {
+  suspend fn get(n, resume) {
+    resume(n)
+    resume(n)
+  }
+}
+pub fn work() -> Int { with Twice { (use Wait).get(42) } }

@@ -1,0 +1,16 @@
+
+@external(c, "host_wait")
+suspend fn wait(n: Int) -> Int
+@external(c, "mark")
+fn mark(n: Int) -> () use {}
+error Boom
+effect Wait { suspend fn get() -> Int }
+handler Waiting: Wait {
+ suspend fn get(resume) { resume(wait(1)) }
+ release { mark(1) }
+}
+pub fn failure() -> Int fails Boom use Async {
+ with Waiting { (use Wait).get()
+  fail Boom
+ }
+}

@@ -1,0 +1,13 @@
+# P7 variant意味対応のproposal
+
+基点はP6台帳 `a686172`。全428 recordのうち、165既verifiedを維持し、rootがshared declaration/fieldとStageの178 recordを担当する。残る未verifiedの非Stage `variant_entry` 85件を `p7-variant-proposal.json` で個別に照合した。正本台帳は変更しない。
+
+85件すべてで実装pathと関数symbol、参照試験の関数symbolが実在することを、作業treeまたは明示した固定commitに対して確認した。source-only Builtin 8件はsource機能としての正常C観測と、未変換IRの拒否を別証拠とする。OnFail::Handleは新しいtyped inputで検査・正規化されるため、旧roleのrejectをそのまま実挙動と誤認しない。Heap-stage runtime操作、EnvGet、Drop/Dup、Unwindは、存在するinputを拒否した直接診断試験へ対応する。
+
+全85件をverified候補とする。Term::Unreachableは既存のFail/Recur後の出力tailだけでは直接到達するdefectを証明できなかったため、`931c3ce`の専用IR/C試験を追加根拠とした。nativeのASSERT/unreachable codeとsuspendのASSERT/invalid scheduler stateへ直接到達し、両最適化で正確なhook文言を観測した。最小中断entryで現れた未使用C parameter/helperのwarning修正も同commitで検証する。
+
+metadata variantは、schema上にfieldがあるだけで完了とせず、generic dataの具体配置、host symbolの4形式、Handler/Evidence/Cell/Anyの所有・寿命、String/Bytes/List/Tupleの実C値を結び付けた。型やcontextの直積すべてを各variantの代表試験から推定しない。別担当と合わせた226 contextの照合、最終統合HEADでの全体runとMSRV/strict Clippyは別に必要である。
+
+この照合時点のlibrary 240試験と、旧concurrency32・cleanup API24のC入力は成功している。C11の両最適化を必須実行し、後者の元resource budgetも維持した。stage2 IRの参照は `aeb7c53` に固定し、最終統合runで再確認する。
+
+構造contextの追加監査では、SwitchOn::LitとCaseKey::Litのsuspend経路についてsourceのBool/enum matchを代用しない。source側はIfへ下がるため、受理されるI32/I64 literal selectorを実task待機後まで保持する `p7_switch_frame_tests::literal_i32_and_i64_switches_resume_into_cases_and_default` を追加した。min/max/defaultを1000回、heap0・128 byte/frame・fiber/task/event各1で実行し、未完了・重複/stale通知も確認した。C11両最適化で値とcase/defaultの遷移を観測する。Boolのsource条件分岐はIfの証拠へ対応付ける。

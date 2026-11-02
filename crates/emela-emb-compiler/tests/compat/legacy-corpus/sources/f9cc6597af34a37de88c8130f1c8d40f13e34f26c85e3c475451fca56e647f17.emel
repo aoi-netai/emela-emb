@@ -1,0 +1,6 @@
+
+import Std.Fiber.{Fiber, Exit}
+pub fn terminal(n: Int) -> Exit[Int, {}] use Async {
+  Fiber.scope(fn() { child = Fiber.fork(fn() { n })
+    Fiber.await(child) })
+}

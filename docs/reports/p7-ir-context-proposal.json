@@ -1,0 +1,244 @@
+{
+  "fixed_revision": "c34c0aeefdd966d854371b3110db00a47798751d",
+  "kind": "proposal_only_no_canonical_ledger_changes",
+  "C_flags": [
+    "-std=c11",
+    "-Wall",
+    "-Wextra",
+    "-Werror"
+  ],
+  "optimizations": [
+    "-O0",
+    "-O2"
+  ],
+  "context_proposals": [
+    {
+      "id": "emela_core::FiberOp::Scope",
+      "context": "sync",
+      "proposed_status": "verified_rejected",
+      "evidence": [
+        {
+          "path": "crates/emela-emb-compiler/src/backend/lower/p7_contract_tests.rs",
+          "symbol": "structured_fiber_waits_accept_suspending_and_reject_native_callers"
+        }
+      ],
+      "reason": "A fully typed input first lowers successfully with suspends=true; changing only the caller flag to false rejects with fiber wait requires a suspending caller."
+    },
+    {
+      "id": "emela_core::FiberOp::Join",
+      "context": "sync",
+      "proposed_status": "verified_rejected",
+      "evidence": [
+        {
+          "path": "crates/emela-emb-compiler/src/backend/lower/p7_contract_tests.rs",
+          "symbol": "structured_fiber_waits_accept_suspending_and_reject_native_callers"
+        }
+      ],
+      "reason": "A fully typed input first lowers successfully with suspends=true; changing only the caller flag to false rejects with fiber wait requires a suspending caller."
+    },
+    {
+      "id": "emela_core::FiberOp::Await",
+      "context": "sync",
+      "proposed_status": "verified_rejected",
+      "evidence": [
+        {
+          "path": "crates/emela-emb-compiler/src/backend/lower/p7_contract_tests.rs",
+          "symbol": "structured_fiber_waits_accept_suspending_and_reject_native_callers"
+        }
+      ],
+      "reason": "A fully typed input first lowers successfully with suspends=true; changing only the caller flag to false rejects with fiber wait requires a suspending caller."
+    },
+    {
+      "id": "emela_core::FiberOp::Interrupt",
+      "context": "sync",
+      "proposed_status": "verified_rejected",
+      "evidence": [
+        {
+          "path": "crates/emela-emb-compiler/src/backend/lower/p7_contract_tests.rs",
+          "symbol": "structured_fiber_waits_accept_suspending_and_reject_native_callers"
+        }
+      ],
+      "reason": "A fully typed input first lowers successfully with suspends=true; changing only the caller flag to false rejects with fiber wait requires a suspending caller."
+    },
+    {
+      "id": "emela_core::FiberOp::DeferredAwait",
+      "context": "sync",
+      "proposed_status": "verified_rejected",
+      "evidence": [
+        {
+          "path": "crates/emela-emb-compiler/src/backend/lower/p7_contract_tests.rs",
+          "symbol": "structured_fiber_waits_accept_suspending_and_reject_native_callers"
+        }
+      ],
+      "reason": "A fully typed input first lowers successfully with suspends=true; changing only the caller flag to false rejects with fiber wait requires a suspending caller."
+    },
+    {
+      "id": "emela_core::FiberOp::CauseRaise",
+      "context": "sync",
+      "proposed_status": "verified_boundary",
+      "evidence": [
+        {
+          "path": "crates/emela-emb-compiler/src/backend/lower/p7_contract_tests.rs",
+          "symbol": "cause_raise_requires_a_failure_edge_and_a_propagation_channel"
+        },
+        {
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "attempts_preserve_success_and_typed_cause_failures_across_raise"
+        }
+      ],
+      "reason": "Missing explicit failure edge and propagating into an infallible function are independently rejected; accepted typed failure/cause paths are covered by the existing execution test."
+    },
+    {
+      "id": "emela_core::FiberOp::CauseRaise",
+      "context": "suspend",
+      "proposed_status": "verified_boundary",
+      "evidence": [
+        {
+          "path": "crates/emela-emb-compiler/src/backend/lower/p7_contract_tests.rs",
+          "symbol": "cause_raise_requires_a_failure_edge_and_a_propagation_channel"
+        },
+        {
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "symbol": "attempts_preserve_success_and_typed_cause_failures_across_raise"
+        }
+      ],
+      "reason": "Missing explicit failure edge and propagating into an infallible function are independently rejected; accepted typed failure/cause paths are covered by the existing execution test."
+    },
+    {
+      "id": "emela_lir::RuntimeOp::Retire",
+      "context": "common",
+      "proposed_status": "verified_executed",
+      "modes": [
+        "sync",
+        "suspend"
+      ],
+      "evidence": [
+        {
+          "path": "crates/emela-emb-compiler/src/backend/lower/p7_handler_lifetime_tests.rs",
+          "symbol": "retirement_keeps_active_checks_through_all_aliases_in_native_and_suspend_callers"
+        }
+      ],
+      "reason": "All five direct/evidence/coerce/tuple/argument aliases preserve the same active identity and exact after-release panic. Each fatal hook stops the process, as in the fixed-old test."
+    },
+    {
+      "id": "emela_core::Builtin::StringSplit",
+      "context": "common",
+      "proposed_status": "verified_executed",
+      "modes": {
+        "sync": [
+          {
+            "path": "crates/emela-emb-compiler/tests/p3_memory_api.rs",
+            "symbol": "strings_lists_and_trusted_bytes_pure_apis_execute"
+          }
+        ],
+        "suspend": [
+          {
+            "path": "crates/emela-emb-compiler/src/backend/lower/p7_string_frame_tests.rs",
+            "symbol": "split_views_and_distinct_join_results_survive_a_real_suspension_with_nul_and_unicode"
+          }
+        ]
+      },
+      "reason": "Split views and two different join buffers survive an actual external task wait; input is overwritten immediately after start, NUL/UTF8 bytes remain exact at capacity8, outputs do not alias, returned string is owned and heap is empty after release."
+    },
+    {
+      "id": "emela_core::Builtin::StringJoin",
+      "context": "common",
+      "proposed_status": "verified_executed",
+      "modes": {
+        "sync": [
+          {
+            "path": "crates/emela-emb-compiler/tests/p3_memory_api.rs",
+            "symbol": "strings_lists_and_trusted_bytes_pure_apis_execute"
+          }
+        ],
+        "suspend": [
+          {
+            "path": "crates/emela-emb-compiler/src/backend/lower/p7_string_frame_tests.rs",
+            "symbol": "split_views_and_distinct_join_results_survive_a_real_suspension_with_nul_and_unicode"
+          }
+        ]
+      },
+      "reason": "Split views and two different join buffers survive an actual external task wait; input is overwritten immediately after start, NUL/UTF8 bytes remain exact at capacity8, outputs do not alias, returned string is owned and heap is empty after release."
+    },
+    {
+      "id": "emela_core::FiberOp::Deferred",
+      "context": "suspend",
+      "proposed_status": "verified_executed",
+      "evidence": [
+        {
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_deferred_tests.rs",
+          "symbol": "discarded_deferreds_reuse_one_slot_in_a_long_lived_scope"
+        }
+      ],
+      "reason": "Unused destination and explicit discarded destination each reuse a capacity1 pool for 1000 allocations in a single Scope, across 1000 outer C calls with empty heap."
+    },
+    {
+      "id": "emela_lir::Value::Call",
+      "context": "suspend",
+      "observation": "caught_failure_during_cleanup",
+      "proposed_status": "verified_executed",
+      "evidence": [
+        {
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend_tests.rs",
+          "symbol": "suspending_cleanup_preserves_the_failure_until_an_outer_handler_runs"
+        }
+      ],
+      "reason": "Cleanup catches a separate error payload7 before suspending; only after cleanup completes does the original owned payload42 reach the outer handler. Heap is fully released."
+    },
+    {
+      "id": "emela_lir::RuntimeOp::Hold",
+      "context": "common",
+      "proposed_status": "verified_isr_boundary",
+      "evidence": [
+        {
+          "path": "crates/emela-emb-compiler/src/backend/lower/p7_contract_tests.rs",
+          "symbol": "interrupt_masks_are_rejected_from_nested_isr_entries_with_or_without_unwind_runtime"
+        }
+      ],
+      "reason": "Hold/Unhold each reject both direct and nested ISR reachability, with and without another exported function requiring unwind runtime."
+    },
+    {
+      "id": "emela_core::FiberOp::Deferred",
+      "context": "sync",
+      "proposed_status": "verified_executed",
+      "evidence": [
+        {
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_scope_tests.rs",
+          "symbol": "calling_the_generated_scope_deferred_operation_requires_its_pool"
+        }
+      ],
+      "reason": "The generated deferred handler operation is a synchronous closure; capacity0 rejects and capacity1 executes in a suspending Scope caller with full reclamation."
+    },
+    {
+      "id": "emela_lir::RuntimeOp::Unhold",
+      "context": "common",
+      "proposed_status": "verified_isr_boundary",
+      "evidence": [
+        {
+          "path": "crates/emela-emb-compiler/src/backend/lower/p7_contract_tests.rs",
+          "symbol": "interrupt_masks_are_rejected_from_nested_isr_entries_with_or_without_unwind_runtime"
+        }
+      ],
+      "reason": "Hold/Unhold each reject both direct and nested ISR reachability, with and without another exported function requiring unwind runtime."
+    }
+  ],
+  "additional_direct_IR_tests": [
+    {
+      "path": "crates/emela-emb-compiler/src/backend/lower/p7_string_frame_tests.rs",
+      "symbol": "constant_numeric_and_string_values_fold_and_constant_float_append_keeps_its_exact_bound"
+    },
+    {
+      "path": "crates/emela-emb-compiler/src/backend/lower/p7_string_frame_tests.rs",
+      "symbol": "selected_entry_supplies_dynamic_string_buffers_at_minimum_and_maximum_capacities"
+    },
+    {
+      "path": "crates/emela-emb-compiler/src/backend/lower/p7_aggregate_failure_tests.rs",
+      "symbol": "owned_any_nested_in_error_payloads_survives_indirect_success_and_failure"
+    },
+    {
+      "path": "crates/emela-emb-compiler/src/backend/lower/p7_aggregate_failure_tests.rs",
+      "symbol": "growing_generic_arguments_through_function_results_keep_owned_lazy_payloads"
+    }
+  ],
+  "raw_IR_port_note": "FnBuilder.assign in the fixed tests produces fresh VarIds even when hints repeat. The translated success/error/branch result variables preserve those distinct IDs."
+}

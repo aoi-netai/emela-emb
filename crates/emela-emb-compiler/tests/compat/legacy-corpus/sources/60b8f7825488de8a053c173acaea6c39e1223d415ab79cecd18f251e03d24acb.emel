@@ -1,0 +1,1 @@
+pub fn encoded(n: Int) -> Option[String] { String.from_code_point(n) }

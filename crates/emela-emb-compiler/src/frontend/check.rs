@@ -1,6 +1,7 @@
 mod effect_calls;
 mod functions;
 mod methods;
+mod records;
 mod references;
 pub(super) mod suspend;
 mod trait_methods;
@@ -545,9 +546,7 @@ impl Checker {
                             ));
                         }
                     }
-                    if !type_parameters.is_empty()
-                        && (export_symbol.is_some() || external.is_some())
-                    {
+                    if !type_parameters.is_empty() && export_symbol.is_some() {
                         return Err(Diagnostic::new(
                             DK::Export,
                             function.name.span,
@@ -1171,6 +1170,7 @@ impl Checker {
             immediate: matches!(definition.effect_method, Some(super::effect_collect::MethodKind::Operation { handler, operation }) if !self.catalog.core.effects[self.effects.handlers[handler].effect].ops[operation].suspend),
             constant: definition.ast.constant,
             origin: definition.ast.constant.then_some(id),
+            canonical_const: None,
             derivation: definition.derivation,
             error_show: None,
             name: definition.name,
@@ -1597,7 +1597,7 @@ impl Checker {
                         "opaque fields are private",
                     ));
                 }
-                if declaration.ast.variants.len() != 1 {
+                if !declaration.ast.record {
                     return Err(self.error(
                         module,
                         DK::Type,
@@ -1675,11 +1675,9 @@ impl Checker {
                             return self.construct(module, ctor, &[], locals, expected, span);
                         }
                         Symbol::Function(id) if self.definitions[id.0].ast.constant => {
-                            self.function(id)?;
-                            let ret = self.definitions[id.0]
-                                .signature
-                                .ret
-                                .expect("const inference return type");
+                            let (signature, type_arguments) =
+                                self.function_instance(module, id, span)?;
+                            let ret = signature.ret.expect("const inference return type");
                             if let Some(expected) = expected {
                                 self.expect_type(module, ret, expected, span)?;
                             }
@@ -1687,7 +1685,7 @@ impl Checker {
                             return Ok(ir::Expr {
                                 kind: ir::ExprKind::Call {
                                     target: id,
-                                    type_arguments: vec![],
+                                    type_arguments,
                                     args: vec![],
                                     order: vec![],
                                 },
@@ -1797,6 +1795,15 @@ impl Checker {
                     },
                     ty,
                 )
+            }
+            A::Update {
+                callee,
+                fields,
+                base,
+            } => {
+                let value =
+                    self.record_update(module, callee, fields, base, locals, expected, span)?;
+                return self.coerce_function(module, value, expected, span);
             }
             A::Call { callee, args } => {
                 if let A::Field { base, name } = &callee.kind {
@@ -2455,20 +2462,7 @@ impl Checker {
     ) -> Result<ir::Expr, Diagnostic> {
         use crate::contract::ir::{Type, TypeId};
         let declaration = self.catalog.declaration(ctor.enum_id).clone();
-        if declaration.ast.params.is_empty() {
-            let state_type = self.catalog.core.types.enum_type(ctor.enum_id, vec![]);
-            if let Some(handler) = self.effects.handler_for_state(state_type) {
-                if !matches!(self.current_effect_method, Some(super::effect_collect::MethodKind::Init(id)) if id == handler.id)
-                {
-                    return Err(self.error(
-                        module,
-                        DK::Type,
-                        span,
-                        "a handler state constructor is available only inside its initializer",
-                    ));
-                }
-            }
-        }
+        self.check_handler_construction(module, ctor, span)?;
         let fields = &declaration.ast.variants[ctor.variant].fields;
         let raw_types = self.catalog.core.enums[ctor.enum_id].variants[ctor.variant]
             .tys
