@@ -119,7 +119,12 @@ impl Checker {
             self.expect_type(module, ty, expected, span)?;
         }
         let ret = self.resolve_type(module, ret, span)?;
-        self.validate_type_bounds(module, data::backend_type(ret), &self.current_bounds, span)?;
+        self.validate_type_bounds(
+            module,
+            data::backend_type(ret),
+            &self.current_bounds.clone(),
+            span,
+        )?;
         let params = reference_params(locals, &params);
         let body = ir::Expr {
             kind: ir::ExprKind::Make {
