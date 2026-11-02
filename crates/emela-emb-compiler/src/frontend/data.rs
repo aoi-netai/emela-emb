@@ -264,7 +264,7 @@ impl Catalog {
         Ok(Ty::Compound(self.core.types.enum_type(id, args)))
     }
     fn lookup_type(&self, modules: &Modules, module: usize, path: &str) -> Option<b::EnumId> {
-        self.lookup(modules, module, path, &self.types)
+        self.lookup(modules, module, path, &self.types, true)
     }
     pub fn constructor(
         &self,
@@ -273,7 +273,7 @@ impl Catalog {
         path: &str,
         span: Span,
     ) -> Result<Option<b::CtorRef>, Diagnostic> {
-        let Some(ctor) = self.lookup(modules, module, path, &self.constructors) else {
+        let Some(ctor) = self.lookup(modules, module, path, &self.constructors, false) else {
             return Ok(None);
         };
         let declaration = self.declaration(ctor.enum_id);
@@ -292,13 +292,14 @@ impl Catalog {
         module: usize,
         path: &str,
         namespace: &[HashMap<String, T>],
+        eponymous_type: bool,
     ) -> Option<T> {
         if let Some((alias, name)) = path.split_once('.') {
             let target = modules.modules[module]
                 .ast
                 .imports
                 .iter()
-                .find(|i| i.members.is_none() && i.path.value.rsplit('.').next() == Some(alias))
+                .find(|i| i.path.value.rsplit('.').next() == Some(alias))
                 .and_then(|i| modules.modules.iter().position(|m| m.name == i.path.value))
                 .or_else(|| {
                     modules
@@ -330,7 +331,9 @@ impl Catalog {
             .modules
             .iter()
             .enumerate()
-            .filter(|(_, m)| m.builtin)
+            .filter(|(_, m)| {
+                m.builtin && (m.name == "Prelude" || (eponymous_type && m.name == path))
+            })
             .find_map(|(index, _)| namespace[index].get(path).copied())
     }
     pub fn type_id(&self, module: usize, name: &str) -> Option<b::EnumId> {

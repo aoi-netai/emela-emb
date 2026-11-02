@@ -194,9 +194,7 @@ impl TraitCollection {
             let target = scope
                 .imports
                 .iter()
-                .find(|import| {
-                    import.members.is_none() && import.path.value.rsplit('.').next() == Some(alias)
-                })
+                .find(|import| import.path.value.rsplit('.').next() == Some(alias))
                 .and_then(|import| {
                     self.scopes
                         .iter()

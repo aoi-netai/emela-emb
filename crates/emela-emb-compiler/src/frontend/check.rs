@@ -28,13 +28,13 @@ struct Definition {
     self_type: Option<crate::contract::ir::TypeId>,
     derivation: Option<super::traits::BuiltinTrait>,
 }
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 enum Symbol {
     Function(DefinitionId),
     Constant(ConstantId),
     Constructor(crate::contract::ir::CtorRef),
 }
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 enum ConstantId {
     IntMin,
     IntMax,
@@ -619,7 +619,7 @@ impl Checker {
                                     || self.scopes[index]
                                         .values
                                         .insert(member.value.clone(), symbol)
-                                        .is_some()
+                                        .is_some_and(|previous| previous != symbol)
                                 {
                                     errors.push(Diagnostic::new(DK::Name, member.span, format!("imported name '{}' conflicts with another declaration", member.value)).in_source(&module.source_name));
                                 }
@@ -637,22 +637,23 @@ impl Checker {
                             ),
                         }
                     }
-                } else {
-                    let alias = import.path.value.rsplit('.').next().unwrap().to_owned();
-                    if self.scopes[index]
-                        .modules
-                        .insert(alias.clone(), target)
-                        .is_some()
-                    {
-                        errors.push(
-                            Diagnostic::new(
-                                DK::Name,
-                                import.path.span,
-                                format!("duplicate imported module '{alias}'"),
-                            )
-                            .in_source(&module.source_name),
-                        );
-                    }
+                }
+                // A selective import also introduces the module's short name.
+                // Repeating the same import does not introduce a second definition.
+                let alias = import.path.value.rsplit('.').next().unwrap().to_owned();
+                if self.scopes[index]
+                    .modules
+                    .insert(alias.clone(), target)
+                    .is_some_and(|previous| previous != target)
+                {
+                    errors.push(
+                        Diagnostic::new(
+                            DK::Name,
+                            import.path.span,
+                            format!("duplicate imported module '{alias}'"),
+                        )
+                        .in_source(&module.source_name),
+                    );
                 }
             }
         }
