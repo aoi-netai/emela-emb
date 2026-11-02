@@ -289,6 +289,61 @@
       "revision": "0cb01f9",
       "path": "docs/reports/compiler-p6-ledger-proposal.json",
       "format": "lifecycle"
+    },
+    {
+      "revision": "9998b3c",
+      "path": "docs/reports/p7-concurrency-corpus-compat.json",
+      "format": "source-cases"
+    },
+    {
+      "revision": "1c1912a",
+      "path": "docs/reports/p7-integration-corpus-compat.json",
+      "format": "integration"
+    },
+    {
+      "revision": "31bc997",
+      "path": "docs/reports/p7-legacy-bytes-compat.json",
+      "format": "raw-files"
+    },
+    {
+      "revision": "d2573cc",
+      "path": "docs/reports/p7-legacy-strings-compat.json",
+      "format": "raw-files"
+    },
+    {
+      "revision": "c5f8b91",
+      "path": "docs/reports/p7-external-source-compat.json",
+      "format": "entry-programs"
+    },
+    {
+      "revision": "d2d3c75",
+      "path": "docs/reports/p7-services-source-compat.json",
+      "format": "entry-programs"
+    },
+    {
+      "revision": "3e8db38",
+      "path": "docs/reports/p7-scope-source-compat.json",
+      "format": "entry-programs"
+    },
+    {
+      "revision": "44666f9",
+      "path": "docs/reports/p7-recursive-source-compat.json",
+      "format": "raw-files"
+    },
+    {
+      "revision": "2eaae18",
+      "path": "docs/reports/p7-suspend-source-compat.json",
+      "format": "raw-files"
+    },
+    {
+      "revision": "301f76e",
+      "path": "docs/reports/p7-closures-state-source-compat.json",
+      "format": "raw-files"
+    },
+    {
+      "revision": "89aa919",
+      "path": "docs/reports/p7-cleanup-source-compat.json",
+      "format": "cleanup-cases"
     }
   ]
 }

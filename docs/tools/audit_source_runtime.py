@@ -90,8 +90,29 @@ def main() -> None:
         report_records.append({**ref, "sha256": digest(report_text)})
         if ref["format"] == "traits":
             entries = [{"id": report["program"], "files": [{"name": "main.emel", "fixture": report["source_path"], "sha256": report["source_sha256"]}], "legacy_tests": [test for observation in report["observations"] for test in observation["legacy_tests"]], "observations": report["observations"], "runtime_assertions": report["observations"]}]
-        elif ref["format"] == "const-rest":
+        elif ref["format"] in ("const-rest", "integration", "entry-programs"):
             entries = [{"id": entry["program"], **entry} for entry in report["entries"]]
+        elif ref["format"] == "source-cases":
+            entries = []
+            for case in report["cases"]:
+                runtime_programs = set()
+                for variant in case["runtime_variants"]:
+                    if variant["status"] != "runtime-passed":
+                        raise ValueError(f"runtime case has a pending variant: {case['legacy_test']}")
+                    entries.append({"id": variant["program"], "legacy_tests": [case["legacy_test"]], "files": case["original_files"][variant["program"]], "observations": variant, "new_test": variant["new_test"], "runtime_assertions": case["legacy_C_assertions"], "source_adaptation": case["source_adaptation"]})
+                    runtime_programs.add(variant["program"])
+                for identifier in sorted(set(case["programs"]) - runtime_programs):
+                    artifacts = [observation for observation in case.get("artifact_observations", []) if observation.get("program") == identifier]
+                    if not artifacts:
+                        raise ValueError(f"unexecuted program lacks old artifact evidence: {identifier}")
+                    entries.append({"id": identifier, "legacy_tests": [case["legacy_test"]], "files": case["original_files"][identifier], "observations": artifacts, "assessment": "original-body-artifact-evidence", "source_adaptation": case["source_adaptation"]})
+        elif ref["format"] == "cleanup-cases":
+            entries = []
+            for case in report["cases"]:
+                if case["status"] != "source-runtime-verified" or set(case["seams"]) - {"private_C_cancel"}:
+                    raise ValueError(f"cleanup report contains an unverified or IR-adapted case: {case['legacy_test']}")
+                for identifier in sorted({file["program"] for file in case["source_files"]}):
+                    entries.append({"id": identifier, "legacy_tests": [case["legacy_test"]], "files": [file for file in case["source_files"] if file["program"] == identifier], "observations": {key: case[key] for key in ("C_generation", "strict_C_objects", "C_runtime", "successful_iterations", "terminal_defect_observed", "old_resource_budgets_preserved")}, "new_test": case["new_test"], "options": case["old_options"], "C_harness": case["harness"], "private_C_seam": case["seams"], "runtime_assertions": case["legacy_C_assertions"], "source_adaptation": case["source_adaptation"]})
         elif ref["format"] == "lifecycle":
             entries = [{"id": entry["program"], "files": [{"name": "main.emel", "fixture": entry["source_path"], "sha256": entry["source_sha256"]}], **entry} for entry in report["legacy_source_runtime"] if "source_sha256" in entry]
         else:
@@ -100,8 +121,10 @@ def main() -> None:
             original = programs[program["id"]]
             if not set(program["legacy_tests"]).issubset(original["legacy_tests"]):
                 raise ValueError(f"runtime legacy test IDs differ: {program['id']}")
-            assessment = "original-body-runtime-evidence"
+            assessment = program.get("assessment", "original-body-runtime-evidence")
             seam = program.get("post_lowering_ir_seam", program.get("GC_adaptation"))
+            if ref["format"] == "integration":
+                seam = program["adaptation"]
             if ref["format"] != "child-waiters":
                 for file in program["files"]:
                     expected = next(f for f in original["files"] if f["name"] == file["name"])
@@ -126,7 +149,10 @@ def main() -> None:
                 if len(original["files"]) != 1 or digest(unexported) != original["files"][0]["sha256"]:
                     raise ValueError(f"removing only C export does not restore original: {program['id']}")
                 pure = program["observations"]["pure_source_runtime"]
-            runtime[program["id"]] = {"report": ref, "assessment": assessment, "legacy_tests": program["legacy_tests"], "original_body_hash_verified": True, "pipeline": "source-to-C" if pure else "source-IR-adaptation-to-C", "observations": program.get("observations", program.get("scope")), "post_lowering_ir_seam": seam, "runtime_assertions": program.get("runtime_assertions"), "direct_test": program.get("new_test", program.get("evidence")), "source_adaptation": program.get("source_adaptation", program.get("adaptation"))}
+            pipeline = "source-to-C-artifact-check" if assessment == "original-body-artifact-evidence" else "source-to-C" if pure else "source-IR-adaptation-to-C"
+            evidence = {"report": ref, "assessment": assessment, "legacy_tests": program["legacy_tests"], "original_body_hash_verified": True, "pipeline": pipeline, "observations": program.get("observations", program.get("scope")), "post_lowering_ir_seam": seam, "runtime_assertions": program.get("runtime_assertions"), "direct_test": program.get("new_test", program.get("evidence")), "source_adaptation": program.get("source_adaptation", program.get("adaptation")), "configuration": {key: program[key] for key in ("options", "C_harness", "private_C_seam", "old_resource_budgets_preserved") if key in program}, "report_validation": report.get("validation", report.get("run", report.get("execution")))}
+            for identifier in program["legacy_tests"]:
+                runtime.setdefault(program["id"], {})[identifier] = evidence
     cases = []
     for case in manifest["cases"]:
         identifier = case["legacy_test"]
@@ -134,14 +160,14 @@ def main() -> None:
         families = [family for family in reviews["families"] if re.search(family["path_pattern"], case["legacy_path"])]
         if not families:
             raise ValueError(f"unassigned normal source case: {identifier}")
-        relevant = [{"program": p, **runtime[p]} for p in case["programs"] if p in runtime and identifier in runtime[p]["legacy_tests"]]
+        relevant = [{"program": p, **runtime[p][identifier]} for p in case["programs"] if p in runtime and identifier in runtime[p]]
         all_runtime = len(relevant) == len(case["programs"])
         manual = reviews["reviewed_cases"].get(identifier)
         ledger_row = ledger_tests.get(identifier)
         ledger_final = bool(ledger_row and ledger_row["status"] in ("verified", "replaced"))
         if all_runtime:
             decisions = {entry["assessment"] for entry in relevant}
-            assessment = "existing-source-C-observations-match" if "existing-source-C-observations-match" in decisions else "original-body-runtime-and-diagnostic-evidence" if "original-body-diagnostic-evidence" in decisions else "original-body-runtime-evidence"
+            assessment = "original-body-artifact-evidence" if decisions == {"original-body-artifact-evidence"} else "existing-source-C-observations-match" if "existing-source-C-observations-match" in decisions else "original-body-runtime-and-diagnostic-evidence" if "original-body-diagnostic-evidence" in decisions else "original-body-runtime-and-artifact-evidence" if "original-body-artifact-evidence" in decisions else "original-body-runtime-evidence"
         else:
             assessment = manual["assessment"] if manual else "existing-ledger-source-replacement" if ledger_final else "runtime-observation-mapping-open"
         cases.append({
