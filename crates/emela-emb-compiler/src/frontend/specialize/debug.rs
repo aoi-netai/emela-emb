@@ -150,7 +150,7 @@ impl Specializer {
         self.debug_fallback.insert(id);
         let slot = self.functions.len();
         self.functions.push(function.clone());
-        function.body = Some(self.derive_body(&function, BuiltinTrait::Show, nested)?);
+        function.body = Some(self.derive_body(&function, BuiltinTrait::Show, nested, depth)?);
         self.function(&mut function, &[], depth + 1)?;
         self.functions[slot] = function;
         Ok(id)

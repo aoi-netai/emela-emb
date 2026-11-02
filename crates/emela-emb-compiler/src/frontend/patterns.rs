@@ -80,6 +80,16 @@ fn matrix(rows: Vec<Vec<Pattern>>, types: Vec<Ty>, catalog: &mut Catalog, depth:
     if types.is_empty() || rows.iter().any(|row| row.iter().all(any)) {
         return true;
     }
+    // An unconstrained recursive column must not expand forever before the
+    // remaining constrained columns are examined (for example a pair of Lists).
+    if rows.iter().all(|row| any(&row[0])) {
+        return matrix(
+            rows.into_iter().map(|row| row[1..].to_vec()).collect(),
+            types[1..].to_vec(),
+            catalog,
+            depth + 1,
+        );
+    }
     if depth >= 512 {
         return false;
     }

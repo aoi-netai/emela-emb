@@ -15,6 +15,7 @@ impl<'a> Source<'a> {
 pub(crate) const CORE_MODULES: &[(&str, &str)] = &[
     ("Prelude", include_str!("../lib/core/prelude.emel")),
     ("Option", include_str!("../lib/core/option.emel")),
+    ("List", include_str!("../lib/core/list.emel")),
     ("Int", include_str!("../lib/core/int.emel")),
     ("Int64", include_str!("../lib/core/int64.emel")),
     ("Float", include_str!("../lib/core/float.emel")),
@@ -67,6 +68,7 @@ pub(crate) enum Intrinsic {
     IntCheckedAdd,
     FloatParse,
     StringFromCodePoint,
+    ListJoin,
 }
 pub(crate) fn intrinsic(module: &str, name: &str) -> Option<Intrinsic> {
     Some(match (module, name) {
@@ -110,6 +112,7 @@ pub(crate) fn intrinsic(module: &str, name: &str) -> Option<Intrinsic> {
         ("Int", "checked_add") => Intrinsic::IntCheckedAdd,
         ("Float", "parse_or_none") => Intrinsic::FloatParse,
         ("String", "from_code_point") => Intrinsic::StringFromCodePoint,
+        ("List", "join") => Intrinsic::ListJoin,
         _ => return None,
     })
 }

@@ -103,6 +103,8 @@ fn list_element_types_spreads_and_exhaustiveness_are_checked() {
         "fn main(xs: List[Int, Int]) { 0 }",
         "fn main() { [1, ..[], 2] }",
         "fn main(xs: List[Int]) { xs match { [..tail, x] -> 0\n _ -> 1 } }",
+        "fn main() { List.sort([1.0]) }",
+        "type Ordered[A: Ord](value: A)\nfn main(xs: List[Ordered[Float]]) { () }",
     ] {
         let errors = compile(source).unwrap_err();
         assert_eq!(
@@ -124,6 +126,7 @@ fn classify(xs: List[Bool]) -> Int {
     [True, _, ..] -> 3
     [False, _, ..] -> 4 }
 }
+
 @export(c, "matrix")
 pub fn matrix() -> Int {
   assert classify([]) == 0
@@ -141,5 +144,91 @@ pub fn matrix() -> Int {
     support::compile_and_run(
         &output,
         &format!("{BOARD}\nint main(void) {{ assert(matrix()==42); return 0; }}"),
+    );
+}
+
+#[test]
+fn standard_list_api_custom_traits_and_stable_sort_execute() {
+    let source = r#"
+type Key(rank: Int, serial: Int)
+impl Key: Eq { fn eq(self, other) { self.rank == other.rank } }
+impl Key: Ord { fn compare(self, other) { Ord.compare(self.rank, other.rank) } }
+impl Key: Show { fn show(self) { "K#{self.rank}" } }
+@export(c, "standard_lists")
+pub fn standard_lists() -> Int {
+  xs = List.range(0, 1000)
+  empty: List[Int] = []
+  assert List.length(xs) == 1000
+  assert List.is_empty([]) && !List.is_empty(xs)
+  assert List.head(xs) == Some(0) && List.head(empty) == None
+  assert List.get(xs, -1) == None && List.get(xs, 999) == Some(999)
+  assert List.get(xs, 1000) == None && List.last(xs) == Some(999)
+  assert List.tail([1, 2, 3]) == [2, 3] && List.tail(empty) == []
+  assert List.reverse([1, 2, 3]) == [3, 2, 1]
+  assert List.append([1, 2], [3]) == [1, 2, 3]
+  assert List.flatten([[1], [], [2, 3]]) == [1, 2, 3]
+  assert List.take(xs, 2) == [0, 1] && List.take(xs, -1) == []
+  assert List.drop([1, 2, 3], 2) == [3] && List.drop(empty, 5) == []
+  assert List.zip([1, 2], ["a"]) == [(1, "a")]
+  assert List.enumerate(["a", "b"]) == [(0, "a"), (1, "b")]
+  assert List.unzip([(1, "a"), (2, "b")]) == ([1, 2], ["a", "b"])
+  assert [Key(1, 1)] == [Key(1, 2)]
+  assert Ord.compare([Key(1, 9)], [Key(2, 0)]) == Less
+  assert Ord.compare([1], [1, 0]) == Less
+  assert inspect([Key(7, 0), Key(8, 0)]) == "[K7, K8]"
+  assert inspect(["a", "b"]) == "[\"a\", \"b\"]"
+  sorted = List.sort([Key(2, 1), Key(1, 2), Key(2, 3), Key(1, 4)])
+  assert sorted match { [Key(_, 2), Key(_, 4), Key(_, 1), Key(_, 3)] -> True
+    _ -> False }
+  assert List.sort([3, 1, 2, 1]) == [1, 1, 2, 3]
+  42
+}
+"#;
+    let output = compile_sources(
+        &[Source::new("main.emel", source)],
+        "main.emel",
+        &Options::default().with_heap_bytes(262144),
+    )
+    .unwrap();
+    support::compile_and_run(
+        &output,
+        &format!(
+            "{BOARD}\nint main(void) {{ for(int i=0;i<20;i++) assert(standard_lists()==42); return 0; }}"
+        ),
+    );
+}
+
+#[test]
+fn dbg_lists_fall_back_for_elements_without_show_and_keep_custom_parts() {
+    let source = r#"
+type Key(n: Int)
+impl Key: Show { fn show(self) { "K#{self.n}" } }
+type Plain(key: Key, text: String)
+@export(c, "debug_list")
+pub fn debug_list() -> Int {
+  xs = dbg([Plain(Key(7), "x"), Plain(Key(8), "y")])
+  xs match { [Plain(Key(n), _), ..] -> n
+    _ -> 0 }
+}
+"#;
+    let output = compile_sources(
+        &[Source::new("main.emel", source)],
+        "main.emel",
+        &Options::default().with_heap_bytes(8192),
+    )
+    .unwrap();
+    support::compile_and_run(
+        &output,
+        &format!(
+            r#"{BOARD}
+#include <string.h>
+static int logs;
+void emela_board_debug(const char *text, uint16_t length) {{
+  const char expected[]="[Plain(key: K7, text: \"x\"), Plain(key: K8, text: \"y\")]";
+  assert(length==sizeof expected-1 && !memcmp(text, expected, length)); logs++;
+}}
+int main(void) {{ for(int i=0;i<100;i++) assert(debug_list()==7); assert(logs==100); return 0; }}
+"#
+        ),
     );
 }

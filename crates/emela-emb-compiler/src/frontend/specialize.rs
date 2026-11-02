@@ -378,7 +378,7 @@ impl Specializer {
             local.ty = self.ty(&source, local.ty, args, source.span)?;
         }
         if let Some(kind) = function.derivation.take() {
-            function.body = Some(self.derive_body(function, kind, false)?);
+            function.body = Some(self.derive_body(function, kind, false, depth)?);
         }
         if let Some(body) = &mut function.body {
             self.block(&source, body, args, depth)?;

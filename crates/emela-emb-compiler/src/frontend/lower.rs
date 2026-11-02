@@ -957,5 +957,6 @@ fn builtin(op: Intrinsic) -> b::Builtin {
         Intrinsic::IntCheckedAdd => b::Builtin::IntCheckedAdd,
         Intrinsic::FloatParse => b::Builtin::FloatParse,
         Intrinsic::StringFromCodePoint => b::Builtin::StringFromCodePoint,
+        Intrinsic::ListJoin => b::Builtin::StringJoin,
     }
 }

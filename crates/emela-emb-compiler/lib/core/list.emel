@@ -1,0 +1,219 @@
+# Synchronous List API adapted from the fixed legacy fork.
+# Higher-order APIs are connected in P4; allocation uses the configured fixed heap.
+
+pub fn length[A](xs: List[A]) -> Int {
+  count_onto(xs, 0)
+}
+
+fn count_onto[A](xs: List[A], n: Int) -> Int {
+  xs match {
+    []          -> n
+    [_, ..rest] -> count_onto(rest, n + 1)
+  }
+}
+
+pub fn is_empty[A](xs: List[A]) -> Bool {
+  xs match {
+    [] -> True
+    _  -> False
+  }
+}
+
+pub fn get[A](xs: List[A], index: Int) -> Option[A] {
+  xs match {
+    _ if index < 0 -> None
+    []             -> None
+    [x, ..rest]    -> if index == 0 { Some(x) } else { get(rest, index - 1) }
+  }
+}
+
+pub fn head[A](xs: List[A]) -> Option[A] {
+  xs match {
+    []      -> None
+    [x, ..] -> Some(x)
+  }
+}
+
+pub fn tail[A](xs: List[A]) -> List[A] {
+  xs match {
+    []          -> []
+    [_, ..rest] -> rest
+  }
+}
+
+pub fn reverse[A](xs: List[A]) -> List[A] {
+  reverse_onto(xs, [])
+}
+
+fn reverse_onto[A](xs: List[A], acc: List[A]) -> List[A] {
+  xs match {
+    []          -> acc
+    [x, ..rest] -> reverse_onto(rest, [x, ..acc])
+  }
+}
+
+pub fn append[A](xs: List[A], ys: List[A]) -> List[A] {
+  reverse_onto(reverse(xs), ys)
+}
+
+pub fn range(from: Int, to: Int) -> List[Int] {
+  range_onto(from, to, [])
+}
+
+fn range_onto(from: Int, to: Int, acc: List[Int]) -> List[Int] {
+  if to <= from { acc } else { range_onto(from, to - 1, [to - 1, ..acc]) }
+}
+
+pub fn zip[A, B](xs: List[A], ys: List[B]) -> List[(A, B)] {
+  zip_onto(xs, ys, [])
+}
+
+fn zip_onto[A, B](xs: List[A], ys: List[B], acc: List[(A, B)]) -> List[(A, B)] {
+  (xs, ys) match {
+    ([x, ..xs_rest], [y, ..ys_rest]) -> zip_onto(xs_rest, ys_rest, [(x, y), ..acc])
+    _                                -> reverse(acc)
+  }
+}
+
+pub fn take[A](xs: List[A], n: Int) -> List[A] {
+  take_onto(xs, n, [])
+}
+
+fn take_onto[A](xs: List[A], n: Int, acc: List[A]) -> List[A] {
+  if n <= 0 {
+    reverse(acc)
+  } else {
+    xs match {
+      []          -> reverse(acc)
+      [x, ..rest] -> take_onto(rest, n - 1, [x, ..acc])
+    }
+  }
+}
+
+pub fn drop[A](xs: List[A], n: Int) -> List[A] {
+  if n <= 0 {
+    xs
+  } else {
+    xs match {
+      []          -> []
+      [_, ..rest] -> drop(rest, n - 1)
+    }
+  }
+}
+
+pub fn last[A](xs: List[A]) -> Option[A] {
+  xs match {
+    []          -> None
+    [x]         -> Some(x)
+    [_, ..rest] -> last(rest)
+  }
+}
+
+pub fn enumerate[A](xs: List[A]) -> List[(Int, A)] {
+  range(0, length(xs)) |> zip(xs)
+}
+
+@intrinsic
+pub fn join(xs: List[String], sep: String) -> String
+
+# The legacy flatten/unzip implementations use internal lambdas. These helpers preserve
+# traversal order while leaving public higher-order functions for P4.
+pub fn flatten[A](xss: List[List[A]]) -> List[A] {
+  flatten_onto(reverse(xss), [])
+}
+fn flatten_onto[A](xss: List[List[A]], acc: List[A]) -> List[A] {
+  xss match {
+    [] -> acc
+    [xs, ..rest] -> flatten_onto(rest, append(xs, acc))
+  }
+}
+pub fn unzip[A, B](xys: List[(A, B)]) -> (List[A], List[B]) {
+  unzip_onto(reverse(xys), [], [])
+}
+fn unzip_onto[A, B](xys: List[(A, B)], xs: List[A], ys: List[B]) -> (List[A], List[B]) {
+  xys match {
+    [] -> (xs, ys)
+    [(x, y), ..rest] -> unzip_onto(rest, [x, ..xs], [y, ..ys])
+  }
+}
+
+
+# P3 keeps the legacy stable merge sort and substitutes its internal callback
+# with the resolved Ord method. Public sort_by remains in P4.
+pub fn sort[A: Ord](xs: List[A]) -> List[A] {
+  merge_all(singleton_runs(xs, []))
+}
+fn singleton_runs[A](xs: List[A], acc: List[List[A]]) -> List[List[A]] {
+  xs match {
+    [] -> reverse(acc)
+    [x, ..rest] -> singleton_runs(rest, [[x], ..acc])
+  }
+}
+
+fn merge_all[A: Ord](runs: List[List[A]]) -> List[A] {
+  runs match {
+    []    -> []
+    [run] -> run
+    _     -> merge_all(merge_pairs_onto(runs, []))
+  }
+}
+
+fn merge_pairs_onto[A: Ord](
+  runs: List[List[A]],
+  acc: List[List[A]],
+) -> List[List[A]] {
+  runs match {
+    [a, b, ..rest] -> merge_pairs_onto(rest, [merge_onto(a, b, []), ..acc])
+    [a]            -> reverse([a, ..acc])
+    _              -> reverse(acc)
+  }
+}
+
+fn merge_onto[A: Ord](xs: List[A], ys: List[A], acc: List[A]) -> List[A] {
+  (xs, ys) match {
+    ([], _) -> reverse_onto(acc, ys)
+    (_, []) -> reverse_onto(acc, xs)
+    ([x, ..xs_rest], [y, ..ys_rest]) -> Ord.compare(x, y) match {
+      Greater -> merge_onto(xs, ys_rest, [y, ..acc])
+      _       -> merge_onto(xs_rest, ys, [x, ..acc])
+    }
+  }
+}
+
+fn eq_lists[A: Eq](xs: List[A], ys: List[A]) -> Bool {
+  (xs, ys) match {
+    ([], [])                         -> True
+    ([x, ..xs_rest], [y, ..ys_rest]) -> Eq.eq(x, y) && eq_lists(xs_rest, ys_rest)
+    _                                -> False
+  }
+}
+
+fn compare_lists[A: Ord](xs: List[A], ys: List[A]) -> Ordering {
+  (xs, ys) match {
+    ([], [])                         -> Equal
+    ([], _)                          -> Less
+    (_, [])                          -> Greater
+    ([x, ..xs_rest], [y, ..ys_rest]) -> Ord.compare(x, y) match {
+      Equal -> compare_lists(xs_rest, ys_rest)
+      order -> order
+    }
+  }
+}
+
+impl List[A: Eq]: Eq {
+  fn eq(self, other) { eq_lists(self, other) }
+}
+impl List[A: Ord]: Ord {
+  fn compare(self, other) { compare_lists(self, other) }
+}
+# The old Show body maps String.show_nested and joins. The tail-recursive
+# mapping helper keeps the same order and custom element dispatch without a closure.
+impl List[A: Show]: Show {
+  fn show(self) { "[#{join(show_parts(self, []), ", ")}]" }
+}
+fn show_parts[A: Show](xs: List[A], acc: List[String]) -> List[String] {
+  xs match {
+    [] -> reverse(acc)
+    [x, ..rest] -> show_parts(rest, [String.show_nested(x), ..acc])
+  }
+}

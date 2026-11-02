@@ -241,8 +241,14 @@ impl Catalog {
                     "type 'List' expects one argument",
                 ));
             }
-            let element =
-                backend_type(self.type_text(modules, module, arguments[0], span, params)?);
+            let element = backend_type(self.type_text(
+                modules,
+                module,
+                arguments[0],
+                span,
+                params,
+                self_type,
+            )?);
             return Ok(Ty::Compound(self.core.types.intern(b::Type::List(element))));
         }
         let id = self
