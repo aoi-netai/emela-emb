@@ -25,9 +25,11 @@ pub fn virtual_time()->Int64 {
   (_,end)=State.run(Instant.from_unix_milliseconds(100),fn(){
     with TestClock {
       assert Instant.to_unix_milliseconds((use Clock).now())==100
-      (use Clock).sleep(-7)
-      assert Instant.to_unix_milliseconds((use Clock).now())==100
-      (use Clock).sleep(50)
+      times=List.map([-7,50],fn(ms){
+        (use Clock).sleep(ms)
+        Instant.to_unix_milliseconds((use Clock).now())
+      })
+      assert times==[100,150]
       assert Instant.to_unix_milliseconds((use Clock).now())==150
     }
   })
