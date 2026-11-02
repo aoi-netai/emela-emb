@@ -18,6 +18,8 @@ mod isr;
 mod memory;
 #[path = "p7_binding_tests.rs"]
 mod p7_bindings;
+#[path = "p7_const_source_tests.rs"]
+mod p7_const_source;
 #[path = "p7_contract_tests.rs"]
 mod p7_contract;
 #[path = "p7_data_tests.rs"]
