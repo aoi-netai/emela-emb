@@ -118,7 +118,19 @@ P1時点の`fn f() { f() }`拒否は、戻り型の自動汎化に伴って更�
 
 ## P2の残りの確認
 
-method呼出しの省略記法、generic trait method、型宣言のfield制約と旧fixture由来の追加回帰を確認中。旧`release_0_24/traits.emel`は同期部分を独立fixtureへ抽出し、List/closure/Fiber/Causeを含む元fixture全体の実行はP6以降に残す。先行成功だけで旧混在fixture・旧115関連試験・横断要件全体をverifiedにしない。
+`5db890c` でmethod呼出しの省略記法と未使用の型宣言のfield制約を接続した。`tests/p2_methods.rs` はreceiverの一度評価と名前付き引数の評価順、定義moduleの公開関数、可視traitと型パラメーターのboundからの解決、曖昧なmethodとfield名衝突の拒否を確認する。`4aabd7a` の `tests/p2_modules.rs` は選択importでもmodule名を導入し、同一定義の再importを許可しつつ別定義・private名を拒否する。固定旧仕様 `spec/language/04-modules.md` のnamespace規則に合わせた。
+
+`e445dc4` の `tests/p2_regressions.rs` は旧同期traitのcustom/default/supertraitと失敗、同名traitのmodule別dispatch、String失敗payloadの寿命、runtime constの初期化順・1000回のdefect cache、Option.or_failの引数副作用、FloatのNaN payloadとsigned zero、Unicode scalar境界を追加検証する。全経路でfailするString関数の出力容量localも、`afa12e4` でCの未使用変数警告を出さなくなった。
+
+`af651d2` のconst評価はIf/SwitchのYield/Returnとpayloadのないenumのtagを扱い、構造を持つ値や未対応controlはruntime評価へ残す。`tests/p2_consts.rs` は条件付きOrderingを含む静的評価を確認する。`8aa6b02` の `tests/p2_static_strings.rs` は旧 `string_comparison::all_constant_comparisons_match_runtime_order_without_emitting_the_helper` の全5組×6演算をsource constへ移し、C戻り値とruntime helper非生成を確認した。
+
+- code revision `af651d2` の `cargo test --workspace --locked --offline`: 188 pass、失敗/skip 0、終了0。fmt/Clippy全target・警告拒否も終了0。
+- `8aa6b02` の `cargo test -p emela-emb-compiler --test p2_static_strings --locked --offline`: 1 pass、C両最適化pass。
+- `tests/p2_standard_api.rs::code_point_capacity_defects_are_preserved_when_only_the_tag_or_no_value_is_used`: String容量2、heap4096で2byte scalarを1000回生成・解放し、3byte scalarはtagだけの利用と結果破棄の両方で `STRING_CAPACITY` / `string capacity exceeded` を観測した。旧 `dynamic_string_from_code_point_checks_capacity_before_writing` に対応し、C両最適化pass。
+
+`tests/p2_debug.rs` の追加回帰は、todoの `TODO` kind/`not yet implemented` と動的panicの `PANIC` kind/整形messageをC hookで比較し、停止後のexternalを呼ばないことを両最適化で確認した。
+
+generic trait methodのIR具体化は `ccd0615` で検証済みで、source収集・型検査への接続を確認中。旧`release_0_24/traits.emel`のList/closure/Fiber/Causeを含む元fixture全体の実行はP6以降に残す。同期部分の成功だけで旧混在fixture・旧115関連試験・横断要件全体をverifiedにしない。
 
 ## 最終統合の追記欄
 
