@@ -72,9 +72,18 @@ String引数を持つ自己tail recurで、loop cleanupが未宣言の所有flag
 
 const導入後にも実際のRust 1.85.0で `cargo check --workspace --all-targets --locked --offline` が終了0。準備済みのFail/Escape ASTをcheckerへ接続する途中のため、その未読field警告は残る。警告を抑制してP2完了とはせず、接続後の最終Clippyで解消を確認する。
 
+## 失敗集合・fail・escapeのsource接続
+
+`32bc50b` で値型と別のerror集合を推論し、fail/escapeをbackendの失敗辺へ接続した。明示`-> T`でfails省略なら未回復の失敗を拒否し、戻り型省略では相互参照する関数の失敗集合を推論する。escapeはunguardedなpattern群がerror payloadを共同で網羅した場合にだけ、そのerrorを集合から除く。genericなerror引数は回復済みの場合も単一error型に制約し、constの未回復failを拒否する。
+
+`tests/p2_failures.rs` の3 source試験で、引数途中の失敗による後続処理の停止、escape全体からの脱出、handler内の再失敗の外側への伝播、Bool payloadの共同網羅、回復済みconstのcache、generic or_fail、失敗集合の相互再帰推論を確認した。
+
+- `cargo test --workspace --locked --offline`: 141 pass、失敗/skip 0、終了0。C試験は`-O0`/`-O2`とも成功。
+- `cargo fmt --all --check` と `cargo clippy --workspace --all-targets --locked --offline -- -D warnings`: 終了0。const導入時に残っていたAST未読警告も実装の接続で解消した。
+
 ## P2の残りの確認
 
-未確定戻り型の汎化、trait/default/supertrait/derive、fails/fail/escape、mono const、数値parseを後続の機能別検証へ接続する。旧`release_0_24/traits.emel`は同期部分を独立fixtureへ抽出し、List/closure/Fiber/Causeを含む元fixture全体の実行はP6以降に残す。先行String成功だけで旧混在fixture・旧115関連試験・横断要件全体をverifiedにしない。
+未確定戻り型の汎化、trait/default/supertrait/derive、標準Prelude/Optionと数値parse、const patternを後続の機能別検証へ接続する。旧`release_0_24/traits.emel`は同期部分を独立fixtureへ抽出し、List/closure/Fiber/Causeを含む元fixture全体の実行はP6以降に残す。先行String成功だけで旧混在fixture・旧115関連試験・横断要件全体をverifiedにしない。
 
 ## 最終統合の追記欄
 
