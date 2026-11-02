@@ -95,6 +95,12 @@ P1時点の`fn f() { f() }`拒否は、戻り型の自動汎化に伴って更�
 - `cargo fmt --all --check` と `cargo clippy --workspace --all-targets --locked --offline -- -D warnings`: 終了0。
 - `cargo test -p emela-emb-compiler --release --test p2_inference --locked --offline`: 4 pass、失敗/skip 0、終了0。Rustのrelease buildでも同じC `-O0`/`-O2`試験が成功。
 
+## Cの入口がない入力の到達性
+
+`00de1e9` で、`@export`と選択entryのどちらもない場合に全関数を生成するfallbackを除去した。公開範囲を示す`pub`だけではC生成の入口にしない。標準ライブラリの追加により、未使用のparse等の失敗payloadがheapを要求していた問題も解消する。
+
+`tests/p2_reachability.rs` は、未使用external・失敗payloadを含むライブラリsourceをheap 0で生成し、関数・external参照・heapを生成しないCを`-O0`/`-O2`でコンパイル・実行した。未使用bodyの型エラーは引き続き拒否する。全146試験とfmt/Clippyが成功し、IR試験のroot指定を変える必要はなかった。
+
 ## P2の残りの確認
 
 trait/default/supertrait/derive、標準Prelude/Optionと数値parse、const patternを後続の機能別検証へ接続する。旧`release_0_24/traits.emel`は同期部分を独立fixtureへ抽出し、List/closure/Fiber/Causeを含む元fixture全体の実行はP6以降に残す。先行String成功だけで旧混在fixture・旧115関連試験・横断要件全体をverifiedにしない。

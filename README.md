@@ -11,7 +11,7 @@ pub fn answer() -> Int {
 }
 ```
 
-P1では複数module、内部関数、scalar型、演算、分岐、自己末尾再帰、assert、同期externalを扱います。正確な構文、仕様の参照版、未対応の機能は [対応仕様](docs/language-subset.md) を参照してください。Emela全体の互換性・Tier 2適合は対象外です。
+P1のscalar経路が完了し、P2の同期データ・型システムを拡張中です。P1の確定した範囲は [対応仕様](docs/language-subset.md)、追加したデータ型・String・汎化・失敗・constの実行結果は [P2検証報告](docs/reports/compiler-p2.md) を参照してください。[7段階の計画](docs/compiler-parity-plan.md) に沿って、固定した旧fork相当の独立コンパイラーを実現します。
 
 ## ビルドと生成
 
@@ -34,9 +34,9 @@ cargo run --locked -p emela-emb-cli -- build main.emel math.emel --entry main.em
 
 `--heap-bytes` は固定heapのbyte数（既定0）、`--string-capacity` は動的Stringのbyte容量（既定256、1〜512）です。容量はcompilerの `Options` と同じ入力経路へ渡します。ライブラリでは `compile_sources(&[Source::new(name, text)], entry_name, &Options)` を利用できます。filesystemや外部processはCLIと試験helperが担当します。
 
-P1のsource/API・CLI試験は、生成したCを `cc -O0` と `cc -O2` の両方でコンパイル・リンク・実行します。C compilerの不在や実行失敗をskipしません。
+source/API・CLI試験は、生成したCを `cc -O0` と `cc -O2` の両方でコンパイル・リンク・実行します。C compilerの不在や実行失敗をskipしません。
 
-現在の試験と独立環境での確認は [P1検証報告](docs/reports/compiler-p1.md)、最初の最小実装の履歴は [最小実験結果](docs/minimal-c-experiment.md) に記録しています。
+P1の試験と独立環境での確認は [P1検証報告](docs/reports/compiler-p1.md)、最初の最小実装の履歴は [最小実験結果](docs/minimal-c-experiment.md) に記録しています。
 
 旧fork相当への拡張は [対応表に基づく終了条件と移行台帳](docs/compiler-coverage.md) で追跡します。[旧Flow IR・実装対応表](docs/reference/legacy-flow/README.md) を固定した参照資料として同梱しています。
 
