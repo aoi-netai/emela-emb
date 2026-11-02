@@ -1,0 +1,16 @@
+[package]
+name = "emela-emb-cli"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+
+[[bin]]
+name = "emela-emb"
+path = "src/main.rs"
+
+[dependencies]
+emela-emb-compiler = { path = "../emela-emb-compiler" }
+
+[lints]
+workspace = true
