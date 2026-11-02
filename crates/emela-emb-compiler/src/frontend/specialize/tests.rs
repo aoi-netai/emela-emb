@@ -379,3 +379,44 @@ fn malformed_parameter_indices_and_evaluation_order_are_rejected() {
             .contains("complete permutation")
     );
 }
+
+#[test]
+fn mutually_recursive_templates_share_reserved_concrete_instances() {
+    let mut input = recursive_input(false);
+    let mut odd = input.functions[0].clone();
+    odd.id = ir::DefinitionId(2);
+    odd.name = "odd".into();
+    odd.source_name = "odd.emel".into();
+    let ir::Statement::Expr(ir::Expr {
+        kind: ir::ExprKind::If { else_, .. },
+        ..
+    }) = &mut input.functions[0].body.as_mut().unwrap().statements[0]
+    else {
+        panic!()
+    };
+    let ir::Statement::Expr(ir::Expr {
+        kind: ir::ExprKind::Call { target, .. },
+        ..
+    }) = &mut else_.statements[0]
+    else {
+        panic!()
+    };
+    *target = ir::DefinitionId(2);
+    let ir::Statement::Expr(ir::Expr {
+        kind: ir::ExprKind::Call { args, .. },
+        ..
+    }) = &mut input.functions[1].body.as_mut().unwrap().statements[0]
+    else {
+        panic!()
+    };
+    args[0] = integer(64);
+    input.functions.push(odd);
+    let concrete = specialize(input.clone()).unwrap();
+    assert_eq!(concrete.functions.len(), 3);
+    assert!(
+        concrete.functions.iter().all(
+            |function| function.id != ir::DefinitionId(0) && function.id != ir::DefinitionId(2)
+        )
+    );
+    execute(input);
+}
