@@ -96,7 +96,8 @@ fn execute_with_harness(input: ir::Program, harness: &str) {
     execute_with_options(input, harness, &crate::Options::default());
 }
 fn execute_with_options(input: ir::Program, harness: &str, options: &crate::Options) {
-    let program = specialize(input).unwrap();
+    let mut program = specialize(input).unwrap();
+    crate::frontend::function_abi::project(&mut program).unwrap();
     let lowered = crate::frontend::lower::lower(&program);
     let mut output = crate::backend::compile_program(lowered, options).unwrap();
     if options.heap_bytes() != 0 {
@@ -1996,3 +1997,6 @@ fn generic_function_references_inside_a_lambda_lower_to_indirect_calls() {
 
 #[path = "tests_effects.rs"]
 mod effects;
+
+#[path = "tests_state.rs"]
+mod state;

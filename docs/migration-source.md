@@ -374,3 +374,11 @@ Handler/Evidence/operation call/RetireとCellの型・ID検証は独自lowerに�
 関数型間のCoerceは、既存plan/emitのadapter互換条件に沿って独自validatorへ接続する。引数の変更、Never以外の戻り型変更、evidenceの消去は拒否し、Unit消去を伴うpure関数からfailure/evidence ABIへの変換をIR/C両最適化・1000回の全heap回収で確認する。
 
 戻り型Neverの関数値は任意の具体戻り型へ拡大できる。failure ABIだけで戻る経路には初期化済みの仮結果を返し、通常経路でNever関数が戻った場合はassert defectにする。IR/C試験ではIntへの拡大後も元のdefectと捕捉可能なfailureがそれぞれ保たれることを両最適化で確認する。
+
+## P4のState.run合成
+
+固定revisionの `crates/emela-core/lib/std/state.emel`（SHA-256: `44b9437ac0aab7c892574deb918eabff2f13d6f61db19623b80f28f133e80856`）をcompiler所有sourceとして保存する。契約は旧 `crates/emela-core/src/lower.rs` の `StateRun::apply` / `state_run` を参照した（同file SHA-256: `1b625dd7d1dd64036d2ec2ec2886312415a5c088b014622b353072de7f454d86`）。旧frontendを依存・同梱せず、独自の具体化処理 `frontend/specialize/state.rs` でCell、capture付きoperation、handler、evidence供給とcallback呼出しを合成する。
+
+引数はnamed argumentを含めsource順で一度ずつ評価し、成功後にCellを作る。Stateはretireせず、返却closureによる共有状態の保持を許す。公開Cell型やStd.Cell APIは追加しない。独自IR/C試験で、引数の順序、返却closureによる連続更新、1000回のheap全回収と別moduleのState identity拒否を確認した。
+
+現時点ではStd.Stateの通常source供給は未登録。effect集合・source checkerの統合後に有効化し、source/C実行を別に確認する。

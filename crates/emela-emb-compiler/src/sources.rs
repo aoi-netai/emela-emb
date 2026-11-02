@@ -31,6 +31,8 @@ pub(crate) const CORE_MODULES: &[(&str, &str)] = &[
 /// source modules above. User function spellings never select an intrinsic implementation.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub(crate) enum Intrinsic {
+    /// Expands to a Cell, a handler, and a callback invocation during specialization.
+    StateRun,
     Panic,
     Todo,
     Dbg,
@@ -86,6 +88,7 @@ pub(crate) enum Intrinsic {
 }
 pub(crate) fn intrinsic(module: &str, name: &str) -> Option<Intrinsic> {
     Some(match (module, name) {
+        ("Std.State", "run") => Intrinsic::StateRun,
         ("Prelude", "panic") => Intrinsic::Panic,
         ("Prelude", "todo") => Intrinsic::Todo,
         ("Prelude", "dbg") => Intrinsic::Dbg,

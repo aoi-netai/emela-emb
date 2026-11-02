@@ -711,7 +711,7 @@ impl Specializer {
                 type_arguments,
             } => {
                 Self::order(function, expression.span, order, args.len())?;
-                for value in args {
+                for value in args.iter_mut() {
                     self.expression(function, value, arguments, depth)?;
                 }
                 let concrete = type_arguments
@@ -730,6 +730,24 @@ impl Specializer {
                     .collect::<Result<Vec<_>>>()?;
                 *target = self.instantiate(function, *target, concrete, expression.span, depth)?;
                 type_arguments.clear();
+                if let Some(runtime) = self
+                    .functions
+                    .iter()
+                    .find(|candidate| {
+                        candidate.id == *target
+                            && candidate.intrinsic == Some(crate::sources::Intrinsic::StateRun)
+                    })
+                    .cloned()
+                {
+                    *expression = self.state_run_expression(
+                        function,
+                        &runtime,
+                        std::mem::take(args),
+                        order,
+                        expression.ty,
+                        expression.span,
+                    )?;
+                }
             }
         }
         Ok(())
@@ -751,3 +769,6 @@ mod debug;
 
 #[path = "specialize/effects.rs"]
 mod effects;
+
+#[path = "specialize/state.rs"]
+mod state;

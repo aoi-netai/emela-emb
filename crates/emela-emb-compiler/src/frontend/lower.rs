@@ -1082,6 +1082,7 @@ fn literal(value: &ir::Literal) -> b::Const {
 }
 fn builtin(op: Intrinsic) -> b::Builtin {
     match op {
+        Intrinsic::StateRun => unreachable!("State.run is expanded before backend lowering"),
         Intrinsic::Panic => b::Builtin::Panic,
         Intrinsic::Todo => b::Builtin::Todo,
         Intrinsic::Dbg => b::Builtin::Dbg,
