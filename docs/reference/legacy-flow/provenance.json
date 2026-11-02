@@ -1,0 +1,886 @@
+{
+  "schema_version": 1,
+  "source_repository": "https://github.com/aoi-netai/emela-emb-dev",
+  "source_revision": "c34c0aeefdd966d854371b3110db00a47798751d",
+  "source_directory": "crates/emela-codegen-emb/docs/generated",
+  "license": "Apache-2.0",
+  "license_path": "LICENSE",
+  "files": [
+    {
+      "path": "flow-ir-inventory.json",
+      "source_path": "crates/emela-codegen-emb/docs/generated/flow-ir-inventory.json",
+      "source_sha256": "5c495460514043988b8bbb0edb64ead4bab7d9f792024ebd841537ef48f7defb",
+      "stored_sha256": "5c495460514043988b8bbb0edb64ead4bab7d9f792024ebd841537ef48f7defb",
+      "transformations": []
+    },
+    {
+      "path": "flow-ir-inventory.md",
+      "source_path": "crates/emela-codegen-emb/docs/generated/flow-ir-inventory.md",
+      "source_sha256": "55a5aebaae4536629d4eff20c8dea3cd79ca52da2daa49482013a8bc2930c01d",
+      "stored_sha256": "561f3926ba00161594154ef43d1619bfacb5eda5bbfe2b3d2623fb559a15b070",
+      "transformations": [
+        "prepend snapshot notice",
+        "rewrite 432 source links to public commit-pinned URLs at 6fb21ccb59da45ada607cba024641c32101c93dc"
+      ]
+    },
+    {
+      "path": "flow-implementation-inventory.json",
+      "source_path": "crates/emela-codegen-emb/docs/generated/flow-implementation-inventory.json",
+      "source_sha256": "25ca32c2a0249d10069e7f648c954c726b45c6aae9ce46eace99b5df758a85ef",
+      "stored_sha256": "25ca32c2a0249d10069e7f648c954c726b45c6aae9ce46eace99b5df758a85ef",
+      "transformations": []
+    },
+    {
+      "path": "flow-implementation-inventory.md",
+      "source_path": "crates/emela-codegen-emb/docs/generated/flow-implementation-inventory.md",
+      "source_sha256": "d826a9ddd85ea86819c34074810fe94274bd6ad2591ae04218ba0ae68468e610",
+      "stored_sha256": "a9fb5406b1ea499b86ed21b872f5942a2d18a65aea3ab1e1ca18a18b84f1b763",
+      "transformations": [
+        "prepend snapshot notice",
+        "rewrite 402 source links to public commit-pinned URLs at 6fb21ccb59da45ada607cba024641c32101c93dc"
+      ]
+    },
+    {
+      "path": "flow-backend-inventory.json",
+      "source_path": "crates/emela-codegen-emb/docs/generated/flow-backend-inventory.json",
+      "source_sha256": "e8161afe09e199e2fbfcf892f841a21b13afbf638c6947be50092b89073ef8e5",
+      "stored_sha256": "e8161afe09e199e2fbfcf892f841a21b13afbf638c6947be50092b89073ef8e5",
+      "transformations": []
+    },
+    {
+      "path": "flow-backend-inventory.md",
+      "source_path": "crates/emela-codegen-emb/docs/generated/flow-backend-inventory.md",
+      "source_sha256": "a45d83d608cb08054dc6c55ab6d511f4d4c02171e45f5a205271c392262bb15b",
+      "stored_sha256": "6c48d7c7922748c84ad360dc8777b0379010780159b9d57f45b2a47c1485b946",
+      "transformations": [
+        "prepend snapshot notice",
+        "rewrite 1261 source links to public commit-pinned URLs at 6fb21ccb59da45ada607cba024641c32101c93dc"
+      ]
+    },
+    {
+      "path": "flow-coverage.json",
+      "source_path": "crates/emela-codegen-emb/docs/generated/flow-coverage.json",
+      "source_sha256": "f270449666d639bead4d2dd54bcce9c8d8d1baca61477ec5af173f39ce51149c",
+      "stored_sha256": "f270449666d639bead4d2dd54bcce9c8d8d1baca61477ec5af173f39ce51149c",
+      "transformations": []
+    },
+    {
+      "path": "flow-coverage.md",
+      "source_path": "crates/emela-codegen-emb/docs/generated/flow-coverage.md",
+      "source_sha256": "5d7fc7ad6bcf2aac1013752078237d42958ea72a4ffd1c4bf2ea3424a397c515",
+      "stored_sha256": "d1646ebd269d63b120fcd2e20958028fa3991f7fd526a19fbcfc22e3671d443b",
+      "transformations": [
+        "prepend snapshot notice",
+        "rewrite 0 source links to public commit-pinned URLs at 6fb21ccb59da45ada607cba024641c32101c93dc"
+      ]
+    }
+  ],
+  "license_sha256": "5df65efbea284e97cad56bd9f5379f985a930c4681260409badce16e29fc1e35",
+  "source_revision_public": false,
+  "source_links_revision": "6fb21ccb59da45ada607cba024641c32101c93dc",
+  "source_links_verification": {
+    "date": "2026-11-02",
+    "public_commit_api_result": "HTTP 200",
+    "baseline_commit_api_result": "HTTP 422: No commit found for SHA",
+    "comparison": "Git blob equality at source_revision and source_links_revision for every linked source file and all eight report originals",
+    "linked_source_files": 199
+  },
+  "source_link_targets": [
+    {
+      "path": "crates/emela-codegen-emb/src/compiler/emit/control.rs",
+      "git_blob": "586802a244925f2cecc3fdf5417588bc253a1420"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/compiler/emit/features/builtins/bytes.rs",
+      "git_blob": "89d2c5143a061c137e886bdc07f1a4461e2e33db"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/compiler/emit/features/builtins/cells.rs",
+      "git_blob": "2a87eaffcd20bb014c74993562bc733028b2fd9b"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/compiler/emit/features/builtins/float.rs",
+      "git_blob": "30cb3c04899b54b755f3408f0d972ddcae98f76b"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/compiler/emit/features/builtins/float_parse.rs",
+      "git_blob": "d71c4880833f1f179266718bb5ad5f627da98cae"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/compiler/emit/features/builtins/float_to_string.rs",
+      "git_blob": "8f550efd3ce223df0d1f4baabb64093d1c349b44"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/compiler/emit/features/builtins/int64_to_string.rs",
+      "git_blob": "38594b945fe75083ad8c571457541cda72a87412"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/compiler/emit/features/builtins/int_checked_add.rs",
+      "git_blob": "04a199e166ef8a323d08cd3dd7ece24dfd3f70cd"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/compiler/emit/features/builtins/int_parse.rs",
+      "git_blob": "1fb85a1dd111d788879c13b09f4bc95123c1b16c"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/compiler/emit/features/builtins/int_to_string.rs",
+      "git_blob": "f0d4a8b621bc92e305ff06a938120e83095dedd4"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/compiler/emit/features/builtins/integer.rs",
+      "git_blob": "40aa3d17ba47a1c7aec19117bf313839fc07c98f"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/compiler/emit/features/builtins/integer64.rs",
+      "git_blob": "77f1155bb0ea0fd2d647808ef8cae51a72f327ca"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/compiler/emit/features/builtins/mod.rs",
+      "git_blob": "963c120b1714806e4ad370faa441991c93fae500"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/compiler/emit/features/builtins/rejected.rs",
+      "git_blob": "efe0d5639af7365f1f5e372f7c1b398b7283dd9c"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/compiler/emit/features/builtins/string_append.rs",
+      "git_blob": "19ca87ccb3484610532ea579a7efc78192fd75b4"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/compiler/emit/features/builtins/string_byte_size.rs",
+      "git_blob": "be76abf478c6ae9063492d7037e80889bc4a9f4c"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/compiler/emit/features/builtins/string_chars.rs",
+      "git_blob": "8b00622a03c1048936977b53127f2ce87ebdedca"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/compiler/emit/features/builtins/string_code_points.rs",
+      "git_blob": "6066a9e3cdda20d75edeb2b9179f5730e37dd257"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/compiler/emit/features/builtins/string_contains.rs",
+      "git_blob": "7f1f88ccd178af6e2006418d3ecd8e4122f71a2a"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/compiler/emit/features/builtins/string_ends_with.rs",
+      "git_blob": "90be4b768d0084a8cedcc6b9fecd709d1c18b425"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/compiler/emit/features/builtins/string_from_code_point.rs",
+      "git_blob": "ea0b26c49008d6f9ec0e645b92b6093fee78a532"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/compiler/emit/features/builtins/string_join.rs",
+      "git_blob": "bad066dc58623fdd540fc226331f5bcc3998e38e"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/compiler/emit/features/builtins/string_length.rs",
+      "git_blob": "ac000815e598df099f690766496c35b089e9583f"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/compiler/emit/features/builtins/string_split.rs",
+      "git_blob": "12f047b445aa4a8c3cfe8e1cbecfdc541e647851"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/compiler/emit/features/builtins/string_starts_with.rs",
+      "git_blob": "516c4ad086904fff06a556a9a600cb5f05e408d9"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/compiler/emit/features/builtins/string_trim.rs",
+      "git_blob": "f832533a2833935c19c8bb53c43cd3dc7b25eaf7"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/compiler/emit/features/case_keys.rs",
+      "git_blob": "04774dd9ac047f15624090df2993dab6657f6541"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/compiler/emit/features/constants.rs",
+      "git_blob": "a1c30aaabb02b49fe084bd25f4a7a3d6ba8c9f81"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/compiler/emit/features/failures.rs",
+      "git_blob": "95af668ddedd9e78ba18df79cd8895e523c8c1b8"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/compiler/emit/features/fibers/attempt.rs",
+      "git_blob": "dbd03de79da553016d22c168935acca3f4854dd8"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/compiler/emit/features/fibers/await.rs",
+      "git_blob": "51c9237abe640f0d486a24c4092c9e0eefc39ef9"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/compiler/emit/features/fibers/cause_kind.rs",
+      "git_blob": "2c85f766940d1be9503ef46a8ebba4720a3debc9"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/compiler/emit/features/fibers/cause_raise.rs",
+      "git_blob": "a0683396eb00c8da4246dd4d6ac439a05f48f252"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/compiler/emit/features/fibers/cause_to_string.rs",
+      "git_blob": "7184c994dd5c250099b548e34914d513319bd8f9"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/compiler/emit/features/fibers/complete.rs",
+      "git_blob": "d1b48581ebc2d07a208a250679bd082f4491ae6b"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/compiler/emit/features/fibers/deferred.rs",
+      "git_blob": "ee3e0cd833bff5e87da23298d410dfd5cbf4548e"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/compiler/emit/features/fibers/deferred_await.rs",
+      "git_blob": "6937297aa9bb49ec931cd49916e084554af39632"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/compiler/emit/features/fibers/fork.rs",
+      "git_blob": "38e8368266505b373360c592a0c258f4df436e1e"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/compiler/emit/features/fibers/interrupt.rs",
+      "git_blob": "8da148fc6554de4bbe9be94beaccbf032544f082"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/compiler/emit/features/fibers/join.rs",
+      "git_blob": "868cbbab8e2324cc5868ff866cc2c8ab7935d8f7"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/compiler/emit/features/fibers/mod.rs",
+      "git_blob": "445628ab38325a36f11f8683104f668d7687ca5d"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/compiler/emit/features/fibers/poll.rs",
+      "git_blob": "fb7729965e3eb3a35df6c49627ee08ea49c0d13b"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/compiler/emit/features/fibers/scope.rs",
+      "git_blob": "5148f4a856e94774a26ba0eca7d9d5042927522b"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/compiler/emit/features/operands.rs",
+      "git_blob": "cf5774684ed2440e3f20147cc35aebc7ea46c513"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/compiler/emit/features/primitive_operations.rs",
+      "git_blob": "de1ce57de6bfeff73b5d5e6e85d42f43779da835"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/compiler/emit/features/primitive_types.rs",
+      "git_blob": "87fd81737dc2db703ddc0c53862fca190a6f230e"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/compiler/emit/features/runtime.rs",
+      "git_blob": "edcf4188e0e1950eb8fb980a4c4790d6a1c45fcb"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/compiler/emit/features/statements/block.rs",
+      "git_blob": "5ba21cd5fbb7787725eac204b26b290715f9b2e0"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/compiler/emit/features/statements/drop.rs",
+      "git_blob": "becf11307620e3ddd72aa32e723d1b158f8d7777"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/compiler/emit/features/statements/dup.rs",
+      "git_blob": "4c0e5f008435a0cfd13f6db125776b99d0a9858f"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/compiler/emit/features/statements/if_.rs",
+      "git_blob": "14652a0904d62fc1f94b680c44b8a9ac09ef0ded"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/compiler/emit/features/statements/let_.rs",
+      "git_blob": "37daef32d841b157888e6b1bc404f34e20d39756"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/compiler/emit/features/statements/loop_.rs",
+      "git_blob": "ece9018378f390939bf826260d7db53924f7a08c"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/compiler/emit/features/statements/mod.rs",
+      "git_blob": "b823e983bea25dcfc6716826669af8ea7d2250e2"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/compiler/emit/features/statements/protect.rs",
+      "git_blob": "379a35d577780b40728c793d60c654a95d280557"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/compiler/emit/features/statements/switch.rs",
+      "git_blob": "9d921fa164088da314d5bb3b34a8fa74d1f7a532"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/compiler/emit/features/switches.rs",
+      "git_blob": "d61f74c9135466a62bc286055bd5d5259968a949"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/compiler/emit/features/terms/break.rs",
+      "git_blob": "5e3aeda3f249159380dbe369e2b0b31c1c3d812b"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/compiler/emit/features/terms/defect.rs",
+      "git_blob": "9a9ef42116a0cf9bd8fb343d0f8b24fc9f6dd73f"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/compiler/emit/features/terms/fail.rs",
+      "git_blob": "ad903c1a869cd4b70be615fef170b6631e0b4d7a"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/compiler/emit/features/terms/mod.rs",
+      "git_blob": "765c4af6bf5407dcaf6619612c01216ef7caf2f8"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/compiler/emit/features/terms/recur.rs",
+      "git_blob": "44b10ed5d97338d75df71d98b138e1834eaae610"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/compiler/emit/features/terms/return_.rs",
+      "git_blob": "b35861d7d2cad1404b6167295b92df4a572931f9"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/compiler/emit/features/terms/unreachable.rs",
+      "git_blob": "fa6af1f8b05454e239bc1b67698d2386c9de6e60"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/compiler/emit/features/terms/unwind.rs",
+      "git_blob": "60938bd0d53d894f5ab81093b9b6abc482849c5e"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/compiler/emit/features/terms/yield.rs",
+      "git_blob": "a31708869fb11ec8e91de84b7fd9d09675954377"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/compiler/emit/features/values/as_error.rs",
+      "git_blob": "41516d7a5c29a313efeeab993d9c9b587313e1e9"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/compiler/emit/features/values/builtin.rs",
+      "git_blob": "3df9985b3e716990090319923a1c3d3fd1c3fafa"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/compiler/emit/features/values/call.rs",
+      "git_blob": "be477095e8de28870222711dceeecbcfebad2052"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/compiler/emit/features/values/coerce.rs",
+      "git_blob": "973093d5bf5ee0f3ebcc4d4f94472e8416b2dd21"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/compiler/emit/features/values/const_.rs",
+      "git_blob": "873b1cf0737d4b34a7d9a375f8406e9f747741ca"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/compiler/emit/features/values/env_get.rs",
+      "git_blob": "986f94e9941131347521995ac0482ad85edfa8ca"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/compiler/emit/features/values/ev_extend.rs",
+      "git_blob": "fc0b7ed1a88a2c1410d8d5ece2eec7a9a706772c"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/compiler/emit/features/values/ev_lookup.rs",
+      "git_blob": "ac6a85ea7235a803cc83b817f9beb11837211550"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/compiler/emit/features/values/fiber.rs",
+      "git_blob": "0dbdcc6eb77d160374496841dca848f6dd14018b"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/compiler/emit/features/values/field.rs",
+      "git_blob": "27dea46a19947c5308cf44b16385084ccc4a422b"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/compiler/emit/features/values/fn_ref.rs",
+      "git_blob": "72290c942413ecfd85463c360abc3df43f51a78a"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/compiler/emit/features/values/handler.rs",
+      "git_blob": "3d35ce26d92f5b22472e18dd4b45fbc794259747"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/compiler/emit/features/values/is_error.rs",
+      "git_blob": "2b889a9df6b31fd4f514940209c9c5d20ae28656"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/compiler/emit/features/values/list.rs",
+      "git_blob": "410b211d8026ece2b658bde9648a983e7af0551e"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/compiler/emit/features/values/list_head.rs",
+      "git_blob": "a96ba4853812721e238e7b95e77b3880d4933e4d"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/compiler/emit/features/values/list_is_empty.rs",
+      "git_blob": "f180f8d8dfcaf83413c7957332fdaa4b03b9d80b"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/compiler/emit/features/values/list_tail.rs",
+      "git_blob": "b2d11fdd893b09eabee2a87625c6a16c3a46c1db"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/compiler/emit/features/values/make.rs",
+      "git_blob": "f5201069a4dffb29cb1289317bd36082e7f2c477"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/compiler/emit/features/values/make_closure.rs",
+      "git_blob": "2bf505f78555f70377058d175645abc95b03a681"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/compiler/emit/features/values/mod.rs",
+      "git_blob": "80c57ec5649084e224ea369ca5fe648330f414c7"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/compiler/emit/features/values/prim.rs",
+      "git_blob": "f73f9dc190c002384a04faa34026171e2d70016c"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/compiler/emit/features/values/runtime.rs",
+      "git_blob": "a59e217f87281877fda943a86605e38e9e679a7e"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/compiler/emit/features/values/tag.rs",
+      "git_blob": "f715066106d8084ee0fc41c589390731063520f7"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/compiler/emit/features/values/tuple.rs",
+      "git_blob": "5f986d5e4bbe2094a09443cab2948cacfb3ac582"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/compiler/emit/features/values/tuple_get.rs",
+      "git_blob": "2b0d6b7f5b60045ae07cf33b0cac054a2975d0a6"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/compiler/emit/mod.rs",
+      "git_blob": "f4a6df88a8559c71cd80a2d56fef2cc5628cfdbd"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/compiler/lower/adapter.rs",
+      "git_blob": "a80eac63e5b7bf742fdc9604020e58e99da1b330"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/compiler/lower/closure.rs",
+      "git_blob": "267c0bfb114d44f420a46ce24d3150989a6e0a3d"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/compiler/lower/stages.rs",
+      "git_blob": "392c93b88aefee035bbfa88c95b7a478a2dc1ee2"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/compiler/lower/type_normalize.rs",
+      "git_blob": "893c90943368b7d9414770fce06a5639400e64da"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/compiler/mod.rs",
+      "git_blob": "405a30e2cef8ded71650e68deed293ba26c2b6d8"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/compiler/plan/external.rs",
+      "git_blob": "79db82ef89c62a969f70c48630e3740a7af2f065"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/compiler/plan/layouts.rs",
+      "git_blob": "f0c9b9857731bbbd4b8ed8c2bffe96102ac7b1d6"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/compiler/plan/operations/builtins/bytes.rs",
+      "git_blob": "527463cf945128cad714de879b4782b99955824c"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/compiler/plan/operations/builtins/cells.rs",
+      "git_blob": "614cf124933f2fb00c66e055bd264d0d244a82fd"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/compiler/plan/operations/builtins/float.rs",
+      "git_blob": "9b8e74333d56cb900f3b8288c333378197f7877e"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/compiler/plan/operations/builtins/float_parse.rs",
+      "git_blob": "1bf9f42f64a1ba486eb38a86384dc1f9c772dd79"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/compiler/plan/operations/builtins/float_to_string.rs",
+      "git_blob": "dd49c1350ff785a6f2b2773c1957f4a5a691a496"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/compiler/plan/operations/builtins/int64_to_string.rs",
+      "git_blob": "32830b6292d8e753e5595eb12acc0aeda789dddd"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/compiler/plan/operations/builtins/int_parse.rs",
+      "git_blob": "fed8f21d50e74913a818b276dc989bd0df0c656a"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/compiler/plan/operations/builtins/int_to_string.rs",
+      "git_blob": "3bcfb098aa2a5198588065bbd26d574f2ea5391f"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/compiler/plan/operations/builtins/integer.rs",
+      "git_blob": "9287dc70b09738793acae3540ca7c24b91904eca"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/compiler/plan/operations/builtins/integer64.rs",
+      "git_blob": "c0f0db0e10a7909d4ea26dad297b11e4c3d2a7bb"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/compiler/plan/operations/builtins/mod.rs",
+      "git_blob": "8562e423e9e71329c806e83f8e09fcee36ca9c76"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/compiler/plan/operations/builtins/string_append.rs",
+      "git_blob": "b076601cee674fda476dfda95b19b2f77f6b735c"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/compiler/plan/operations/builtins/string_byte_size.rs",
+      "git_blob": "bca81160fc0decfb9201c3e4fce22d55b545be07"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/compiler/plan/operations/builtins/string_chars.rs",
+      "git_blob": "e3e0a7ff4c525443859b780e07f4e6935a5a74f9"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/compiler/plan/operations/builtins/string_code_points.rs",
+      "git_blob": "d2d2d8f4e2a70e78bff4e7c3b28ea0e981b6e626"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/compiler/plan/operations/builtins/string_contains.rs",
+      "git_blob": "7ebcb726b62bbc1537e3971ee71180216f39e19a"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/compiler/plan/operations/builtins/string_ends_with.rs",
+      "git_blob": "605bb225a0830862b3303b00c20d36017b6e8652"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/compiler/plan/operations/builtins/string_from_code_point.rs",
+      "git_blob": "7c37a4f58d55977c23067fd73f37946a6e1a61d6"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/compiler/plan/operations/builtins/string_join.rs",
+      "git_blob": "0e041f62063e2a659f1535e4d3dda022ea7f4643"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/compiler/plan/operations/builtins/string_length.rs",
+      "git_blob": "60f7442a2b34d2d3f5d1523c39dfe666917afec2"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/compiler/plan/operations/builtins/string_split.rs",
+      "git_blob": "6945de1c826b84f54a63d0fe10ac258afca704eb"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/compiler/plan/operations/builtins/string_starts_with.rs",
+      "git_blob": "257610554b67bd364c9603129117a879d1881370"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/compiler/plan/operations/builtins/string_trim.rs",
+      "git_blob": "95c477458fe297453ebcc5ac7aaad450ec88b6fe"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/compiler/plan/operations/failures.rs",
+      "git_blob": "76d9fabbf2a5ecf8f5aee0c7b76429ae577cd803"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/compiler/plan/operations/fibers/cause_to_string.rs",
+      "git_blob": "44005a028dee19a26a72bf7b0ad630643e722c3a"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/compiler/plan/operations/fibers/mod.rs",
+      "git_blob": "c6dcef961563782f7cfbe9554fc08d680468f9af"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/compiler/plan/operations/primitive_operations.rs",
+      "git_blob": "b5e6a64c27b6c943a316e40478f7d381836b014e"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/compiler/plan/operations/runtime.rs",
+      "git_blob": "da45d963c6d919d56362bcce7269f9bde67d55da"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/compiler/plan/operations/statements/block.rs",
+      "git_blob": "fa929506f1875b69a629ac1d524a55ec6de52ea5"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/compiler/plan/operations/statements/drop.rs",
+      "git_blob": "8f433b5f09d6d385eb86b89975425361eceb2a41"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/compiler/plan/operations/statements/dup.rs",
+      "git_blob": "8f433b5f09d6d385eb86b89975425361eceb2a41"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/compiler/plan/operations/statements/if_.rs",
+      "git_blob": "b70e56fa842e913c526edac27350ba6b640b1c81"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/compiler/plan/operations/statements/let_.rs",
+      "git_blob": "591bad5692aa1ab90818bd397311e6909700e106"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/compiler/plan/operations/statements/loop_.rs",
+      "git_blob": "926c4fbd1dbf26a0327e75e309c214e049c409ed"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/compiler/plan/operations/statements/mod.rs",
+      "git_blob": "d1622694799f5d64116c8d6cb8a060176727ed21"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/compiler/plan/operations/statements/protect.rs",
+      "git_blob": "85dd909ae119c1baeef73465455dc1198132b2f1"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/compiler/plan/operations/statements/switch.rs",
+      "git_blob": "2ab5c7ba47fc0ca2295208f1a19b976cb42cbb24"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/compiler/plan/operations/terms/break.rs",
+      "git_blob": "506301afd178241bb5c2c6962d281b03159bd767"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/compiler/plan/operations/terms/defect.rs",
+      "git_blob": "e8871e4606ea24776076ab0e89bf86b123a69ceb"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/compiler/plan/operations/terms/fail.rs",
+      "git_blob": "318f511708da4c6b8215ab1d94272bf6201085f3"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/compiler/plan/operations/terms/mod.rs",
+      "git_blob": "2d347ed8ff14711421ba908b869fac83887a95fb"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/compiler/plan/operations/terms/recur.rs",
+      "git_blob": "8b70ca3043805d89a46a602fbd63614df112ee76"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/compiler/plan/operations/terms/return_.rs",
+      "git_blob": "60781399edfb165808839c0d88c435c7a6a3b14b"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/compiler/plan/operations/terms/unreachable.rs",
+      "git_blob": "6ec52c171b48fb2c4e7521dacbf89535d5e4af3a"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/compiler/plan/operations/terms/unwind.rs",
+      "git_blob": "bcf3c7b712ae8b2a85f48e784a40fd55bc53ac00"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/compiler/plan/operations/terms/yield.rs",
+      "git_blob": "496d1428f97ea71689825476440484426c31ade3"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/compiler/plan/operations/values/as_error.rs",
+      "git_blob": "085c7218f9be78a4896cf694ba8910fb1df06698"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/compiler/plan/operations/values/call.rs",
+      "git_blob": "c03e5efd35fe30e3f5d1f8f01b154d784f9d7abe"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/compiler/plan/operations/values/coerce.rs",
+      "git_blob": "32b559cfeb34f1da413c773e9931981bbf411ce7"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/compiler/plan/operations/values/const_.rs",
+      "git_blob": "7709a9cce0206e0df55b7f1708a82582f2578bf9"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/compiler/plan/operations/values/ev_extend.rs",
+      "git_blob": "c5caa87c0408e504f6625061c1f8d52a68bf5ccd"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/compiler/plan/operations/values/ev_lookup.rs",
+      "git_blob": "576978142b28e84ba2db20ab4de4ed669aba4ace"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/compiler/plan/operations/values/fiber.rs",
+      "git_blob": "b6dcb9729908e5908ad13f1b6aaa85ad5629554d"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/compiler/plan/operations/values/field.rs",
+      "git_blob": "085c7218f9be78a4896cf694ba8910fb1df06698"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/compiler/plan/operations/values/fn_ref.rs",
+      "git_blob": "c7c9e335cdf9046ba5b7dcbb7784d51afabae498"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/compiler/plan/operations/values/handler.rs",
+      "git_blob": "882d9c178382781764c7614123c571d19e04b6ef"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/compiler/plan/operations/values/list.rs",
+      "git_blob": "39931091ca59e5fdc264d88cdf816ef56f28f68f"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/compiler/plan/operations/values/list_head.rs",
+      "git_blob": "576978142b28e84ba2db20ab4de4ed669aba4ace"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/compiler/plan/operations/values/list_tail.rs",
+      "git_blob": "576978142b28e84ba2db20ab4de4ed669aba4ace"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/compiler/plan/operations/values/mod.rs",
+      "git_blob": "7b309acf4d3c07c7880ec31c999f52a53433c3c8"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/compiler/plan/operations/values/tuple_get.rs",
+      "git_blob": "085c7218f9be78a4896cf694ba8910fb1df06698"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/compiler/tests/separation.rs",
+      "git_blob": "e421f916d7d894b08ae876313368a87bbb474b43"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/contract/ir.rs",
+      "git_blob": "133e8e95b6c40ebbe3eb392e50f980d969de9d76"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/input/upstream/verify.rs",
+      "git_blob": "65812b37151c2b958e4d216eb702286fe6a49b46"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/semantics/c.rs",
+      "git_blob": "3bceda4214a219fb8226ea6ee8d53ebeb684a495"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/semantics/host_modules.rs",
+      "git_blob": "16c0437f7579fa2ab9f2f9866e28e019e564e7e0"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/semantics/host_refs.rs",
+      "git_blob": "73393d769f67feb943912e44d8d0fba049e904ac"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/semantics/representations.rs",
+      "git_blob": "935965d034b1a8ef394b943250c01aeb36367164"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/semantics/type_representations.rs",
+      "git_blob": "06b2a098049d5ba3a4bd00a7749263bb92d61cf8"
+    },
+    {
+      "path": "crates/emela-codegen-emb/src/semantics/variants.rs",
+      "git_blob": "e69ec2be1b24e662e73e35da993bf551a12de043"
+    },
+    {
+      "path": "crates/emela-codegen-emb/tests/binding_metadata/mod.rs",
+      "git_blob": "3d87742943786c2173e9f247c3b6d933061a9786"
+    },
+    {
+      "path": "crates/emela-codegen-emb/tests/builtin_audit/mod.rs",
+      "git_blob": "874d29df216256adf6c987a6ffad81064ba34fbe"
+    },
+    {
+      "path": "crates/emela-codegen-emb/tests/builtin_audit/retire.rs",
+      "git_blob": "d260db55d0dea2ac209dc3192be977f09542cfac"
+    },
+    {
+      "path": "crates/emela-codegen-emb/tests/bytes/mod.rs",
+      "git_blob": "3fcf3b21de356c9b70ff65dad15fdf5bf2dfe591"
+    },
+    {
+      "path": "crates/emela-codegen-emb/tests/cell/mod.rs",
+      "git_blob": "53ebffa6acb8080538a51dc1b2e3e702b7ad9712"
+    },
+    {
+      "path": "crates/emela-codegen-emb/tests/completion_types/mod.rs",
+      "git_blob": "4ce7db95c577ff90c4901d9e54537f47e95721de"
+    },
+    {
+      "path": "crates/emela-codegen-emb/tests/const_runtime/mod.rs",
+      "git_blob": "6623d4585ef0825c2de827aa228681f0759d2cc3"
+    },
+    {
+      "path": "crates/emela-codegen-emb/tests/deferred/mod.rs",
+      "git_blob": "bc2d8d38e32d1a343756e3b79480446befddb379"
+    },
+    {
+      "path": "crates/emela-codegen-emb/tests/emit.rs",
+      "git_blob": "a8d55940daec2d5dcd1608873793ec0137d51e33"
+    },
+    {
+      "path": "crates/emela-codegen-emb/tests/fiber/aggregate_abi.rs",
+      "git_blob": "c3a6d1ac2ef3984630611a76bf45811332ece2ab"
+    },
+    {
+      "path": "crates/emela-codegen-emb/tests/fiber/attempt.rs",
+      "git_blob": "7aa367c61380baff16a554f347005df6fe5cf27c"
+    },
+    {
+      "path": "crates/emela-codegen-emb/tests/fiber/await_.rs",
+      "git_blob": "1cd5ea9e20ba4c8f770121861d814e7a3e057731"
+    },
+    {
+      "path": "crates/emela-codegen-emb/tests/fiber/cause.rs",
+      "git_blob": "d56c71b84cf4f569214d9d344fe55b284d36fbc3"
+    },
+    {
+      "path": "crates/emela-codegen-emb/tests/fiber/failure.rs",
+      "git_blob": "6045c0cfe42ffdd71c82648a03cc7be11e96c81e"
+    },
+    {
+      "path": "crates/emela-codegen-emb/tests/fiber/function_aggregate.rs",
+      "git_blob": "b275191aca8e9cb3583aabd619181553c1e09970"
+    },
+    {
+      "path": "crates/emela-codegen-emb/tests/fiber/interrupt.rs",
+      "git_blob": "2ed60a8be656cf9bb65c4b4bbacff97922793e27"
+    },
+    {
+      "path": "crates/emela-codegen-emb/tests/fiber/join.rs",
+      "git_blob": "28f3fba089303c612ed3415170370a34bf7c4857"
+    },
+    {
+      "path": "crates/emela-codegen-emb/tests/fiber/protect.rs",
+      "git_blob": "5f18c6dacd7789c8cabe34ef79b9299be7c6c2e9"
+    },
+    {
+      "path": "crates/emela-codegen-emb/tests/flow.rs",
+      "git_blob": "6a4ebd7915e28e857066edd9a8671e8e2a2aa51a"
+    },
+    {
+      "path": "crates/emela-codegen-emb/tests/string_append/mod.rs",
+      "git_blob": "c97ec404af751f8e5fcabad5c0ccddbddbc48977"
+    },
+    {
+      "path": "crates/emela-codegen-emb/tests/string_comparison/mod.rs",
+      "git_blob": "1a4a7c4f69cc243ef8d5f60613754952a09aac32"
+    },
+    {
+      "path": "crates/emela-codegen-emb/tests/suspend/mod.rs",
+      "git_blob": "ce956cd299ea5b5fcf24c9b099127d36fa988af3"
+    },
+    {
+      "path": "crates/emela-codegen-emb/tests/value_audit/discarded.rs",
+      "git_blob": "01c7f27a9cfcee3e41efa8bd9025584ac07e70a1"
+    },
+    {
+      "path": "crates/emela-codegen-emb/tests/value_audit/mod.rs",
+      "git_blob": "407925bc56713c4e1faa04c7656ea40debc55392"
+    },
+    {
+      "path": "crates/emela-codegen-emb/tools/flow-implementation-routes.json",
+      "git_blob": "cb55e17b016c23aa37fbc0514005648d1fd06c71"
+    },
+    {
+      "path": "crates/emela-core/src/intrinsics.rs",
+      "git_blob": "0c8f3bf3dbce679c13d5573510059a46ab2d0f1b"
+    },
+    {
+      "path": "crates/emela-core/src/ir.rs",
+      "git_blob": "0041f65d6f1941f3477029951923ca80591459ac"
+    },
+    {
+      "path": "crates/emela-lir/src/ir.rs",
+      "git_blob": "3efe467d6120f188d2155ab291fc0a092b29e408"
+    },
+    {
+      "path": "crates/emela-lir/src/repr.rs",
+      "git_blob": "63772d15f1e4ba8d01b19350cde0f7a05fe29851"
+    },
+    {
+      "path": "crates/emela-lir/src/verify.rs",
+      "git_blob": "f2087ca654d837b95b3c136d661ba5858e289d01"
+    }
+  ]
+}
