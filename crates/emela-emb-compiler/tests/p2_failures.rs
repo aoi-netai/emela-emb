@@ -159,3 +159,40 @@ int main(void) {{ for(int i=0;i<1000;i++) {{ assert(generic_error_payloads(1)==4
         ),
     );
 }
+
+#[test]
+fn nested_generic_errors_substitute_payload_fields_before_any_layout() {
+    let source = r#"
+error Inner[A](value: A)
+error Nest[A](inner: Inner[A])
+error Outer[A](nested: Option[Nest[A]])
+fn text(n: Int) -> String fails Outer[String] {
+  err: Outer[String] = Outer(Some(Nest(Inner(Int.to_string(n)))))
+  fail err
+}
+fn none() -> Int fails Outer[Int] {
+  err: Outer[Int] = Outer(None)
+  fail err
+}
+@export(c, "nested_generic_errors")
+pub fn nested() -> Bool {
+  n = none() escape { Outer(None) -> 42
+    Outer(Some(Nest(Inner(n)))) -> n }
+  s = text(n) escape { Outer(None) -> "missing"
+    Outer(Some(Nest(Inner(s)))) -> s }
+  n == 42 && s == "42"
+}
+"#;
+    let output = compile_sources(
+        &[Source::new("main.emel", source)],
+        "main.emel",
+        &Options::default().with_heap_bytes(4096),
+    )
+    .unwrap();
+    support::compile_and_run(
+        &output,
+        &format!(
+            "{BOARD}\nint main(void) {{ for(int i=0;i<1000;i++) assert(nested_generic_errors()); return 0; }}"
+        ),
+    );
+}
