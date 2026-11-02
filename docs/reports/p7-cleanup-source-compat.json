@@ -1,0 +1,205 @@
+{
+  "schema_version": 1,
+  "legacy_revision": "c34c0aeefdd966d854371b3110db00a47798751d",
+  "policy": "Pending records are not execution evidence. Source API and post-source IR seams are separated.",
+  "cases": [
+    {
+      "legacy_test": "emit::fiber::payload::list_error_payloads_survive_suspending_cleanup_and_are_dropped_on_cancellation",
+      "legacy_path": "crates/emela-codegen-emb/tests/fiber/payload.rs",
+      "legacy_line": 198,
+      "legacy_rust_sha256": "6c6a40d71ae5c02f8fae9fb15139d82abec44cdde923e34536ebd61f51cac769",
+      "source_files": [
+        {
+          "program": "program:cf50ee7030b8857d1729",
+          "name": "main.emel",
+          "fixture": "sources/28710f3837c49e15ce2634ca30a18ee389f70232b210eeb4ce827484bf4d882d.emel",
+          "source_id": "source:28710f3837c49e15ce26",
+          "sha256": "28710f3837c49e15ce2634ca30a18ee389f70232b210eeb4ce827484bf4d882d"
+        }
+      ],
+      "source_adaptation": "original corpus source bytes + explicit C exports only",
+      "harness": "crates/emela-emb-compiler/tests/compat/p7/cleanup/list_error_payloads_survive_suspending_cleanup_and_are_dropped_on_cancellation.c",
+      "old_options": {
+        "heap_bytes": 4096,
+        "fiber_capacity": 8,
+        "frame_capacity": 24,
+        "frame_bytes": 512,
+        "task_capacity": 2,
+        "event_capacity": 2,
+        "task_adapters": {
+          "host_wait": "board_wait_start"
+        }
+      },
+      "legacy_C_assertions": [
+        "n == ++waits",
+        "waits == 1",
+        "emela_task_complete_int(task, 0)",
+        "waits == 2 && result == -1",
+        "emela_task_complete_int(task, 0)",
+        "waits == 3 && result == -1",
+        "emela_task_complete_int(task, 0)",
+        "result == (i % 2 ? -1 : 12)",
+        "!emela_task_complete_int(task, 0)",
+        "test_heap_empty()"
+      ],
+      "status": "source-runtime-verified",
+      "recommended_ledger_status": "replaced",
+      "seams": [
+        "private_C_cancel"
+      ],
+      "new_test": "tests/p7_payload_compat.rs::list_error_payloads_survive_suspending_cleanup_and_are_dropped_on_cancellation",
+      "C_generation": "accepted",
+      "strict_C_objects": {
+        "-O0": "compiled-linked",
+        "-O2": "compiled-linked"
+      },
+      "C_runtime": {
+        "-O0": "passed",
+        "-O2": "passed"
+      },
+      "old_resource_budgets_preserved": true,
+      "final_integrated_verification": "required",
+      "source_API_path": "normal compile_sources; no IR mutation",
+      "generated_C_instrumentation": [
+        "heap observer",
+        "old private root cancellation flag hook"
+      ],
+      "successful_iterations": 1000,
+      "terminal_defect_observed": false,
+      "implementation_regression": {
+        "evidence_lookup": "shared failure-handler emission generated duplicate goto labels; scoped search has no labels",
+        "frame_bytes_before": 544,
+        "frame_bytes_after": 512,
+        "old_limit_preserved": 512,
+        "field_packing": "ownership/error/guard flags grouped after value fields; names/types/semantics retained"
+      }
+    },
+    {
+      "legacy_test": "emit::fiber::payload::native_failure_channels_own_formatted_parse_errors_and_list_payloads",
+      "legacy_path": "crates/emela-codegen-emb/tests/fiber/payload.rs",
+      "legacy_line": 151,
+      "legacy_rust_sha256": "6c6a40d71ae5c02f8fae9fb15139d82abec44cdde923e34536ebd61f51cac769",
+      "source_files": [
+        {
+          "program": "program:93d5729a9fbacc7c65d7",
+          "name": "main.emel",
+          "fixture": "sources/144f29d9a0b5e2e919653da31576003d7121621b28ec4473cd9a0fa014d2d37d.emel",
+          "source_id": "source:144f29d9a0b5e2e91965",
+          "sha256": "144f29d9a0b5e2e919653da31576003d7121621b28ec4473cd9a0fa014d2d37d"
+        }
+      ],
+      "source_adaptation": "original corpus source bytes + explicit C exports only",
+      "harness": "crates/emela-emb-compiler/tests/compat/p7/cleanup/native_failure_channels_own_formatted_parse_errors_and_list_payloads.c",
+      "old_options": {
+        "heap_bytes": 2048,
+        "fiber_capacity": 8,
+        "frame_capacity": 24,
+        "frame_bytes": 512,
+        "task_capacity": 2,
+        "event_capacity": 2,
+        "task_adapters": {
+          "host_wait": "board_wait_start"
+        }
+      },
+      "legacy_C_assertions": [
+        "emela_export_caught_0(INT32_MIN) == 12",
+        "emela_export_batch_1(INT32_MIN) == 12",
+        "emela_export_local_4(INT32_MIN) == 11",
+        "cleanups == i * 2 + 1 && memcmp(bytes, \"xxxxx\", 5) == 0",
+        "result.owner && result.length == 5 && memcmp(result.data, \"a\\0b\\xc3\\xa9\", 5) == 0",
+        "emela_export_captured_3((EmelaString){.data = bytes, .length = 5}) == 42",
+        "cleanups == i * 2 + 2",
+        "test_heap_empty()"
+      ],
+      "status": "source-runtime-verified",
+      "recommended_ledger_status": "replaced",
+      "seams": [],
+      "new_test": "tests/p7_payload_compat.rs::native_failure_channels_own_formatted_parse_errors_and_list_payloads",
+      "C_generation": "accepted",
+      "strict_C_objects": {
+        "-O0": "compiled-linked",
+        "-O2": "compiled-linked"
+      },
+      "C_runtime": {
+        "-O0": "passed",
+        "-O2": "passed"
+      },
+      "old_resource_budgets_preserved": true,
+      "final_integrated_verification": "required",
+      "source_API_path": "normal compile_sources; no IR mutation",
+      "generated_C_instrumentation": [
+        "heap observer"
+      ],
+      "successful_iterations": 1000,
+      "terminal_defect_observed": false
+    },
+    {
+      "legacy_test": "emit::fiber::payload::operation_failure_before_resume_transfers_and_releases_its_string_payload",
+      "legacy_path": "crates/emela-codegen-emb/tests/fiber/payload.rs",
+      "legacy_line": 33,
+      "legacy_rust_sha256": "6c6a40d71ae5c02f8fae9fb15139d82abec44cdde923e34536ebd61f51cac769",
+      "source_files": [
+        {
+          "program": "program:9d4cee877d9489d1ecde",
+          "name": "main.emel",
+          "fixture": "sources/6ee68efefc13d3b7c08e0984eeaa92eba1a893cf38f4a2d43fd1bb577de5a935.emel",
+          "source_id": "source:6ee68efefc13d3b7c08e",
+          "sha256": "6ee68efefc13d3b7c08e0984eeaa92eba1a893cf38f4a2d43fd1bb577de5a935"
+        }
+      ],
+      "source_adaptation": "original corpus source bytes + explicit C exports only",
+      "harness": "crates/emela-emb-compiler/tests/compat/p7/cleanup/operation_failure_before_resume_transfers_and_releases_its_string_payload.c",
+      "old_options": {
+        "heap_bytes": 4096,
+        "fiber_capacity": 8,
+        "frame_capacity": 24,
+        "frame_bytes": 512,
+        "task_capacity": 2,
+        "event_capacity": 2,
+        "task_adapters": {
+          "host_wait": "board_wait_start"
+        }
+      },
+      "legacy_C_assertions": [
+        "emela_task_complete_int(task, INT32_MIN)",
+        "emela_scheduler_run(1)",
+        "result == (i % 2 ? 11 : INT32_MIN)",
+        "test_heap_empty()"
+      ],
+      "status": "source-runtime-verified",
+      "recommended_ledger_status": "replaced",
+      "seams": [],
+      "new_test": "tests/p7_payload_compat.rs::operation_failure_before_resume_transfers_and_releases_its_string_payload",
+      "C_generation": "accepted",
+      "strict_C_objects": {
+        "-O0": "compiled-linked",
+        "-O2": "compiled-linked"
+      },
+      "C_runtime": {
+        "-O0": "passed",
+        "-O2": "passed"
+      },
+      "old_resource_budgets_preserved": true,
+      "final_integrated_verification": "required",
+      "source_API_path": "normal compile_sources; no IR mutation",
+      "generated_C_instrumentation": [
+        "heap observer"
+      ],
+      "successful_iterations": 1000,
+      "terminal_defect_observed": false
+    }
+  ],
+  "execution": {
+    "Rust_test_profile": "CARGO_PROFILE_TEST_OPT_LEVEL=1",
+    "C_flags": [
+      "-std=c11",
+      "-Wall",
+      "-Werror",
+      "-O0 and -O2 mandatory"
+    ],
+    "source_tests": 3,
+    "library_tests": 240,
+    "strict_clippy": "workspace/all-targets -D warnings passed",
+    "master_ledger_modified": false
+  }
+}

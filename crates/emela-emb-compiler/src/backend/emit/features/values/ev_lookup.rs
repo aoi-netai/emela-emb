@@ -47,24 +47,24 @@ pub(in crate::backend::emit) fn emit_evidence_lookup(
         ));
     }
     let cursor = format!("emela_evidence_cursor_{}", u32::from(dst.into_raw()));
+    writer.begin_block("");
     writer.decl(
         "emela_evidence_node *",
         &cursor,
         Some(&variable_name(evidence)),
     );
-    writer.begin_block(&format!("while ({cursor} != NULL)"));
     writer.begin_block(&format!(
-        "if ({cursor}->effect == UINT32_C({}))",
+        "while ({cursor} != NULL && {cursor}->effect != UINT32_C({}))",
         u32::from(effect.into_raw())
     ));
-    writer.assign(&variable_name(dst), &format!("{cursor}->handler"));
-    writer.line(&format!("goto emela_evidence_lookup_done_{cursor};"));
-    writer.end_block();
     writer.assign(&cursor, &format!("({cursor}->parent)"));
     writer.end_block();
+    writer.begin_block(&format!("if ({cursor} == NULL)"));
     writer.line(
         "emela_board_defect(EMELA_DEFECT_PANIC, \"effect handler not found\", UINT16_C(23));",
     );
-    writer.line(&format!("emela_evidence_lookup_done_{cursor}: ;"));
+    writer.end_block();
+    writer.assign(&variable_name(dst), &format!("{cursor}->handler"));
+    writer.end_block();
     Ok(())
 }

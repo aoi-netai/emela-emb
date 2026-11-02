@@ -562,3 +562,6 @@ completeの一度だけの格納、空/Unit/Bool/tuple/Int64/Floatのpoll/await�
 ## P7: Scope原文7試験のC観測
 
 固定旧 `tests/fiber/mod.rs` の正常source7試験を `tests/p7_scope_compat.rs` へ移し、[原文hash・旧Options・C本文の対応](reports/p7-scope-source-compat.json) を保存した。子開始の順序、unstarted取消、完了通知とScope再利用、入れ子task取消、Scope地点evidenceとsibling fork、pool不足defect、String/List captureを元のC assertionで確認する。明示C export以外にsource本文を変えず、旧512byte frameとheap/fiber/task/event容量を保ち、C両最適化で成功した。
+P7の`p7_payload_compat.rs`は固定旧`tests/fiber/payload.rs`のsource3入力を保存済みcorpusから読み、exportだけを加えて旧C観測を実行する。String/Listエラーpayloadの所有、suspend cleanup、直接/間接failure、取消とstale通知を旧heap/frame 512 byteで確認する。root取消は旧試験どおり生成Cのprivate flag hookを使い、IR変更は行わない。対応は`docs/reports/p7-cleanup-source-compat.json`へ記録する。
+
+同じfailure handlerを複数箇所へ出力するとevidence検索のgoto labelが重複するため、検索をlocal scope内のwhile・NULL診断・代入へ適応した。中断frameの値fieldへ所有flagを交互に挟むpaddingも除き、error/guard/各値のflagをまとめた。field名・型と所有処理は保持し、旧List error入力のframeは544 byteから512 byteとなる。frame容量を増やす代用はせず、C両最適化の旧上限assertと1000回のheap回収を通す。

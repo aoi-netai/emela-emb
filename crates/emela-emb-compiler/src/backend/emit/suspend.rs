@@ -222,7 +222,6 @@ pub(super) fn emit_function(
     let has_failure = suspension.has_failure;
     if has_failure {
         writer.line("  EmelaError call_error;");
-        writer.line("  int call_error_owned;");
         writer.line(&format!(
             "  EmelaError pending_error[{}];",
             graph.max_error_depth + 1
@@ -233,7 +232,6 @@ pub(super) fn emit_function(
     }
     if graph.max_depth != 0 {
         writer.line(&format!("  emela_protection guards[{}];", graph.max_depth));
-        writer.line("  uint32_t guard_depth;");
     }
     if has_result {
         writer.line(&format!("  {} *result;", layouts.c_type(function.ret)));
@@ -244,6 +242,16 @@ pub(super) fn emit_function(
             layouts.c_type(var.ty),
             u32::from(id.into_raw())
         ));
+    }
+    // Keep ownership flags together rather than padding every following pointer
+    // or aggregate to its alignment. Fields are addressed by name throughout.
+    if has_failure {
+        writer.line("  int call_error_owned;");
+    }
+    if graph.max_depth != 0 {
+        writer.line("  uint32_t guard_depth;");
+    }
+    for (id, var) in function.vars.iter().filter(|(id, _)| active.contains(id)) {
         if layouts.is_managed_value(var.ty) {
             writer.line(&format!("  int owned_{};", u32::from(id.into_raw())));
         }

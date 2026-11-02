@@ -24,7 +24,18 @@ pub fn compile(source: &str, options: &Options) -> Result<Output, Vec<Diagnostic
 }
 
 pub fn run(source: &str, harness: &str, options: &Options) -> Output {
-    let output = heap::with_heap_audit(compile(source, options).unwrap());
+    let mut output = heap::with_heap_audit(compile(source, options).unwrap());
+    if harness.contains("void test_cancel(") {
+        // The old cancellation tests use this generated-C seam to cancel a root.
+        let file = output
+            .files
+            .iter_mut()
+            .find(|file| file.path == "emela_embedded.c")
+            .unwrap();
+        file.contents
+            .push_str("void test_cancel(EmelaFiber h) { emela_fiber_get(h)->cancelled = 1; }\n");
+        output.c_source = file.contents.clone();
+    }
     let header = output
         .files
         .iter()
