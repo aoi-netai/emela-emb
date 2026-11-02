@@ -18,6 +18,14 @@ P3の確定branchを基点に、関数値・closureとerror/effect集合の制�
 
 現時点のmodule登録は `cfg(test)`。source型検査側のadapterと同時に通常pipelineへ有効化する。単体成功をsourceのeffect対応として数えない。
 
+## handler・Cellと関数型変換の基盤
+
+`a9d603f` は独自IRのHandler/EvExtend/EvLookup/OpCall/RetireとCellの型・参照検証を接続する。handlerの静的解決でheapを不要にする経路と、別関数へ渡すevidenceを動的に検査する経路を分ける。Anyを介して別関数からretireしたhandlerへの呼出しはdefectとなり、Protectのcleanupも実行する。Cell→Any→closure→Cellの循環は1000回反復し、毎回heap全体が解放される。
+
+`e689529` / `87d3af7` / `971cfce` は関数値Coerceを型付きIR・具体化・lowerへ通し、failure/evidence ABIの拡大とNever戻り値の拡大を検証する。Unitを含む引数位置とhidden evidenceを保ち、evidenceの消去は拒否する。Never関数からfailure ABIを通って戻る場合はerrorを保持し、通常復帰を許さない。
+
+source revision `971cfce` で `cargo test -p emela-emb-compiler --lib backend::lower --locked --offline` が43 pass、失敗/skip 0。Cを使う各試験は `-O0` / `-O2` とも成功し、fmtも通過した。この範囲は独自IRの証拠であり、sourceのhandler・label・init/release・State対応の完了を示すものではない。
+
 ## 基盤統合の実行結果
 
 source revision `261d901`。WSL2 `x86_64-unknown-linux-gnu`、Rust 1.99.1、`cc`（GCC 11.4.0）。
