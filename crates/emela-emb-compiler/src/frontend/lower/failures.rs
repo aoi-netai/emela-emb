@@ -8,6 +8,33 @@ pub(super) fn allocate_raises(
     fn collect(expression: &ir::Expr, types: &mut std::collections::HashSet<b::TypeId>) {
         use ir::ExprKind as E;
         match &expression.kind {
+            E::Use { .. } => {}
+            E::OpCall { handler, args, .. } => {
+                collect(handler, types);
+                for argument in args {
+                    collect(argument, types);
+                }
+            }
+            E::Handler { operations, .. } => {
+                for operation in operations {
+                    collect(operation, types);
+                }
+            }
+            E::Provide { bindings, body } => {
+                for (_, value) in bindings {
+                    collect(value, types);
+                }
+                block(body, types);
+            }
+            E::With { bindings, body } => {
+                for binding in bindings {
+                    collect(&binding.value, types);
+                    if let Some(cleanup) = &binding.cleanup {
+                        collect(cleanup, types);
+                    }
+                }
+                block(body, types);
+            }
             E::FnRef { .. } => {}
             E::Lambda { body, .. } => block(body, types),
             E::Apply { callee, args, .. } => {

@@ -9,6 +9,8 @@ use std::collections::{HashMap, HashSet};
 
 #[path = "lower/constant_patterns.rs"]
 mod constant_patterns;
+#[path = "lower/effects.rs"]
+mod effects;
 #[path = "lower/failures.rs"]
 mod failures;
 
@@ -23,7 +25,6 @@ pub(crate) fn lower(input: &ir::Program) -> b::Program {
     let mut ids = HashMap::new();
     for function in &input.functions {
         if function.intrinsic.is_none() {
-            debug_assert!(function.signature.sets.effects.is_empty());
             debug_assert!(function.derivation.is_none());
             debug_assert!(function.origin.is_none() || function.constant);
             let mut target = b::Function::new(&function.name);
@@ -53,6 +54,11 @@ pub(crate) fn lower(input: &ir::Program) -> b::Program {
         .iter()
         .filter_map(|function| (!function.signature.sets.errors.is_empty()).then_some(function.id))
         .collect();
+    let effectful: HashSet<_> = input
+        .functions
+        .iter()
+        .filter_map(|function| (!function.signature.sets.effects.is_empty()).then_some(function.id))
+        .collect();
     let intrinsics = input
         .functions
         .iter()
@@ -72,6 +78,8 @@ pub(crate) fn lower(input: &ir::Program) -> b::Program {
             locals: HashMap::new(),
             core: &program.core,
             failing: &failing,
+            effectful: &effectful,
+            evidence: None,
             raises: &raises,
             structural_equality: &structural_equality,
             escape: None,
@@ -87,6 +95,11 @@ pub(crate) fn lower(input: &ir::Program) -> b::Program {
             let var = context.var(&param.name, param.ty);
             context.function.params.push(var);
             context.locals.insert(param.id, b::Operand::Var(var));
+        }
+        if effectful.contains(&function.id) {
+            let evidence = context.var("evidence", Ty::Compound(b::TypeId::EVIDENCE));
+            context.function.params.push(evidence);
+            context.evidence = Some(evidence);
         }
         if let Some(body) = &function.body {
             context.function.body = Some(context.block(body, true));
@@ -111,6 +124,8 @@ struct Context<'a> {
     locals: HashMap<LocalId, b::Operand>,
     core: &'a b::Definitions,
     failing: &'a HashSet<DefinitionId>,
+    effectful: &'a HashSet<DefinitionId>,
+    evidence: Option<b::VarId>,
     raises: &'a HashMap<b::TypeId, b::FnId>,
     structural_equality: &'a HashMap<b::TypeId, b::FnId>,
     escape: Option<(b::VarId, b::SeqId)>,
@@ -227,6 +242,23 @@ impl Context<'_> {
     ) -> Option<b::Operand> {
         use ir::ExprKind as E;
         match &expression.kind {
+            E::Use { effect } => self.use_effect(builder, *effect, expression.ty),
+            E::OpCall {
+                handler,
+                effect,
+                op,
+                args,
+                order,
+            } => self.operation_call(builder, handler, *effect, *op, args, order, expression.ty),
+            E::Handler {
+                name,
+                effect,
+                operations,
+            } => self.handler_value(builder, name, *effect, operations, expression.ty),
+            E::Provide { bindings, body } => self.provide(builder, bindings, body, tail),
+            E::With { bindings, body } => {
+                self.with_bindings(builder, bindings, body, expression.ty)
+            }
             E::Coerce(value) => {
                 let operand = self.expression(builder, value, false)?;
                 if expression.ty == value.ty {
@@ -258,7 +290,7 @@ impl Context<'_> {
                 captures,
                 body,
             } => {
-                let captured: Vec<_> = captures
+                let mut captured: Vec<_> = captures
                     .iter()
                     .filter_map(|id| match self.locals.get(id).expect("checked capture") {
                         b::Operand::Var(var) => Some(*var),
@@ -267,6 +299,20 @@ impl Context<'_> {
                     .collect();
                 let saved_locals = self.locals.clone();
                 let saved_escape = self.escape.take();
+                let saved_evidence = self.evidence;
+                let b::Type::Fn(ft) = self.core.ty(ty(expression.ty)) else {
+                    unreachable!("checked lambda type")
+                };
+                let ft = ft.clone();
+                // Ordinary effectful closures receive the caller's table. Handler operation
+                // closures keep the table of the surrounding acquisition instead.
+                if !ft.ev {
+                    if let Some(evidence) = saved_evidence {
+                        if !captured.contains(&evidence) {
+                            captured.push(evidence);
+                        }
+                    }
+                }
                 self.closure_depth += 1;
                 let mut parameters = Vec::new();
                 for parameter in params {
@@ -279,13 +325,16 @@ impl Context<'_> {
                     };
                     self.locals.insert(parameter.id, value);
                 }
+                if ft.ev {
+                    let evidence = self.var("lambda_evidence", Ty::Compound(b::TypeId::EVIDENCE));
+                    parameters.push(evidence);
+                    self.evidence = Some(evidence);
+                }
                 let body = self.block(body, true);
+                self.evidence = saved_evidence;
                 self.closure_depth -= 1;
                 self.locals = saved_locals;
                 self.escape = saved_escape;
-                let b::Type::Fn(ft) = self.core.ty(ty(expression.ty)) else {
-                    unreachable!("checked lambda type")
-                };
                 self.value(
                     builder,
                     b::Value::Closure(Box::new(b::Closure {
@@ -316,17 +365,22 @@ impl Context<'_> {
                 let b::Type::Fn(ft) = self.core.ty(ty(callee.ty)) else {
                     unreachable!("checked callable type")
                 };
+                let (ev, suspends, fails) = (ft.ev, ft.suspends, ft.fails);
+                let mut operands: Vec<_> = order
+                    .iter()
+                    .filter(|&&index| args[index].ty != Ty::Unit)
+                    .map(|&index| evaluated[index].clone())
+                    .collect();
+                if ev {
+                    operands.push(self.current_evidence(builder).into());
+                }
                 self.value(
                     builder,
                     b::Value::Call {
                         callee: b::Callee::Indirect(target),
-                        args: order
-                            .iter()
-                            .filter(|&&index| args[index].ty != Ty::Unit)
-                            .map(|&index| evaluated[index].clone())
-                            .collect(),
-                        suspends: ft.suspends,
-                        on_fail: ft.fails.then(|| self.failure_edge()),
+                        args: operands,
+                        suspends,
+                        on_fail: fails.then(|| self.failure_edge()),
                     },
                     expression.ty,
                 )
@@ -627,10 +681,13 @@ impl Context<'_> {
                     // Evaluate even Unit arguments before omitting their C values.
                     evaluated.push(value);
                 }
-                let operands = order
+                let mut operands: Vec<_> = order
                     .iter()
                     .filter_map(|&index| evaluated[index].clone())
                     .collect();
+                if self.effectful.contains(target) {
+                    operands.push(self.current_evidence(builder).into());
+                }
                 if tail
                     && *target == self.current
                     && !self.function.constant

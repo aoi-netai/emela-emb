@@ -93,9 +93,16 @@ fn execute(input: ir::Program) {
     );
 }
 fn execute_with_harness(input: ir::Program, harness: &str) {
+    execute_with_options(input, harness, &crate::Options::default());
+}
+fn execute_with_options(input: ir::Program, harness: &str, options: &crate::Options) {
     let program = specialize(input).unwrap();
     let lowered = crate::frontend::lower::lower(&program);
-    let output = crate::backend::compile_program(lowered, &crate::Options::default()).unwrap();
+    let mut output = crate::backend::compile_program(lowered, options).unwrap();
+    if options.heap_bytes() != 0 {
+        output.files.iter_mut().find(|file| file.path == "emela_embedded.c").unwrap().contents.push_str(
+            "\nint test_heap_empty(void){for(unsigned char*p=emela_heap_storage;emela_heap_initialized&&p<emela_heap_end();){emela_heap_block*b=(emela_heap_block*)(void*)p;if(!b->is_free)return 0;p+=b->size;}return 1;}\n");
+    }
     static NEXT: AtomicU64 = AtomicU64::new(0);
     let path = std::env::temp_dir().join(format!(
         "emela-specialize-{}-{}",
@@ -1986,3 +1993,6 @@ fn generic_function_references_inside_a_lambda_lower_to_indirect_calls() {
         functions: vec![identity, answer],
     });
 }
+
+#[path = "tests_effects.rs"]
+mod effects;

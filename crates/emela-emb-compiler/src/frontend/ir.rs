@@ -58,6 +58,31 @@ pub(crate) struct Expr {
 #[derive(Clone, Debug)]
 pub(crate) enum ExprKind {
     Literal(Literal),
+    /// Lookup uses the current invocation's evidence, retaining the exact label key.
+    Use {
+        effect: crate::contract::ir::EffectId,
+    },
+    OpCall {
+        handler: Box<Expr>,
+        effect: crate::contract::ir::EffectId,
+        op: usize,
+        args: Vec<Expr>,
+        order: Vec<usize>,
+    },
+    Handler {
+        name: String,
+        effect: crate::contract::ir::EffectId,
+        operations: Vec<Expr>,
+    },
+    /// Extend evidence for this body without retiring the supplied capabilities.
+    Provide {
+        bindings: Vec<(crate::contract::ir::EffectId, Expr)>,
+        body: Block,
+    },
+    With {
+        bindings: Vec<WithBinding>,
+        body: Block,
+    },
     Concat(Vec<Expr>),
     Fail(Box<Expr>),
     Coerce(Box<Expr>),
@@ -136,6 +161,15 @@ pub(crate) enum ExprKind {
     },
     Block(Block),
     Assert(Box<Expr>),
+}
+/// Acquisition is sequential; cleanup protects only the successfully acquired suffix.
+#[derive(Clone, Debug)]
+pub(crate) struct WithBinding {
+    pub local: Local,
+    pub value: Expr,
+    pub effects: Vec<crate::contract::ir::EffectId>,
+    pub cleanup: Option<Expr>,
+    pub retire: Option<String>,
 }
 #[derive(Clone, Debug)]
 pub(crate) enum Literal {

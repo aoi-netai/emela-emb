@@ -151,6 +151,34 @@ impl Context<'_> {
         self.ty(&mut expression.ty, expression.span)?;
         use ir::ExprKind as E;
         match &mut expression.kind {
+            E::Use { .. } => {}
+            E::OpCall { handler, args, .. } => {
+                self.expression(handler)?;
+                for argument in args {
+                    self.expression(argument)?;
+                }
+            }
+            E::Handler { operations, .. } => {
+                for operation in operations {
+                    self.expression(operation)?;
+                }
+            }
+            E::Provide { bindings, body } => {
+                for (_, value) in bindings {
+                    self.expression(value)?;
+                }
+                self.block(body)?;
+            }
+            E::With { bindings, body } => {
+                for binding in bindings {
+                    self.ty(&mut binding.local.ty, expression.span)?;
+                    self.expression(&mut binding.value)?;
+                    if let Some(cleanup) = &mut binding.cleanup {
+                        self.expression(cleanup)?;
+                    }
+                }
+                self.block(body)?;
+            }
             E::Literal(_) | E::Local(_) => {}
             E::FnRef { type_arguments, .. } => {
                 for argument in type_arguments {

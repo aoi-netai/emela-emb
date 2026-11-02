@@ -294,6 +294,33 @@ impl Context<'_> {
         use ir::ExprKind as E;
         let mut analysis = Analysis::default();
         match &expression.kind {
+            E::Use { .. } => {}
+            E::OpCall { handler, args, .. } => {
+                analysis.merge(self.expression(handler, dynamic)?);
+                for argument in args {
+                    analysis.merge(self.expression(argument, dynamic)?);
+                }
+            }
+            E::Handler { operations, .. } => {
+                for operation in operations {
+                    analysis.merge(self.expression(operation, dynamic)?);
+                }
+            }
+            E::Provide { bindings, body } => {
+                for (_, value) in bindings {
+                    analysis.merge(self.expression(value, dynamic)?);
+                }
+                analysis.merge(self.block(body, dynamic)?);
+            }
+            E::With { bindings, body } => {
+                for binding in bindings {
+                    analysis.merge(self.expression(&binding.value, dynamic)?);
+                    if let Some(cleanup) = &binding.cleanup {
+                        analysis.merge(self.expression(cleanup, dynamic)?);
+                    }
+                }
+                analysis.merge(self.block(body, dynamic)?);
+            }
             E::Literal(_) | E::Local(_) | E::FnRef { .. } | E::Lambda { .. } => {}
             E::Apply { callee, args, .. } => {
                 analysis.merge(self.expression(callee, dynamic)?);

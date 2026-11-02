@@ -470,6 +470,41 @@ impl Specializer {
     ) -> Result<()> {
         expression.ty = self.ty(function, expression.ty, arguments, expression.span)?;
         match &mut expression.kind {
+            ir::ExprKind::Use { .. } => {}
+            ir::ExprKind::OpCall {
+                handler,
+                args,
+                order,
+                ..
+            } => {
+                Self::order(function, expression.span, order, args.len())?;
+                self.expression(function, handler, arguments, depth)?;
+                for argument in args {
+                    self.expression(function, argument, arguments, depth)?;
+                }
+            }
+            ir::ExprKind::Handler { operations, .. } => {
+                for operation in operations {
+                    self.expression(function, operation, arguments, depth)?;
+                }
+            }
+            ir::ExprKind::Provide { bindings, body } => {
+                for (_, value) in bindings {
+                    self.expression(function, value, arguments, depth)?;
+                }
+                self.block(function, body, arguments, depth)?;
+            }
+            ir::ExprKind::With { bindings, body } => {
+                for binding in bindings {
+                    binding.local.ty =
+                        self.ty(function, binding.local.ty, arguments, expression.span)?;
+                    self.expression(function, &mut binding.value, arguments, depth)?;
+                    if let Some(cleanup) = &mut binding.cleanup {
+                        self.expression(function, cleanup, arguments, depth)?;
+                    }
+                }
+                self.block(function, body, arguments, depth)?;
+            }
             ir::ExprKind::Literal(_) | ir::ExprKind::Local(_) => {}
             ir::ExprKind::FnRef {
                 target,

@@ -156,7 +156,7 @@ impl Specializer {
         Ok(id)
     }
 }
-fn maximum_local(function: &ir::Function) -> Option<usize> {
+pub(super) fn maximum_local(function: &ir::Function) -> Option<usize> {
     fn record(id: ir::LocalId, maximum: &mut Option<usize>) {
         *maximum = Some(maximum.map_or(id.0, |previous| previous.max(id.0)));
     }
@@ -201,6 +201,34 @@ fn maximum_local(function: &ir::Function) -> Option<usize> {
         use ir::ExprKind as E;
         match &value.kind {
             E::Local(id) => record(*id, maximum),
+            E::Use { .. } => {}
+            E::OpCall { handler, args, .. } => {
+                expression(handler, maximum);
+                for argument in args {
+                    expression(argument, maximum);
+                }
+            }
+            E::Handler { operations, .. } => {
+                for operation in operations {
+                    expression(operation, maximum);
+                }
+            }
+            E::Provide { bindings, body } => {
+                for (_, value) in bindings {
+                    expression(value, maximum);
+                }
+                block(body, maximum);
+            }
+            E::With { bindings, body } => {
+                for binding in bindings {
+                    record(binding.local.id, maximum);
+                    expression(&binding.value, maximum);
+                    if let Some(cleanup) = &binding.cleanup {
+                        expression(cleanup, maximum);
+                    }
+                }
+                block(body, maximum);
+            }
             E::FnRef { .. } => {}
             E::Lambda {
                 params,
