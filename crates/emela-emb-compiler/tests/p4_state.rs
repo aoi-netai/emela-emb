@@ -40,6 +40,15 @@ int main(void){
     assert(state_failure((EmelaString){"a\0b",3,NULL})&&test_heap_empty());
     trace=0;assert(state_order()==42&&trace==132&&test_heap_empty());
     assert(state_nested()==42&&test_heap_empty());
+    memcpy(input,"a\0b",3);
+    assert(state_bytes((EmelaString){input,3,NULL})&&test_heap_empty());
+    assert(!memcmp(input,"zzz",3));
+    memcpy(input,"a\0b",3);
+    EmelaBytes captured=captured_bytes((EmelaString){input,3,NULL});
+    memset(input,'x',3);assert(captured.length==3&&captured.data[0]=='a');
+    EmelaBytes shared=shared_bytes(captured);emela_embedded_release_bytes(&captured);
+    assert(shared.length==6&&shared.data[0]=='a'&&shared.data[4]==0);
+    emela_embedded_release_bytes(&shared);assert(test_heap_empty());
   }
   return 0;
 }

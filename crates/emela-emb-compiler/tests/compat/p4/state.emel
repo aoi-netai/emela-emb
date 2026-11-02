@@ -1,4 +1,5 @@
 import Std.State.{State}
+import Std.Bytes.{Bytes}
 
 @external(c, "mark")
 fn mark(value: Int) -> Int
@@ -79,4 +80,33 @@ pub fn nested() -> Int use {} {
     42
   }) == (42, 42)
   result
+}
+
+@export(c, "state_bytes")
+pub fn bytes(text: String) -> Bool {
+  ((saved, read), final) = State.run(Bytes.encode_utf8(text), fn() {
+    state = use State[Bytes]
+    saved = state.get()
+    state.update(fn(value) { Bytes.append(value, Bytes.encode_utf8("!")) })
+    (saved, fn() { state.get() })
+  })
+  mutate_input()
+  Bytes.to_list(saved) == [97, 0, 98] && Bytes.to_list(final) == [97, 0, 98, 33] && read() == final
+}
+
+@export(c, "captured_bytes")
+pub fn captured_bytes(text: String) -> Bytes {
+  value = Bytes.encode_utf8(text)
+  read = fn() { value }
+  read()
+}
+
+@export(c, "shared_bytes")
+pub fn shared_bytes(input: Bytes) -> Bytes {
+  (value, _) = State.run(input, fn() {
+    state = use State[Bytes]
+    state.set(Bytes.append(state.get(), state.get()))
+    state.get()
+  })
+  value
 }
