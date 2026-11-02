@@ -528,3 +528,36 @@ fn rejects_explicit_export_and_external_symbol_collisions() {
             .contains("conflicts with a generated function")
     );
 }
+
+#[test]
+fn float_constant_bits_and_non_finite_values_execute() {
+    let values = [
+        1.25,
+        1e100,
+        -0.0,
+        f64::INFINITY,
+        f64::NEG_INFINITY,
+        f64::NAN,
+    ];
+    let functions: Vec<_> = values
+        .into_iter()
+        .enumerate()
+        .map(|(index, value)| {
+            let mut f = Function::new(&format!("float_value{index}"));
+            f.exported = true;
+            f.export_symbol = Some(f.name.clone());
+            f.ret = TypeId::FLOAT;
+            f.body = Some(f.seqs.alloc(Seq {
+                stmts: vec![],
+                term: Term::Return(Some(Const::Float(value).into())),
+            }));
+            f
+        })
+        .collect();
+    let output = crate::backend::compile_program(program(functions), &Options::default()).unwrap();
+    execute(
+        &output,
+        "#include <math.h>\n#include \"emela_embedded.h\"\nint main(void) {\n if (float_value0() != 1.25 || float_value1() != 1e100) return 1;\n if (float_value2() != 0.0 || !signbit(float_value2())) return 2;\n if (!isinf(float_value3()) || signbit(float_value3())) return 3;\n if (!isinf(float_value4()) || !signbit(float_value4())) return 4;\n return isnan(float_value5()) ? 0 : 5;\n}\n",
+        0,
+    );
+}
