@@ -222,5 +222,10 @@
       },
       "runtime_assertions": "integer/text return 42; six const initialization logs total; two tick calls total; selected closure marks branch two on each call"
     }
-  ]
+  ],
+  "previous_restriction_test_update": {
+    "test": "crates/emela-emb-compiler/tests/p2_inference.rs::generalization_keeps_numeric_defaults_rigid_signatures_and_c_boundaries",
+    "change": "Replace the former unannotated const EMPTY rejection with an explicitly annotated const EMPTY:Maybe[Int] rigidity rejection.",
+    "reason": "Unannotated const EMPTY=None is now legally generalized across Maybe[Int] and Maybe[String]; positive source/C tests cover those multiple instances."
+  }
 }
