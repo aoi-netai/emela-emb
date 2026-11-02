@@ -37,7 +37,7 @@
 
 | 旧schema | 意味の対応 | 検査・観測 |
 | --- | --- | --- |
-| `Seq.stmts / term`、`Stmt`、`Term` | ordered statementと終端を独自graphに保持。If/Switch/Loop/Block/Protect、Return/Fail/Break/Recur/Defect/Unwindを検証・正規化する | source短絡・評価順・失敗escape、末尾再帰、cleanupを越える不正制御、取消とdefectの別経路 |
+| `Seq.stmts / term`、`Stmt`、`Term` | ordered statementと終端を独自graphに保持。If/Switch/Loop/Block/Protect、Return/Fail/Break/Recur/Defectを検証・正規化する。Term::Unwindの内部variantは残るが独立lowerの入力としては許可せず、失敗・取消のunwindはProtect/control/frameの経路で扱う | source短絡・評価順・失敗escape、末尾再帰、cleanupを越える不正制御、取消とdefectの別経路 |
 | `Case.body / key`、`CaseKey`、`SwitchOn` | label/Int/Int64/enum tagとcase sequenceの対応を保持。exhaustive指定だけで不正tagを成功扱いしない | P7独立IRのliteral switch・payload/nullary tag・NoMatch hook、P2 source match |
 | `Operand`、`Const`、`PrimTy`、`PrimOp` | 変数参照とliteral、primitive計算を区別。Int/Int64 wrap・shift/除算のdefect・Float bits・String長を維持 | P1/P2の数値端値・NaN・負shift・NUL・Unicode、P7 C境界Float bits |
 | `Value`、`Callee`、`OnFail` | Direct/Indirect/Op callと失敗辺、tuple/enum/list/cell/closure/evidence/Fiber操作を独自入力として検証 | 同期/中断を分けたP2〜P6 source/Cと独自IR。旧source builtin8はlowerしてから後段へ渡す |
