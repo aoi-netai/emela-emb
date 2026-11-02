@@ -59,6 +59,27 @@ sourceの具体化は、旧testを実行した証拠ではない。新compiler�
 
 phase7 integrationのrequest外部関数化/GC anchor、Cause cleanupのFlow後処理などは `execution_configuration` に分ける。これらの旧C期待値を、後処理なしのsource実行と同一視しない。新compilerでの到達・C期待値の移植は、入力保存とは別の検証で記録する。
 
+## P4最終版での到達調査
+
+[到達JSON](../compiler-legacy-source-reach.json)は、新compiler `5dab56c` のrelease CLIで保存済み169programを調べた結果である。compiler binaryとfixture manifestのSHA-256を記録した。heap 131072、String容量256の共通設定を使い、旧test固有のOptions・外部adapter・Flow後処理は適応していない。後続のP5/P6/P7修正をこの基準結果へ混ぜていない。
+
+| 入力/検証 | 結果 | 範囲 |
+| --- | ---: | --- |
+| 元sourceのcompile完了 | 49 / 169 program | 型検査とC生成まで完了。うち45programはC entry/export未選択 |
+| 元sourceのbackend拒否 | 2 / 169 program | pipeline上で型検査は通過、C生成は未達 |
+| その他のcompile拒否 | 118 / 169 program | このprobeだけでは型検査成功を確定しない |
+| 具体関数を1個ずつexportしたC生成 | 81 / 95 root | 元sourceの49programにある具体main/public fnを対象 |
+| 上記CをC11でobject化 | 80 / 95 root | `-std=c11 -Wall -Werror -O0/-O2` の双方 |
+| 上記C生成拒否 | 14 / 95 root | 型検査後のbackend診断 |
+| 上記Cのobject化拒否 | 1 / 95 root | 未使用const helperによるWerror |
+| C link/実行 | 未検証 | object成功を旧C期待値の成功に数えない |
+
+旧 `Roots::Public` の根拠は `crates/emela-core/src/lower.rs:3404-3421`。entry moduleのmain/public fnを選び、trait boundのあるschemeを除く。調査ではこのうち具体型の関数を1個ずつ明示exportへ対応付けた。明示generic headerとexternal宣言は具体ABI adapterのreview対象にし、generic export拒否を言語不足に数えない。型推論でgenericになった場合も具体exportの制限として分類する。今回49programの95対象はいずれも具体signatureで、個別exportによる型検査は全件通過した。private mainへのpub追加・C symbol・元位置を各recordに残し、元fixtureは変更していない。
+
+raw compileの最初の診断による暫定振分けは、P6 source未接続86、P5 suspend/Async未接続19、Embedded service 5、P7要review10。これは全診断の完全な意味分類ではない。P7の10programはpolymorphic const関連8とbare external type関連2で、担当別の修正後に再調査する。具体root追加で現れたaggregate external ABIのadapter不足、const closureのC生成不足も到達JSONへ残した。旧正常sourceを不足syntaxのため対象外へ落としていない。
+
+record updateはこの169programとは別に固定spec 5.3から確認したP7の不足で、`User(name: "b", ..user)` が構文段階で拒否された。既存AST/checkの拡張と、旧仕様の型引数変更・named RHS→baseの評価順・opaque境界の検証を別commitで行う。
+
 ## 再生成と独立性
 
 Python 3.10以降の標準libraryとGitだけを使う。旧repoでは固定objectに対する `git ls-tree` と `git show` だけを呼ぶ。旧compilerのbuild・実行、dirty checkoutの編集、本体crate/dev依存は追加していない。
@@ -68,6 +89,7 @@ python3 docs/tools/index_legacy_corpus.py /path/to/legacy/repository
 python3 docs/tools/index_legacy_corpus.py /path/to/legacy/repository --check
 python3 docs/tools/materialize_legacy_fixtures.py
 python3 docs/tools/materialize_legacy_fixtures.py --check
+python3 docs/tools/check_legacy_reach.py --compiler-revision 5dab56c
 ```
 
 生成時に、全test属性の対応・対象file/moduleの訪問・test ID重複・本文hash・source ID参照・reviewの固定revisionを検査する。`--check` は再生成結果とcommit済みJSONのbyte一致を検査する。
