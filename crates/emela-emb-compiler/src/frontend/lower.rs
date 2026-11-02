@@ -269,6 +269,7 @@ impl Context<'_> {
     ) -> Option<b::Operand> {
         use ir::ExprKind as E;
         match &expression.kind {
+            E::Evidence => Some(self.current_evidence(builder).into()),
             E::Fiber { op, args, errors } => {
                 let mut values = Vec::new();
                 for argument in args {
@@ -306,7 +307,11 @@ impl Context<'_> {
                 operations,
                 ..
             } => self.handler_value(builder, name, *effect, operations, expression.ty),
-            E::Provide { bindings, body } => self.provide(builder, bindings, body, tail),
+            E::Provide {
+                base,
+                bindings,
+                body,
+            } => self.provide(builder, base.as_deref(), bindings, body, tail),
             E::With { bindings, body } => {
                 self.with_expression(builder, bindings, body, expression.ty)
             }

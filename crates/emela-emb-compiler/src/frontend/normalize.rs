@@ -204,7 +204,14 @@ impl Context<'_> {
                     self.expression(operation)?;
                 }
             }
-            E::Provide { bindings, body } => {
+            E::Provide {
+                base,
+                bindings,
+                body,
+            } => {
+                if let Some(base) = base {
+                    self.expression(base)?;
+                }
                 for (effect, value) in bindings {
                     *effect = self.effect(*effect, expression.span)?;
                     self.expression(value)?;
@@ -224,7 +231,7 @@ impl Context<'_> {
                 }
                 self.block(body)?;
             }
-            E::Literal(_) | E::Local(_) => {}
+            E::Evidence | E::Literal(_) | E::Local(_) => {}
             E::FnRef { type_arguments, .. } => {
                 for argument in type_arguments {
                     let mut ty = frontend_type(*argument);

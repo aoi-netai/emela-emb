@@ -25,7 +25,7 @@ pub(super) fn allocate_raises(input: &ir::Program, program: &mut b::Program) -> 
                     collect(argument, types);
                 }
             }
-            E::Use { .. } => {}
+            E::Evidence | E::Use { .. } => {}
             E::OpCall { handler, args, .. } => {
                 collect(handler, types);
                 for argument in args {
@@ -37,7 +37,14 @@ pub(super) fn allocate_raises(input: &ir::Program, program: &mut b::Program) -> 
                     collect(operation, types);
                 }
             }
-            E::Provide { bindings, body } => {
+            E::Provide {
+                base,
+                bindings,
+                body,
+            } => {
+                if let Some(base) = base {
+                    collect(base, types);
+                }
                 for (_, value) in bindings {
                     collect(value, types);
                 }

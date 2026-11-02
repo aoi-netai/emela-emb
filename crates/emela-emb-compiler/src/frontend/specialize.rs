@@ -602,7 +602,14 @@ impl Specializer {
                     self.handler_operation_abi(operation);
                 }
             }
-            ir::ExprKind::Provide { bindings, body } => {
+            ir::ExprKind::Provide {
+                base,
+                bindings,
+                body,
+            } => {
+                if let Some(base) = base {
+                    self.expression(function, base, arguments, depth)?;
+                }
                 for (effect, value) in bindings {
                     *effect = self.effect(function, *effect, arguments, expression.span, 0)?;
                     self.expression(function, value, arguments, depth)?;
@@ -623,7 +630,7 @@ impl Specializer {
                 }
                 self.block(function, body, arguments, depth)?;
             }
-            ir::ExprKind::Literal(_) | ir::ExprKind::Local(_) => {}
+            ir::ExprKind::Evidence | ir::ExprKind::Literal(_) | ir::ExprKind::Local(_) => {}
             ir::ExprKind::FnRef {
                 target,
                 type_arguments,

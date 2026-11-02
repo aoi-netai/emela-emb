@@ -248,6 +248,7 @@ fn provide(effect: b::EffectId, handler: ir::Expr, body: ir::Expr) -> ir::Expr {
     let ty = body.ty;
     expression(
         ir::ExprKind::Provide {
+            base: None,
             bindings: vec![(effect, handler)],
             body: block(body),
         },
@@ -263,6 +264,95 @@ fn apply(callee: ir::Expr) -> ir::Expr {
         },
         ValueType::Int,
     )
+}
+
+#[test]
+fn an_explicit_provide_base_restores_a_captured_table_inside_an_effectful_closure() {
+    let mut core = b::Definitions::default();
+    let (read, handler_type) = effect(&mut core, "Read");
+    let pure = fn_type(&mut core, false);
+    let effectful = fn_type(&mut core, true);
+    let saved = local(0, frontend_type(b::TypeId::EVIDENCE));
+    let mut callback = lambda(
+        expression(
+            ir::ExprKind::Provide {
+                base: Some(Box::new(reference(&saved))),
+                bindings: vec![],
+                body: block(operation(read, handler_type)),
+            },
+            ValueType::Int,
+        ),
+        effectful,
+    );
+    let ir::ExprKind::Lambda { captures, .. } = &mut callback.kind else {
+        unreachable!()
+    };
+    captures.push(saved.id);
+    let inner = expression(
+        ir::ExprKind::Binary {
+            op: Binary::Add,
+            left: Box::new(expression(
+                ir::ExprKind::Binary {
+                    op: Binary::Mul,
+                    left: Box::new(operation(read, handler_type)),
+                    right: Box::new(integer(10)),
+                },
+                ValueType::Int,
+            )),
+            right: Box::new(apply(callback)),
+        },
+        ValueType::Int,
+    );
+    let inner = provide(
+        read,
+        handler(read, handler_type, lambda(integer(2), pure)),
+        inner,
+    );
+    let outer = expression(
+        ir::ExprKind::Provide {
+            base: None,
+            bindings: vec![(read, handler(read, handler_type, lambda(integer(1), pure)))],
+            body: ir::Block {
+                ty: ValueType::Int,
+                span: span(),
+                statements: vec![
+                    ir::Statement::Pattern {
+                        pattern: ir::Pattern {
+                            kind: ir::PatternKind::Bind(saved.clone()),
+                            ty: saved.ty,
+                            span: span(),
+                        },
+                        value: expression(ir::ExprKind::Evidence, saved.ty),
+                    },
+                    ir::Statement::Expr(inner),
+                ],
+            },
+        },
+        ValueType::Int,
+    );
+    let answer = exported(function(
+        0,
+        "answer",
+        vec![],
+        ValueType::Int,
+        expression(
+            ir::ExprKind::Binary {
+                op: Binary::Mul,
+                left: Box::new(outer),
+                right: Box::new(integer(2)),
+            },
+            ValueType::Int,
+        ),
+    ));
+    execute_with_options(
+        ir::Program {
+            core,
+            registry: Default::default(),
+            functions: vec![answer],
+        },
+        "#include <stdlib.h>\n#include \"emela_embedded.h\"\n#include \"emela_board.h\"\nint test_heap_empty(void);\n_Noreturn void emela_board_defect(EmelaDefectKind k,const char*m,uint16_t n){(void)k;(void)m;(void)n;abort();}\nint main(void){for(int i=0;i<1000;i++)if(answer()!=42||!test_heap_empty())return 1;return 0;}\n",
+        &crate::Options::default().with_heap_bytes(8192),
+    );
 }
 
 #[test]

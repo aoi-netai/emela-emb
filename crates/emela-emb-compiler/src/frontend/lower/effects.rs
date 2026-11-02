@@ -6,11 +6,12 @@ impl Context<'_> {
         if let Some(evidence) = self.evidence {
             return evidence;
         }
-        self.extend_evidence(builder, &[])
+        self.extend_evidence(builder, None, &[])
     }
     fn extend_evidence(
         &mut self,
         builder: &mut Builder,
+        base: Option<b::VarId>,
         bindings: &[(b::EffectId, b::VarId)],
     ) -> b::VarId {
         let evidence = self.var("provided_evidence", Ty::Compound(b::TypeId::EVIDENCE));
@@ -19,7 +20,7 @@ impl Context<'_> {
             b::Stmt::Let {
                 dst: Some(evidence),
                 value: b::Value::EvExtend {
-                    base: self.evidence,
+                    base,
                     bindings: bindings.to_vec(),
                 },
                 on_defect: None,
@@ -106,11 +107,24 @@ impl Context<'_> {
     pub(super) fn provide(
         &mut self,
         builder: &mut Builder,
+        base: Option<&ir::Expr>,
         bindings: &[(b::EffectId, ir::Expr)],
         body: &ir::Block,
         tail: bool,
     ) -> Option<b::Operand> {
         let saved = self.evidence;
+        let base = if let Some(base) = base {
+            let value = self.expression(builder, base, false);
+            if builder.term.is_some() {
+                return None;
+            }
+            let Some(b::Operand::Var(value)) = value else {
+                unreachable!("provided base is evidence")
+            };
+            Some(value)
+        } else {
+            saved
+        };
         let mut provided = Vec::new();
         for (effect, value) in bindings {
             let value = self.expression(builder, value, false);
@@ -123,7 +137,7 @@ impl Context<'_> {
             };
             provided.push((*effect, handler));
         }
-        self.evidence = Some(self.extend_evidence(builder, &provided));
+        self.evidence = Some(self.extend_evidence(builder, base, &provided));
         let result = self.block_into(builder, body, tail);
         self.evidence = saved;
         result
@@ -245,7 +259,7 @@ impl Context<'_> {
                 .iter()
                 .map(|&effect| (effect, handler))
                 .collect();
-            self.evidence = Some(self.extend_evidence(builder, &provided));
+            self.evidence = Some(self.extend_evidence(builder, self.evidence, &provided));
         }
         if binding.cleanup.is_none() && binding.retire.is_none() {
             let value = self.with_bindings(builder, remaining, body, result);

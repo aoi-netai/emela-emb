@@ -423,7 +423,7 @@ impl Context<'_> {
                     }
                 }
             }
-            E::Use { .. } => {}
+            E::Evidence | E::Use { .. } => {}
             E::OpCall {
                 handler,
                 args,
@@ -445,7 +445,14 @@ impl Context<'_> {
                     analysis.merge(self.expression(operation, dynamic)?);
                 }
             }
-            E::Provide { bindings, body } => {
+            E::Provide {
+                base,
+                bindings,
+                body,
+            } => {
+                if let Some(base) = base {
+                    analysis.merge(self.expression(base, dynamic)?);
+                }
                 for (_, value) in bindings {
                     analysis.merge(self.expression(value, dynamic)?);
                 }
