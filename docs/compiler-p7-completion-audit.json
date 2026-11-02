@@ -3,7 +3,7 @@
   "legacy_revision": "c34c0aeefdd966d854371b3110db00a47798751d",
   "implementation_revision": "13cd3130094ac1f53ba99faa783df271a91b290f",
   "ledger_sha256": "217edadb708662dbc3ec34f9f85f2b865414322b4f3fe0a221a1d4687c86e498",
-  "review_sha256": "cc0120c68c4f5f665627eecdb94459d6c615f65f1a53b94421d2b87cec53f25a",
+  "review_sha256": "a87366b80452b66e11117ab4f14178128407c152fcd619b5f2d46e92fa520de5",
   "corpus_index_sha256": "2a1d100c713a22864e85beba4c902529117b4a2b480bc79170ca0adf35106ff0",
   "purpose": "Read-only completion audit. The authoritative ledger and its statuses are not changed. Candidate matches need semantic review; C generation/object checks are not C execution.",
   "fixed_reference_checks": {
@@ -13,6 +13,47 @@
     "requirement_ids": "match"
   },
   "reviews": [
+    {
+      "id": "legacy-inline-data-observations-replaced",
+      "owner": "audit",
+      "state": "old-assertions-reconstructed-and-C-executed",
+      "test_ids": [
+        "emit::binding_metadata::named_enum_fields_preserve_payload_order_in_generated_c",
+        "emit::constructs_payload_and_unit_enum_variants_as_inline_values",
+        "emit::reads_generic_enum_fields_from_inline_values",
+        "emit::reads_tags_from_payload_and_nullary_enums",
+        "emit::constructs_inline_tuples_and_keeps_unit_field_positions",
+        "emit::reads_tuple_fields_and_ignores_unit_projections",
+        "emit::emits_and_runs_int32_and_int64_literal_switches",
+        "emit::emits_and_runs_exhaustive_payload_enum_switch_and_defects_on_invalid_tag",
+        "emit::emits_and_runs_switches_on_nullary_enum_representations"
+      ],
+      "note": "Reviewed the fixed-old bodies and preserved every old C assertion in two independent IR tests: named payload 7/42, Some/None tags/payload 42, Boxed[Int64] field73, payload/nullary tags, tuple Int64/Unit/Bool f0=91/f2=True and discarded Unit projection, Int/Int64 min/max/default literal switches, enum outputs71/82 and nullary3/5, invalidtag7 NoMatch kind/message. C11 Wall/Werror O0/O2 and 1000 normal repetitions passed at 902175f. The old IR-only scope is preserved; authoritative ledger status remains unchanged pending adoption.",
+      "candidate_evidence": [
+        {
+          "revision": "902175f",
+          "path": "crates/emela-emb-compiler/src/backend/lower/p7_data_tests.rs",
+          "symbol": "legacy_inline_layouts_preserve_generic_fields_tags_and_unit_positions_at_the_c_boundary",
+          "kind": "ir_test"
+        },
+        {
+          "revision": "902175f",
+          "path": "crates/emela-emb-compiler/src/backend/lower/p7_data_tests.rs",
+          "symbol": "legacy_literal_and_enum_switches_cover_numeric_extremes_and_reject_invalid_tags",
+          "kind": "ir_test"
+        },
+        {
+          "revision": "902175f",
+          "path": "docs/reports/compiler-p7-ir-data.md",
+          "kind": "run_report"
+        }
+      ],
+      "candidate_reference_ids": [
+        "902175f2aedb197c923875ee02a177549a7e1f50:crates/emela-emb-compiler/src/backend/lower/p7_data_tests.rs#legacy_inline_layouts_preserve_generic_fields_tags_and_unit_positions_at_the_c_boundary",
+        "902175f2aedb197c923875ee02a177549a7e1f50:crates/emela-emb-compiler/src/backend/lower/p7_data_tests.rs#legacy_literal_and_enum_switches_cover_numeric_extremes_and_reject_invalid_tags",
+        "902175f2aedb197c923875ee02a177549a7e1f50:docs/reports/compiler-p7-ir-data.md"
+      ]
+    },
     {
       "id": "P6-fiber-deferred-cause",
       "owner": "frontend/backend",
@@ -14944,6 +14985,7 @@
           "key": "emit::binding_metadata::named_enum_fields_preserve_payload_order_in_generated_c",
           "ledger_final_status": false,
           "review_groups": [
+            "legacy-inline-data-observations-replaced",
             "P7-C-ABI-and-bindings",
             "data-strings-lists-and-owned-values"
           ],
@@ -15576,6 +15618,7 @@
           "key": "emit::constructs_inline_tuples_and_keeps_unit_field_positions",
           "ledger_final_status": false,
           "review_groups": [
+            "legacy-inline-data-observations-replaced",
             "data-strings-lists-and-owned-values"
           ],
           "ledger_reference_ids": [],
@@ -15599,6 +15642,7 @@
           "key": "emit::constructs_payload_and_unit_enum_variants_as_inline_values",
           "ledger_final_status": false,
           "review_groups": [
+            "legacy-inline-data-observations-replaced",
             "data-strings-lists-and-owned-values"
           ],
           "ledger_reference_ids": [],
@@ -15892,6 +15936,7 @@
           "key": "emit::emits_and_runs_exhaustive_payload_enum_switch_and_defects_on_invalid_tag",
           "ledger_final_status": false,
           "review_groups": [
+            "legacy-inline-data-observations-replaced",
             "control-flow-and-scalar-IR-observations"
           ],
           "ledger_reference_ids": [],
@@ -15969,6 +16014,7 @@
           "key": "emit::emits_and_runs_int32_and_int64_literal_switches",
           "ledger_final_status": false,
           "review_groups": [
+            "legacy-inline-data-observations-replaced",
             "control-flow-and-scalar-IR-observations"
           ],
           "ledger_reference_ids": [],
@@ -16073,6 +16119,7 @@
           "key": "emit::emits_and_runs_switches_on_nullary_enum_representations",
           "ledger_final_status": false,
           "review_groups": [
+            "legacy-inline-data-observations-replaced",
             "control-flow-and-scalar-IR-observations"
           ],
           "ledger_reference_ids": [],
@@ -16840,6 +16887,7 @@
           "key": "emit::reads_generic_enum_fields_from_inline_values",
           "ledger_final_status": false,
           "review_groups": [
+            "legacy-inline-data-observations-replaced",
             "data-strings-lists-and-owned-values"
           ],
           "ledger_reference_ids": [],
@@ -16890,6 +16938,7 @@
           "key": "emit::reads_tags_from_payload_and_nullary_enums",
           "ledger_final_status": false,
           "review_groups": [
+            "legacy-inline-data-observations-replaced",
             "data-strings-lists-and-owned-values"
           ],
           "ledger_reference_ids": [],
@@ -16913,6 +16962,7 @@
           "key": "emit::reads_tuple_fields_and_ignores_unit_projections",
           "ledger_final_status": false,
           "review_groups": [
+            "legacy-inline-data-observations-replaced",
             "data-strings-lists-and-owned-values"
           ],
           "ledger_reference_ids": [],
@@ -23392,6 +23442,34 @@
       "execution_inferred_from_discovery": false
     },
     {
+      "revision": "902175f2aedb197c923875ee02a177549a7e1f50",
+      "path": "crates/emela-emb-compiler/src/backend/lower/p7_data_tests.rs",
+      "symbol": "legacy_inline_layouts_preserve_generic_fields_tags_and_unit_positions_at_the_c_boundary",
+      "leaf_name": "legacy_inline_layouts_preserve_generic_fields_tags_and_unit_positions_at_the_c_boundary",
+      "line": 58,
+      "body_sha256": "7b4b052e9ecdad51d6aa6cd96be2db5ae39464de25062ddc7c663e3aef843663",
+      "attributes": [
+        "#[test]"
+      ],
+      "role": "backend-IR-unit-test",
+      "direct_C_helper_seen": [],
+      "execution_inferred_from_discovery": false
+    },
+    {
+      "revision": "902175f2aedb197c923875ee02a177549a7e1f50",
+      "path": "crates/emela-emb-compiler/src/backend/lower/p7_data_tests.rs",
+      "symbol": "legacy_literal_and_enum_switches_cover_numeric_extremes_and_reject_invalid_tags",
+      "leaf_name": "legacy_literal_and_enum_switches_cover_numeric_extremes_and_reject_invalid_tags",
+      "line": 323,
+      "body_sha256": "c1e0d6b138d63cdf2dc44b01550f79628b81c82a1fecd1e3554054b9efc4fed6",
+      "attributes": [
+        "#[test]"
+      ],
+      "role": "backend-IR-unit-test",
+      "direct_C_helper_seen": [],
+      "execution_inferred_from_discovery": false
+    },
+    {
       "revision": "ac756a74a0abf60adbc81335fe95693646b2efc1",
       "path": "crates/emela-emb-compiler/src/backend/lower/isr_tests.rs",
       "symbol": "isr_entries_reject_discarded_cells_in_direct_and_nested_calls",
@@ -29021,6 +29099,44 @@
       "symbol_components_seen": null,
       "semantic_correspondence_verified": false
     },
+    "902175f2aedb197c923875ee02a177549a7e1f50:crates/emela-emb-compiler/src/backend/lower/p7_data_tests.rs#legacy_inline_layouts_preserve_generic_fields_tags_and_unit_positions_at_the_c_boundary": {
+      "revision": "902175f2aedb197c923875ee02a177549a7e1f50",
+      "path": "crates/emela-emb-compiler/src/backend/lower/p7_data_tests.rs",
+      "symbol": "legacy_inline_layouts_preserve_generic_fields_tags_and_unit_positions_at_the_c_boundary",
+      "kind": "ir_test",
+      "roles": [
+        "ir_test"
+      ],
+      "path_exists": true,
+      "blob": "6df93f81496c543bf9c94931b700f7e60d495be7",
+      "symbol_components_seen": true,
+      "semantic_correspondence_verified": false
+    },
+    "902175f2aedb197c923875ee02a177549a7e1f50:crates/emela-emb-compiler/src/backend/lower/p7_data_tests.rs#legacy_literal_and_enum_switches_cover_numeric_extremes_and_reject_invalid_tags": {
+      "revision": "902175f2aedb197c923875ee02a177549a7e1f50",
+      "path": "crates/emela-emb-compiler/src/backend/lower/p7_data_tests.rs",
+      "symbol": "legacy_literal_and_enum_switches_cover_numeric_extremes_and_reject_invalid_tags",
+      "kind": "ir_test",
+      "roles": [
+        "ir_test"
+      ],
+      "path_exists": true,
+      "blob": "6df93f81496c543bf9c94931b700f7e60d495be7",
+      "symbol_components_seen": true,
+      "semantic_correspondence_verified": false
+    },
+    "902175f2aedb197c923875ee02a177549a7e1f50:docs/reports/compiler-p7-ir-data.md": {
+      "revision": "902175f2aedb197c923875ee02a177549a7e1f50",
+      "path": "docs/reports/compiler-p7-ir-data.md",
+      "kind": "run_report",
+      "roles": [
+        "run_report"
+      ],
+      "path_exists": true,
+      "blob": "b395949e5c67c39bca728efb35f2e3d56bed91a0",
+      "symbol_components_seen": null,
+      "semantic_correspondence_verified": false
+    },
     "ac756a74a0abf60adbc81335fe95693646b2efc1:crates/emela-emb-compiler/src/backend/lower/isr_tests.rs": {
       "revision": "ac756a74a0abf60adbc81335fe95693646b2efc1",
       "path": "crates/emela-emb-compiler/src/backend/lower/isr_tests.rs",
@@ -29059,7 +29175,7 @@
     }
   },
   "reference_checks": {
-    "count": 432,
+    "count": 435,
     "missing_paths": [],
     "symbol_components_not_seen": [
       "13cd3130094ac1f53ba99faa783df271a91b290f:crates/emela-emb-compiler/src/backend/mod.rs#compile_flow"

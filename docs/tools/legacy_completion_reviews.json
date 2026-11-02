@@ -3,6 +3,28 @@
   "policy": "Candidate evidence and reviewer assignments only. No ledger status is promoted by this file. Owner checkpoints require final integration and execution review.",
   "groups": [
     {
+      "id": "legacy-inline-data-observations-replaced",
+      "owner": "audit",
+      "state": "old-assertions-reconstructed-and-C-executed",
+      "test_ids": [
+        "emit::binding_metadata::named_enum_fields_preserve_payload_order_in_generated_c",
+        "emit::constructs_payload_and_unit_enum_variants_as_inline_values",
+        "emit::reads_generic_enum_fields_from_inline_values",
+        "emit::reads_tags_from_payload_and_nullary_enums",
+        "emit::constructs_inline_tuples_and_keeps_unit_field_positions",
+        "emit::reads_tuple_fields_and_ignores_unit_projections",
+        "emit::emits_and_runs_int32_and_int64_literal_switches",
+        "emit::emits_and_runs_exhaustive_payload_enum_switch_and_defects_on_invalid_tag",
+        "emit::emits_and_runs_switches_on_nullary_enum_representations"
+      ],
+      "note": "Reviewed the fixed-old bodies and preserved every old C assertion in two independent IR tests: named payload 7/42, Some/None tags/payload 42, Boxed[Int64] field73, payload/nullary tags, tuple Int64/Unit/Bool f0=91/f2=True and discarded Unit projection, Int/Int64 min/max/default literal switches, enum outputs71/82 and nullary3/5, invalidtag7 NoMatch kind/message. C11 Wall/Werror O0/O2 and 1000 normal repetitions passed at 902175f. The old IR-only scope is preserved; authoritative ledger status remains unchanged pending adoption.",
+      "candidate_evidence": [
+        {"revision": "902175f", "path": "crates/emela-emb-compiler/src/backend/lower/p7_data_tests.rs", "symbol": "legacy_inline_layouts_preserve_generic_fields_tags_and_unit_positions_at_the_c_boundary", "kind": "ir_test"},
+        {"revision": "902175f", "path": "crates/emela-emb-compiler/src/backend/lower/p7_data_tests.rs", "symbol": "legacy_literal_and_enum_switches_cover_numeric_extremes_and_reject_invalid_tags", "kind": "ir_test"},
+        {"revision": "902175f", "path": "docs/reports/compiler-p7-ir-data.md", "kind": "run_report"}
+      ]
+    },
+    {
       "id": "P6-fiber-deferred-cause",
       "owner": "frontend/backend",
       "state": "active-implementation",
