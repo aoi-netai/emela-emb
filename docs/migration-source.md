@@ -390,3 +390,9 @@ Std.Stateを通常sourceへ登録し、`tests/p4_state.rs`で返却closure、借
 Stringの`@deprecated`・`@internal`は従来と同じmetadata適応として省略し、既に供給していた`String.is_empty`は保持する。Preludeのprimitive Bool/trait適応を上書きせず、Std.Stateのnative effect接続は別の変更として扱う。
 
 `tests/p4_standard_callbacks.rs`と`tests/compat/p4/stdlib-*.emel`は、callbackの順序・短絡・安定sort、generic/constructor/trait function reference、captureした関数の返却、失敗途中のList解放を確認するための入力である。この復元のC実行結果はP4の統合報告で記録し、sourceを保存しただけでは対応完了にしない。
+
+## P4のConsole標準handler
+
+固定revisionの `crates/emela-core/lib/std/console.emel`（SHA-256: `35e8a9bafad0db2c285fe6bd44627b7eb4fd41bbf2e1238a4b3d519c0a1d2d0e`）を `lib/std/console.emel` へ採用する。Console・SystemConsole・TestConsoleのbodyを保持し、他targetのexternal metadataを省略、C相対pathは呼出し元が接続するsymbolへ適応した。予約済みC名はcompiler所有module・宣言名・固定symbolが一致する場合だけ許可し、user宣言には開放しない。
+
+`tests/p4_console.rs` はStateへ記録するTestConsoleと、既存の明示external adapterを使うSystemConsoleのC mockを接続する。List.mapのeffect多相、lineの順序・stderrの処理差、埋込みNULのString、1000回のheap全回収を両最適化で確認する。物理boardやplatformのservice接続はP7で扱う。

@@ -424,7 +424,11 @@ impl Checker {
                                         "only the C boundary target 'c' is supported",
                                     ));
                                 }
-                                if !valid_export_name(&symbol.value) {
+                                let trusted_external = module.builtin
+                                    && matches!(attribute, ast::Attribute::External { .. })
+                                    && sources::external_symbol(&module.name, &function.name.value)
+                                        == Some(symbol.value.as_str());
+                                if !valid_export_name(&symbol.value) && !trusted_external {
                                     return Err(Diagnostic::new(
                                         DK::Export,
                                         symbol.span,

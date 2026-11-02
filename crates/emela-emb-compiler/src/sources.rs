@@ -16,6 +16,7 @@ pub(crate) const CORE_MODULES: &[(&str, &str)] = &[
     ("Prelude", include_str!("../lib/core/prelude.emel")),
     ("Option", include_str!("../lib/core/option.emel")),
     ("List", include_str!("../lib/core/list.emel")),
+    ("Std.Console", include_str!("../lib/std/console.emel")),
     ("Std.State", include_str!("../lib/std/state.emel")),
     ("Std.Map", include_str!("../lib/std/map.emel")),
     ("Std.Set", include_str!("../lib/std/set.emel")),
@@ -144,4 +145,14 @@ pub(crate) fn intrinsic(module: &str, name: &str) -> Option<Intrinsic> {
         ("Std.Bytes", "decode_valid_utf8") => Intrinsic::BytesDecodeValidUtf8,
         _ => return None,
     })
+}
+
+/// Reserved C names owned by this compiler's standard declarations.
+/// A user module or a different declaration cannot select these bindings.
+pub(crate) fn external_symbol(module: &str, name: &str) -> Option<&'static str> {
+    match (module, name) {
+        ("Std.Console", "console_log") => Some("emela_console_print_line"),
+        ("Std.Console", "console_error") => Some("emela_console_print_error_line"),
+        _ => None,
+    }
 }
