@@ -7,7 +7,7 @@ use super::{
 };
 use crate::{
     Diagnostic, DiagnosticKind, Span,
-    contract::ir::{Type, TypeId, TypeTable},
+    contract::ir::{Definitions, EffectId, Type, TypeId},
 };
 use std::collections::{HashMap, HashSet};
 pub(crate) fn normalize(
@@ -39,7 +39,9 @@ pub(crate) fn normalize(
         }
         let mut context = Context {
             solver,
-            types: &mut program.core.types,
+            core: &mut program.core,
+            effect_ids: HashMap::new(),
+            effect_types: HashMap::new(),
             source: &function.source_name,
             parameters: function.type_parameters,
             substitutions,
@@ -55,6 +57,7 @@ pub(crate) fn normalize(
                 .errors
                 .iter_mut()
                 .chain(&mut function.signature.sets.error_constraints)
+                .chain(&mut function.signature.sets.effects)
             {
                 let mut ty = frontend_type(*error);
                 context.ty(&mut ty, function.span)?;
@@ -83,7 +86,9 @@ pub(crate) fn normalize(
 }
 struct Context<'a> {
     solver: &'a mut Solver,
-    types: &'a mut TypeTable,
+    core: &'a mut Definitions,
+    effect_ids: HashMap<EffectId, EffectId>,
+    effect_types: HashMap<TypeId, TypeId>,
     source: &'a str,
     parameters: usize,
     substitutions: HashMap<TypeId, TypeId>,
@@ -93,10 +98,11 @@ impl Context<'_> {
     fn ty(&mut self, ty: &mut ValueType, span: Span) -> Result<(), Diagnostic> {
         let resolved = self
             .solver
-            .substitute(self.types, backend_type(*ty), &self.substitutions)
+            .substitute(&mut self.core.types, backend_type(*ty), &self.substitutions)
             .map_err(|e| {
                 Diagnostic::new(DiagnosticKind::Type, span, e.message).in_source(self.source)
             })?;
+        let resolved = self.effect_type(resolved, span)?;
         self.validate(resolved, &mut HashSet::new(), span)?;
         *ty = frontend_type(resolved);
         Ok(())
@@ -110,7 +116,7 @@ impl Context<'_> {
         if !seen.insert(ty) {
             return Ok(());
         }
-        let children = match &self.types[ty] {
+        let children = match &self.core.types[ty] {
             Type::Param(index) if *index >= self.parameters => {
                 return Err(Diagnostic::new(
                     DiagnosticKind::Type,
@@ -126,7 +132,15 @@ impl Context<'_> {
                 .iter()
                 .copied()
                 .chain([function.ret])
+                .chain(
+                    function
+                        .sets
+                        .into_iter()
+                        .flat_map(|sets| [sets.errors, sets.effects]),
+                )
                 .collect(),
+            Type::Set(summary) => summary.params.clone(),
+            Type::Handler(effect) => self.core.effects[*effect].args.clone(),
             _ => Vec::new(),
         };
         for child in children {
@@ -151,20 +165,32 @@ impl Context<'_> {
         self.ty(&mut expression.ty, expression.span)?;
         use ir::ExprKind as E;
         match &mut expression.kind {
-            E::Use { .. } => {}
-            E::OpCall { handler, args, .. } => {
+            E::Use { effect } => {
+                *effect = self.effect(*effect, expression.span)?;
+            }
+            E::OpCall {
+                handler,
+                effect,
+                args,
+                ..
+            } => {
+                *effect = self.effect(*effect, expression.span)?;
                 self.expression(handler)?;
                 for argument in args {
                     self.expression(argument)?;
                 }
             }
-            E::Handler { operations, .. } => {
+            E::Handler {
+                effect, operations, ..
+            } => {
+                *effect = self.effect(*effect, expression.span)?;
                 for operation in operations {
                     self.expression(operation)?;
                 }
             }
             E::Provide { bindings, body } => {
-                for (_, value) in bindings {
+                for (effect, value) in bindings {
+                    *effect = self.effect(*effect, expression.span)?;
                     self.expression(value)?;
                 }
                 self.block(body)?;
@@ -172,6 +198,9 @@ impl Context<'_> {
             E::With { bindings, body } => {
                 for binding in bindings {
                     self.ty(&mut binding.local.ty, expression.span)?;
+                    for effect in &mut binding.effects {
+                        *effect = self.effect(*effect, expression.span)?;
+                    }
                     self.expression(&mut binding.value)?;
                     if let Some(cleanup) = &mut binding.cleanup {
                         self.expression(cleanup)?;
@@ -329,3 +358,6 @@ impl Context<'_> {
         Ok(())
     }
 }
+
+#[path = "normalize/effects.rs"]
+mod effects;

@@ -62,6 +62,7 @@ fn specialize_with_limits(input: ir::Program, limits: Limits) -> Result<ir::Prog
         templates,
         functions,
         cache: HashMap::new(),
+        effect_instances: HashMap::new(),
         builtin_helpers: HashMap::new(),
         debug_show_helpers: HashMap::new(),
         debug_fallback: HashSet::new(),
@@ -88,6 +89,7 @@ struct Specializer {
     templates: HashMap<ir::DefinitionId, ir::Function>,
     functions: Vec<ir::Function>,
     cache: HashMap<(ir::DefinitionId, Vec<b::TypeId>), ir::DefinitionId>,
+    effect_instances: HashMap<(b::EffectId, Vec<b::TypeId>), b::EffectId>,
     builtin_helpers: HashMap<(super::traits::BuiltinTrait, b::TypeId, bool), ir::DefinitionId>,
     debug_show_helpers: HashMap<(b::TypeId, bool), ir::DefinitionId>,
     debug_fallback: HashSet<ir::DefinitionId>,
@@ -268,6 +270,10 @@ impl Specializer {
                     self.substitute(function, element, args, span, memo, active, depth + 1)?;
                 self.core.types.intern(b::Type::Cell(element))
             }
+            b::Type::Handler(effect) => {
+                let effect = self.effect(function, effect, args, span, depth + 1)?;
+                self.core.types.intern(b::Type::Handler(effect))
+            }
             b::Type::Fn(mut signature) => {
                 signature.params = signature
                     .params
@@ -366,6 +372,19 @@ impl Specializer {
                 ));
             }
         }
+        for effect_type in &mut function.signature.sets.effects {
+            *effect_type = self.substitute(
+                &source,
+                *effect_type,
+                args,
+                source.span,
+                &mut HashMap::new(),
+                &mut HashSet::new(),
+                0,
+            )?;
+        }
+        function.signature.sets.effects.sort_by_key(|ty| ty.index());
+        function.signature.sets.effects.dedup();
         function.signature.sets.errors.sort_by_key(|ty| ty.index());
         function.signature.sets.errors.dedup();
         function
@@ -470,26 +489,34 @@ impl Specializer {
     ) -> Result<()> {
         expression.ty = self.ty(function, expression.ty, arguments, expression.span)?;
         match &mut expression.kind {
-            ir::ExprKind::Use { .. } => {}
+            ir::ExprKind::Use { effect } => {
+                *effect = self.effect(function, *effect, arguments, expression.span, 0)?;
+            }
             ir::ExprKind::OpCall {
                 handler,
+                effect,
                 args,
                 order,
                 ..
             } => {
+                *effect = self.effect(function, *effect, arguments, expression.span, 0)?;
                 Self::order(function, expression.span, order, args.len())?;
                 self.expression(function, handler, arguments, depth)?;
                 for argument in args {
                     self.expression(function, argument, arguments, depth)?;
                 }
             }
-            ir::ExprKind::Handler { operations, .. } => {
+            ir::ExprKind::Handler {
+                effect, operations, ..
+            } => {
+                *effect = self.effect(function, *effect, arguments, expression.span, 0)?;
                 for operation in operations {
                     self.expression(function, operation, arguments, depth)?;
                 }
             }
             ir::ExprKind::Provide { bindings, body } => {
-                for (_, value) in bindings {
+                for (effect, value) in bindings {
+                    *effect = self.effect(function, *effect, arguments, expression.span, 0)?;
                     self.expression(function, value, arguments, depth)?;
                 }
                 self.block(function, body, arguments, depth)?;
@@ -498,6 +525,9 @@ impl Specializer {
                 for binding in bindings {
                     binding.local.ty =
                         self.ty(function, binding.local.ty, arguments, expression.span)?;
+                    for effect in &mut binding.effects {
+                        *effect = self.effect(function, *effect, arguments, expression.span, 0)?;
+                    }
                     self.expression(function, &mut binding.value, arguments, depth)?;
                     if let Some(cleanup) = &mut binding.cleanup {
                         self.expression(function, cleanup, arguments, depth)?;
@@ -718,3 +748,6 @@ mod constant_patterns;
 
 #[path = "specialize/debug.rs"]
 mod debug;
+
+#[path = "specialize/effects.rs"]
+mod effects;

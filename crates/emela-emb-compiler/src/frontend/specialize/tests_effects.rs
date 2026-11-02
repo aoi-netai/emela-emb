@@ -91,7 +91,7 @@ fn invocation_evidence_reaches_direct_calls_function_values_and_lambdas() {
     let pure = fn_type(&mut core, false);
     let effectful = fn_type(&mut core, true);
     let mut get = function(0, "get", vec![], ValueType::Int, operation(read, ht));
-    get.signature.sets.effects.push("Read".into());
+    get.signature.sets.effects.push(backend_type(ht));
     let callback = local(0, effectful);
     let mut invoke = function(
         1,
@@ -100,7 +100,7 @@ fn invocation_evidence_reaches_direct_calls_function_values_and_lambdas() {
         ValueType::Int,
         apply(reference(&callback)),
     );
-    invoke.signature.sets.effects.push("Read".into());
+    invoke.signature.sets.effects.push(backend_type(ht));
     let callback = local(1, effectful);
     let handler_local = local(2, ht);
     let mut answer = exported(function(2, "answer", vec![], ValueType::Int, integer(0)));
@@ -165,7 +165,7 @@ fn handler_operations_capture_dependency_evidence_at_construction() {
     let (other, other_ht) = effect(&mut core, "Other");
     let pure = fn_type(&mut core, false);
     let mut get = function(0, "get", vec![], ValueType::Int, operation(read, ht));
-    get.signature.sets.effects.push("Read".into());
+    get.signature.sets.effects.push(backend_type(ht));
     let dependent = handler(
         other,
         other_ht,
@@ -192,4 +192,167 @@ fn handler_operations_capture_dependency_evidence_at_construction() {
         "#include <stdlib.h>\n#include \"emela_embedded.h\"\n#include \"emela_board.h\"\nint test_heap_empty(void);\n_Noreturn void emela_board_defect(EmelaDefectKind k,const char*m,uint16_t n){(void)k;(void)m;(void)n;abort();}\nint main(void){for(int i=0;i<1000;i++)if(answer()!=42||!test_heap_empty())return 1;return 0;}\n",
         &crate::Options::default().with_heap_bytes(4096),
     );
+}
+
+#[test]
+fn generic_labeled_effects_specialize_signature_lookup_and_operation_types() {
+    let mut core = b::Definitions::default();
+    let parameter = core.types.intern(b::Type::Param(0));
+    let (generic, _) = effect(&mut core, "Read");
+    core.effects[generic].args = vec![parameter];
+    core.effects[generic].ops[0].ret = parameter;
+    let mut concrete = core.effects[generic].clone();
+    concrete.args = vec![b::TypeId::INT];
+    concrete.ops[0].ret = b::TypeId::INT;
+    let concrete = core.effects.alloc(concrete);
+    let mut alias = core.effects[generic].clone();
+    alias.name = "Audit".into();
+    alias.decl = "Audit".into();
+    alias.label_of = Some(generic);
+    let alias = core.effects.alloc(alias);
+    let generic_ht = frontend_type(core.types.intern(b::Type::Handler(alias)));
+    let mut concrete_alias = core.effects[alias].clone();
+    concrete_alias.args = vec![b::TypeId::INT];
+    concrete_alias.ops[0].ret = b::TypeId::INT;
+    concrete_alias.label_of = Some(concrete);
+    let concrete_alias = core.effects.alloc(concrete_alias);
+    let ht = frontend_type(core.types.intern(b::Type::Handler(concrete_alias)));
+    let pure = fn_type(&mut core, false);
+    let mut fetch = function(
+        0,
+        "fetch",
+        vec![],
+        frontend_type(parameter),
+        expression(
+            ir::ExprKind::OpCall {
+                handler: Box::new(expression(ir::ExprKind::Use { effect: alias }, generic_ht)),
+                effect: alias,
+                op: 0,
+                args: vec![],
+                order: vec![],
+            },
+            frontend_type(parameter),
+        ),
+    );
+    fetch.type_parameters = 1;
+    fetch.signature.sets.effects.push(backend_type(generic_ht));
+    let answer = exported(function(
+        1,
+        "answer",
+        vec![],
+        ValueType::Int,
+        provide(
+            concrete_alias,
+            handler(concrete_alias, ht, lambda(integer(42), pure)),
+            call(0, vec![], vec![b::TypeId::INT], ValueType::Int),
+        ),
+    ));
+    let input = ir::Program {
+        core,
+        registry: Default::default(),
+        functions: vec![fetch, answer],
+    };
+    let output = specialize(input.clone()).unwrap();
+    let specialized = output
+        .functions
+        .iter()
+        .find(|function| function.name.starts_with("fetch$specialized"))
+        .unwrap();
+    assert_eq!(specialized.signature.sets.effects, vec![backend_type(ht)]);
+    execute_with_options(
+        input,
+        "#include <stdlib.h>\n#include \"emela_embedded.h\"\n#include \"emela_board.h\"\nint test_heap_empty(void);\n_Noreturn void emela_board_defect(EmelaDefectKind k,const char*m,uint16_t n){(void)k;(void)m;(void)n;abort();}\nint main(void){for(int i=0;i<1000;i++)if(answer()!=42||!test_heap_empty())return 1;return 0;}\n",
+        &crate::Options::default().with_heap_bytes(4096),
+    );
+}
+
+#[test]
+fn normalization_freezes_capabilities_inside_function_sets_and_composite_types() {
+    let mut core = b::Definitions::default();
+    let mut solver = crate::frontend::infer::Solver::new();
+    let meta = solver.fresh(&mut core.types, crate::frontend::infer::Constraint::Any);
+    let (read, _) = effect(&mut core, "Read");
+    core.effects[read].args = vec![meta];
+    core.effects[read].ops[0].ret = meta;
+    let mut alias = core.effects[read].clone();
+    alias.name = "Audit".into();
+    alias.decl = "Audit".into();
+    alias.label_of = Some(read);
+    let alias = core.effects.alloc(alias);
+    let ht = core.types.intern(b::Type::Handler(alias));
+    let list = core.types.intern(b::Type::List(ht));
+    let tuple = core.types.intern(b::Type::Tuple(vec![list]));
+    let empty = core.types.intern(b::Type::Set(b::SetSummary::default()));
+    let effects = core.types.intern(b::Type::Set(b::SetSummary {
+        ev: true,
+        params: vec![ht],
+        ..Default::default()
+    }));
+    let ft = core.types.intern(b::Type::Fn(b::FnType {
+        params: vec![tuple],
+        ret: ht,
+        ev: true,
+        fails: false,
+        suspends: false,
+        sets: Some(b::FnSets {
+            errors: empty,
+            effects,
+        }),
+    }));
+    let parameter = local(0, frontend_type(tuple));
+    let closure = expression(
+        ir::ExprKind::Lambda {
+            params: vec![parameter],
+            captures: vec![],
+            body: block(expression(
+                ir::ExprKind::Use { effect: alias },
+                frontend_type(ht),
+            )),
+        },
+        frontend_type(ft),
+    );
+    let function = function(0, "capability", vec![], frontend_type(ft), closure);
+    solver.unify(&mut core.types, meta, b::TypeId::INT).unwrap();
+    let mut input = ir::Program {
+        core,
+        registry: Default::default(),
+        functions: vec![function],
+    };
+    crate::frontend::normalize::normalize(&mut input, &mut solver, &[vec![]]).unwrap();
+    let b::Type::Fn(ft) = input
+        .core
+        .ty(backend_type(input.functions[0].signature.ret.unwrap()))
+    else {
+        panic!()
+    };
+    let b::Type::Handler(frozen) = input.core.ty(ft.ret) else {
+        panic!()
+    };
+    assert_ne!(*frozen, alias);
+    assert_eq!(input.core.effects[*frozen].args, vec![b::TypeId::INT]);
+    assert_eq!(input.core.effects[*frozen].ops[0].ret, b::TypeId::INT);
+    let base = input.core.effects[*frozen].label_of.unwrap();
+    assert_eq!(input.core.effects[base].args, vec![b::TypeId::INT]);
+    assert_eq!(input.core.effects[base].ops[0].ret, b::TypeId::INT);
+    let b::Type::Set(summary) = input.core.ty(ft.sets.unwrap().effects) else {
+        panic!()
+    };
+    assert_eq!(summary.params, vec![ft.ret]);
+    let b::Type::Tuple(fields) = input.core.ty(ft.params[0]) else {
+        panic!()
+    };
+    assert_eq!(input.core.ty(fields[0]), &b::Type::List(ft.ret));
+    let ir::ExprKind::Lambda { body, .. } =
+        &match &input.functions[0].body.as_ref().unwrap().statements[0] {
+            ir::Statement::Expr(value) => value,
+            _ => panic!(),
+        }
+        .kind
+    else {
+        panic!()
+    };
+    let ir::Statement::Expr(value) = &body.statements[0] else {
+        panic!()
+    };
+    assert!(matches!(value.kind, ir::ExprKind::Use { effect } if effect == *frozen));
 }
