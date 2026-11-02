@@ -1,0 +1,4 @@
+@export(c, "message")
+pub fn message(text: String) -> String {
+  String.append(String.append("Missing(text: ", text), ")")
+}

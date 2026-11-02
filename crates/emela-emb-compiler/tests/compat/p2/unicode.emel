@@ -1,0 +1,4 @@
+@export(c, "string_length")
+pub fn length(text: String) -> Int { String.length(text) }
+@export(c, "string_byte_size")
+pub fn byte_size(text: String) -> Int { String.byte_size(text) }
