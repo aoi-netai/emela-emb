@@ -11,8 +11,10 @@ pub(crate) type ParamBounds = HashMap<TypeId, Vec<TraitId>>;
 #[derive(Clone, Debug)]
 pub(crate) struct Method {
     pub(crate) name: String,
-    /// A function signature whose rigid Param(0) denotes Self.
+    /// A signature with Self at Param(0) and method parameters at Param(1..).
     pub(crate) signature: TypeId,
+    /// Bounds in method parameter order, excluding Self and impl parameters.
+    pub(crate) type_parameters: Vec<Vec<TraitId>>,
     pub(crate) default_function: Option<DefinitionId>,
 }
 #[derive(Clone, Debug)]
@@ -571,6 +573,54 @@ impl Registry {
         name: &str,
         bounds: &ParamBounds,
     ) -> Result<ResolvedMethod> {
+        self.resolve_generic(core, ty, trait_id, name, &[], bounds)
+    }
+    #[allow(clippy::too_many_arguments)]
+    pub(crate) fn resolve_generic(
+        &self,
+        core: &Definitions,
+        ty: TypeId,
+        trait_id: TraitId,
+        name: &str,
+        method_arguments: &[TypeId],
+        bounds: &ParamBounds,
+    ) -> Result<ResolvedMethod> {
+        let owner = self.method_owner(trait_id, name)?;
+        let parameters = self.traits[owner]
+            .methods
+            .iter()
+            .find(|method| method.name == name)
+            .map(|method| method.type_parameters.as_slice())
+            .unwrap_or_default();
+        if method_arguments.len() != parameters.len() {
+            return Err(error(
+                TraitErrorKind::InvalidType,
+                "trait method type argument count differs from its declaration",
+            ));
+        }
+        for (&argument, required) in method_arguments.iter().zip(parameters) {
+            Self::node(core, argument)?;
+            for &required in required {
+                if !self.satisfies(core, argument, required, bounds)? {
+                    return Err(error(
+                        TraitErrorKind::UnsatisfiedBound,
+                        "trait method type argument does not satisfy its bound",
+                    ));
+                }
+            }
+        }
+        let mut resolved = self.resolve_receiver(core, ty, trait_id, name, bounds)?;
+        resolved.type_arguments.extend_from_slice(method_arguments);
+        Ok(resolved)
+    }
+    fn resolve_receiver(
+        &self,
+        core: &Definitions,
+        ty: TypeId,
+        trait_id: TraitId,
+        name: &str,
+        bounds: &ParamBounds,
+    ) -> Result<ResolvedMethod> {
         let owner = self.method_owner(trait_id, name)?;
         if !self.satisfies(core, ty, trait_id, bounds)? {
             return Err(error(
@@ -659,6 +709,7 @@ mod tests {
         Method {
             name: name.into(),
             signature: TypeId::UNIT,
+            type_parameters: vec![],
             default_function: default.map(DefinitionId),
         }
     }

@@ -14,7 +14,7 @@ impl Specializer {
                 .satisfies(&self.core, ty, eq, &ParamBounds::new())
                 .map_err(|error| diagnostic(function, span, error.message))?
             {
-                let target = self.trait_target(function, ty, eq, "eq", false, span, depth)?;
+                let target = self.trait_target(function, ty, eq, "eq", &[], false, span, depth)?;
                 return Ok(ir::ConstantEquality::Function(target));
             }
         }

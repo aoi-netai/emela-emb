@@ -15,33 +15,38 @@ impl Specializer {
         ty: b::TypeId,
         trait_id: usize,
         method: &str,
+        method_arguments: &[b::TypeId],
         nested: bool,
         span: Span,
         depth: usize,
     ) -> Result<ir::DefinitionId> {
         if nested
+            && method_arguments.is_empty()
             && ty == b::TypeId::STRING
             && method == "show"
             && self.registry.builtin_id(BuiltinTrait::Show) == Some(trait_id)
         {
             return self.builtin_helper(caller, BuiltinTrait::Show, ty, true, span, depth);
         }
-        let resolved =
-            match self
-                .registry
-                .resolve(&self.core, ty, trait_id, method, &ParamBounds::new())
+        let resolved = match self.registry.resolve_generic(
+            &self.core,
+            ty,
+            trait_id,
+            method,
+            method_arguments,
+            &ParamBounds::new(),
+        ) {
+            Ok(resolved) => resolved,
+            Err(error)
+                if error.kind == crate::frontend::traits::TraitErrorKind::UnsatisfiedBound
+                    && method == "show"
+                    && self.registry.builtin_id(BuiltinTrait::Show) == Some(trait_id)
+                    && self.debug_fallback.contains(&caller.id) =>
             {
-                Ok(resolved) => resolved,
-                Err(error)
-                    if error.kind == crate::frontend::traits::TraitErrorKind::UnsatisfiedBound
-                        && method == "show"
-                        && self.registry.builtin_id(BuiltinTrait::Show) == Some(trait_id)
-                        && self.debug_fallback.contains(&caller.id) =>
-                {
-                    return self.debug_show_helper(caller, ty, nested, span, depth);
-                }
-                Err(error) => return Err(diagnostic(caller, span, error.message)),
-            };
+                return self.debug_show_helper(caller, ty, nested, span, depth);
+            }
+            Err(error) => return Err(diagnostic(caller, span, error.message)),
+        };
         if resolved.deferred {
             return Err(diagnostic(
                 caller,
@@ -57,7 +62,7 @@ impl Specializer {
                     "trait implementation refers to an unknown function",
                 )
             })?;
-            let args = if template.type_parameters == 0 {
+            let args = if template.type_parameters == 0 && method_arguments.is_empty() {
                 vec![]
             } else {
                 resolved.type_arguments
@@ -381,6 +386,7 @@ impl Builder<'_> {
                 self_type: ty,
                 args,
                 order,
+                method_type_arguments: vec![],
                 nested_show: nested,
             },
             ret,

@@ -28,7 +28,7 @@ impl Specializer {
             .satisfies(&self.core, ty, show, &ParamBounds::new())
             .map_err(|error| diagnostic(caller, span, error.message))?
         {
-            self.trait_target(caller, ty, show, "show", true, span, depth)?
+            self.trait_target(caller, ty, show, "show", &[], true, span, depth)?
         } else {
             self.debug_show_helper(caller, ty, true, span, depth)?
         };

@@ -476,6 +476,7 @@ fn structural_trait_helpers_call_custom_fields_inside_tuple_option_and_enum() {
                 methods: vec![Method {
                     name: method.into(),
                     signature,
+                    type_parameters: vec![],
                     default_function: None,
                 }],
             })
@@ -609,6 +610,7 @@ fn structural_trait_helpers_call_custom_fields_inside_tuple_option_and_enum() {
                 self_type,
                 order: (0..args.len()).collect(),
                 args,
+                method_type_arguments: vec![],
                 nested_show: false,
             },
             ty,
@@ -931,11 +933,13 @@ fn generic_trait_calls_instantiate_default_methods_with_the_concrete_self_type()
                 Method {
                     name: "score".into(),
                     signature,
+                    type_parameters: vec![],
                     default_function: None,
                 },
                 Method {
                     name: "next".into(),
                     signature,
+                    type_parameters: vec![],
                     default_function: Some(ir::DefinitionId(1)),
                 },
             ],
@@ -988,6 +992,7 @@ fn generic_trait_calls_instantiate_default_methods_with_the_concrete_self_type()
                 self_type: parameter,
                 args: vec![expression(ir::ExprKind::Local(ir::LocalId(0)), generic)],
                 order: vec![0],
+                method_type_arguments: vec![],
                 nested_show: false,
             },
             ValueType::Int,
@@ -1608,6 +1613,7 @@ fn nested_string_show_uses_quoting_even_when_a_builtin_method_stub_is_registered
             methods: vec![Method {
                 name: "show".into(),
                 signature,
+                type_parameters: vec![],
                 default_function: None,
             }],
         })
@@ -1634,6 +1640,7 @@ fn nested_string_show_uses_quoting_even_when_a_builtin_method_stub_is_registered
                 ValueType::String,
             )],
             order: vec![0],
+            method_type_arguments: vec![],
             nested_show: true,
         },
         ValueType::String,
@@ -1693,6 +1700,7 @@ fn dbg_uses_custom_show_and_recursive_fallback_and_returns_the_original_value_on
             methods: vec![Method {
                 name: "show".into(),
                 signature,
+                type_parameters: vec![],
                 default_function: None,
             }],
         })
@@ -1867,6 +1875,7 @@ fn dbg_uses_custom_show_and_recursive_fallback_and_returns_the_original_value_on
                 self_type: outer_ty,
                 args: vec![outer_value],
                 order: vec![0],
+                method_type_arguments: vec![],
                 nested_show: false,
             },
             ValueType::String,
@@ -1901,3 +1910,6 @@ fn dbg_of_a_diverging_expression_does_not_require_or_evaluate_show() {
         "#include <stdlib.h>\n#include \"emela_embedded.h\"\n#include \"emela_board.h\"\n_Noreturn void stop(void){exit(0);}\n_Noreturn void emela_board_defect(EmelaDefectKind k,const char*m,uint16_t n){(void)k;(void)m;(void)n;exit(9);}\nint main(void){(void)answer();return 1;}\n",
     );
 }
+
+#[path = "tests_generic_methods.rs"]
+mod generic_methods;

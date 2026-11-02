@@ -299,6 +299,7 @@ impl TraitCollection {
                 .map(|method| Method {
                     name: method.name.clone(),
                     signature: function_type(core, &method.signature),
+                    type_parameters: vec![],
                     default_function: method.function.as_ref().map(|_| DefinitionId(0)),
                 })
                 .collect();
@@ -425,6 +426,7 @@ impl TraitCollection {
                 methods.push(Method {
                     name: method.name.clone(),
                     signature: function_type(core, &method.signature),
+                    type_parameters: vec![],
                     default_function,
                 });
             }
@@ -655,6 +657,7 @@ fn prepare_inner(
                 vec![Method {
                     name: method_name(kind).into(),
                     signature: function_type(&mut catalog.core, &signature),
+                    type_parameters: vec![],
                     default_function: None,
                 }],
             )
@@ -818,6 +821,7 @@ fn prepare_inner(
             .map(|method| Method {
                 name: method.name.clone(),
                 signature: function_type(&mut catalog.core, &method.signature),
+                type_parameters: vec![],
                 default_function: None,
             })
             .collect();

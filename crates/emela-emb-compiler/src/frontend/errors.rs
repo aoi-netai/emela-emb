@@ -174,6 +174,7 @@ impl Context<'_> {
                 trait_id,
                 method,
                 self_type,
+                method_type_arguments,
                 args,
                 ..
             } => {
@@ -200,7 +201,9 @@ impl Context<'_> {
                         if let Some(sets) = signature.sets {
                             if let Type::Set(summary) = self.catalog.core.ty(sets.errors).clone() {
                                 for error in summary.params {
-                                    let error = self.catalog.core.types.subst(error, &[*self_type]);
+                                    let mut arguments = vec![*self_type];
+                                    arguments.extend_from_slice(method_type_arguments);
+                                    let error = self.catalog.core.types.subst(error, &arguments);
                                     self.require_error(error, expression.span)?;
                                     analysis.errors.insert(error);
                                     analysis.constraints.insert(error);

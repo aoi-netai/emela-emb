@@ -471,6 +471,7 @@ impl Specializer {
                 trait_id,
                 method,
                 self_type,
+                method_type_arguments,
                 args,
                 order,
                 nested_show,
@@ -488,11 +489,26 @@ impl Specializer {
                     &mut HashSet::new(),
                     0,
                 )?;
+                let concrete_method_arguments = method_type_arguments
+                    .iter()
+                    .map(|&ty| {
+                        self.substitute(
+                            function,
+                            ty,
+                            arguments,
+                            expression.span,
+                            &mut HashMap::new(),
+                            &mut HashSet::new(),
+                            0,
+                        )
+                    })
+                    .collect::<Result<Vec<_>>>()?;
                 let target = self.trait_target(
                     function,
                     concrete,
                     *trait_id,
                     method,
+                    &concrete_method_arguments,
                     *nested_show,
                     expression.span,
                     depth,

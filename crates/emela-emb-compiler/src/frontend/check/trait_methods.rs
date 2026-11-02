@@ -275,6 +275,7 @@ impl Checker {
                 self_type,
                 args,
                 order,
+                method_type_arguments: vec![],
                 nested_show,
             },
             ty: ret,

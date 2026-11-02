@@ -170,11 +170,19 @@ impl Context<'_> {
                 self.expression(right)?;
             }
             E::TraitCall {
-                self_type, args, ..
+                self_type,
+                method_type_arguments,
+                args,
+                ..
             } => {
                 let mut ty = frontend_type(*self_type);
                 self.ty(&mut ty, expression.span)?;
                 *self_type = backend_type(ty);
+                for argument in method_type_arguments {
+                    let mut ty = frontend_type(*argument);
+                    self.ty(&mut ty, expression.span)?;
+                    *argument = backend_type(ty);
+                }
                 for arg in args {
                     self.expression(arg)?;
                 }

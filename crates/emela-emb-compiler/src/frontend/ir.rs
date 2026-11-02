@@ -74,6 +74,7 @@ pub(crate) enum ExprKind {
         trait_id: super::traits::TraitId,
         method: String,
         self_type: crate::contract::ir::TypeId,
+        method_type_arguments: Vec<crate::contract::ir::TypeId>,
         args: Vec<Expr>,
         order: Vec<usize>,
         nested_show: bool,
