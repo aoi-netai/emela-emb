@@ -526,3 +526,7 @@ BoardのC型名は固定旧の `Embedded.<module>.<type>` 名義から決まる�
 | `crates/emela-codegen-emb/tests/string_comparison/mod.rs` | `a3794bb28614f61ae828d2bce7a200649e102866e111700101926cbc646d737d` | `tests/p7_isr.rs` |
 
 ISR入口は明示exportされたEmela名で選び、C公開aliasと区別する。externalは実際のadapter C symbolを許可リストに要求する。到達する再帰・heap割当・所有aggregate・動的call・runtime constを拒否し、静的const・借用String比較・heapを触らないBytes.sizeは維持する。元のFloat全bitパターン（負ゼロ・NaN payload・無限大・subnormal）、Int端値と1000回反復をC両最適化で確認する。捨てたCellNewも独自IRから拒否する。
+
+## P7の残余source操作の検証
+
+旧8source builtin（AssertFail/Dbg/DebugPrint/Inspect/Panic/ShowNested/ShowString/Todo）はsource機能として維持する。`source_builtin_tests.rs`はsourceから独自lowerを通してこれらが後段に残らないことと、未変換の8操作を不正IRとして後段で拒否することを確認する。Cでの表示・副作用順・assert/defect hookは既存 `p1.rs`、`p2_debug.rs`、`p2_traits.rs`、`p4_function_values.rs` の試験で観測する。

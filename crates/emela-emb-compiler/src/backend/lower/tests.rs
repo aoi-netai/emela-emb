@@ -18,6 +18,8 @@ mod isr;
 mod memory;
 #[path = "service_tests.rs"]
 mod services;
+#[path = "source_builtin_tests.rs"]
+mod source_builtins;
 #[path = "suspend_tests.rs"]
 mod suspend;
 
