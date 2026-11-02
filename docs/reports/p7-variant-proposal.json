@@ -1,0 +1,3192 @@
+{
+  "schema_version": 1,
+  "kind": "proposal_only_no_canonical_ledger_changes",
+  "baseline_ledger_revision": "a686172",
+  "legacy_revision": "c34c0aeefdd966d854371b3110db00a47798751d",
+  "reviewed_source_revision": "89aa919",
+  "ownership": {
+    "variant_entries": 85,
+    "excluded_schema_stage_variants": [
+      "emela_lir::Stage::ClosuresConverted",
+      "emela_lir::Stage::DefectsExplicit",
+      "emela_lir::Stage::Flow",
+      "emela_lir::Stage::RefCounted",
+      "emela_lir::Stage::StateMachines"
+    ],
+    "canonical_record_partition": {
+      "already_verified": 165,
+      "variant_proposal": 85,
+      "root_schema_proposal": 178,
+      "total": 428
+    }
+  },
+  "policy": "Every path and exact function symbol was checked against the local committed source or its explicit committed revision. Representative semantic evidence does not imply all context/type products; those are covered by the separate 226-context audit. Direct branch gaps remain pending. No canonical statuses are mutated.",
+  "verification_basis": {
+    "own_library_tests": "240 passed with Rust test profile opt1; mandatory C11 -Wall -Werror -O0/-O2",
+    "own_compatibility_tests": "P7 concurrency32 and cleanup source24 passed; original budgets retained",
+    "stage2_IR_evidence": "Committed aeb7c53; execution reported in its proposal and to be repeated by root exact-head full run",
+    "all_path_and_symbol_references_checked": true
+  },
+  "counts": {
+    "verified": 84,
+    "pending": 1
+  },
+  "records": [
+    {
+      "id": "emela_core::Builtin::AssertFail",
+      "relation": "variant_entry",
+      "baseline_status": "mapped",
+      "legacy_role": "reject",
+      "proposed_status": "verified",
+      "behavior": "source_normalized_and_residual_rejected",
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/frontend/lower.rs",
+          "symbol": "Context::expression"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "diagnostic_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/source_builtin_tests.rs",
+          "symbol": "rejects_all_eight_residual_source_builtins_before_emission",
+          "observation": "All eight source-only Builtin inputs individually fail with Unsupported before C emission."
+        },
+        {
+          "kind": "source_lowering_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/source_builtin_tests.rs",
+          "symbol": "source_debug_display_assert_and_defect_operations_leave_no_residual_builtins",
+          "observation": "Checks source checker/specializer/lower output; source-only builtins disappear and Runtime ShowString/DebugPrint and Term Defect remain."
+        },
+        {
+          "kind": "source_C_test",
+          "path": "crates/emela-emb-compiler/tests/p1.rs",
+          "symbol": "failed_source_assertion_calls_the_board_defect_hook_without_continuing",
+          "observation": "Source assertion reaches the expected board defect; later external continuation must not run."
+        }
+      ],
+      "review_reason": "Assert source lowers to a defect terminal; raw AssertFail is rejected.",
+      "final_integrated_verification": "required",
+      "context_product_not_inferred_from_this_entry": true
+    },
+    {
+      "id": "emela_core::Builtin::Dbg",
+      "relation": "variant_entry",
+      "baseline_status": "mapped",
+      "legacy_role": "reject",
+      "proposed_status": "verified",
+      "behavior": "source_normalized_and_residual_rejected",
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/builtins/rejected.rs",
+          "symbol": "dbg"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "diagnostic_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/source_builtin_tests.rs",
+          "symbol": "rejects_all_eight_residual_source_builtins_before_emission",
+          "observation": "All eight source-only Builtin inputs individually fail with Unsupported before C emission."
+        },
+        {
+          "kind": "source_lowering_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/source_builtin_tests.rs",
+          "symbol": "source_debug_display_assert_and_defect_operations_leave_no_residual_builtins",
+          "observation": "Checks source checker/specializer/lower output; source-only builtins disappear and Runtime ShowString/DebugPrint and Term Defect remain."
+        },
+        {
+          "kind": "source_C_test",
+          "path": "crates/emela-emb-compiler/tests/p2_debug.rs",
+          "symbol": "dbg_falls_back_recursively_uses_custom_show_and_returns_the_original_value_once",
+          "observation": "C checks exact debug bytes/order, custom and fallback Show, NUL data and preservation of the original value."
+        }
+      ],
+      "review_reason": "Dbg/DebugPrint source becomes typed Show and Runtime DebugPrint; board debug bytes/order and original value are observed.",
+      "final_integrated_verification": "required",
+      "context_product_not_inferred_from_this_entry": true
+    },
+    {
+      "id": "emela_core::Builtin::DebugPrint",
+      "relation": "variant_entry",
+      "baseline_status": "mapped",
+      "legacy_role": "reject",
+      "proposed_status": "verified",
+      "behavior": "source_normalized_and_residual_rejected",
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/builtins/rejected.rs",
+          "symbol": "debug_print"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "diagnostic_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/source_builtin_tests.rs",
+          "symbol": "rejects_all_eight_residual_source_builtins_before_emission",
+          "observation": "All eight source-only Builtin inputs individually fail with Unsupported before C emission."
+        },
+        {
+          "kind": "source_lowering_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/source_builtin_tests.rs",
+          "symbol": "source_debug_display_assert_and_defect_operations_leave_no_residual_builtins",
+          "observation": "Checks source checker/specializer/lower output; source-only builtins disappear and Runtime ShowString/DebugPrint and Term Defect remain."
+        },
+        {
+          "kind": "source_C_test",
+          "path": "crates/emela-emb-compiler/tests/p2_debug.rs",
+          "symbol": "dbg_falls_back_recursively_uses_custom_show_and_returns_the_original_value_once",
+          "observation": "C checks exact debug bytes/order, custom and fallback Show, NUL data and preservation of the original value."
+        }
+      ],
+      "review_reason": "Dbg/DebugPrint source becomes typed Show and Runtime DebugPrint; board debug bytes/order and original value are observed.",
+      "final_integrated_verification": "required",
+      "context_product_not_inferred_from_this_entry": true
+    },
+    {
+      "id": "emela_core::Builtin::Inspect",
+      "relation": "variant_entry",
+      "baseline_status": "mapped",
+      "legacy_role": "reject",
+      "proposed_status": "verified",
+      "behavior": "source_normalized_and_residual_rejected",
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/builtins/rejected.rs",
+          "symbol": "inspect"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "diagnostic_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/source_builtin_tests.rs",
+          "symbol": "rejects_all_eight_residual_source_builtins_before_emission",
+          "observation": "All eight source-only Builtin inputs individually fail with Unsupported before C emission."
+        },
+        {
+          "kind": "source_lowering_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/source_builtin_tests.rs",
+          "symbol": "source_debug_display_assert_and_defect_operations_leave_no_residual_builtins",
+          "observation": "Checks source checker/specializer/lower output; source-only builtins disappear and Runtime ShowString/DebugPrint and Term Defect remain."
+        },
+        {
+          "kind": "source_C_test",
+          "path": "crates/emela-emb-compiler/tests/p4_function_values.rs",
+          "symbol": "intrinsic_function_values_keep_source_rewrites_and_release_wrappers",
+          "observation": "Stored inspect references still produce the required String using source rewrites and wrapper ownership."
+        },
+        {
+          "kind": "source_C_test",
+          "path": "crates/emela-emb-compiler/tests/p2_debug.rs",
+          "symbol": "dbg_falls_back_recursively_uses_custom_show_and_returns_the_original_value_once",
+          "observation": "C checks exact debug bytes/order, custom and fallback Show, NUL data and preservation of the original value."
+        }
+      ],
+      "review_reason": "Source display normalization respects typed/custom recursive Show and produces a String; residual source-only operations reject.",
+      "final_integrated_verification": "required",
+      "context_product_not_inferred_from_this_entry": true
+    },
+    {
+      "id": "emela_core::Builtin::Panic",
+      "relation": "variant_entry",
+      "baseline_status": "mapped",
+      "legacy_role": "reject",
+      "proposed_status": "verified",
+      "behavior": "source_normalized_and_residual_rejected",
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/builtins/rejected.rs",
+          "symbol": "panic"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "diagnostic_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/source_builtin_tests.rs",
+          "symbol": "rejects_all_eight_residual_source_builtins_before_emission",
+          "observation": "All eight source-only Builtin inputs individually fail with Unsupported before C emission."
+        },
+        {
+          "kind": "source_lowering_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/source_builtin_tests.rs",
+          "symbol": "source_debug_display_assert_and_defect_operations_leave_no_residual_builtins",
+          "observation": "Checks source checker/specializer/lower output; source-only builtins disappear and Runtime ShowString/DebugPrint and Term Defect remain."
+        },
+        {
+          "kind": "source_C_test",
+          "path": "crates/emela-emb-compiler/tests/p2_debug.rs",
+          "symbol": "todo_and_dynamic_panic_reach_the_board_hook_without_evaluating_following_code",
+          "observation": "Todo and dynamic panic reach the board hook with exact message/kind and no subsequent call."
+        }
+      ],
+      "review_reason": "Source dynamic/static stopping operations reach the exact defect hook; raw source-only operation is rejected.",
+      "final_integrated_verification": "required",
+      "context_product_not_inferred_from_this_entry": true
+    },
+    {
+      "id": "emela_core::Builtin::ShowNested",
+      "relation": "variant_entry",
+      "baseline_status": "mapped",
+      "legacy_role": "reject",
+      "proposed_status": "verified",
+      "behavior": "source_normalized_and_residual_rejected",
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/builtins/rejected.rs",
+          "symbol": "show_nested"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "diagnostic_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/source_builtin_tests.rs",
+          "symbol": "rejects_all_eight_residual_source_builtins_before_emission",
+          "observation": "All eight source-only Builtin inputs individually fail with Unsupported before C emission."
+        },
+        {
+          "kind": "source_lowering_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/source_builtin_tests.rs",
+          "symbol": "source_debug_display_assert_and_defect_operations_leave_no_residual_builtins",
+          "observation": "Checks source checker/specializer/lower output; source-only builtins disappear and Runtime ShowString/DebugPrint and Term Defect remain."
+        },
+        {
+          "kind": "source_C_test",
+          "path": "crates/emela-emb-compiler/tests/p4_function_values.rs",
+          "symbol": "intrinsic_function_values_keep_source_rewrites_and_release_wrappers",
+          "observation": "Stored inspect references still produce the required String using source rewrites and wrapper ownership."
+        },
+        {
+          "kind": "source_C_test",
+          "path": "crates/emela-emb-compiler/tests/p2_debug.rs",
+          "symbol": "dbg_falls_back_recursively_uses_custom_show_and_returns_the_original_value_once",
+          "observation": "C checks exact debug bytes/order, custom and fallback Show, NUL data and preservation of the original value."
+        }
+      ],
+      "review_reason": "Source display normalization respects typed/custom recursive Show and produces a String; residual source-only operations reject.",
+      "final_integrated_verification": "required",
+      "context_product_not_inferred_from_this_entry": true
+    },
+    {
+      "id": "emela_core::Builtin::ShowString",
+      "relation": "variant_entry",
+      "baseline_status": "mapped",
+      "legacy_role": "reject",
+      "proposed_status": "verified",
+      "behavior": "source_normalized_and_residual_rejected",
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/builtins/rejected.rs",
+          "symbol": "show_string"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "diagnostic_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/source_builtin_tests.rs",
+          "symbol": "rejects_all_eight_residual_source_builtins_before_emission",
+          "observation": "All eight source-only Builtin inputs individually fail with Unsupported before C emission."
+        },
+        {
+          "kind": "source_lowering_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/source_builtin_tests.rs",
+          "symbol": "source_debug_display_assert_and_defect_operations_leave_no_residual_builtins",
+          "observation": "Checks source checker/specializer/lower output; source-only builtins disappear and Runtime ShowString/DebugPrint and Term Defect remain."
+        },
+        {
+          "kind": "source_C_test",
+          "path": "crates/emela-emb-compiler/tests/p4_function_values.rs",
+          "symbol": "intrinsic_function_values_keep_source_rewrites_and_release_wrappers",
+          "observation": "Stored inspect references still produce the required String using source rewrites and wrapper ownership."
+        },
+        {
+          "kind": "source_C_test",
+          "path": "crates/emela-emb-compiler/tests/p2_debug.rs",
+          "symbol": "dbg_falls_back_recursively_uses_custom_show_and_returns_the_original_value_once",
+          "observation": "C checks exact debug bytes/order, custom and fallback Show, NUL data and preservation of the original value."
+        }
+      ],
+      "review_reason": "Source display normalization respects typed/custom recursive Show and produces a String; residual source-only operations reject.",
+      "final_integrated_verification": "required",
+      "context_product_not_inferred_from_this_entry": true
+    },
+    {
+      "id": "emela_core::Builtin::StringJoin",
+      "relation": "variant_entry",
+      "baseline_status": "mapped",
+      "legacy_role": "emit",
+      "proposed_status": "verified",
+      "behavior": "emitted",
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/builtins/string_join.rs",
+          "symbol": "string_join"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/plan/operations/builtins/string_join.rs",
+          "symbol": "string_behavior"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/plan/operations/builtins/string_join.rs",
+          "symbol": "string_bound"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/plan/operations/builtins/string_join.rs",
+          "symbol": "require_runtime"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "source_C_test",
+          "path": "crates/emela-emb-compiler/tests/p3_memory_api.rs",
+          "symbol": "strings_lists_and_trusted_bytes_pure_apis_execute",
+          "observation": "Native String split/join source paths return exact contents with ownership and capacity checks."
+        },
+        {
+          "kind": "IR_C_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/p7_string_frame_tests.rs",
+          "symbol": "split_views_and_distinct_join_results_survive_a_real_suspension_with_nul_and_unicode",
+          "observation": "Actual external task wait; two distinct join buffers retain NUL/UTF8 after borrowed input overwrite; final result owned, heap empty.",
+          "revision": "aeb7c53"
+        }
+      ],
+      "review_reason": "Native and actual-suspending split/join retain exact bytes, bounded independent buffers and returned ownership.",
+      "final_integrated_verification": "required",
+      "context_product_not_inferred_from_this_entry": true
+    },
+    {
+      "id": "emela_core::Builtin::StringSplit",
+      "relation": "variant_entry",
+      "baseline_status": "mapped",
+      "legacy_role": "emit",
+      "proposed_status": "verified",
+      "behavior": "emitted",
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/builtins/string_split.rs",
+          "symbol": "string_split"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/plan/operations/builtins/string_split.rs",
+          "symbol": "require_runtime"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "source_C_test",
+          "path": "crates/emela-emb-compiler/tests/p3_memory_api.rs",
+          "symbol": "strings_lists_and_trusted_bytes_pure_apis_execute",
+          "observation": "Native String split/join source paths return exact contents with ownership and capacity checks."
+        },
+        {
+          "kind": "IR_C_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/p7_string_frame_tests.rs",
+          "symbol": "split_views_and_distinct_join_results_survive_a_real_suspension_with_nul_and_unicode",
+          "observation": "Actual external task wait; two distinct join buffers retain NUL/UTF8 after borrowed input overwrite; final result owned, heap empty.",
+          "revision": "aeb7c53"
+        }
+      ],
+      "review_reason": "Native and actual-suspending split/join retain exact bytes, bounded independent buffers and returned ownership.",
+      "final_integrated_verification": "required",
+      "context_product_not_inferred_from_this_entry": true
+    },
+    {
+      "id": "emela_core::Builtin::Todo",
+      "relation": "variant_entry",
+      "baseline_status": "mapped",
+      "legacy_role": "reject",
+      "proposed_status": "verified",
+      "behavior": "source_normalized_and_residual_rejected",
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/builtins/rejected.rs",
+          "symbol": "todo"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "diagnostic_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/source_builtin_tests.rs",
+          "symbol": "rejects_all_eight_residual_source_builtins_before_emission",
+          "observation": "All eight source-only Builtin inputs individually fail with Unsupported before C emission."
+        },
+        {
+          "kind": "source_lowering_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/source_builtin_tests.rs",
+          "symbol": "source_debug_display_assert_and_defect_operations_leave_no_residual_builtins",
+          "observation": "Checks source checker/specializer/lower output; source-only builtins disappear and Runtime ShowString/DebugPrint and Term Defect remain."
+        },
+        {
+          "kind": "source_C_test",
+          "path": "crates/emela-emb-compiler/tests/p2_debug.rs",
+          "symbol": "todo_and_dynamic_panic_reach_the_board_hook_without_evaluating_following_code",
+          "observation": "Todo and dynamic panic reach the board hook with exact message/kind and no subsequent call."
+        }
+      ],
+      "review_reason": "Source dynamic/static stopping operations reach the exact defect hook; raw source-only operation is rejected.",
+      "final_integrated_verification": "required",
+      "context_product_not_inferred_from_this_entry": true
+    },
+    {
+      "id": "emela_core::HostModule::Bundled",
+      "relation": "variant_entry",
+      "baseline_status": "mapped",
+      "legacy_role": "metadata",
+      "proposed_status": "verified",
+      "behavior": "metadata_with_runtime_witness",
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/semantics/host_modules.rs",
+          "symbol": "bundled"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "IR_C_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/p7_binding_tests.rs",
+          "symbol": "global_named_file_and_bundled_host_metadata_preserve_the_external_c_symbol",
+          "observation": "Global and all three Import module forms link to the exact read_number symbol: result42 and four calls per 1000 iterations."
+        }
+      ],
+      "review_reason": "Imported metadata selects the declared C symbol without renaming or loading a runtime module.",
+      "final_integrated_verification": "required",
+      "context_product_not_inferred_from_this_entry": true
+    },
+    {
+      "id": "emela_core::HostModule::File",
+      "relation": "variant_entry",
+      "baseline_status": "mapped",
+      "legacy_role": "metadata",
+      "proposed_status": "verified",
+      "behavior": "metadata_with_runtime_witness",
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/semantics/host_modules.rs",
+          "symbol": "file"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "IR_C_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/p7_binding_tests.rs",
+          "symbol": "global_named_file_and_bundled_host_metadata_preserve_the_external_c_symbol",
+          "observation": "Global and all three Import module forms link to the exact read_number symbol: result42 and four calls per 1000 iterations."
+        }
+      ],
+      "review_reason": "Imported metadata selects the declared C symbol without renaming or loading a runtime module.",
+      "final_integrated_verification": "required",
+      "context_product_not_inferred_from_this_entry": true
+    },
+    {
+      "id": "emela_core::HostModule::Named",
+      "relation": "variant_entry",
+      "baseline_status": "mapped",
+      "legacy_role": "metadata",
+      "proposed_status": "verified",
+      "behavior": "metadata_with_runtime_witness",
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/semantics/host_modules.rs",
+          "symbol": "named"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "IR_C_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/p7_binding_tests.rs",
+          "symbol": "global_named_file_and_bundled_host_metadata_preserve_the_external_c_symbol",
+          "observation": "Global and all three Import module forms link to the exact read_number symbol: result42 and four calls per 1000 iterations."
+        }
+      ],
+      "review_reason": "Imported metadata selects the declared C symbol without renaming or loading a runtime module.",
+      "final_integrated_verification": "required",
+      "context_product_not_inferred_from_this_entry": true
+    },
+    {
+      "id": "emela_core::HostRef::Global",
+      "relation": "variant_entry",
+      "baseline_status": "mapped",
+      "legacy_role": "metadata",
+      "proposed_status": "verified",
+      "behavior": "metadata_with_runtime_witness",
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/semantics/host_refs.rs",
+          "symbol": "global"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "IR_C_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/p7_binding_tests.rs",
+          "symbol": "global_named_file_and_bundled_host_metadata_preserve_the_external_c_symbol",
+          "observation": "Global and all three Import module forms link to the exact read_number symbol: result42 and four calls per 1000 iterations."
+        }
+      ],
+      "review_reason": "Both global and imported C bindings preserve symbol identity, function ABI and call count.",
+      "final_integrated_verification": "required",
+      "context_product_not_inferred_from_this_entry": true
+    },
+    {
+      "id": "emela_core::HostRef::Import",
+      "relation": "variant_entry",
+      "baseline_status": "mapped",
+      "legacy_role": "metadata",
+      "proposed_status": "verified",
+      "behavior": "metadata_with_runtime_witness",
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/semantics/host_refs.rs",
+          "symbol": "import"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "IR_C_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/p7_binding_tests.rs",
+          "symbol": "global_named_file_and_bundled_host_metadata_preserve_the_external_c_symbol",
+          "observation": "Global and all three Import module forms link to the exact read_number symbol: result42 and four calls per 1000 iterations."
+        }
+      ],
+      "review_reason": "Both global and imported C bindings preserve symbol identity, function ABI and call count.",
+      "final_integrated_verification": "required",
+      "context_product_not_inferred_from_this_entry": true
+    },
+    {
+      "id": "emela_core::Type::Any",
+      "relation": "variant_entry",
+      "baseline_status": "mapped",
+      "legacy_role": "metadata",
+      "proposed_status": "verified",
+      "behavior": "metadata_with_runtime_witness",
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/semantics/type_representations.rs",
+          "symbol": "any_repr"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "IR_C_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/memory_tests.rs",
+          "symbol": "any_boxes_retain_managed_lists_and_release_their_payloads",
+          "observation": "Coerce list into Any and recover it; heap audit proves tagged box payload retention and release."
+        },
+        {
+          "kind": "IR_C_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/cell_tests.rs",
+          "symbol": "erased_cell_cycles_remain_alive_until_the_last_external_root_is_released",
+          "observation": "Erased Cell[Any] cycles keep identity and content while rooted, then release/collect after last root."
+        }
+      ],
+      "review_reason": "Tagged erasure preserves scalar/managed payload ownership and heap roots.",
+      "final_integrated_verification": "required",
+      "context_product_not_inferred_from_this_entry": true
+    },
+    {
+      "id": "emela_core::Type::Bytes",
+      "relation": "variant_entry",
+      "baseline_status": "mapped",
+      "legacy_role": "metadata",
+      "proposed_status": "verified",
+      "behavior": "metadata_with_runtime_witness",
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/semantics/type_representations.rs",
+          "symbol": "bytes_repr"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "source_C_test",
+          "path": "crates/emela-emb-compiler/tests/p3_bytes.rs",
+          "symbol": "bytes_views_keep_u32_lengths_and_unsigned_elements_without_a_heap",
+          "observation": "Source Bytes view with 70000-byte length and unsigned 0..255 values is valid without a heap."
+        },
+        {
+          "kind": "IR_C_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/memory_tests.rs",
+          "symbol": "bytes_optional_results_concat_and_unicode_lists_preserve_contents",
+          "observation": "Bytes views and Option results plus concat, Unicode lists and invalid-data branches preserve exact payloads."
+        }
+      ],
+      "review_reason": "Bytes retains uint32 length, unsigned bytes and owner semantics.",
+      "final_integrated_verification": "required",
+      "context_product_not_inferred_from_this_entry": true
+    },
+    {
+      "id": "emela_core::Type::Cell",
+      "relation": "variant_entry",
+      "baseline_status": "mapped",
+      "legacy_role": "metadata",
+      "proposed_status": "verified",
+      "behavior": "metadata_with_runtime_witness",
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/semantics/type_representations.rs",
+          "symbol": "cell_repr"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/frontend/check.rs"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/frontend/lower.rs"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/lower.rs"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "IR_C_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/cell_tests.rs",
+          "symbol": "erased_cell_cycles_remain_alive_until_the_last_external_root_is_released",
+          "observation": "Erased Cell[Any] cycles keep identity and content while rooted, then release/collect after last root."
+        },
+        {
+          "kind": "source_C_test",
+          "path": "crates/emela-emb-compiler/tests/p4_state.rs",
+          "symbol": "state_shares_owned_values_with_escaped_closures_and_reclaims_every_run",
+          "observation": "Trusted State synthesis exercises Cells through owned String snapshots and shared closure state, 1000 heap reclamations."
+        }
+      ],
+      "review_reason": "Mutable cell identity and owner edges survive aliasing/capture and are released/collected.",
+      "final_integrated_verification": "required",
+      "context_product_not_inferred_from_this_entry": true
+    },
+    {
+      "id": "emela_core::Type::Enum",
+      "relation": "variant_entry",
+      "baseline_status": "mapped",
+      "legacy_role": "metadata",
+      "proposed_status": "verified",
+      "behavior": "metadata_with_runtime_witness",
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/semantics/type_representations.rs",
+          "symbol": "enum_repr"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "IR_C_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/p7_data_tests.rs",
+          "symbol": "legacy_inline_layouts_preserve_generic_fields_tags_and_unit_positions_at_the_c_boundary",
+          "observation": "Generic Maybe/Box, named record, unit enum, tuple Unit erasure: exact public C tags/fields and release behavior."
+        },
+        {
+          "kind": "source_C_test",
+          "path": "crates/emela-emb-compiler/tests/p2_data.rs",
+          "symbol": "generic_functions_data_and_scc_return_inference_execute_from_source",
+          "observation": "Source generic identity/Box/swap/SCC instantiate concrete value arguments and execute."
+        }
+      ],
+      "review_reason": "Concrete generic enum layout, tags, named/positional payloads and unit representation are preserved.",
+      "final_integrated_verification": "required",
+      "context_product_not_inferred_from_this_entry": true
+    },
+    {
+      "id": "emela_core::Type::Evidence",
+      "relation": "variant_entry",
+      "baseline_status": "mapped",
+      "legacy_role": "metadata",
+      "proposed_status": "verified",
+      "behavior": "metadata_with_runtime_witness",
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/semantics/type_representations.rs",
+          "symbol": "evidence_repr"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "IR_C_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/handler_tests.rs",
+          "symbol": "dynamic_evidence_keeps_handlers_alive_and_protection_retires_and_releases_them",
+          "observation": "Dynamic evidence resolves operation closures, keeps handlers alive and releases them after Protect/Retire."
+        },
+        {
+          "kind": "IR_C_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/p7_evidence_tests.rs",
+          "symbol": "discarded_handler_and_evidence_constructors_release_before_the_next_statement",
+          "observation": "Handler/EvExtend discard releases managed evidence before subsequent statements; tested C ownership."
+        }
+      ],
+      "review_reason": "Evidence table layout and managed handler edges are exercised by dynamic lookup and discard.",
+      "final_integrated_verification": "required",
+      "context_product_not_inferred_from_this_entry": true
+    },
+    {
+      "id": "emela_core::Type::Handler",
+      "relation": "variant_entry",
+      "baseline_status": "mapped",
+      "legacy_role": "metadata",
+      "proposed_status": "verified",
+      "behavior": "metadata_with_runtime_witness",
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/semantics/type_representations.rs",
+          "symbol": "handler_repr"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/frontend/check.rs"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/frontend/lower.rs"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/lower.rs"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "IR_C_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/handler_tests.rs",
+          "symbol": "dynamic_evidence_keeps_handlers_alive_and_protection_retires_and_releases_them",
+          "observation": "Dynamic evidence resolves operation closures, keeps handlers alive and releases them after Protect/Retire."
+        },
+        {
+          "kind": "IR_C_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/p7_evidence_tests.rs",
+          "symbol": "discarded_handler_and_evidence_constructors_release_before_the_next_statement",
+          "observation": "Handler/EvExtend discard releases managed evidence before subsequent statements; tested C ownership."
+        }
+      ],
+      "review_reason": "Operation tables and active handler lifetime use the nominal effect identity and managed references.",
+      "final_integrated_verification": "required",
+      "context_product_not_inferred_from_this_entry": true
+    },
+    {
+      "id": "emela_core::Type::List",
+      "relation": "variant_entry",
+      "baseline_status": "mapped",
+      "legacy_role": "metadata",
+      "proposed_status": "verified",
+      "behavior": "metadata_with_runtime_witness",
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/semantics/type_representations.rs",
+          "symbol": "list_repr"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "source_C_test",
+          "path": "crates/emela-emb-compiler/tests/p3_lists.rs",
+          "symbol": "list_construction_spreads_patterns_generics_and_tail_recursion_execute",
+          "observation": "Source List construction/spread, head/tail/empty patterns, generic recursion, written evaluation order and heap reclamation."
+        },
+        {
+          "kind": "IR_C_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/memory_tests.rs",
+          "symbol": "list_string_bytes_and_any_release_owned_values_after_repeated_calls",
+          "observation": "Explicit List/ListTail/ListHead, String and Bytes conversions with Any values retain and release owners."
+        }
+      ],
+      "review_reason": "Typed linked List construction, traversal and shared tail ownership execute.",
+      "final_integrated_verification": "required",
+      "context_product_not_inferred_from_this_entry": true
+    },
+    {
+      "id": "emela_core::Type::Param",
+      "relation": "variant_entry",
+      "baseline_status": "mapped",
+      "legacy_role": "metadata",
+      "proposed_status": "verified",
+      "behavior": "metadata_with_runtime_witness",
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/semantics/type_representations.rs",
+          "symbol": "param_repr"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "source_C_test",
+          "path": "crates/emela-emb-compiler/tests/p2_data.rs",
+          "symbol": "generic_functions_data_and_scc_return_inference_execute_from_source",
+          "observation": "Source generic identity/Box/swap/SCC instantiate concrete value arguments and execute."
+        },
+        {
+          "kind": "diagnostic_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/tests.rs",
+          "symbol": "rejects_malformed_generic_fields_and_unhandled_failure_channels",
+          "observation": "Out-of-range Param(3) in a one-parameter definition is rejected; missing failure edge also rejected."
+        },
+        {
+          "kind": "IR_C_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/p7_data_tests.rs",
+          "symbol": "legacy_inline_layouts_preserve_generic_fields_tags_and_unit_positions_at_the_c_boundary",
+          "observation": "Generic Maybe/Box, named record, unit enum, tuple Unit erasure: exact public C tags/fields and release behavior."
+        }
+      ],
+      "review_reason": "Parameters remain in valid generic definitions and are substituted at concrete uses; undeclared indices reject. This is not a claim that unresolved source parameters reach C.",
+      "final_integrated_verification": "required",
+      "context_product_not_inferred_from_this_entry": true
+    },
+    {
+      "id": "emela_core::Type::String",
+      "relation": "variant_entry",
+      "baseline_status": "mapped",
+      "legacy_role": "metadata",
+      "proposed_status": "verified",
+      "behavior": "metadata_with_runtime_witness",
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/semantics/type_representations.rs",
+          "symbol": "string_repr"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "source_C_test",
+          "path": "crates/emela-emb-compiler/tests/p2_strings.rs",
+          "symbol": "scalar_interpolation_unicode_nul_string_operators_and_numeric_formats_execute",
+          "observation": "Exact Unicode, embedded NUL, interpolation, dynamic operators and numeric formatting across the public C String ABI."
+        },
+        {
+          "kind": "IR_C_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/memory_tests.rs",
+          "symbol": "list_string_bytes_and_any_release_owned_values_after_repeated_calls",
+          "observation": "Explicit List/ListTail/ListHead, String and Bytes conversions with Any values retain and release owners."
+        }
+      ],
+      "review_reason": "String byte length, Unicode/NUL content, bounded views and owner snapshots match the public C ABI.",
+      "final_integrated_verification": "required",
+      "context_product_not_inferred_from_this_entry": true
+    },
+    {
+      "id": "emela_core::Type::Tuple",
+      "relation": "variant_entry",
+      "baseline_status": "mapped",
+      "legacy_role": "metadata",
+      "proposed_status": "verified",
+      "behavior": "metadata_with_runtime_witness",
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/semantics/type_representations.rs",
+          "symbol": "tuple_repr"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "IR_C_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/p7_data_tests.rs",
+          "symbol": "legacy_inline_layouts_preserve_generic_fields_tags_and_unit_positions_at_the_c_boundary",
+          "observation": "Generic Maybe/Box, named record, unit enum, tuple Unit erasure: exact public C tags/fields and release behavior."
+        },
+        {
+          "kind": "IR_C_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/tests.rs",
+          "symbol": "block_yield_and_break_to_enclosing_block_execute",
+          "observation": "Both Yield and Break edges initialize the enclosing block result and execute expected42."
+        }
+      ],
+      "review_reason": "Tuple fields, Unit positions and concrete element ABI remain materialized.",
+      "final_integrated_verification": "required",
+      "context_product_not_inferred_from_this_entry": true
+    },
+    {
+      "id": "emela_core::VariantFields::Named",
+      "relation": "variant_entry",
+      "baseline_status": "mapped",
+      "legacy_role": "metadata",
+      "proposed_status": "verified",
+      "behavior": "metadata_with_runtime_witness",
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/semantics/variants.rs",
+          "symbol": "named"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "IR_C_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/p7_data_tests.rs",
+          "symbol": "legacy_inline_layouts_preserve_generic_fields_tags_and_unit_positions_at_the_c_boundary",
+          "observation": "Generic Maybe/Box, named record, unit enum, tuple Unit erasure: exact public C tags/fields and release behavior."
+        },
+        {
+          "kind": "diagnostic_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/tests.rs",
+          "symbol": "rejects_malformed_generic_fields_and_unhandled_failure_channels",
+          "observation": "Out-of-range Param(3) in a one-parameter definition is rejected; missing failure edge also rejected."
+        }
+      ],
+      "review_reason": "Arity/name metadata is validated and determines concrete C field positions and nullary/tag representation.",
+      "final_integrated_verification": "required",
+      "context_product_not_inferred_from_this_entry": true
+    },
+    {
+      "id": "emela_core::VariantFields::Positional",
+      "relation": "variant_entry",
+      "baseline_status": "mapped",
+      "legacy_role": "metadata",
+      "proposed_status": "verified",
+      "behavior": "metadata_with_runtime_witness",
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/semantics/variants.rs",
+          "symbol": "positional"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "IR_C_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/p7_data_tests.rs",
+          "symbol": "legacy_inline_layouts_preserve_generic_fields_tags_and_unit_positions_at_the_c_boundary",
+          "observation": "Generic Maybe/Box, named record, unit enum, tuple Unit erasure: exact public C tags/fields and release behavior."
+        },
+        {
+          "kind": "diagnostic_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/tests.rs",
+          "symbol": "rejects_malformed_generic_fields_and_unhandled_failure_channels",
+          "observation": "Out-of-range Param(3) in a one-parameter definition is rejected; missing failure edge also rejected."
+        }
+      ],
+      "review_reason": "Arity/name metadata is validated and determines concrete C field positions and nullary/tag representation.",
+      "final_integrated_verification": "required",
+      "context_product_not_inferred_from_this_entry": true
+    },
+    {
+      "id": "emela_core::VariantFields::Unit",
+      "relation": "variant_entry",
+      "baseline_status": "mapped",
+      "legacy_role": "metadata",
+      "proposed_status": "verified",
+      "behavior": "metadata_with_runtime_witness",
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/semantics/variants.rs",
+          "symbol": "unit"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "IR_C_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/p7_data_tests.rs",
+          "symbol": "legacy_inline_layouts_preserve_generic_fields_tags_and_unit_positions_at_the_c_boundary",
+          "observation": "Generic Maybe/Box, named record, unit enum, tuple Unit erasure: exact public C tags/fields and release behavior."
+        },
+        {
+          "kind": "diagnostic_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/tests.rs",
+          "symbol": "rejects_malformed_generic_fields_and_unhandled_failure_channels",
+          "observation": "Out-of-range Param(3) in a one-parameter definition is rejected; missing failure edge also rejected."
+        }
+      ],
+      "review_reason": "Arity/name metadata is validated and determines concrete C field positions and nullary/tag representation.",
+      "final_integrated_verification": "required",
+      "context_product_not_inferred_from_this_entry": true
+    },
+    {
+      "id": "emela_lir::CaseKey::Lit",
+      "relation": "variant_entry",
+      "baseline_status": "mapped",
+      "legacy_role": "emit",
+      "proposed_status": "verified",
+      "behavior": "emitted",
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/case_keys.rs",
+          "symbol": "lit_label"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "IR_C_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/p7_data_tests.rs",
+          "symbol": "legacy_literal_and_enum_switches_cover_numeric_extremes_and_reject_invalid_tags",
+          "observation": "Dynamic Bool/I32/I64 literals, enum tags, default branches and invalid enum tags are observed through C."
+        }
+      ],
+      "review_reason": "Literal and variant keys select exact C branches, defaults and invalid-tag defects.",
+      "final_integrated_verification": "required",
+      "context_product_not_inferred_from_this_entry": true
+    },
+    {
+      "id": "emela_lir::CaseKey::Variant",
+      "relation": "variant_entry",
+      "baseline_status": "mapped",
+      "legacy_role": "emit",
+      "proposed_status": "verified",
+      "behavior": "emitted",
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/case_keys.rs",
+          "symbol": "variant_label"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "IR_C_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/p7_data_tests.rs",
+          "symbol": "legacy_literal_and_enum_switches_cover_numeric_extremes_and_reject_invalid_tags",
+          "observation": "Dynamic Bool/I32/I64 literals, enum tags, default branches and invalid enum tags are observed through C."
+        }
+      ],
+      "review_reason": "Literal and variant keys select exact C branches, defaults and invalid-tag defects.",
+      "final_integrated_verification": "required",
+      "context_product_not_inferred_from_this_entry": true
+    },
+    {
+      "id": "emela_lir::Const::String",
+      "relation": "variant_entry",
+      "baseline_status": "mapped",
+      "legacy_role": "emit",
+      "proposed_status": "verified",
+      "behavior": "emitted",
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/constants.rs",
+          "symbol": "string_value"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "source_C_test",
+          "path": "crates/emela-emb-compiler/tests/p2_strings.rs",
+          "symbol": "scalar_interpolation_unicode_nul_string_operators_and_numeric_formats_execute",
+          "observation": "Exact Unicode, embedded NUL, interpolation, dynamic operators and numeric formatting across the public C String ABI."
+        },
+        {
+          "kind": "IR_C_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/tests.rs",
+          "symbol": "strings_unicode_comparisons_and_float_rounding_execute",
+          "observation": "Actual Prim Lt[String] includes NUL and UTF8, returns true; strings and FloatFloor execute in the same IR test."
+        }
+      ],
+      "review_reason": "NUL/Unicode constant byte content and exact lengths reach C with escaped static storage.",
+      "final_integrated_verification": "required",
+      "context_product_not_inferred_from_this_entry": true
+    },
+    {
+      "id": "emela_lir::OnFail::Break",
+      "relation": "variant_entry",
+      "baseline_status": "mapped",
+      "legacy_role": "emit",
+      "proposed_status": "verified",
+      "behavior": "emitted",
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/failures.rs",
+          "symbol": "break_edge"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "IR_C_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/tests.rs",
+          "symbol": "failure_payload_recovery_runs_cleanup_once",
+          "observation": "Fail -> Break(Any) -> AsError -> Field recovers42; Protect cleanup callback runs exactly once, bad error type rejected."
+        },
+        {
+          "kind": "source_C_test",
+          "path": "crates/emela-emb-compiler/tests/p2_failures.rs",
+          "symbol": "concrete_generic_error_payloads_keep_distinct_slots_and_owned_nested_strings",
+          "observation": "Source error tests/selects and payload extraction distinguish concrete generic error tags and preserve nested ownership."
+        },
+        {
+          "kind": "IR_C_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend_tests.rs",
+          "symbol": "suspending_cleanup_preserves_the_failure_until_an_outer_handler_runs",
+          "observation": "Actual suspend/cleanup then outer failure handler preserves original payload and ownership."
+        }
+      ],
+      "review_reason": "Error ownership transfers into an enclosing Any block and reaches the outer escape after cleanup.",
+      "final_integrated_verification": "required",
+      "context_product_not_inferred_from_this_entry": true
+    },
+    {
+      "id": "emela_lir::OnFail::Handle",
+      "relation": "variant_entry",
+      "baseline_status": "mapped",
+      "legacy_role": "reject",
+      "proposed_status": "verified",
+      "behavior": "validated_and_normalized",
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/failures.rs",
+          "symbol": "handle_edge"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "IR_C_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/p7_contract_tests.rs",
+          "symbol": "local_failure_handlers_are_validated_and_normalized_in_sync_and_suspend_calls",
+          "observation": "Typed OnFail Handle inputs validate, normalize to local Block/Break and return42 with handler sideeffect in both modes."
+        }
+      ],
+      "review_reason": "This independent typed input intentionally accepts/validates local Handle and normalizes it before emit; the final Heap-style emitter landing remains a residual error.",
+      "final_integrated_verification": "required",
+      "context_product_not_inferred_from_this_entry": true
+    },
+    {
+      "id": "emela_lir::OnFail::Propagate",
+      "relation": "variant_entry",
+      "baseline_status": "mapped",
+      "legacy_role": "emit",
+      "proposed_status": "verified",
+      "behavior": "emitted",
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/failures.rs",
+          "symbol": "propagate_edge"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "source_C_test",
+          "path": "crates/emela-emb-compiler/tests/p2_failures.rs",
+          "symbol": "concrete_generic_error_payloads_keep_distinct_slots_and_owned_nested_strings",
+          "observation": "Source error tests/selects and payload extraction distinguish concrete generic error tags and preserve nested ownership."
+        },
+        {
+          "kind": "IR_C_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend_tests.rs",
+          "symbol": "suspending_cleanup_preserves_the_failure_until_an_outer_handler_runs",
+          "observation": "Actual suspend/cleanup then outer failure handler preserves original payload and ownership."
+        }
+      ],
+      "review_reason": "Failures propagate through typed call signatures and suspending cleanup without replacing the payload.",
+      "final_integrated_verification": "required",
+      "context_product_not_inferred_from_this_entry": true
+    },
+    {
+      "id": "emela_lir::Operand::Const",
+      "relation": "variant_entry",
+      "baseline_status": "mapped",
+      "legacy_role": "emit",
+      "proposed_status": "verified",
+      "behavior": "emitted",
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/operands.rs",
+          "symbol": "const_value"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "IR_C_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/tests.rs",
+          "symbol": "tail_recursion_uses_parallel_parameter_assignment_and_scalar_external_calls",
+          "observation": "Raw Prim and If/Recur loop with parallel replacement of parameters executes with an external scalar hook."
+        },
+        {
+          "kind": "IR_C_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/p7_data_tests.rs",
+          "symbol": "legacy_inline_layouts_preserve_generic_fields_tags_and_unit_positions_at_the_c_boundary",
+          "observation": "Generic Maybe/Box, named record, unit enum, tuple Unit erasure: exact public C tags/fields and release behavior."
+        },
+        {
+          "kind": "IR_C_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/tests.rs",
+          "symbol": "float_constant_bits_and_non_finite_values_execute",
+          "observation": "IR Const Float preserves -0, NaN and infinities; finite outputs compared by C."
+        }
+      ],
+      "review_reason": "Literal and local variable operands participate in actual calls, primitives and returned values.",
+      "final_integrated_verification": "required",
+      "context_product_not_inferred_from_this_entry": true
+    },
+    {
+      "id": "emela_lir::Operand::Var",
+      "relation": "variant_entry",
+      "baseline_status": "mapped",
+      "legacy_role": "emit",
+      "proposed_status": "verified",
+      "behavior": "emitted",
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/operands.rs",
+          "symbol": "var_value"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "IR_C_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/tests.rs",
+          "symbol": "tail_recursion_uses_parallel_parameter_assignment_and_scalar_external_calls",
+          "observation": "Raw Prim and If/Recur loop with parallel replacement of parameters executes with an external scalar hook."
+        },
+        {
+          "kind": "IR_C_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/p7_data_tests.rs",
+          "symbol": "legacy_inline_layouts_preserve_generic_fields_tags_and_unit_positions_at_the_c_boundary",
+          "observation": "Generic Maybe/Box, named record, unit enum, tuple Unit erasure: exact public C tags/fields and release behavior."
+        },
+        {
+          "kind": "IR_C_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/tests.rs",
+          "symbol": "float_constant_bits_and_non_finite_values_execute",
+          "observation": "IR Const Float preserves -0, NaN and infinities; finite outputs compared by C."
+        }
+      ],
+      "review_reason": "Literal and local variable operands participate in actual calls, primitives and returned values.",
+      "final_integrated_verification": "required",
+      "context_product_not_inferred_from_this_entry": true
+    },
+    {
+      "id": "emela_lir::PrimOp::Eq",
+      "relation": "variant_entry",
+      "baseline_status": "mapped",
+      "legacy_role": "emit",
+      "proposed_status": "verified",
+      "behavior": "emitted",
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/primitive_operations.rs",
+          "symbol": "prim_eq"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/plan/operations/primitive_operations.rs",
+          "symbol": "require_runtime"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "source_C_test",
+          "path": "crates/emela-emb-compiler/tests/p1.rs",
+          "symbol": "scalar_numeric_boundaries_execute_with_legacy_semantics",
+          "observation": "Dynamic exported eq/ne/lt/le/gt/ge for Int/Int64/Float are called on boundary inputs by numeric-harness.c."
+        },
+        {
+          "kind": "IR_C_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/tests.rs",
+          "symbol": "strings_unicode_comparisons_and_float_rounding_execute",
+          "observation": "Actual Prim Lt[String] includes NUL and UTF8, returns true; strings and FloatFloor execute in the same IR test."
+        }
+      ],
+      "review_reason": "Dynamic numeric comparison exports cover all six operators; explicit String primitive compares NUL-bearing values. Per-type/context axes are separately audited by the 226-context proposal.",
+      "final_integrated_verification": "required",
+      "context_product_not_inferred_from_this_entry": true
+    },
+    {
+      "id": "emela_lir::PrimOp::Ge",
+      "relation": "variant_entry",
+      "baseline_status": "mapped",
+      "legacy_role": "emit",
+      "proposed_status": "verified",
+      "behavior": "emitted",
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/primitive_operations.rs",
+          "symbol": "prim_ge"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/plan/operations/primitive_operations.rs",
+          "symbol": "require_runtime"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "source_C_test",
+          "path": "crates/emela-emb-compiler/tests/p1.rs",
+          "symbol": "scalar_numeric_boundaries_execute_with_legacy_semantics",
+          "observation": "Dynamic exported eq/ne/lt/le/gt/ge for Int/Int64/Float are called on boundary inputs by numeric-harness.c."
+        },
+        {
+          "kind": "IR_C_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/tests.rs",
+          "symbol": "strings_unicode_comparisons_and_float_rounding_execute",
+          "observation": "Actual Prim Lt[String] includes NUL and UTF8, returns true; strings and FloatFloor execute in the same IR test."
+        }
+      ],
+      "review_reason": "Dynamic numeric comparison exports cover all six operators; explicit String primitive compares NUL-bearing values. Per-type/context axes are separately audited by the 226-context proposal.",
+      "final_integrated_verification": "required",
+      "context_product_not_inferred_from_this_entry": true
+    },
+    {
+      "id": "emela_lir::PrimOp::Gt",
+      "relation": "variant_entry",
+      "baseline_status": "mapped",
+      "legacy_role": "emit",
+      "proposed_status": "verified",
+      "behavior": "emitted",
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/primitive_operations.rs",
+          "symbol": "prim_gt"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/plan/operations/primitive_operations.rs",
+          "symbol": "require_runtime"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "source_C_test",
+          "path": "crates/emela-emb-compiler/tests/p1.rs",
+          "symbol": "scalar_numeric_boundaries_execute_with_legacy_semantics",
+          "observation": "Dynamic exported eq/ne/lt/le/gt/ge for Int/Int64/Float are called on boundary inputs by numeric-harness.c."
+        },
+        {
+          "kind": "IR_C_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/tests.rs",
+          "symbol": "strings_unicode_comparisons_and_float_rounding_execute",
+          "observation": "Actual Prim Lt[String] includes NUL and UTF8, returns true; strings and FloatFloor execute in the same IR test."
+        }
+      ],
+      "review_reason": "Dynamic numeric comparison exports cover all six operators; explicit String primitive compares NUL-bearing values. Per-type/context axes are separately audited by the 226-context proposal.",
+      "final_integrated_verification": "required",
+      "context_product_not_inferred_from_this_entry": true
+    },
+    {
+      "id": "emela_lir::PrimOp::Le",
+      "relation": "variant_entry",
+      "baseline_status": "mapped",
+      "legacy_role": "emit",
+      "proposed_status": "verified",
+      "behavior": "emitted",
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/primitive_operations.rs",
+          "symbol": "prim_le"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/plan/operations/primitive_operations.rs",
+          "symbol": "require_runtime"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "source_C_test",
+          "path": "crates/emela-emb-compiler/tests/p1.rs",
+          "symbol": "scalar_numeric_boundaries_execute_with_legacy_semantics",
+          "observation": "Dynamic exported eq/ne/lt/le/gt/ge for Int/Int64/Float are called on boundary inputs by numeric-harness.c."
+        },
+        {
+          "kind": "IR_C_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/tests.rs",
+          "symbol": "strings_unicode_comparisons_and_float_rounding_execute",
+          "observation": "Actual Prim Lt[String] includes NUL and UTF8, returns true; strings and FloatFloor execute in the same IR test."
+        }
+      ],
+      "review_reason": "Dynamic numeric comparison exports cover all six operators; explicit String primitive compares NUL-bearing values. Per-type/context axes are separately audited by the 226-context proposal.",
+      "final_integrated_verification": "required",
+      "context_product_not_inferred_from_this_entry": true
+    },
+    {
+      "id": "emela_lir::PrimOp::Lt",
+      "relation": "variant_entry",
+      "baseline_status": "mapped",
+      "legacy_role": "emit",
+      "proposed_status": "verified",
+      "behavior": "emitted",
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/primitive_operations.rs",
+          "symbol": "prim_lt"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/plan/operations/primitive_operations.rs",
+          "symbol": "require_runtime"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "source_C_test",
+          "path": "crates/emela-emb-compiler/tests/p1.rs",
+          "symbol": "scalar_numeric_boundaries_execute_with_legacy_semantics",
+          "observation": "Dynamic exported eq/ne/lt/le/gt/ge for Int/Int64/Float are called on boundary inputs by numeric-harness.c."
+        },
+        {
+          "kind": "IR_C_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/tests.rs",
+          "symbol": "strings_unicode_comparisons_and_float_rounding_execute",
+          "observation": "Actual Prim Lt[String] includes NUL and UTF8, returns true; strings and FloatFloor execute in the same IR test."
+        }
+      ],
+      "review_reason": "Dynamic numeric comparison exports cover all six operators; explicit String primitive compares NUL-bearing values. Per-type/context axes are separately audited by the 226-context proposal.",
+      "final_integrated_verification": "required",
+      "context_product_not_inferred_from_this_entry": true
+    },
+    {
+      "id": "emela_lir::PrimOp::Ne",
+      "relation": "variant_entry",
+      "baseline_status": "mapped",
+      "legacy_role": "emit",
+      "proposed_status": "verified",
+      "behavior": "emitted",
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/primitive_operations.rs",
+          "symbol": "prim_ne"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/plan/operations/primitive_operations.rs",
+          "symbol": "require_runtime"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "source_C_test",
+          "path": "crates/emela-emb-compiler/tests/p1.rs",
+          "symbol": "scalar_numeric_boundaries_execute_with_legacy_semantics",
+          "observation": "Dynamic exported eq/ne/lt/le/gt/ge for Int/Int64/Float are called on boundary inputs by numeric-harness.c."
+        },
+        {
+          "kind": "IR_C_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/tests.rs",
+          "symbol": "strings_unicode_comparisons_and_float_rounding_execute",
+          "observation": "Actual Prim Lt[String] includes NUL and UTF8, returns true; strings and FloatFloor execute in the same IR test."
+        }
+      ],
+      "review_reason": "Dynamic numeric comparison exports cover all six operators; explicit String primitive compares NUL-bearing values. Per-type/context axes are separately audited by the 226-context proposal.",
+      "final_integrated_verification": "required",
+      "context_product_not_inferred_from_this_entry": true
+    },
+    {
+      "id": "emela_lir::PrimTy::String",
+      "relation": "variant_entry",
+      "baseline_status": "mapped",
+      "legacy_role": "emit",
+      "proposed_status": "verified",
+      "behavior": "emitted",
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/primitive_types.rs",
+          "symbol": "string_expression"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "IR_C_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/tests.rs",
+          "symbol": "strings_unicode_comparisons_and_float_rounding_execute",
+          "observation": "Actual Prim Lt[String] includes NUL and UTF8, returns true; strings and FloatFloor execute in the same IR test."
+        },
+        {
+          "kind": "source_C_test",
+          "path": "crates/emela-emb-compiler/tests/p2_strings.rs",
+          "symbol": "scalar_interpolation_unicode_nul_string_operators_and_numeric_formats_execute",
+          "observation": "Exact Unicode, embedded NUL, interpolation, dynamic operators and numeric formatting across the public C String ABI."
+        }
+      ],
+      "review_reason": "UTF8 bytewise primitive comparison handles embedded NUL with explicit lengths.",
+      "final_integrated_verification": "required",
+      "context_product_not_inferred_from_this_entry": true
+    },
+    {
+      "id": "emela_lir::Repr::Ref",
+      "relation": "variant_entry",
+      "baseline_status": "mapped",
+      "legacy_role": "metadata",
+      "proposed_status": "verified",
+      "behavior": "metadata_with_runtime_witness",
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/semantics/representations.rs",
+          "symbol": "ref_value"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "IR_C_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/p7_data_tests.rs",
+          "symbol": "legacy_inline_layouts_preserve_generic_fields_tags_and_unit_positions_at_the_c_boundary",
+          "observation": "Generic Maybe/Box, named record, unit enum, tuple Unit erasure: exact public C tags/fields and release behavior."
+        },
+        {
+          "kind": "IR_C_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/memory_tests.rs",
+          "symbol": "any_boxes_retain_managed_lists_and_release_their_payloads",
+          "observation": "Coerce list into Any and recover it; heap audit proves tagged box payload retention and release."
+        },
+        {
+          "kind": "IR_C_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/memory_tests.rs",
+          "symbol": "list_string_bytes_and_any_release_owned_values_after_repeated_calls",
+          "observation": "Explicit List/ListTail/ListHead, String and Bytes conversions with Any values retain and release owners."
+        }
+      ],
+      "review_reason": "Reference-class variables are exercised as data, list, any and owner-bearing values; layout-specific C types remain separate from the generic representation tag.",
+      "final_integrated_verification": "required",
+      "context_product_not_inferred_from_this_entry": true
+    },
+    {
+      "id": "emela_lir::RuntimeOp::DebugPrint",
+      "relation": "variant_entry",
+      "baseline_status": "mapped",
+      "legacy_role": "emit",
+      "proposed_status": "verified",
+      "behavior": "emitted",
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/runtime.rs",
+          "symbol": "debug_print"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/plan/operations/runtime.rs",
+          "symbol": "string_behavior"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/plan/operations/runtime.rs",
+          "symbol": "string_bound"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/plan/operations/runtime.rs",
+          "symbol": "needs_heap"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/plan/operations/runtime.rs",
+          "symbol": "require_runtime"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "source_C_test",
+          "path": "crates/emela-emb-compiler/tests/p2_debug.rs",
+          "symbol": "dbg_falls_back_recursively_uses_custom_show_and_returns_the_original_value_once",
+          "observation": "C checks exact debug bytes/order, custom and fallback Show, NUL data and preservation of the original value."
+        },
+        {
+          "kind": "source_lowering_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/source_builtin_tests.rs",
+          "symbol": "source_debug_display_assert_and_defect_operations_leave_no_residual_builtins",
+          "observation": "Checks source checker/specializer/lower output; source-only builtins disappear and Runtime ShowString/DebugPrint and Term Defect remain."
+        }
+      ],
+      "review_reason": "DebugPrint writes exact source-derived String bytes through the board hook.",
+      "final_integrated_verification": "required",
+      "context_product_not_inferred_from_this_entry": true
+    },
+    {
+      "id": "emela_lir::RuntimeOp::Defect",
+      "relation": "variant_entry",
+      "baseline_status": "mapped",
+      "legacy_role": "reject",
+      "proposed_status": "verified",
+      "behavior": "input_rejected",
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/runtime.rs",
+          "symbol": "defect"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/plan/operations/runtime.rs",
+          "symbol": "string_behavior"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/plan/operations/runtime.rs",
+          "symbol": "string_bound"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/plan/operations/runtime.rs",
+          "symbol": "needs_heap"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/plan/operations/runtime.rs",
+          "symbol": "require_runtime"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "diagnostic_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/p7_input_tests.rs",
+          "symbol": "residual_heap_runtime_operations_are_rejected_in_native_and_suspending_input",
+          "observation": "Defect/DefectAt/DefectTake/DefectResume/Yield/YieldPerform individually reject as residual inputs before planning in native and suspend modes."
+        }
+      ],
+      "review_reason": "These retained Heap/runtime-stage operations reject as raw native or suspending inputs; source behavior is expressed through supported terminals/calls.",
+      "final_integrated_verification": "required",
+      "context_product_not_inferred_from_this_entry": true
+    },
+    {
+      "id": "emela_lir::RuntimeOp::DefectAt",
+      "relation": "variant_entry",
+      "baseline_status": "pending",
+      "legacy_role": "reject",
+      "proposed_status": "verified",
+      "behavior": "input_rejected",
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/lower/values.rs",
+          "symbol": "value_type"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/runtime.rs",
+          "symbol": "defect_at"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "diagnostic_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/p7_input_tests.rs",
+          "symbol": "residual_heap_runtime_operations_are_rejected_in_native_and_suspending_input",
+          "observation": "Defect/DefectAt/DefectTake/DefectResume/Yield/YieldPerform individually reject as residual inputs before planning in native and suspend modes."
+        }
+      ],
+      "review_reason": "These retained Heap/runtime-stage operations reject as raw native or suspending inputs; source behavior is expressed through supported terminals/calls.",
+      "final_integrated_verification": "required",
+      "context_product_not_inferred_from_this_entry": true
+    },
+    {
+      "id": "emela_lir::RuntimeOp::DefectResume",
+      "relation": "variant_entry",
+      "baseline_status": "mapped",
+      "legacy_role": "reject",
+      "proposed_status": "verified",
+      "behavior": "input_rejected",
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/runtime.rs",
+          "symbol": "defect_resume"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/plan/operations/runtime.rs",
+          "symbol": "string_behavior"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/plan/operations/runtime.rs",
+          "symbol": "string_bound"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/plan/operations/runtime.rs",
+          "symbol": "needs_heap"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/plan/operations/runtime.rs",
+          "symbol": "require_runtime"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/frontend/function_abi.rs"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/frontend/lower.rs"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend.rs"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "diagnostic_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/p7_input_tests.rs",
+          "symbol": "residual_heap_runtime_operations_are_rejected_in_native_and_suspending_input",
+          "observation": "Defect/DefectAt/DefectTake/DefectResume/Yield/YieldPerform individually reject as residual inputs before planning in native and suspend modes."
+        }
+      ],
+      "review_reason": "These retained Heap/runtime-stage operations reject as raw native or suspending inputs; source behavior is expressed through supported terminals/calls.",
+      "final_integrated_verification": "required",
+      "context_product_not_inferred_from_this_entry": true
+    },
+    {
+      "id": "emela_lir::RuntimeOp::DefectTake",
+      "relation": "variant_entry",
+      "baseline_status": "mapped",
+      "legacy_role": "reject",
+      "proposed_status": "verified",
+      "behavior": "input_rejected",
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/runtime.rs",
+          "symbol": "defect_take"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/plan/operations/runtime.rs",
+          "symbol": "string_behavior"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/plan/operations/runtime.rs",
+          "symbol": "string_bound"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/plan/operations/runtime.rs",
+          "symbol": "needs_heap"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/plan/operations/runtime.rs",
+          "symbol": "require_runtime"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "diagnostic_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/p7_input_tests.rs",
+          "symbol": "residual_heap_runtime_operations_are_rejected_in_native_and_suspending_input",
+          "observation": "Defect/DefectAt/DefectTake/DefectResume/Yield/YieldPerform individually reject as residual inputs before planning in native and suspend modes."
+        }
+      ],
+      "review_reason": "These retained Heap/runtime-stage operations reject as raw native or suspending inputs; source behavior is expressed through supported terminals/calls.",
+      "final_integrated_verification": "required",
+      "context_product_not_inferred_from_this_entry": true
+    },
+    {
+      "id": "emela_lir::RuntimeOp::ShowString",
+      "relation": "variant_entry",
+      "baseline_status": "mapped",
+      "legacy_role": "emit",
+      "proposed_status": "verified",
+      "behavior": "emitted",
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/runtime.rs",
+          "symbol": "emit_show_string"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/plan/operations/runtime.rs",
+          "symbol": "string_behavior"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/plan/operations/runtime.rs",
+          "symbol": "string_bound"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/plan/operations/runtime.rs",
+          "symbol": "needs_heap"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/plan/operations/runtime.rs",
+          "symbol": "require_runtime"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "IR_C_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/p7_discarded_tests.rs",
+          "symbol": "discarded_runtime_show_string_still_checks_its_output_capacity",
+          "observation": "Explicit Runtime ShowString discard preserves bounded-buffer behavior: normal 1000 calls and capacity3 exact defect."
+        },
+        {
+          "kind": "source_lowering_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/source_builtin_tests.rs",
+          "symbol": "source_debug_display_assert_and_defect_operations_leave_no_residual_builtins",
+          "observation": "Checks source checker/specializer/lower output; source-only builtins disappear and Runtime ShowString/DebugPrint and Term Defect remain."
+        }
+      ],
+      "review_reason": "String quoting/escaping and bounded output planning apply even when the result is discarded.",
+      "final_integrated_verification": "required",
+      "context_product_not_inferred_from_this_entry": true
+    },
+    {
+      "id": "emela_lir::RuntimeOp::Yield",
+      "relation": "variant_entry",
+      "baseline_status": "mapped",
+      "legacy_role": "reject",
+      "proposed_status": "verified",
+      "behavior": "input_rejected",
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/runtime.rs",
+          "symbol": "yield_operation"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/plan/operations/runtime.rs",
+          "symbol": "string_behavior"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/plan/operations/runtime.rs",
+          "symbol": "string_bound"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/plan/operations/runtime.rs",
+          "symbol": "needs_heap"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/plan/operations/runtime.rs",
+          "symbol": "require_runtime"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "diagnostic_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/p7_input_tests.rs",
+          "symbol": "residual_heap_runtime_operations_are_rejected_in_native_and_suspending_input",
+          "observation": "Defect/DefectAt/DefectTake/DefectResume/Yield/YieldPerform individually reject as residual inputs before planning in native and suspend modes."
+        }
+      ],
+      "review_reason": "These retained Heap/runtime-stage operations reject as raw native or suspending inputs; source behavior is expressed through supported terminals/calls.",
+      "final_integrated_verification": "required",
+      "context_product_not_inferred_from_this_entry": true
+    },
+    {
+      "id": "emela_lir::RuntimeOp::YieldPerform",
+      "relation": "variant_entry",
+      "baseline_status": "mapped",
+      "legacy_role": "reject",
+      "proposed_status": "verified",
+      "behavior": "input_rejected",
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/runtime.rs",
+          "symbol": "yield_perform"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/plan/operations/runtime.rs",
+          "symbol": "string_behavior"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/plan/operations/runtime.rs",
+          "symbol": "string_bound"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/plan/operations/runtime.rs",
+          "symbol": "needs_heap"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/plan/operations/runtime.rs",
+          "symbol": "require_runtime"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "diagnostic_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/p7_input_tests.rs",
+          "symbol": "residual_heap_runtime_operations_are_rejected_in_native_and_suspending_input",
+          "observation": "Defect/DefectAt/DefectTake/DefectResume/Yield/YieldPerform individually reject as residual inputs before planning in native and suspend modes."
+        }
+      ],
+      "review_reason": "These retained Heap/runtime-stage operations reject as raw native or suspending inputs; source behavior is expressed through supported terminals/calls.",
+      "final_integrated_verification": "required",
+      "context_product_not_inferred_from_this_entry": true
+    },
+    {
+      "id": "emela_lir::Stmt::Block",
+      "relation": "variant_entry",
+      "baseline_status": "mapped",
+      "legacy_role": "emit",
+      "proposed_status": "verified",
+      "behavior": "emitted",
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/statements/block.rs",
+          "symbol": "emit"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/plan/operations/statements/block.rs",
+          "symbol": "lower"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "IR_C_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/tests.rs",
+          "symbol": "block_yield_and_break_to_enclosing_block_execute",
+          "observation": "Both Yield and Break edges initialize the enclosing block result and execute expected42."
+        },
+        {
+          "kind": "IR_C_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/tests.rs",
+          "symbol": "failure_payload_recovery_runs_cleanup_once",
+          "observation": "Fail -> Break(Any) -> AsError -> Field recovers42; Protect cleanup callback runs exactly once, bad error type rejected."
+        }
+      ],
+      "review_reason": "Structured block results and failure cleanup are directly executed.",
+      "final_integrated_verification": "required",
+      "context_product_not_inferred_from_this_entry": true
+    },
+    {
+      "id": "emela_lir::Stmt::Drop",
+      "relation": "variant_entry",
+      "baseline_status": "mapped",
+      "legacy_role": "reject",
+      "proposed_status": "verified",
+      "behavior": "input_rejected",
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/statements/drop.rs",
+          "symbol": "emit"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/plan/operations/statements/drop.rs",
+          "symbol": "lower"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "diagnostic_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/p7_contract_tests.rs",
+          "symbol": "unwind_environment_values_and_refcount_statements_are_rejected_as_input",
+          "observation": "Raw EnvGet/MakeClosure, Stmt Dup/Drop and Term Unwind inputs are retained in the contract and rejected in both caller modes."
+        }
+      ],
+      "review_reason": "Raw reference-count statements remain unsupported at the typed input boundary; normal ownership is generated internally.",
+      "final_integrated_verification": "required",
+      "context_product_not_inferred_from_this_entry": true
+    },
+    {
+      "id": "emela_lir::Stmt::Dup",
+      "relation": "variant_entry",
+      "baseline_status": "mapped",
+      "legacy_role": "reject",
+      "proposed_status": "verified",
+      "behavior": "input_rejected",
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/statements/dup.rs",
+          "symbol": "emit"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/plan/operations/statements/dup.rs",
+          "symbol": "lower"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "diagnostic_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/p7_contract_tests.rs",
+          "symbol": "unwind_environment_values_and_refcount_statements_are_rejected_as_input",
+          "observation": "Raw EnvGet/MakeClosure, Stmt Dup/Drop and Term Unwind inputs are retained in the contract and rejected in both caller modes."
+        }
+      ],
+      "review_reason": "Raw reference-count statements remain unsupported at the typed input boundary; normal ownership is generated internally.",
+      "final_integrated_verification": "required",
+      "context_product_not_inferred_from_this_entry": true
+    },
+    {
+      "id": "emela_lir::Stmt::If",
+      "relation": "variant_entry",
+      "baseline_status": "mapped",
+      "legacy_role": "emit",
+      "proposed_status": "verified",
+      "behavior": "emitted",
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/statements/if_.rs",
+          "symbol": "emit"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/plan/operations/statements/if_.rs",
+          "symbol": "lower"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/statements/if_.rs",
+          "symbol": "emit_suspend"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "IR_C_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/tests.rs",
+          "symbol": "tail_recursion_uses_parallel_parameter_assignment_and_scalar_external_calls",
+          "observation": "Raw Prim and If/Recur loop with parallel replacement of parameters executes with an external scalar hook."
+        },
+        {
+          "kind": "source_C_test",
+          "path": "crates/emela-emb-compiler/tests/p1.rs",
+          "symbol": "modules_internal_calls_branches_and_tail_recursion_execute",
+          "observation": "Source branches, direct calls and million-step tail recursion run through C public exports."
+        }
+      ],
+      "review_reason": "Dynamic true/false branches participate in scalar control flow and recursive calls.",
+      "final_integrated_verification": "required",
+      "context_product_not_inferred_from_this_entry": true
+    },
+    {
+      "id": "emela_lir::Stmt::Let",
+      "relation": "variant_entry",
+      "baseline_status": "mapped",
+      "legacy_role": "emit",
+      "proposed_status": "verified",
+      "behavior": "emitted",
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/statements/let_.rs",
+          "symbol": "emit"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/plan/operations/statements/let_.rs",
+          "symbol": "lower"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "IR_C_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/tests.rs",
+          "symbol": "tail_recursion_uses_parallel_parameter_assignment_and_scalar_external_calls",
+          "observation": "Raw Prim and If/Recur loop with parallel replacement of parameters executes with an external scalar hook."
+        },
+        {
+          "kind": "IR_C_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/p7_data_tests.rs",
+          "symbol": "legacy_inline_layouts_preserve_generic_fields_tags_and_unit_positions_at_the_c_boundary",
+          "observation": "Generic Maybe/Box, named record, unit enum, tuple Unit erasure: exact public C tags/fields and release behavior."
+        }
+      ],
+      "review_reason": "Let assigns typed results before subsequent reads/calls, including aggregate values.",
+      "final_integrated_verification": "required",
+      "context_product_not_inferred_from_this_entry": true
+    },
+    {
+      "id": "emela_lir::Stmt::Loop",
+      "relation": "variant_entry",
+      "baseline_status": "mapped",
+      "legacy_role": "emit",
+      "proposed_status": "verified",
+      "behavior": "emitted",
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/statements/loop_.rs",
+          "symbol": "emit"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/plan/operations/statements/loop_.rs",
+          "symbol": "lower"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "IR_C_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/tests.rs",
+          "symbol": "loop_initial_values_yield_and_multiple_recur_variables_execute",
+          "observation": "Loop initial values, Yield and parallel multiple-Recur variable replacement are directly executed."
+        }
+      ],
+      "review_reason": "Loop initial state, yields and parallel recurrences preserve value order.",
+      "final_integrated_verification": "required",
+      "context_product_not_inferred_from_this_entry": true
+    },
+    {
+      "id": "emela_lir::Stmt::Switch",
+      "relation": "variant_entry",
+      "baseline_status": "mapped",
+      "legacy_role": "emit",
+      "proposed_status": "verified",
+      "behavior": "emitted",
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/statements/switch.rs",
+          "symbol": "emit"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/plan/operations/statements/switch.rs",
+          "symbol": "lower"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/plan/operations/statements/switch.rs",
+          "symbol": "require_runtime"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/statements/switch.rs",
+          "symbol": "emit_suspend"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "IR_C_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/p7_data_tests.rs",
+          "symbol": "legacy_literal_and_enum_switches_cover_numeric_extremes_and_reject_invalid_tags",
+          "observation": "Dynamic Bool/I32/I64 literals, enum tags, default branches and invalid enum tags are observed through C."
+        }
+      ],
+      "review_reason": "Literal/tag switches and default/invalid-tag paths execute.",
+      "final_integrated_verification": "required",
+      "context_product_not_inferred_from_this_entry": true
+    },
+    {
+      "id": "emela_lir::SwitchOn::Lit",
+      "relation": "variant_entry",
+      "baseline_status": "mapped",
+      "legacy_role": "emit",
+      "proposed_status": "verified",
+      "behavior": "emitted",
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/switches.rs",
+          "symbol": "lit_scrutinee"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "IR_C_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/p7_data_tests.rs",
+          "symbol": "legacy_literal_and_enum_switches_cover_numeric_extremes_and_reject_invalid_tags",
+          "observation": "Dynamic Bool/I32/I64 literals, enum tags, default branches and invalid enum tags are observed through C."
+        }
+      ],
+      "review_reason": "Dynamic scalar and enum-tag scrutinees select the expected branches.",
+      "final_integrated_verification": "required",
+      "context_product_not_inferred_from_this_entry": true
+    },
+    {
+      "id": "emela_lir::SwitchOn::Tag",
+      "relation": "variant_entry",
+      "baseline_status": "mapped",
+      "legacy_role": "emit",
+      "proposed_status": "verified",
+      "behavior": "emitted",
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/switches.rs",
+          "symbol": "tag_scrutinee"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "IR_C_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/p7_data_tests.rs",
+          "symbol": "legacy_literal_and_enum_switches_cover_numeric_extremes_and_reject_invalid_tags",
+          "observation": "Dynamic Bool/I32/I64 literals, enum tags, default branches and invalid enum tags are observed through C."
+        }
+      ],
+      "review_reason": "Dynamic scalar and enum-tag scrutinees select the expected branches.",
+      "final_integrated_verification": "required",
+      "context_product_not_inferred_from_this_entry": true
+    },
+    {
+      "id": "emela_lir::Term::Break",
+      "relation": "variant_entry",
+      "baseline_status": "mapped",
+      "legacy_role": "emit",
+      "proposed_status": "verified",
+      "behavior": "emitted",
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/terms/break.rs",
+          "symbol": "emit"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/plan/operations/terms/break.rs",
+          "symbol": "lower"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/terms/break.rs",
+          "symbol": "emit_function"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "IR_C_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/tests.rs",
+          "symbol": "block_yield_and_break_to_enclosing_block_execute",
+          "observation": "Both Yield and Break edges initialize the enclosing block result and execute expected42."
+        },
+        {
+          "kind": "IR_C_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/tests.rs",
+          "symbol": "loop_initial_values_yield_and_multiple_recur_variables_execute",
+          "observation": "Loop initial values, Yield and parallel multiple-Recur variable replacement are directly executed."
+        }
+      ],
+      "review_reason": "Structured result and loop edges carry correct typed values to their enclosing destination.",
+      "final_integrated_verification": "required",
+      "context_product_not_inferred_from_this_entry": true
+    },
+    {
+      "id": "emela_lir::Term::Defect",
+      "relation": "variant_entry",
+      "baseline_status": "mapped",
+      "legacy_role": "emit",
+      "proposed_status": "verified",
+      "behavior": "emitted",
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/terms/defect.rs",
+          "symbol": "emit"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/plan/operations/terms/defect.rs",
+          "symbol": "lower"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/plan/operations/terms/defect.rs",
+          "symbol": "require_runtime"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/terms/defect.rs",
+          "symbol": "emit_function"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/terms/defect.rs",
+          "symbol": "emit_suspend"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "source_C_test",
+          "path": "crates/emela-emb-compiler/tests/p2_debug.rs",
+          "symbol": "todo_and_dynamic_panic_reach_the_board_hook_without_evaluating_following_code",
+          "observation": "Todo and dynamic panic reach the board hook with exact message/kind and no subsequent call."
+        },
+        {
+          "kind": "source_C_test",
+          "path": "crates/emela-emb-compiler/tests/p1.rs",
+          "symbol": "failed_source_assertion_calls_the_board_defect_hook_without_continuing",
+          "observation": "Source assertion reaches the expected board defect; later external continuation must not run."
+        }
+      ],
+      "review_reason": "Static and dynamic String defect terminals terminate at the board hook before the continuation.",
+      "final_integrated_verification": "required",
+      "context_product_not_inferred_from_this_entry": true
+    },
+    {
+      "id": "emela_lir::Term::Fail",
+      "relation": "variant_entry",
+      "baseline_status": "mapped",
+      "legacy_role": "emit",
+      "proposed_status": "verified",
+      "behavior": "emitted",
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/terms/fail.rs",
+          "symbol": "emit"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/plan/operations/terms/fail.rs",
+          "symbol": "lower"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/terms/fail.rs",
+          "symbol": "emit_function"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/terms/fail.rs",
+          "symbol": "emit_suspend"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "IR_C_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/tests.rs",
+          "symbol": "failure_payload_recovery_runs_cleanup_once",
+          "observation": "Fail -> Break(Any) -> AsError -> Field recovers42; Protect cleanup callback runs exactly once, bad error type rejected."
+        },
+        {
+          "kind": "source_C_test",
+          "path": "crates/emela-emb-compiler/tests/p2_failures.rs",
+          "symbol": "concrete_generic_error_payloads_keep_distinct_slots_and_owned_nested_strings",
+          "observation": "Source error tests/selects and payload extraction distinguish concrete generic error tags and preserve nested ownership."
+        },
+        {
+          "kind": "IR_C_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend_tests.rs",
+          "symbol": "suspending_cleanup_preserves_the_failure_until_an_outer_handler_runs",
+          "observation": "Actual suspend/cleanup then outer failure handler preserves original payload and ownership."
+        }
+      ],
+      "review_reason": "Typed Fail preserves tag/payload and invokes cleanup before catch/propagate.",
+      "final_integrated_verification": "required",
+      "context_product_not_inferred_from_this_entry": true
+    },
+    {
+      "id": "emela_lir::Term::Recur",
+      "relation": "variant_entry",
+      "baseline_status": "mapped",
+      "legacy_role": "emit",
+      "proposed_status": "verified",
+      "behavior": "emitted",
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/terms/recur.rs",
+          "symbol": "emit"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/plan/operations/terms/recur.rs",
+          "symbol": "lower"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/terms/recur.rs",
+          "symbol": "emit_function"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "IR_C_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/tests.rs",
+          "symbol": "tail_recursion_uses_parallel_parameter_assignment_and_scalar_external_calls",
+          "observation": "Raw Prim and If/Recur loop with parallel replacement of parameters executes with an external scalar hook."
+        },
+        {
+          "kind": "IR_C_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/tests.rs",
+          "symbol": "loop_initial_values_yield_and_multiple_recur_variables_execute",
+          "observation": "Loop initial values, Yield and parallel multiple-Recur variable replacement are directly executed."
+        },
+        {
+          "kind": "source_C_test",
+          "path": "crates/emela-emb-compiler/tests/p1.rs",
+          "symbol": "modules_internal_calls_branches_and_tail_recursion_execute",
+          "observation": "Source branches, direct calls and million-step tail recursion run through C public exports."
+        }
+      ],
+      "review_reason": "Parallel recurrence assignment and stack-bounded source tail recursion execute.",
+      "final_integrated_verification": "required",
+      "context_product_not_inferred_from_this_entry": true
+    },
+    {
+      "id": "emela_lir::Term::Return",
+      "relation": "variant_entry",
+      "baseline_status": "mapped",
+      "legacy_role": "emit",
+      "proposed_status": "verified",
+      "behavior": "emitted",
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/terms/return_.rs",
+          "symbol": "emit"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/plan/operations/terms/return_.rs",
+          "symbol": "lower"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/terms/return_.rs",
+          "symbol": "emit_function"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/terms/return_.rs",
+          "symbol": "emit_suspend"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "source_C_test",
+          "path": "crates/emela-emb-compiler/tests/p1.rs",
+          "symbol": "modules_internal_calls_branches_and_tail_recursion_execute",
+          "observation": "Source branches, direct calls and million-step tail recursion run through C public exports."
+        },
+        {
+          "kind": "IR_C_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/p7_data_tests.rs",
+          "symbol": "legacy_inline_layouts_preserve_generic_fields_tags_and_unit_positions_at_the_c_boundary",
+          "observation": "Generic Maybe/Box, named record, unit enum, tuple Unit erasure: exact public C tags/fields and release behavior."
+        },
+        {
+          "kind": "IR_C_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/tests.rs",
+          "symbol": "float_constant_bits_and_non_finite_values_execute",
+          "observation": "IR Const Float preserves -0, NaN and infinities; finite outputs compared by C."
+        }
+      ],
+      "review_reason": "Scalar and managed/aggregate public returns preserve values, ABI and lifetime.",
+      "final_integrated_verification": "required",
+      "context_product_not_inferred_from_this_entry": true
+    },
+    {
+      "id": "emela_lir::Term::Unreachable",
+      "relation": "variant_entry",
+      "baseline_status": "mapped",
+      "legacy_role": "emit",
+      "proposed_status": "pending",
+      "behavior": "awaiting_direct_C_witness",
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/terms/unreachable.rs",
+          "symbol": "emit"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/plan/operations/terms/unreachable.rs",
+          "symbol": "lower"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/plan/operations/terms/unreachable.rs",
+          "symbol": "require_runtime"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/terms/unreachable.rs",
+          "symbol": "emit_function"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/terms/unreachable.rs",
+          "symbol": "emit_suspend"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "source_C_test",
+          "path": "crates/emela-emb-compiler/tests/p1.rs",
+          "symbol": "never_returning_external_preserves_the_unreachable_contract",
+          "observation": "Never external hook terminates and generated continuation does not execute."
+        }
+      ],
+      "review_reason": "Implementation and emitted tails exist, but direct entry into native/suspend unreachable-defect paths was not witnessed in reviewed committed tests. Backend agent is adding the narrow direct C regression.",
+      "final_integrated_verification": "required",
+      "context_product_not_inferred_from_this_entry": true
+    },
+    {
+      "id": "emela_lir::Term::Unwind",
+      "relation": "variant_entry",
+      "baseline_status": "mapped",
+      "legacy_role": "reject",
+      "proposed_status": "verified",
+      "behavior": "input_rejected",
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/terms/unwind.rs",
+          "symbol": "emit"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/plan/operations/terms/unwind.rs",
+          "symbol": "lower"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/terms/unwind.rs",
+          "symbol": "emit_function"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "diagnostic_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/p7_contract_tests.rs",
+          "symbol": "unwind_environment_values_and_refcount_statements_are_rejected_as_input",
+          "observation": "Raw EnvGet/MakeClosure, Stmt Dup/Drop and Term Unwind inputs are retained in the contract and rejected in both caller modes."
+        }
+      ],
+      "review_reason": "Retained raw Unwind rejects before planning in native and suspending input.",
+      "final_integrated_verification": "required",
+      "context_product_not_inferred_from_this_entry": true
+    },
+    {
+      "id": "emela_lir::Term::Yield",
+      "relation": "variant_entry",
+      "baseline_status": "mapped",
+      "legacy_role": "emit",
+      "proposed_status": "verified",
+      "behavior": "emitted",
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/terms/yield.rs",
+          "symbol": "emit"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/plan/operations/terms/yield.rs",
+          "symbol": "lower"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/terms/yield.rs",
+          "symbol": "emit_function"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "IR_C_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/tests.rs",
+          "symbol": "block_yield_and_break_to_enclosing_block_execute",
+          "observation": "Both Yield and Break edges initialize the enclosing block result and execute expected42."
+        },
+        {
+          "kind": "IR_C_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/tests.rs",
+          "symbol": "loop_initial_values_yield_and_multiple_recur_variables_execute",
+          "observation": "Loop initial values, Yield and parallel multiple-Recur variable replacement are directly executed."
+        }
+      ],
+      "review_reason": "Structured result and loop edges carry correct typed values to their enclosing destination.",
+      "final_integrated_verification": "required",
+      "context_product_not_inferred_from_this_entry": true
+    },
+    {
+      "id": "emela_lir::Value::AsError",
+      "relation": "variant_entry",
+      "baseline_status": "mapped",
+      "legacy_role": "emit",
+      "proposed_status": "verified",
+      "behavior": "emitted",
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/values/as_error.rs",
+          "symbol": "emit"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/plan/operations/values/as_error.rs",
+          "symbol": "result_ownership"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "IR_C_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/tests.rs",
+          "symbol": "failure_payload_recovery_runs_cleanup_once",
+          "observation": "Fail -> Break(Any) -> AsError -> Field recovers42; Protect cleanup callback runs exactly once, bad error type rejected."
+        },
+        {
+          "kind": "source_C_test",
+          "path": "crates/emela-emb-compiler/tests/p2_failures.rs",
+          "symbol": "concrete_generic_error_payloads_keep_distinct_slots_and_owned_nested_strings",
+          "observation": "Source error tests/selects and payload extraction distinguish concrete generic error tags and preserve nested ownership."
+        }
+      ],
+      "review_reason": "Typed error payload recovery checks and retains the concrete error identity.",
+      "final_integrated_verification": "required",
+      "context_product_not_inferred_from_this_entry": true
+    },
+    {
+      "id": "emela_lir::Value::Builtin",
+      "relation": "variant_entry",
+      "baseline_status": "mapped",
+      "legacy_role": "emit",
+      "proposed_status": "verified",
+      "behavior": "emitted",
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/values/builtin.rs",
+          "symbol": "emit"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "IR_C_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/tests.rs",
+          "symbol": "tail_recursion_uses_parallel_parameter_assignment_and_scalar_external_calls",
+          "observation": "Raw Prim and If/Recur loop with parallel replacement of parameters executes with an external scalar hook."
+        },
+        {
+          "kind": "source_C_test",
+          "path": "crates/emela-emb-compiler/tests/p3_memory_api.rs",
+          "symbol": "strings_lists_and_trusted_bytes_pure_apis_execute",
+          "observation": "Native String split/join source paths return exact contents with ownership and capacity checks."
+        },
+        {
+          "kind": "diagnostic_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/source_builtin_tests.rs",
+          "symbol": "rejects_all_eight_residual_source_builtins_before_emission",
+          "observation": "All eight source-only Builtin inputs individually fail with Unsupported before C emission."
+        }
+      ],
+      "review_reason": "Supported builtin dispatch reaches its implementation; raw source-only builtins reject.",
+      "final_integrated_verification": "required",
+      "context_product_not_inferred_from_this_entry": true
+    },
+    {
+      "id": "emela_lir::Value::Const",
+      "relation": "variant_entry",
+      "baseline_status": "mapped",
+      "legacy_role": "emit",
+      "proposed_status": "verified",
+      "behavior": "emitted",
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/values/const_.rs",
+          "symbol": "emit"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/plan/operations/values/const_.rs",
+          "symbol": "string_bound"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "IR_C_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/tests.rs",
+          "symbol": "float_constant_bits_and_non_finite_values_execute",
+          "observation": "IR Const Float preserves -0, NaN and infinities; finite outputs compared by C."
+        },
+        {
+          "kind": "IR_C_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/tests.rs",
+          "symbol": "strings_unicode_comparisons_and_float_rounding_execute",
+          "observation": "Actual Prim Lt[String] includes NUL and UTF8, returns true; strings and FloatFloor execute in the same IR test."
+        }
+      ],
+      "review_reason": "Typed literal value assignment and return preserve numeric bit patterns and String bytes.",
+      "final_integrated_verification": "required",
+      "context_product_not_inferred_from_this_entry": true
+    },
+    {
+      "id": "emela_lir::Value::EnvGet",
+      "relation": "variant_entry",
+      "baseline_status": "mapped",
+      "legacy_role": "reject",
+      "proposed_status": "verified",
+      "behavior": "input_rejected",
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/values/env_get.rs",
+          "symbol": "emit"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "diagnostic_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/p7_contract_tests.rs",
+          "symbol": "unwind_environment_values_and_refcount_statements_are_rejected_as_input",
+          "observation": "Raw EnvGet/MakeClosure, Stmt Dup/Drop and Term Unwind inputs are retained in the contract and rejected in both caller modes."
+        }
+      ],
+      "review_reason": "Raw environment read is retained but rejected at typed input; source closures use converted environment metadata.",
+      "final_integrated_verification": "required",
+      "context_product_not_inferred_from_this_entry": true
+    },
+    {
+      "id": "emela_lir::Value::Field",
+      "relation": "variant_entry",
+      "baseline_status": "mapped",
+      "legacy_role": "emit",
+      "proposed_status": "verified",
+      "behavior": "emitted",
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/values/field.rs",
+          "symbol": "emit"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/plan/operations/values/field.rs",
+          "symbol": "result_ownership"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "IR_C_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/p7_data_tests.rs",
+          "symbol": "legacy_inline_layouts_preserve_generic_fields_tags_and_unit_positions_at_the_c_boundary",
+          "observation": "Generic Maybe/Box, named record, unit enum, tuple Unit erasure: exact public C tags/fields and release behavior."
+        },
+        {
+          "kind": "IR_C_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/tests.rs",
+          "symbol": "failure_payload_recovery_runs_cleanup_once",
+          "observation": "Fail -> Break(Any) -> AsError -> Field recovers42; Protect cleanup callback runs exactly once, bad error type rejected."
+        }
+      ],
+      "review_reason": "Concrete data construction, field/tag projection and tuple Unit positions are observed through C.",
+      "final_integrated_verification": "required",
+      "context_product_not_inferred_from_this_entry": true
+    },
+    {
+      "id": "emela_lir::Value::IsError",
+      "relation": "variant_entry",
+      "baseline_status": "mapped",
+      "legacy_role": "emit",
+      "proposed_status": "verified",
+      "behavior": "emitted",
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/values/is_error.rs",
+          "symbol": "emit"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "source_C_test",
+          "path": "crates/emela-emb-compiler/tests/p2_failures.rs",
+          "symbol": "concrete_generic_error_payloads_keep_distinct_slots_and_owned_nested_strings",
+          "observation": "Source error tests/selects and payload extraction distinguish concrete generic error tags and preserve nested ownership."
+        }
+      ],
+      "review_reason": "Source escape selection tests concrete generic error tags before typed payload recovery.",
+      "final_integrated_verification": "required",
+      "context_product_not_inferred_from_this_entry": true
+    },
+    {
+      "id": "emela_lir::Value::List",
+      "relation": "variant_entry",
+      "baseline_status": "mapped",
+      "legacy_role": "emit",
+      "proposed_status": "verified",
+      "behavior": "emitted",
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/values/list.rs",
+          "symbol": "emit"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/plan/operations/values/list.rs",
+          "symbol": "result_ownership"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/plan/operations/values/list.rs",
+          "symbol": "needs_heap"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/plan/operations/values/list.rs",
+          "symbol": "is_known_empty"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "source_C_test",
+          "path": "crates/emela-emb-compiler/tests/p3_lists.rs",
+          "symbol": "list_construction_spreads_patterns_generics_and_tail_recursion_execute",
+          "observation": "Source List construction/spread, head/tail/empty patterns, generic recursion, written evaluation order and heap reclamation."
+        },
+        {
+          "kind": "IR_C_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/memory_tests.rs",
+          "symbol": "list_string_bytes_and_any_release_owned_values_after_repeated_calls",
+          "observation": "Explicit List/ListTail/ListHead, String and Bytes conversions with Any values retain and release owners."
+        }
+      ],
+      "review_reason": "List construction, head/tail and empty/nonempty patterns execute with retained/released owners.",
+      "final_integrated_verification": "required",
+      "context_product_not_inferred_from_this_entry": true
+    },
+    {
+      "id": "emela_lir::Value::ListHead",
+      "relation": "variant_entry",
+      "baseline_status": "mapped",
+      "legacy_role": "emit",
+      "proposed_status": "verified",
+      "behavior": "emitted",
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/values/list_head.rs",
+          "symbol": "emit"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/plan/operations/values/list_head.rs",
+          "symbol": "result_ownership"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/plan/operations/values/list_head.rs",
+          "symbol": "needs_heap"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "source_C_test",
+          "path": "crates/emela-emb-compiler/tests/p3_lists.rs",
+          "symbol": "list_construction_spreads_patterns_generics_and_tail_recursion_execute",
+          "observation": "Source List construction/spread, head/tail/empty patterns, generic recursion, written evaluation order and heap reclamation."
+        },
+        {
+          "kind": "IR_C_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/memory_tests.rs",
+          "symbol": "list_string_bytes_and_any_release_owned_values_after_repeated_calls",
+          "observation": "Explicit List/ListTail/ListHead, String and Bytes conversions with Any values retain and release owners."
+        }
+      ],
+      "review_reason": "List construction, head/tail and empty/nonempty patterns execute with retained/released owners.",
+      "final_integrated_verification": "required",
+      "context_product_not_inferred_from_this_entry": true
+    },
+    {
+      "id": "emela_lir::Value::ListIsEmpty",
+      "relation": "variant_entry",
+      "baseline_status": "mapped",
+      "legacy_role": "emit",
+      "proposed_status": "verified",
+      "behavior": "emitted",
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/values/list_is_empty.rs",
+          "symbol": "emit"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "source_C_test",
+          "path": "crates/emela-emb-compiler/tests/p3_lists.rs",
+          "symbol": "list_construction_spreads_patterns_generics_and_tail_recursion_execute",
+          "observation": "Source List construction/spread, head/tail/empty patterns, generic recursion, written evaluation order and heap reclamation."
+        },
+        {
+          "kind": "IR_C_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/memory_tests.rs",
+          "symbol": "list_string_bytes_and_any_release_owned_values_after_repeated_calls",
+          "observation": "Explicit List/ListTail/ListHead, String and Bytes conversions with Any values retain and release owners."
+        }
+      ],
+      "review_reason": "List construction, head/tail and empty/nonempty patterns execute with retained/released owners.",
+      "final_integrated_verification": "required",
+      "context_product_not_inferred_from_this_entry": true
+    },
+    {
+      "id": "emela_lir::Value::ListTail",
+      "relation": "variant_entry",
+      "baseline_status": "mapped",
+      "legacy_role": "emit",
+      "proposed_status": "verified",
+      "behavior": "emitted",
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/values/list_tail.rs",
+          "symbol": "emit"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/plan/operations/values/list_tail.rs",
+          "symbol": "result_ownership"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/plan/operations/values/list_tail.rs",
+          "symbol": "needs_heap"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "source_C_test",
+          "path": "crates/emela-emb-compiler/tests/p3_lists.rs",
+          "symbol": "list_construction_spreads_patterns_generics_and_tail_recursion_execute",
+          "observation": "Source List construction/spread, head/tail/empty patterns, generic recursion, written evaluation order and heap reclamation."
+        },
+        {
+          "kind": "IR_C_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/memory_tests.rs",
+          "symbol": "list_string_bytes_and_any_release_owned_values_after_repeated_calls",
+          "observation": "Explicit List/ListTail/ListHead, String and Bytes conversions with Any values retain and release owners."
+        }
+      ],
+      "review_reason": "List construction, head/tail and empty/nonempty patterns execute with retained/released owners.",
+      "final_integrated_verification": "required",
+      "context_product_not_inferred_from_this_entry": true
+    },
+    {
+      "id": "emela_lir::Value::Make",
+      "relation": "variant_entry",
+      "baseline_status": "mapped",
+      "legacy_role": "emit",
+      "proposed_status": "verified",
+      "behavior": "emitted",
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/values/make.rs",
+          "symbol": "emit"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "IR_C_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/p7_data_tests.rs",
+          "symbol": "legacy_inline_layouts_preserve_generic_fields_tags_and_unit_positions_at_the_c_boundary",
+          "observation": "Generic Maybe/Box, named record, unit enum, tuple Unit erasure: exact public C tags/fields and release behavior."
+        },
+        {
+          "kind": "IR_C_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/tests.rs",
+          "symbol": "failure_payload_recovery_runs_cleanup_once",
+          "observation": "Fail -> Break(Any) -> AsError -> Field recovers42; Protect cleanup callback runs exactly once, bad error type rejected."
+        }
+      ],
+      "review_reason": "Concrete data construction, field/tag projection and tuple Unit positions are observed through C.",
+      "final_integrated_verification": "required",
+      "context_product_not_inferred_from_this_entry": true
+    },
+    {
+      "id": "emela_lir::Value::Prim",
+      "relation": "variant_entry",
+      "baseline_status": "mapped",
+      "legacy_role": "emit",
+      "proposed_status": "verified",
+      "behavior": "emitted",
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/values/prim.rs",
+          "symbol": "emit"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "IR_C_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/tests.rs",
+          "symbol": "tail_recursion_uses_parallel_parameter_assignment_and_scalar_external_calls",
+          "observation": "Raw Prim and If/Recur loop with parallel replacement of parameters executes with an external scalar hook."
+        },
+        {
+          "kind": "source_C_test",
+          "path": "crates/emela-emb-compiler/tests/p1.rs",
+          "symbol": "scalar_numeric_boundaries_execute_with_legacy_semantics",
+          "observation": "Dynamic exported eq/ne/lt/le/gt/ge for Int/Int64/Float are called on boundary inputs by numeric-harness.c."
+        },
+        {
+          "kind": "IR_C_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/tests.rs",
+          "symbol": "strings_unicode_comparisons_and_float_rounding_execute",
+          "observation": "Actual Prim Lt[String] includes NUL and UTF8, returns true; strings and FloatFloor execute in the same IR test."
+        }
+      ],
+      "review_reason": "Primitive value dispatch produces typed dynamic numeric and String comparison results.",
+      "final_integrated_verification": "required",
+      "context_product_not_inferred_from_this_entry": true
+    },
+    {
+      "id": "emela_lir::Value::Runtime",
+      "relation": "variant_entry",
+      "baseline_status": "mapped",
+      "legacy_role": "emit",
+      "proposed_status": "verified",
+      "behavior": "emitted",
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/values/runtime.rs",
+          "symbol": "emit"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "source_C_test",
+          "path": "crates/emela-emb-compiler/tests/p2_debug.rs",
+          "symbol": "dbg_falls_back_recursively_uses_custom_show_and_returns_the_original_value_once",
+          "observation": "C checks exact debug bytes/order, custom and fallback Show, NUL data and preservation of the original value."
+        },
+        {
+          "kind": "IR_C_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/p7_discarded_tests.rs",
+          "symbol": "discarded_runtime_show_string_still_checks_its_output_capacity",
+          "observation": "Explicit Runtime ShowString discard preserves bounded-buffer behavior: normal 1000 calls and capacity3 exact defect."
+        },
+        {
+          "kind": "diagnostic_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/p7_input_tests.rs",
+          "symbol": "residual_heap_runtime_operations_are_rejected_in_native_and_suspending_input",
+          "observation": "Defect/DefectAt/DefectTake/DefectResume/Yield/YieldPerform individually reject as residual inputs before planning in native and suspend modes."
+        }
+      ],
+      "review_reason": "Supported runtime debug/show execute while retained Heap-stage residuals reject individually.",
+      "final_integrated_verification": "required",
+      "context_product_not_inferred_from_this_entry": true
+    },
+    {
+      "id": "emela_lir::Value::Tag",
+      "relation": "variant_entry",
+      "baseline_status": "mapped",
+      "legacy_role": "emit",
+      "proposed_status": "verified",
+      "behavior": "emitted",
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/values/tag.rs",
+          "symbol": "emit"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "IR_C_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/p7_data_tests.rs",
+          "symbol": "legacy_inline_layouts_preserve_generic_fields_tags_and_unit_positions_at_the_c_boundary",
+          "observation": "Generic Maybe/Box, named record, unit enum, tuple Unit erasure: exact public C tags/fields and release behavior."
+        },
+        {
+          "kind": "IR_C_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/tests.rs",
+          "symbol": "failure_payload_recovery_runs_cleanup_once",
+          "observation": "Fail -> Break(Any) -> AsError -> Field recovers42; Protect cleanup callback runs exactly once, bad error type rejected."
+        }
+      ],
+      "review_reason": "Concrete data construction, field/tag projection and tuple Unit positions are observed through C.",
+      "final_integrated_verification": "required",
+      "context_product_not_inferred_from_this_entry": true
+    },
+    {
+      "id": "emela_lir::Value::Tuple",
+      "relation": "variant_entry",
+      "baseline_status": "mapped",
+      "legacy_role": "emit",
+      "proposed_status": "verified",
+      "behavior": "emitted",
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/values/tuple.rs",
+          "symbol": "emit"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "IR_C_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/p7_data_tests.rs",
+          "symbol": "legacy_inline_layouts_preserve_generic_fields_tags_and_unit_positions_at_the_c_boundary",
+          "observation": "Generic Maybe/Box, named record, unit enum, tuple Unit erasure: exact public C tags/fields and release behavior."
+        },
+        {
+          "kind": "IR_C_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/tests.rs",
+          "symbol": "failure_payload_recovery_runs_cleanup_once",
+          "observation": "Fail -> Break(Any) -> AsError -> Field recovers42; Protect cleanup callback runs exactly once, bad error type rejected."
+        }
+      ],
+      "review_reason": "Concrete data construction, field/tag projection and tuple Unit positions are observed through C.",
+      "final_integrated_verification": "required",
+      "context_product_not_inferred_from_this_entry": true
+    },
+    {
+      "id": "emela_lir::Value::TupleGet",
+      "relation": "variant_entry",
+      "baseline_status": "mapped",
+      "legacy_role": "emit",
+      "proposed_status": "verified",
+      "behavior": "emitted",
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/emit/features/values/tuple_get.rs",
+          "symbol": "emit"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/plan/operations/values/tuple_get.rs",
+          "symbol": "result_ownership"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "IR_C_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/p7_data_tests.rs",
+          "symbol": "legacy_inline_layouts_preserve_generic_fields_tags_and_unit_positions_at_the_c_boundary",
+          "observation": "Generic Maybe/Box, named record, unit enum, tuple Unit erasure: exact public C tags/fields and release behavior."
+        },
+        {
+          "kind": "IR_C_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/tests.rs",
+          "symbol": "failure_payload_recovery_runs_cleanup_once",
+          "observation": "Fail -> Break(Any) -> AsError -> Field recovers42; Protect cleanup callback runs exactly once, bad error type rejected."
+        }
+      ],
+      "review_reason": "Concrete data construction, field/tag projection and tuple Unit positions are observed through C.",
+      "final_integrated_verification": "required",
+      "context_product_not_inferred_from_this_entry": true
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+# P7 variant意味対応のproposal
+
+基点はP6台帳 `a686172`。全428 recordのうち、165既verifiedを維持し、rootがshared declaration/fieldとStageの178 recordを担当する。残る未verifiedの非Stage `variant_entry` 85件を `p7-variant-proposal.json` で個別に照合した。正本台帳は変更しない。
+
+85件すべてで実装pathと関数symbol、参照試験の関数symbolが実在することを、作業treeまたは明示した固定commitに対して確認した。source-only Builtin 8件はsource機能としての正常C観測と、未変換IRの拒否を別証拠とする。OnFail::Handleは新しいtyped inputで検査・正規化されるため、旧roleのrejectをそのまま実挙動と誤認しない。Heap-stage runtime操作、EnvGet、Drop/Dup、Unwindは、存在するinputを拒否した直接診断試験へ対応する。
+
+現在84件をverified候補とし、Term::Unreachableの1件はpendingとする。既存の多数のUnreachableはFail/Recur等の後ろにある出力tailで、直接到達するdefectの実観測まで証明していない。backend担当がnative/suspendの直接到達C試験を追加中であり、そのcommitと実行結果が揃った後でこの1件を更新する。
+
+metadata variantは、schema上にfieldがあるだけで完了とせず、generic dataの具体配置、host symbolの4形式、Handler/Evidence/Cell/Anyの所有・寿命、String/Bytes/List/Tupleの実C値を結び付けた。型やcontextの直積すべてを各variantの代表試験から推定しない。別担当と合わせた226 contextの照合、最終統合HEADでの全体runとMSRV/strict Clippyは別に必要である。
+
+この照合時点のlibrary 240試験と、旧concurrency32・cleanup API24のC入力は成功している。C11の両最適化を必須実行し、後者の元resource budgetも維持した。stage2 IRの参照は `aeb7c53` に固定し、最終統合runで再確認する。
