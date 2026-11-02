@@ -1,3 +1,4 @@
+mod effect_calls;
 mod functions;
 mod methods;
 mod references;
@@ -31,6 +32,8 @@ struct Definition {
     bounds: super::traits::ParamBounds,
     self_type: Option<crate::contract::ir::TypeId>,
     derivation: Option<super::traits::BuiltinTrait>,
+    effect_method: Option<super::effect_collect::MethodKind>,
+    effect_mode: super::effects::Mode,
 }
 #[derive(Clone, Copy, PartialEq, Eq)]
 enum Symbol {
@@ -70,6 +73,8 @@ struct Checker {
     modules: Modules,
     catalog: Catalog,
     traits: super::trait_collect::TraitCollection,
+    effects: super::effect_collect::EffectCollection,
+    current_effect_method: Option<super::effect_collect::MethodKind>,
     current_bounds: super::traits::ParamBounds,
     current_self_type: Option<crate::contract::ir::TypeId>,
     trait_obligations: Vec<trait_methods::Obligation>,
@@ -103,30 +108,16 @@ impl Locals {
 }
 
 pub(crate) fn check(mut modules: Modules) -> Result<ir::Program, Vec<Diagnostic>> {
-    for module in &modules.modules {
-        if let Some(span) = module
-            .ast
-            .effects
-            .first()
-            .map(|item| item.span)
-            .or_else(|| module.ast.handlers.first().map(|item| item.span))
-            .or_else(|| module.ast.layers.first().map(|item| item.span))
-        {
-            return Err(vec![
-                Diagnostic::new(
-                    DK::Unsupported,
-                    span,
-                    "effect and handler source checking is not connected yet",
-                )
-                .in_source(&module.source_name),
-            ]);
-        }
-    }
+    super::effect_collect::expand_handlers(&mut modules)?;
     let mut catalog = Catalog::collect(&modules)?;
+    super::effect_collect::fill_operations(&modules, &mut catalog)?;
+    let effects = super::effect_collect::prepare(&mut modules, &mut catalog)?;
     let traits = super::trait_collect::prepare(&mut modules, &mut catalog)?;
     let mut checker = Checker {
         catalog,
         traits,
+        effects,
+        current_effect_method: None,
         current_bounds: Default::default(),
         current_self_type: None,
         trait_obligations: Vec::new(),
@@ -153,6 +144,7 @@ pub(crate) fn check(mut modules: Modules) -> Result<ir::Program, Vec<Diagnostic>
     checker
         .traits
         .bind_functions(&mut checker.catalog.core, &ids)?;
+    checker.effects.bind_functions(&ids)?;
     checker.imports()?;
     checker.validate_data_declarations().map_err(|e| vec![e])?;
     checker
@@ -238,6 +230,13 @@ pub(crate) fn check(mut modules: Modules) -> Result<ir::Program, Vec<Diagnostic>
     }
     checker.catalog.core = program.core.clone();
     super::errors::infer(&mut program, &modes, &mut checker.catalog)?;
+    let effect_modes = checker
+        .definitions
+        .iter()
+        .enumerate()
+        .map(|(index, definition)| (DefinitionId(index), definition.effect_mode.clone()))
+        .collect();
+    super::effects::infer(&mut program, &effect_modes, &mut checker.catalog)?;
     Ok(program)
 }
 impl Checker {
@@ -248,6 +247,9 @@ impl Checker {
         if entry.ast.functions.is_empty()
             && entry.ast.imports.is_empty()
             && entry.ast.data.is_empty()
+            && entry.ast.effects.is_empty()
+            && entry.ast.handlers.is_empty()
+            && entry.ast.layers.is_empty()
         {
             return Err(vec![
                 Diagnostic::new(
@@ -269,22 +271,31 @@ impl Checker {
                             "suspend functions await continuation lowering",
                         ));
                     }
-                    if function
+                    let effect_method = self
                         .effects
-                        .as_ref()
-                        .is_some_and(|effects| !effects.is_empty())
-                    {
-                        return Err(Diagnostic::new(
-                            DK::Unsupported,
-                            function.name.span,
-                            "effect signatures await handler source checking",
-                        ));
-                    }
+                        .methods
+                        .get(&(module_index, function.name.value.clone()))
+                        .cloned();
                     let method = self
                         .traits
                         .methods
                         .get(&(module_index, function.name.value.clone()))
-                        .cloned();
+                        .cloned()
+                        .or_else(|| {
+                            effect_method
+                                .as_ref()
+                                .map(|method| super::trait_collect::MethodInfo {
+                                    signature: method.signature.clone(),
+                                    type_parameters: method.type_parameters,
+                                    derivation: None,
+                                    bounds: method.bounds.clone(),
+                                    errors_allowed: method
+                                        .errors_allowed
+                                        .clone()
+                                        .unwrap_or_default(),
+                                    self_type: method.self_type,
+                                })
+                        });
                     if method
                         .as_ref()
                         .is_some_and(|method| method.type_parameters != function.type_params.len())
@@ -507,7 +518,9 @@ impl Checker {
                                 })?,
                         )),
                     };
-                    let allowed_errors = if let Some(method) = &method {
+                    let allowed_errors = if let Some(method) = &effect_method {
+                        method.errors_allowed.clone()
+                    } else if let Some(method) = &method {
                         Some(method.errors_allowed.clone())
                     } else if let Some(errors) = &function.fails {
                         let mut values = Vec::new();
@@ -543,6 +556,33 @@ impl Checker {
                     } else {
                         None
                     };
+                    let mut written_effects = Vec::new();
+                    if let Some(effects) = &function.effects {
+                        for effect in effects {
+                            let ty = data::backend_type(self.catalog.resolve_type(
+                                &self.modules,
+                                module_index,
+                                effect,
+                                &type_parameters,
+                            )?);
+                            if !matches!(
+                                self.catalog.core.ty(ty),
+                                crate::contract::ir::Type::Param(_)
+                                    | crate::contract::ir::Type::Handler(_)
+                            ) {
+                                return Err(Diagnostic::new(
+                                    DK::Type,
+                                    effect.span,
+                                    "use requires an effect or effect-set parameter",
+                                ));
+                            }
+                            written_effects.push(ty);
+                        }
+                    }
+                    let effect_mode_explicit = function.effects.is_some()
+                        || (method.is_some() && effect_method.is_none())
+                        || function.body.is_none()
+                        || function.constant;
                     let id = DefinitionId(self.definitions.len());
                     if self.module_definitions[module_index]
                         .insert(function.name.value.clone(), id)
@@ -572,8 +612,8 @@ impl Checker {
                             Diagnostic::new(DK::Type, function.name.span, error.message)
                         })?;
                     for ty in params.iter_mut().chain(ret.iter_mut()) {
-                        *ty = data::frontend_type(data::substitute(
-                            &mut self.catalog.core.types,
+                        *ty = data::frontend_type(self.catalog.effects.substitute_type(
+                            &mut self.catalog.core,
                             data::backend_type(*ty),
                             &parameters,
                         ));
@@ -582,11 +622,24 @@ impl Checker {
                         errors
                             .into_iter()
                             .map(|ty| {
-                                data::substitute(&mut self.catalog.core.types, ty, &parameters)
+                                self.catalog.effects.substitute_type(
+                                    &mut self.catalog.core,
+                                    ty,
+                                    &parameters,
+                                )
                             })
                             .collect::<Vec<_>>()
                     });
-                    let mut effects = Vec::new();
+                    let mut effects = written_effects
+                        .into_iter()
+                        .map(|ty| {
+                            self.catalog.effects.substitute_type(
+                                &mut self.catalog.core,
+                                ty,
+                                &parameters,
+                            )
+                        })
+                        .collect::<Vec<_>>();
                     for request in std::mem::take(&mut self.catalog.row_requests) {
                         self.solver
                             .register_row(request.proxy, request.kind, request.origin)
@@ -594,6 +647,13 @@ impl Checker {
                                 Diagnostic::new(DK::Type, function.name.span, error.message)
                             })?;
                         if request.origin == super::sets::Origin::HiddenParameter {
+                            if request.kind == super::sets::SetKind::Effect && external.is_some() {
+                                self.solver.declare_row_immediate(request.proxy).map_err(
+                                    |error| {
+                                        Diagnostic::new(DK::Type, function.name.span, error.message)
+                                    },
+                                )?;
+                            }
                             parameters.push(request.proxy);
                             if request.positive {
                                 match request.kind {
@@ -609,7 +669,11 @@ impl Checker {
                         .into_iter()
                         .map(|(ty, bounds)| {
                             (
-                                data::substitute(&mut self.catalog.core.types, ty, &parameters),
+                                self.catalog.effects.substitute_type(
+                                    &mut self.catalog.core,
+                                    ty,
+                                    &parameters,
+                                ),
                                 bounds,
                             )
                         })
@@ -617,7 +681,13 @@ impl Checker {
                     let self_type = method
                         .as_ref()
                         .and_then(|method| method.self_type)
-                        .map(|ty| data::substitute(&mut self.catalog.core.types, ty, &parameters));
+                        .map(|ty| {
+                            self.catalog.effects.substitute_type(
+                                &mut self.catalog.core,
+                                ty,
+                                &parameters,
+                            )
+                        });
                     let parameter_names = function
                         .type_params
                         .iter()
@@ -640,6 +710,9 @@ impl Checker {
                         },
                     };
                     self.classify_parameter_kinds(module_index, function, &signature, &parameters)?;
+                    let effect_mode = super::effects::Mode {
+                        allowed: effect_mode_explicit.then(|| signature.sets.effects.clone()),
+                    };
                     self.definitions.push(Definition {
                         module: module_index,
                         ast: function.clone(),
@@ -657,6 +730,8 @@ impl Checker {
                         bounds,
                         self_type,
                         derivation: method.and_then(|m| m.derivation),
+                        effect_method: effect_method.map(|method| method.kind),
+                        effect_mode,
                     });
                     Ok(())
                 })();
@@ -894,6 +969,19 @@ impl Checker {
             &mut self.solver,
             &self.schemes.parameters,
         )?;
+        let effect_modes = self
+            .definitions
+            .iter()
+            .enumerate()
+            .map(|(index, definition)| (DefinitionId(index), definition.effect_mode.clone()))
+            .collect();
+        super::effects::constrain(
+            &mut program,
+            &effect_modes,
+            &mut self.catalog,
+            &mut self.solver,
+            &self.schemes.parameters,
+        )?;
         for function in program.functions {
             self.definitions[function.id.0].signature.sets = function.signature.sets.clone();
             if let Some(checked) = &mut self.checked[function.id.0] {
@@ -923,6 +1011,10 @@ impl Checker {
         let saved_bounds = std::mem::replace(&mut self.current_bounds, definition.bounds.clone());
         let saved_self = std::mem::replace(&mut self.current_self_type, definition.self_type);
         let saved_closures = std::mem::take(&mut self.closures);
+        let saved_effect_method = std::mem::replace(
+            &mut self.current_effect_method,
+            definition.effect_method.clone(),
+        );
         let saved_row_mode =
             std::mem::replace(&mut self.catalog.omitted_rows, data::OmittedRows::Inferred);
         let body = definition
@@ -942,6 +1034,7 @@ impl Checker {
         self.current_bounds = saved_bounds;
         self.current_self_type = saved_self;
         self.closures = saved_closures;
+        self.current_effect_method = saved_effect_method;
         self.catalog.omitted_rows = saved_row_mode;
         let body = body?;
         if definition.ast.return_type.is_none()
@@ -1100,7 +1193,8 @@ impl Checker {
             .map(|ty| self.resolve_type(module, ty, span))
             .transpose()?;
         let (kind, ty) = match &expression.kind {
-            A::Use(_) | A::With { .. } => {
+            A::Use(name) => return self.use_effect(module, name, span),
+            A::With { .. } => {
                 return Err(self.error(
                     module,
                     DK::Unsupported,
@@ -2263,6 +2357,18 @@ impl Checker {
     ) -> Result<ir::Expr, Diagnostic> {
         use crate::contract::ir::{Type, TypeId};
         let declaration = self.catalog.declaration(ctor.enum_id).clone();
+        let state_type = self.catalog.core.types.enum_type(ctor.enum_id, vec![]);
+        if let Some(handler) = self.effects.handler_for_state(state_type) {
+            if !matches!(self.current_effect_method, Some(super::effect_collect::MethodKind::Init(id)) if id == handler.id)
+            {
+                return Err(self.error(
+                    module,
+                    DK::Type,
+                    span,
+                    "a handler state constructor is available only inside its initializer",
+                ));
+            }
+        }
         let fields = &declaration.ast.variants[ctor.variant].fields;
         let raw_types = self.catalog.core.enums[ctor.enum_id].variants[ctor.variant]
             .tys
@@ -2350,8 +2456,8 @@ impl Checker {
                 .position(|&position| position == index)
                 .unwrap();
             let substitutions = self.constructor_arguments(module, &mut bindings, span)?;
-            let field_type = data::substitute(
-                &mut self.catalog.core.types,
+            let field_type = self.catalog.effects.substitute_type(
+                &mut self.catalog.core,
                 raw_types[parameter],
                 &substitutions,
             );
@@ -2432,7 +2538,10 @@ impl Checker {
         span: Span,
     ) -> Result<(), Diagnostic> {
         let arguments = self.constructor_arguments(module, bindings, span)?;
-        let expected = data::substitute(&mut self.catalog.core.types, template, &arguments);
+        let expected =
+            self.catalog
+                .effects
+                .substitute_type(&mut self.catalog.core, template, &arguments);
         self.expect_type(
             module,
             data::frontend_type(actual),

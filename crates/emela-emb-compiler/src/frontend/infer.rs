@@ -222,6 +222,7 @@ impl Solver {
         expected: TypeId,
         kind: SetKind,
     ) -> Result<()> {
+        self.resolve_effect_arguments(types)?;
         let actual = self.resolve(types, actual)?;
         let expected = self.resolve(types, expected)?;
         if actual == expected {
@@ -293,6 +294,16 @@ impl Solver {
         for (left, right) in pairs {
             self.unify(types, left, right)?;
             self.unify(types, right, left)?;
+        }
+        Ok(())
+    }
+    fn resolve_effect_arguments(&mut self, types: &mut TypeTable) -> Result<()> {
+        for (id, (head, args, immediate)) in self.rows.effects.clone() {
+            let args = args
+                .into_iter()
+                .map(|ty| self.resolve(types, ty))
+                .collect::<Result<Vec<_>>>()?;
+            self.rows.effects.insert(id, (head, args, immediate));
         }
         Ok(())
     }

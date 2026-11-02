@@ -51,6 +51,9 @@ impl Checker {
         let mut receiver = self.expr(module, base, locals, None)?;
         receiver.ty = self.resolve_type(module, receiver.ty, base.span)?;
         let receiver_type = data::backend_type(receiver.ty);
+        if matches!(self.catalog.core.ty(receiver_type), Type::Handler(_)) {
+            return self.operation_call(module, receiver, name, args, locals, expected, span);
+        }
         if self.solver.is_meta(receiver_type) {
             return Err(self.error(
                 module,

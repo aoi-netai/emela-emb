@@ -6,6 +6,65 @@ pub(super) struct CaptureScope {
     pub captures: HashSet<LocalId>,
 }
 impl Checker {
+    fn infer_parameter_pattern(
+        &mut self,
+        module: usize,
+        pattern: &ast::Pattern,
+        ty: Ty,
+    ) -> Result<Ty, Diagnostic> {
+        let ty = self.resolve_type(module, ty, pattern.span)?;
+        if !self.solver.is_meta(data::backend_type(ty)) {
+            return Ok(ty);
+        }
+        let inferred = match &pattern.kind {
+            ast::PatternKind::Tuple(fields) => {
+                let fields = fields
+                    .iter()
+                    .map(|_| {
+                        self.solver.try_fresh(
+                            &mut self.catalog.core.types,
+                            super::super::infer::Constraint::Any,
+                        )
+                    })
+                    .collect::<Result<Vec<_>, _>>()
+                    .map_err(|error| self.error(module, DK::Type, pattern.span, error.message))?;
+                Some(self.catalog.core.types.intern(Type::Tuple(fields)))
+            }
+            ast::PatternKind::Constructor { path, .. } => match self.resolve(module, path)? {
+                Symbol::Constructor(ctor) => {
+                    let arity = self.catalog.declaration(ctor.enum_id).ast.params.len();
+                    let arguments = (0..arity)
+                        .map(|_| {
+                            self.solver.try_fresh(
+                                &mut self.catalog.core.types,
+                                super::super::infer::Constraint::Any,
+                            )
+                        })
+                        .collect::<Result<Vec<_>, _>>()
+                        .map_err(|error| {
+                            self.error(module, DK::Type, pattern.span, error.message)
+                        })?;
+                    Some(self.catalog.core.types.enum_type(ctor.enum_id, arguments))
+                }
+                _ => None,
+            },
+            ast::PatternKind::List { .. } => {
+                let element = self
+                    .solver
+                    .try_fresh(
+                        &mut self.catalog.core.types,
+                        super::super::infer::Constraint::Any,
+                    )
+                    .map_err(|error| self.error(module, DK::Type, pattern.span, error.message))?;
+                Some(self.catalog.core.types.intern(Type::List(element)))
+            }
+            _ => None,
+        };
+        if let Some(inferred) = inferred {
+            self.expect_type(module, ty, data::frontend_type(inferred), pattern.span)?;
+        }
+        self.resolve_type(module, ty, pattern.span)
+    }
     pub(super) fn classify_parameter_kinds(
         &mut self,
         module: usize,
@@ -237,6 +296,7 @@ impl Checker {
                             })?,
                     ),
                 };
+                let ty = self.infer_parameter_pattern(module, &parameter.pattern, ty)?;
                 let local = lambda_locals.bind(format!("$lambda_parameter_{index}"), ty);
                 let pattern = self.pattern(
                     module,
@@ -286,6 +346,22 @@ impl Checker {
                 ret: Some(result.unwrap_or(body.ty)),
                 sets: InvocationSets {
                     errors,
+                    effects: {
+                        let functions = self.checked.iter().flatten().cloned().collect::<Vec<_>>();
+                        super::super::effects::incoming(
+                            &ir::Expr {
+                                kind: ir::ExprKind::Block(body.clone()),
+                                ty: body.ty,
+                                span: body.span,
+                            },
+                            &functions,
+                            &self.traits.registry,
+                            &mut self.catalog,
+                            &mut self.solver,
+                            &self.schemes.parameters,
+                            &self.modules.modules[module].source_name,
+                        )?
+                    },
                     ..Default::default()
                 },
             };
@@ -464,13 +540,14 @@ impl Checker {
             }
         }
         for parameter in signature.params.iter_mut().chain(signature.ret.iter_mut()) {
+            let ty = self.catalog.effects.substitute_map(
+                &mut self.catalog.core,
+                data::backend_type(*parameter),
+                &substitutions,
+            );
             *parameter = data::frontend_type(
                 self.solver
-                    .substitute(
-                        &mut self.catalog.core.types,
-                        data::backend_type(*parameter),
-                        &substitutions,
-                    )
+                    .substitute(&mut self.catalog.core.types, ty, &substitutions)
                     .map_err(|e| self.error(module, DK::Type, span, e.message))?,
             );
         }
@@ -481,6 +558,10 @@ impl Checker {
             .chain(&mut signature.sets.error_constraints)
             .chain(&mut signature.sets.effects)
         {
+            *ty = self
+                .catalog
+                .effects
+                .substitute_map(&mut self.catalog.core, *ty, &substitutions);
             *ty = self
                 .solver
                 .substitute(&mut self.catalog.core.types, *ty, &substitutions)

@@ -14,6 +14,7 @@ fn maker(offset:Int)->fn(Int)->Int {fn(n){offset+n}}
 fn text(value:String)->fn()->String {owned=String.append(value,"!")
 fn(){owned}}
 type Callback(run:fn(Int)->Int)
+type Pair(left:Int,right:Int)
 fn compare[A:Ord](left:A,right:A)->Ordering {cmp=Ord.compare
 cmp(left,right)}
 @export(c,"function_values")
@@ -23,6 +24,8 @@ pub fn run()->Int {
   assert apply(fn(n){n+1},41)==42
   assert construct(Some)==42
   assert pair(fn((a,b)){a+b})==42
+  pair_sum=fn(Pair(left,right)){left+right}
+  assert pair_sum(Pair(20,22))==42
   assert units(fn(_,n,_){n})==42
   assert compare(1,2)==Less
   assert text("hello")()=="hello!"

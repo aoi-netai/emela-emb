@@ -489,7 +489,7 @@ impl Catalog {
             .tys
             .clone()
             .into_iter()
-            .map(|ty| frontend_type(substitute(&mut self.core.types, ty, &args)))
+            .map(|ty| frontend_type(self.effects.substitute_type(&mut self.core, ty, &args)))
             .collect()
     }
 }

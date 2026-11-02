@@ -115,14 +115,31 @@ impl Catalog {
             errors = self.omitted_function_row(super::super::sets::SetKind::Error);
         }
         let effects = if let Some(effects) = clauses.strip_prefix("use") {
-            if effects.trim() != "{}" {
-                return Err(Diagnostic::new(
-                    DK::Unsupported,
+            let written = effects.trim();
+            let written = written
+                .strip_prefix('{')
+                .and_then(|written| written.strip_suffix('}'))
+                .unwrap_or(written);
+            let mut members = Vec::new();
+            for effect in split(written) {
+                let ty = backend_type(self.type_text(
+                    modules,
+                    module,
+                    effect.trim(),
                     span,
-                    "effect function types await effect declaration resolution",
-                ));
+                    parameters,
+                    self_type,
+                )?);
+                if !matches!(self.core.ty(ty), b::Type::Param(_) | b::Type::Handler(_)) {
+                    return Err(Diagnostic::new(
+                        DK::Type,
+                        span,
+                        "a function use clause requires effects or effect-set parameters",
+                    ));
+                }
+                members.push(ty);
             }
-            Vec::new()
+            members
         } else if !clauses.is_empty() {
             return Err(malformed());
         } else {
