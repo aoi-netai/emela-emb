@@ -1,7 +1,7 @@
 //! Source-owned declaration and visibility metadata over the independent concrete type catalog.
 mod function_types;
 mod substitution;
-use super::{ast, modules::Modules, types::ValueType as Ty};
+use super::{ast, effect_collect::EffectRegistry, modules::Modules, types::ValueType as Ty};
 use crate::{Diagnostic, DiagnosticKind as DK, Span, contract::ir as b};
 use std::collections::{HashMap, HashSet};
 pub(crate) use substitution::substitute;
@@ -13,6 +13,7 @@ pub(crate) struct Declaration {
 }
 pub(crate) struct Catalog {
     pub core: b::Definitions,
+    pub effects: EffectRegistry,
     pub declarations: Vec<Declaration>,
     types: Vec<HashMap<String, b::EnumId>>,
     native_types: Vec<HashMap<String, b::TypeId>>,
@@ -20,8 +21,11 @@ pub(crate) struct Catalog {
 }
 impl Catalog {
     pub fn collect(modules: &Modules) -> Result<Self, Vec<Diagnostic>> {
+        let mut core = b::Definitions::default();
+        let effects = EffectRegistry::declare(modules, &mut core)?;
         let mut catalog = Self {
-            core: b::Definitions::default(),
+            core,
+            effects,
             declarations: Vec::new(),
             types: vec![HashMap::new(); modules.modules.len()],
             native_types: vec![HashMap::new(); modules.modules.len()],
@@ -211,6 +215,41 @@ impl Catalog {
     ) -> Result<Ty, Diagnostic> {
         self.type_text(modules, module, &text.value, text.span, params, None)
     }
+    pub fn resolve_effect(
+        &mut self,
+        modules: &Modules,
+        module: usize,
+        text: &ast::Text,
+        params: &HashMap<String, usize>,
+    ) -> Result<b::EffectId, Diagnostic> {
+        let (head, arguments) = match text.value.find('[') {
+            Some(index) if text.value.ends_with(']') => (
+                &text.value[..index],
+                split(&text.value[index + 1..text.value.len() - 1]),
+            ),
+            Some(_) => {
+                return Err(Diagnostic::new(
+                    DK::Type,
+                    text.span,
+                    "invalid effect type arguments",
+                ));
+            }
+            None => (text.value.as_str(), Vec::new()),
+        };
+        let mut args = Vec::new();
+        for argument in arguments {
+            args.push(backend_type(
+                self.type_text(modules, module, argument, text.span, params, None)?,
+            ));
+        }
+        self.effects.resolve_instance(
+            modules,
+            &mut self.core,
+            module,
+            &ast::Text::new(head, text.span),
+            args,
+        )
+    }
     pub fn resolve_type_with_self(
         &mut self,
         modules: &Modules,
@@ -303,9 +342,13 @@ impl Catalog {
             }
             return Ok(frontend_type(ty));
         }
-        let id = self
-            .lookup_type(modules, module, head)
-            .ok_or_else(|| Diagnostic::new(DK::Name, span, format!("undefined type '{head}'")))?;
+        let Some(id) = self.lookup_type(modules, module, head) else {
+            let effect =
+                self.resolve_effect(modules, module, &ast::Text::new(text, span), params)?;
+            return Ok(Ty::Compound(
+                self.core.types.intern(b::Type::Handler(effect)),
+            ));
+        };
         let declaration = self.declaration(id);
         if declaration.module != module && !declaration.ast.public {
             return Err(Diagnostic::new(

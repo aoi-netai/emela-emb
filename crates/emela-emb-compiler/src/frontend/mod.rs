@@ -3,6 +3,7 @@ pub(crate) mod check;
 pub(crate) mod constant_patterns;
 pub(crate) mod consts;
 pub(crate) mod data;
+pub(crate) mod effect_collect;
 pub(crate) mod errors;
 pub(crate) mod function_abi;
 pub(crate) mod infer;
