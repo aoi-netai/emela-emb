@@ -1,0 +1,23 @@
+
+import Std.Fiber.{Fiber, Scope}
+import Std.Deferred.{Deferred}
+fn save(d: Deferred[String], n: Int) -> Bool {
+  text = Int.to_string(n)
+  first = Deferred.complete(d, text)
+  again = Deferred.complete(d, text)
+  first && !again
+}
+fn peek(d: Deferred[String]) -> String {
+  Deferred.poll(d) match {
+    Some(s) -> s
+    None -> ""
+  }
+}
+pub fn text(n: Int) -> String use Async {
+  Fiber.scope(fn() {
+    d: Deferred[String] = (use Scope).deferred()
+    save(d, n)
+    Int.to_string(n + 1)
+    peek(d)
+  })
+}

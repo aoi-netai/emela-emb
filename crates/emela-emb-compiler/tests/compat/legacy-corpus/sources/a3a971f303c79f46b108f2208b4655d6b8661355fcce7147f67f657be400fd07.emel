@@ -1,0 +1,3 @@
+
+pub enum Nest[A] { End(A), Next(Nest[Bool]) }
+pub fn make() -> Nest[Int] { End(42) }

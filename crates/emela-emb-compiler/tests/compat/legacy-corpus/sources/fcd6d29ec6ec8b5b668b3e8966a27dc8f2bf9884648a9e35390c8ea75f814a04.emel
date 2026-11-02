@@ -1,0 +1,9 @@
+
+import Std.Bytes.{Bytes}
+@external(c, "host_bytes")
+suspend fn exchange(b: Bytes) -> Bytes
+effect Exchange { suspend fn bytes(b: Bytes) -> Bytes }
+handler Exchanging: Exchange { suspend fn bytes(b, resume) { resume(exchange(b)) } }
+pub fn echoed(b: Bytes) -> Bytes use Async {
+  with Exchanging { (use Exchange).bytes(b) }
+}

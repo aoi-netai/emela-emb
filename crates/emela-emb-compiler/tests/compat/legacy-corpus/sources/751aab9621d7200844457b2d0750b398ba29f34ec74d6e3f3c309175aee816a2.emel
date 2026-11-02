@@ -1,0 +1,4 @@
+pub fn apply(x: Int) -> Int {
+  add = fn(y: Int) { x + y }
+  add(2)
+}

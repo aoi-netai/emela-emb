@@ -1,0 +1,9 @@
+
+fn number(x: Int) -> String { Int.to_string(x) }
+pub fn render(x: Int) -> String {
+  padded = String.append(" ", number(x))
+  same = String.append(padded, "")
+  trimmed = String.trim(same)
+  next = number(x + 1)
+  String.append(String.append(trimmed, ":"), next)
+}

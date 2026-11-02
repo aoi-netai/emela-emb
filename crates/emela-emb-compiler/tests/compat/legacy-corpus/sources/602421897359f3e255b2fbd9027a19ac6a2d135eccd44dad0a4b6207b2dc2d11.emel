@@ -1,0 +1,6 @@
+
+@external(c,"host_packet")
+fn packet(p: (String,List[String])) -> (String,List[String]) use {}
+pub fn roundtrip(s: String) -> (String,List[String]) { packet((s,[s])) }
+pub fn text(p: (String,List[String])) -> String { (s,_) = p
+ s }

@@ -1,0 +1,30 @@
+
+@external(c, "host_wait")
+suspend fn wait(n: Int) -> Int
+@external(c, "mark")
+fn mark(n: Int) -> () use {}
+error Boom(n: Int) derive Show
+effect Wait { suspend fn get(n: Int) -> Int }
+handler Waiting: Wait { suspend fn get(n, resume) { resume(wait(n)) } }
+effect Resource { fn read() -> Int }
+handler Res: Resource {
+  fn read() { 0 }
+  release { mark(2)
+    (use Wait).get(2)
+    mark(3)
+  }
+}
+fn invoke(f: fn() -> Int fails Boom use Wait) -> Int fails Boom use Wait { f() }
+pub fn caught(n: Int) -> Int use Async {
+  with Waiting {
+    invoke(fn() {
+      with Res {
+        (use Wait).get(1)
+        mark(1)
+        fail Boom(n: n)
+      }
+    }) escape { Boom(n) -> { mark(4)
+      n
+    } }
+  }
+}

@@ -20,10 +20,10 @@
       "infrastructure_test_contexts": 40,
       "source_success_expectation_tests": 174,
       "source_rejection_expectation_tests": 2,
-      "review_test_contexts": 9,
-      "resolved_program_inputs": 167,
-      "concrete_text_records_including_fragments_and_candidates": 218,
-      "generated_or_unresolved_program_inputs": 7,
+      "review_test_contexts": 0,
+      "resolved_program_inputs": 179,
+      "concrete_text_records_including_fragments_and_candidates": 230,
+      "generated_or_unresolved_program_inputs": 0,
       "ignored_test_contexts": 2
     },
     "unvisited_requested_rust_files": [],
@@ -14174,16 +14174,22 @@
       "legacy_classes": [
         "source-success-expectation"
       ],
-      "review_status": "needs-review",
-      "source_inputs": [],
-      "generated_inputs": [
-        "generated:d5a01d80e06079399f3c"
+      "review_status": "legacy-route-reviewed",
+      "source_inputs": [
+        "source:1daea07d6938ba513abc"
       ],
-      "unassigned_source_literal_candidates": [
-        "source:7c89b3f8dfd204316162",
-        "source:87d4bbf530eccac43725"
+      "generated_inputs": [],
+      "unassigned_source_literal_candidates": [],
+      "non_program_literals": [
+        {
+          "input": "source:7c89b3f8dfd204316162",
+          "role": "reviewed format template or fragment; the materialized program is indexed separately"
+        },
+        {
+          "input": "source:87d4bbf530eccac43725",
+          "role": "reviewed format template or fragment; the materialized program is indexed separately"
+        }
       ],
-      "non_program_literals": [],
       "source_invocations": [
         {
           "callee": "support::try_lower",
@@ -14194,8 +14200,9 @@
           ],
           "inputs": [
             {
-              "input": "generated:d5a01d80e06079399f3c",
-              "filename": "main.emel"
+              "input": "source:1daea07d6938ba513abc",
+              "filename": "main.emel",
+              "variant": "nested-wrap"
             }
           ],
           "postfix_methods": [
@@ -14248,7 +14255,34 @@
       ],
       "unresolved_calls": [],
       "new_status": "unmapped",
-      "new_evidence": []
+      "new_evidence": [],
+      "route_review": {
+        "category": "source",
+        "legacy_classes": [
+          "source-success-expectation"
+        ],
+        "note": "固定tupleのdefinition/valueとformat!のty=Wrap[Int]をそのまま差し込む。",
+        "evidence": {
+          "path": "crates/emela-codegen-emb/tests/completion_types/derived.rs",
+          "line": 4,
+          "end_line": 53
+        },
+        "materializations": [
+          {
+            "generated_input": "generated:d5a01d80e06079399f3c",
+            "variants": [
+              {
+                "name": "nested-wrap",
+                "fields": {
+                  "definition": "enum Wrap[A] { Box(List[A]) } derive Show",
+                  "ty": "Wrap[Int]",
+                  "value": "Box([42])"
+                }
+              }
+            ]
+          }
+        ]
+      }
     },
     {
       "id": "emit::completion_types::finite_changing_recursive_enum_arguments_run_with_owned_back_edges",
@@ -15894,15 +15928,18 @@
       "legacy_classes": [
         "source-success-expectation"
       ],
-      "review_status": "needs-review",
-      "source_inputs": [],
-      "generated_inputs": [
-        "generated:cf02caf71021add92ccf"
+      "review_status": "legacy-route-reviewed",
+      "source_inputs": [
+        "source:4e6fda2411d90e9731ec"
       ],
-      "unassigned_source_literal_candidates": [
-        "source:dbd153ff5f12d6759bf2"
+      "generated_inputs": [],
+      "unassigned_source_literal_candidates": [],
+      "non_program_literals": [
+        {
+          "input": "source:dbd153ff5f12d6759bf2",
+          "role": "reviewed format template or fragment; the materialized program is indexed separately"
+        }
       ],
-      "non_program_literals": [],
       "source_invocations": [
         {
           "callee": "support::try_lower",
@@ -15913,8 +15950,9 @@
           ],
           "inputs": [
             {
-              "input": "generated:cf02caf71021add92ccf",
-              "filename": "main.emel"
+              "input": "source:4e6fda2411d90e9731ec",
+              "filename": "main.emel",
+              "variant": "double-17"
             }
           ],
           "postfix_methods": [
@@ -15955,7 +15993,38 @@
       ],
       "unresolved_calls": [],
       "new_status": "unmapped",
-      "new_evidence": []
+      "new_evidence": [],
+      "route_review": {
+        "category": "source",
+        "legacy_classes": [
+          "source-success-expectation"
+        ],
+        "note": "初期式\"x\"をdouble(...)で17回包む固定loopを展開する。",
+        "evidence": {
+          "path": "crates/emela-codegen-emb/tests/const_runtime/mod.rs",
+          "line": 1094,
+          "end_line": 1127
+        },
+        "materializations": [
+          {
+            "generated_input": "generated:cf02caf71021add92ccf",
+            "variants": [
+              {
+                "name": "double-17",
+                "fields": {
+                  "expression": {
+                    "wrap": {
+                      "initial": "\"x\"",
+                      "template": "double({value})",
+                      "repeat": 17
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        ]
+      }
     },
     {
       "id": "emit::const_runtime::persistent_const_roots_survive_cycle_collection_and_caller_release",
@@ -16240,16 +16309,23 @@
       "legacy_classes": [
         "source-success-expectation"
       ],
-      "review_status": "needs-review",
-      "source_inputs": [],
-      "generated_inputs": [
-        "generated:af359e418a0414baa5e0"
+      "review_status": "legacy-route-reviewed",
+      "source_inputs": [
+        "source:823e637e97a0dbeb7ea0",
+        "source:c986b4c8e5754de0a2f9"
       ],
-      "unassigned_source_literal_candidates": [
-        "source:6f86e488e9d05725ad5c",
-        "source:a28c4c93d0a9f6990c37"
+      "generated_inputs": [],
+      "unassigned_source_literal_candidates": [],
+      "non_program_literals": [
+        {
+          "input": "source:6f86e488e9d05725ad5c",
+          "role": "reviewed format template or fragment; the materialized program is indexed separately"
+        },
+        {
+          "input": "source:a28c4c93d0a9f6990c37",
+          "role": "reviewed format template or fragment; the materialized program is indexed separately"
+        }
       ],
-      "non_program_literals": [],
       "source_invocations": [
         {
           "callee": "support::try_lower",
@@ -16261,8 +16337,14 @@
           ],
           "inputs": [
             {
-              "input": "generated:af359e418a0414baa5e0",
-              "filename": "main.emel"
+              "input": "source:823e637e97a0dbeb7ea0",
+              "filename": "main.emel",
+              "variant": "panic"
+            },
+            {
+              "input": "source:c986b4c8e5754de0a2f9",
+              "filename": "main.emel",
+              "variant": "self-reference"
             }
           ],
           "postfix_methods": [
@@ -16304,7 +16386,38 @@
       ],
       "unresolved_calls": [],
       "new_status": "unmapped",
-      "new_evidence": []
+      "new_evidence": [],
+      "route_review": {
+        "category": "source",
+        "legacy_classes": [
+          "source-success-expectation"
+        ],
+        "note": "recursive=false/trueで選ばれるpanic式/BROKEN式を両方展開する。",
+        "evidence": {
+          "path": "crates/emela-codegen-emb/tests/const_runtime/mod.rs",
+          "line": 984,
+          "end_line": 1033
+        },
+        "materializations": [
+          {
+            "generated_input": "generated:af359e418a0414baa5e0",
+            "variants": [
+              {
+                "name": "panic",
+                "fields": {
+                  "expression": "panic(\"broken\")"
+                }
+              },
+              {
+                "name": "self-reference",
+                "fields": {
+                  "expression": "BROKEN"
+                }
+              }
+            ]
+          }
+        ]
+      }
     },
     {
       "id": "emit::const_runtime::polymorphic_const_opaque_handles_forward_one_pointer_abi_and_one_initialization",
@@ -18074,16 +18187,23 @@
       "legacy_classes": [
         "source-success-expectation"
       ],
-      "review_status": "needs-review",
-      "source_inputs": [],
-      "generated_inputs": [
-        "generated:649eeb43128ae5b9f7ca"
+      "review_status": "legacy-route-reviewed",
+      "source_inputs": [
+        "source:6454690863d207729427",
+        "source:c4f1b942172d789f31d4"
       ],
-      "unassigned_source_literal_candidates": [
-        "source:d51e79bd6e7291458192",
-        "source:e0a75b72ed307b788147"
+      "generated_inputs": [],
+      "unassigned_source_literal_candidates": [],
+      "non_program_literals": [
+        {
+          "input": "source:d51e79bd6e7291458192",
+          "role": "reviewed format template or fragment; the materialized program is indexed separately"
+        },
+        {
+          "input": "source:e0a75b72ed307b788147",
+          "role": "reviewed format template or fragment; the materialized program is indexed separately"
+        }
       ],
-      "non_program_literals": [],
       "source_invocations": [
         {
           "callee": "support::try_lower",
@@ -18094,8 +18214,14 @@
           ],
           "inputs": [
             {
-              "input": "generated:649eeb43128ae5b9f7ca",
-              "filename": "main.emel"
+              "input": "source:c4f1b942172d789f31d4",
+              "filename": "main.emel",
+              "variant": "poll"
+            },
+            {
+              "input": "source:6454690863d207729427",
+              "filename": "main.emel",
+              "variant": "await"
             }
           ],
           "postfix_methods": [
@@ -18142,7 +18268,42 @@
       ],
       "unresolved_calls": [],
       "new_status": "unmapped",
-      "new_evidence": []
+      "new_evidence": [],
+      "route_review": {
+        "category": "source",
+        "legacy_classes": [
+          "source-success-expectation"
+        ],
+        "note": "awaiting=false/trueのret/operation/invokeを同じboolで相関させた2variant。",
+        "evidence": {
+          "path": "crates/emela-codegen-emb/tests/deferred/mod.rs",
+          "line": 732,
+          "end_line": 807
+        },
+        "materializations": [
+          {
+            "generated_input": "generated:649eeb43128ae5b9f7ca",
+            "variants": [
+              {
+                "name": "poll",
+                "fields": {
+                  "ret": "Bool",
+                  "operation": "Deferred.poll(d) match { Some(_) -> True\nNone -> False }",
+                  "invoke": ""
+                }
+              },
+              {
+                "name": "await",
+                "fields": {
+                  "ret": "Int use Async",
+                  "operation": "Deferred.await(d)",
+                  "invoke": "pub fn invoke(f: fn() -> Int fails {} use Async) -> Int use Async { f() }"
+                }
+              }
+            ]
+          }
+        ]
+      }
     },
     {
       "id": "emit::deferred::leaked_complete_callback_checks_scope_before_recycled_slot",
@@ -22548,15 +22709,19 @@
       "legacy_classes": [
         "source-success-expectation"
       ],
-      "review_status": "needs-review",
-      "source_inputs": [],
-      "generated_inputs": [
-        "generated:f1dfbdc5012a3a33a63a"
+      "review_status": "legacy-route-reviewed",
+      "source_inputs": [
+        "source:5a0f57185295f477b997",
+        "source:f86ddeba9b739002623e"
       ],
-      "unassigned_source_literal_candidates": [
-        "source:44aed1d31a4f603d678e"
+      "generated_inputs": [],
+      "unassigned_source_literal_candidates": [],
+      "non_program_literals": [
+        {
+          "input": "source:44aed1d31a4f603d678e",
+          "role": "reviewed format template or fragment; the materialized program is indexed separately"
+        }
       ],
-      "non_program_literals": [],
       "source_invocations": [
         {
           "callee": "support::try_lower",
@@ -22567,8 +22732,14 @@
           ],
           "inputs": [
             {
-              "input": "generated:f1dfbdc5012a3a33a63a",
-              "filename": "main.emel"
+              "input": "source:f86ddeba9b739002623e",
+              "filename": "main.emel",
+              "variant": "join"
+            },
+            {
+              "input": "source:5a0f57185295f477b997",
+              "filename": "main.emel",
+              "variant": "await"
             }
           ],
           "postfix_methods": [
@@ -22609,7 +22780,38 @@
       ],
       "unresolved_calls": [],
       "new_status": "unmapped",
-      "new_evidence": []
+      "new_evidence": [],
+      "route_review": {
+        "category": "source",
+        "legacy_classes": [
+          "source-success-expectation"
+        ],
+        "note": "operation配列join/awaitをそれぞれ展開する。",
+        "evidence": {
+          "path": "crates/emela-codegen-emb/tests/fiber/await_.rs",
+          "line": 255,
+          "end_line": 307
+        },
+        "materializations": [
+          {
+            "generated_input": "generated:f1dfbdc5012a3a33a63a",
+            "variants": [
+              {
+                "name": "join",
+                "fields": {
+                  "operation": "join"
+                }
+              },
+              {
+                "name": "await",
+                "fields": {
+                  "operation": "await"
+                }
+              }
+            ]
+          }
+        ]
+      }
     },
     {
       "id": "emit::fiber::await_::closing_a_scope_drops_ready_join_and_await_frames_before_result_delivery",
@@ -23327,18 +23529,32 @@
       "legacy_classes": [
         "source-success-expectation"
       ],
-      "review_status": "needs-review",
-      "source_inputs": [],
-      "generated_inputs": [
-        "generated:4e9c40666c45e10264b0"
+      "review_status": "legacy-route-reviewed",
+      "source_inputs": [
+        "source:a90022a09a7452ef951b",
+        "source:be4f39329c71752d895a",
+        "source:f3550c720a53dd18af43"
       ],
-      "unassigned_source_literal_candidates": [
-        "source:00f9f82003be13b6cecf",
-        "source:b699a50f98a82a8de05d",
-        "source:bbcc0d7c264de46e2eff",
-        "source:d13c020c8af1c6ea07c8"
+      "generated_inputs": [],
+      "unassigned_source_literal_candidates": [],
+      "non_program_literals": [
+        {
+          "input": "source:00f9f82003be13b6cecf",
+          "role": "reviewed format template or fragment; the materialized program is indexed separately"
+        },
+        {
+          "input": "source:b699a50f98a82a8de05d",
+          "role": "reviewed format template or fragment; the materialized program is indexed separately"
+        },
+        {
+          "input": "source:bbcc0d7c264de46e2eff",
+          "role": "reviewed format template or fragment; the materialized program is indexed separately"
+        },
+        {
+          "input": "source:d13c020c8af1c6ea07c8",
+          "role": "reviewed format template or fragment; the materialized program is indexed separately"
+        }
       ],
-      "non_program_literals": [],
       "source_invocations": [
         {
           "callee": "support::try_lower",
@@ -23349,8 +23565,19 @@
           ],
           "inputs": [
             {
-              "input": "generated:4e9c40666c45e10264b0",
-              "filename": "main.emel"
+              "input": "source:a90022a09a7452ef951b",
+              "filename": "main.emel",
+              "variant": "mode-0"
+            },
+            {
+              "input": "source:be4f39329c71752d895a",
+              "filename": "main.emel",
+              "variant": "mode-1"
+            },
+            {
+              "input": "source:f3550c720a53dd18af43",
+              "filename": "main.emel",
+              "variant": "mode-2"
             }
           ],
           "postfix_methods": [
@@ -23404,7 +23631,68 @@
       ],
       "unresolved_calls": [],
       "new_status": "unmapped",
-      "new_evidence": []
+      "new_evidence": [],
+      "route_review": {
+        "category": "source",
+        "legacy_classes": [
+          "source-success-expectation"
+        ],
+        "note": "mode=0,1,2に対応するprotected関数を差し込み、IR側protect_cleanup_call処理は別adapterとして記録する。",
+        "evidence": {
+          "path": "crates/emela-codegen-emb/tests/fiber/cause.rs",
+          "line": 326,
+          "end_line": 429
+        },
+        "materializations": [
+          {
+            "generated_input": "generated:4e9c40666c45e10264b0",
+            "variants": [
+              {
+                "name": "mode-0",
+                "fields": {
+                  "protected": "fn protected(c: Cause[{}]) -> Int fails Boom { with Res { failure()\n cleanup(c)\n 0 } }"
+                }
+              },
+              {
+                "name": "mode-1",
+                "fields": {
+                  "protected": "fn protected(c: Cause[{}]) -> Int fails Boom use Wait { with Res { (use Wait).get(3)\n failure()\n cleanup(c)\n 0 } }"
+                }
+              },
+              {
+                "name": "mode-2",
+                "fields": {
+                  "protected": "fn protected(c: Cause[{}]) -> Int { with Res { failure()\n cleanup(c)\n 0 } escape { Boom(n) -> { mark(3)\n n } } }"
+                }
+              }
+            ]
+          }
+        ],
+        "execution_configuration": {
+          "options": {
+            "heap_bytes": 4096,
+            "task_capacity": 3,
+            "event_capacity": 3
+          },
+          "post_lower_mutations": [
+            {
+              "helper": "interrupt::protect_cleanup_call"
+            }
+          ]
+        }
+      },
+      "execution_configuration": {
+        "options": {
+          "heap_bytes": 4096,
+          "task_capacity": 3,
+          "event_capacity": 3
+        },
+        "post_lower_mutations": [
+          {
+            "helper": "interrupt::protect_cleanup_call"
+          }
+        ]
+      }
     },
     {
       "id": "emit::fiber::cause::raised_interruption_crosses_sync_calls_and_attempt_without_becoming_a_value",
@@ -25696,10 +25984,9 @@
       "legacy_classes": [
         "source-success-expectation"
       ],
-      "review_status": "needs-review",
+      "review_status": "legacy-route-reviewed",
       "source_inputs": [
-        "source:8a490b7f32de050f7a3f",
-        "source:c127a7f88b884662a537"
+        "source:8a490b7f32de050f7a3f"
       ],
       "generated_inputs": [],
       "unassigned_source_literal_candidates": [],
@@ -25726,47 +26013,9 @@
           ],
           "inputs": [
             {
-              "input": "source:c127a7f88b884662a537",
-              "filename": "main.emel",
-              "binding_review": "reassigned/conditional Rust variable: alternatives are retained without claiming which branch executed"
-            },
-            {
               "input": "source:8a490b7f32de050f7a3f",
               "filename": "main.emel",
-              "binding_review": "reassigned/conditional Rust variable: alternatives are retained without claiming which branch executed"
-            }
-          ],
-          "postfix_methods": [
-            "expect"
-          ],
-          "legacy_expected": {
-            "parse": "accept",
-            "resolve": "accept",
-            "typecheck": "accept",
-            "lower": "accept",
-            "basis": "try_lower asserts syntax/resolution/type success; postfix methods describe only its lowering Result"
-          }
-        },
-        {
-          "callee": "super::support::try_lower",
-          "path": "crates/emela-codegen-emb/examples/support/phase7_integration_flow.rs",
-          "line": 24,
-          "trace": [
-            "emit::fiber::integration::managed_task_success_values_share_state_child_and_deferred_ownership_with_and_without_gc@crates/emela-codegen-emb/tests/fiber/integration.rs:14",
-            "emit::fiber::integration::run@crates/emela-codegen-emb/tests/fiber/integration.rs:18",
-            "emit::fiber::integration::fixture::lower@crates/emela-codegen-emb/examples/support/phase7_integration_flow.rs:6",
-            "emit::fiber::integration::fixture::lower_value@crates/emela-codegen-emb/examples/support/phase7_integration_flow.rs:14"
-          ],
-          "inputs": [
-            {
-              "input": "source:c127a7f88b884662a537",
-              "filename": "main.emel",
-              "binding_review": "reassigned/conditional Rust variable: alternatives are retained without claiming which branch executed"
-            },
-            {
-              "input": "source:8a490b7f32de050f7a3f",
-              "filename": "main.emel",
-              "binding_review": "reassigned/conditional Rust variable: alternatives are retained without claiming which branch executed"
+              "binding_review_resolution": "run引数managed_successはこのtestでtrueに固定。対応するlower_managed/lower traceとsource書換え結果を選ぶ。with_collector=false/trueは同sourceに対するIR adapter差として保持。"
             }
           ],
           "postfix_methods": [
@@ -25829,7 +26078,93 @@
       ],
       "unresolved_calls": [],
       "new_status": "unmapped",
-      "new_evidence": []
+      "new_evidence": [],
+      "route_review": {
+        "category": "source",
+        "legacy_classes": [
+          "source-success-expectation"
+        ],
+        "note": "run引数managed_successはこのtestでtrueに固定。対応するlower_managed/lower traceとsource書換え結果を選ぶ。with_collector=false/trueは同sourceに対するIR adapter差として保持。",
+        "evidence": {
+          "path": "crates/emela-codegen-emb/tests/fiber/integration.rs",
+          "line": 14,
+          "end_line": 16
+        },
+        "select_trace": {
+          "path": "crates/emela-codegen-emb/examples/support/phase7_integration_flow.rs",
+          "function": "lower_managed"
+        },
+        "select_source_contains": [
+          "fn request(n: Int) -> String fails",
+          "state.set(value)"
+        ],
+        "execution_configuration": {
+          "options": {
+            "heap_bytes": 4096,
+            "string_capacity": 32,
+            "frame_capacity": 48,
+            "frame_bytes": 2048,
+            "deferred_capacity": 2
+          },
+          "task_adapters": [
+            [
+              "host_request",
+              "board_request_start"
+            ]
+          ],
+          "post_lower_mutations": [
+            {
+              "function": "request",
+              "body": null,
+              "external_c_symbol": "host_request",
+              "required_flags": [
+                "suspends",
+                "fails"
+              ]
+            },
+            {
+              "helper": "gc_anchor::add",
+              "variants": [
+                false,
+                true
+              ]
+            }
+          ]
+        }
+      },
+      "execution_configuration": {
+        "options": {
+          "heap_bytes": 4096,
+          "string_capacity": 32,
+          "frame_capacity": 48,
+          "frame_bytes": 2048,
+          "deferred_capacity": 2
+        },
+        "task_adapters": [
+          [
+            "host_request",
+            "board_request_start"
+          ]
+        ],
+        "post_lower_mutations": [
+          {
+            "function": "request",
+            "body": null,
+            "external_c_symbol": "host_request",
+            "required_flags": [
+              "suspends",
+              "fails"
+            ]
+          },
+          {
+            "helper": "gc_anchor::add",
+            "variants": [
+              false,
+              true
+            ]
+          }
+        ]
+      }
     },
     {
       "id": "emit::fiber::integration::shared_state_child_reclamation_deferreds_and_external_failure_share_owned_edges_with_and_without_gc",
@@ -25847,9 +26182,8 @@
       "legacy_classes": [
         "source-success-expectation"
       ],
-      "review_status": "needs-review",
+      "review_status": "legacy-route-reviewed",
       "source_inputs": [
-        "source:8a490b7f32de050f7a3f",
         "source:c127a7f88b884662a537"
       ],
       "generated_inputs": [],
@@ -25872,39 +26206,6 @@
           "trace": [
             "emit::fiber::integration::shared_state_child_reclamation_deferreds_and_external_failure_share_owned_edges_with_and_without_gc@crates/emela-codegen-emb/tests/fiber/integration.rs:8",
             "emit::fiber::integration::run@crates/emela-codegen-emb/tests/fiber/integration.rs:18",
-            "emit::fiber::integration::fixture::lower_managed@crates/emela-codegen-emb/examples/support/phase7_integration_flow.rs:10",
-            "emit::fiber::integration::fixture::lower_value@crates/emela-codegen-emb/examples/support/phase7_integration_flow.rs:14"
-          ],
-          "inputs": [
-            {
-              "input": "source:c127a7f88b884662a537",
-              "filename": "main.emel",
-              "binding_review": "reassigned/conditional Rust variable: alternatives are retained without claiming which branch executed"
-            },
-            {
-              "input": "source:8a490b7f32de050f7a3f",
-              "filename": "main.emel",
-              "binding_review": "reassigned/conditional Rust variable: alternatives are retained without claiming which branch executed"
-            }
-          ],
-          "postfix_methods": [
-            "expect"
-          ],
-          "legacy_expected": {
-            "parse": "accept",
-            "resolve": "accept",
-            "typecheck": "accept",
-            "lower": "accept",
-            "basis": "try_lower asserts syntax/resolution/type success; postfix methods describe only its lowering Result"
-          }
-        },
-        {
-          "callee": "super::support::try_lower",
-          "path": "crates/emela-codegen-emb/examples/support/phase7_integration_flow.rs",
-          "line": 24,
-          "trace": [
-            "emit::fiber::integration::shared_state_child_reclamation_deferreds_and_external_failure_share_owned_edges_with_and_without_gc@crates/emela-codegen-emb/tests/fiber/integration.rs:8",
-            "emit::fiber::integration::run@crates/emela-codegen-emb/tests/fiber/integration.rs:18",
             "emit::fiber::integration::fixture::lower@crates/emela-codegen-emb/examples/support/phase7_integration_flow.rs:6",
             "emit::fiber::integration::fixture::lower_value@crates/emela-codegen-emb/examples/support/phase7_integration_flow.rs:14"
           ],
@@ -25912,12 +26213,7 @@
             {
               "input": "source:c127a7f88b884662a537",
               "filename": "main.emel",
-              "binding_review": "reassigned/conditional Rust variable: alternatives are retained without claiming which branch executed"
-            },
-            {
-              "input": "source:8a490b7f32de050f7a3f",
-              "filename": "main.emel",
-              "binding_review": "reassigned/conditional Rust variable: alternatives are retained without claiming which branch executed"
+              "binding_review_resolution": "run引数managed_successはこのtestでfalseに固定。対応するlower_managed/lower traceとsource書換え結果を選ぶ。with_collector=false/trueは同sourceに対するIR adapter差として保持。"
             }
           ],
           "postfix_methods": [
@@ -25980,7 +26276,93 @@
       ],
       "unresolved_calls": [],
       "new_status": "unmapped",
-      "new_evidence": []
+      "new_evidence": [],
+      "route_review": {
+        "category": "source",
+        "legacy_classes": [
+          "source-success-expectation"
+        ],
+        "note": "run引数managed_successはこのtestでfalseに固定。対応するlower_managed/lower traceとsource書換え結果を選ぶ。with_collector=false/trueは同sourceに対するIR adapter差として保持。",
+        "evidence": {
+          "path": "crates/emela-codegen-emb/tests/fiber/integration.rs",
+          "line": 8,
+          "end_line": 11
+        },
+        "select_trace": {
+          "path": "crates/emela-codegen-emb/examples/support/phase7_integration_flow.rs",
+          "function": "lower"
+        },
+        "select_source_contains": [
+          "fn request(n: Int) -> Int fails",
+          "state.set(Int.to_string(value))"
+        ],
+        "execution_configuration": {
+          "options": {
+            "heap_bytes": 4096,
+            "string_capacity": 32,
+            "frame_capacity": 48,
+            "frame_bytes": 2048,
+            "deferred_capacity": 2
+          },
+          "task_adapters": [
+            [
+              "host_request",
+              "board_request_start"
+            ]
+          ],
+          "post_lower_mutations": [
+            {
+              "function": "request",
+              "body": null,
+              "external_c_symbol": "host_request",
+              "required_flags": [
+                "suspends",
+                "fails"
+              ]
+            },
+            {
+              "helper": "gc_anchor::add",
+              "variants": [
+                false,
+                true
+              ]
+            }
+          ]
+        }
+      },
+      "execution_configuration": {
+        "options": {
+          "heap_bytes": 4096,
+          "string_capacity": 32,
+          "frame_capacity": 48,
+          "frame_bytes": 2048,
+          "deferred_capacity": 2
+        },
+        "task_adapters": [
+          [
+            "host_request",
+            "board_request_start"
+          ]
+        ],
+        "post_lower_mutations": [
+          {
+            "function": "request",
+            "body": null,
+            "external_c_symbol": "host_request",
+            "required_flags": [
+              "suspends",
+              "fails"
+            ]
+          },
+          {
+            "helper": "gc_anchor::add",
+            "variants": [
+              false,
+              true
+            ]
+          }
+        ]
+      }
     },
     {
       "id": "emit::fiber::interrupt::await_of_interrupted_children_returns_owned_failures_repeatedly_and_for_unit",
@@ -35124,15 +35506,18 @@
       "legacy_classes": [
         "source-success-expectation"
       ],
-      "review_status": "needs-review",
-      "source_inputs": [],
-      "generated_inputs": [
-        "generated:68b09248816cdf1f93f8"
+      "review_status": "legacy-route-reviewed",
+      "source_inputs": [
+        "source:bb6461d89d845ae8f21e"
       ],
-      "unassigned_source_literal_candidates": [
-        "source:87cd128a38da83aceb49"
+      "generated_inputs": [],
+      "unassigned_source_literal_candidates": [],
+      "non_program_literals": [
+        {
+          "input": "source:87cd128a38da83aceb49",
+          "role": "reviewed format template or fragment; the materialized program is indexed separately"
+        }
       ],
-      "non_program_literals": [],
       "source_invocations": [
         {
           "callee": "support::try_lower",
@@ -35143,8 +35528,9 @@
           ],
           "inputs": [
             {
-              "input": "generated:68b09248816cdf1f93f8",
-              "filename": "main.emel"
+              "input": "source:bb6461d89d845ae8f21e",
+              "filename": "main.emel",
+              "variant": "owned-views"
             }
           ],
           "postfix_methods": [
@@ -35184,7 +35570,34 @@
       ],
       "unresolved_calls": [],
       "new_status": "unmapped",
-      "new_evidence": []
+      "new_evidence": [],
+      "route_review": {
+        "category": "source",
+        "legacy_classes": [
+          "source-success-expectation"
+        ],
+        "note": "SOURCE定数のinclude assetを固定objectから読み、store/readの追記を展開する。",
+        "evidence": {
+          "path": "crates/emela-codegen-emb/tests/string_comparison/mod.rs",
+          "line": 131,
+          "end_line": 182
+        },
+        "materializations": [
+          {
+            "generated_input": "generated:68b09248816cdf1f93f8",
+            "variants": [
+              {
+                "name": "owned-views",
+                "fields": {
+                  "SOURCE": {
+                    "asset": "crates/emela-codegen-emb/examples/support/string_comparison.emel"
+                  }
+                }
+              }
+            ]
+          }
+        ]
+      }
     },
     {
       "id": "emit::string_comparison::source_comparisons_are_heapless_and_allow_isr_and_constant_space_tail_loops",
@@ -45900,6 +46313,12 @@
       "review_reason": "static text expression requires review; it remains an audit obligation",
       "new_status": "unmapped",
       "new_evidence": [],
+      "resolved_by_review": "emit::fiber::cause::interruption_raised_by_cleanup_replaces_a_body_failure",
+      "materialized_inputs": [
+        "source:a90022a09a7452ef951b",
+        "source:be4f39329c71752d895a",
+        "source:f3550c720a53dd18af43"
+      ],
       "is_resolved_program_input": false
     },
     {
@@ -45914,6 +46333,11 @@
       "review_reason": "static text expression requires review; it remains an audit obligation",
       "new_status": "unmapped",
       "new_evidence": [],
+      "resolved_by_review": "emit::deferred::ended_deferred_poll_and_await_reject_leaked_callbacks_after_slot_reuse",
+      "materialized_inputs": [
+        "source:c4f1b942172d789f31d4",
+        "source:6454690863d207729427"
+      ],
       "is_resolved_program_input": false
     },
     {
@@ -45928,6 +46352,10 @@
       "review_reason": "static text expression requires review; it remains an audit obligation",
       "new_status": "unmapped",
       "new_evidence": [],
+      "resolved_by_review": "emit::string_comparison::owned_string_views_compare_without_allocating_or_changing_ownership",
+      "materialized_inputs": [
+        "source:bb6461d89d845ae8f21e"
+      ],
       "is_resolved_program_input": false
     },
     {
@@ -45942,6 +46370,11 @@
       "review_reason": "static text expression requires review; it remains an audit obligation",
       "new_status": "unmapped",
       "new_evidence": [],
+      "resolved_by_review": "emit::const_runtime::polymorphic_const_defects_have_one_source_context_and_self_reference_retries",
+      "materialized_inputs": [
+        "source:823e637e97a0dbeb7ea0",
+        "source:c986b4c8e5754de0a2f9"
+      ],
       "is_resolved_program_input": false
     },
     {
@@ -45956,6 +46389,10 @@
       "review_reason": "static text expression requires review; it remains an audit obligation",
       "new_status": "unmapped",
       "new_evidence": [],
+      "resolved_by_review": "emit::const_runtime::oversized_static_string_growth_falls_back_before_unbounded_compiler_allocation",
+      "materialized_inputs": [
+        "source:4e6fda2411d90e9731ec"
+      ],
       "is_resolved_program_input": false
     },
     {
@@ -45970,6 +46407,10 @@
       "review_reason": "static text expression requires review; it remains an audit obligation",
       "new_status": "unmapped",
       "new_evidence": [],
+      "resolved_by_review": "emit::completion_types::derived::nested_generic_error_payloads_have_finite_display_functions",
+      "materialized_inputs": [
+        "source:1daea07d6938ba513abc"
+      ],
       "is_resolved_program_input": false
     },
     {
@@ -45984,6 +46425,11 @@
       "review_reason": "static text expression requires review; it remains an audit obligation",
       "new_status": "unmapped",
       "new_evidence": [],
+      "resolved_by_review": "emit::fiber::await_::child_wait_is_a_resume_boundary_and_scope_end_reclaims_the_operation_tail",
+      "materialized_inputs": [
+        "source:f86ddeba9b739002623e",
+        "source:5a0f57185295f477b997"
+      ],
       "is_resolved_program_input": false
     },
     {
@@ -46488,6 +46934,35 @@
           "line": 129,
           "end_line": 161,
           "rust_expression": "r#\"\nimport Std.Fiber.{Fiber, Success, Failure}\n@external(c, \"host_wait\")\nsuspend fn wait(n: Int) -> Int\n@external(c, \"mark\")\nfn mark(n: Int) -> () use {}\neffect Wait { suspend fn get(n: Int) -> Int }\nhandler Waiting: Wait { suspend fn get(n, resume) { resume(wait(n)) } }\npub fn work() -> Int use Async {\n  with Waiting {\n    Fiber.scope(fn() {\n      child = Fiber.fork(fn() { value = (use Wait).get(40)\n        mark(4)\n        value })\n      a = Fiber.fork(fn() { mark(1)\n        v = Fiber.await(child) match { Success(v) -> v\n          Failure(_) -> -1 }\n        mark(5)\n        v })\n      b = Fiber.fork(fn() { mark(2)\n        v = Fiber.join(child)\n        mark(6)\n        v })\n      c = Fiber.fork(fn() { mark(3)\n        Fiber.await(child)\n        mark(7) })\n      result = Fiber.join(a) + Fiber.join(b)\n      Fiber.join(c)\n      result\n    })\n  }\n}\n\"#"
+        }
+      ],
+      "new_status": "unmapped",
+      "new_evidence": [],
+      "is_resolved_program_input": true
+    },
+    {
+      "id": "source:1daea07d6938ba513abc",
+      "kind": "concrete",
+      "sha256": "1daea07d6938ba513abc8cc3291e8726a3ed116585528191564b19456d89ad21",
+      "utf8_bytes": 338,
+      "source": "\nimport Std.Fiber.{Fiber, Success, Failure}\nimport Std.Cause.{Cause}\nenum Wrap[A] { Box(List[A]) } derive Show\nerror Boom(value: Wrap[Int]) derive Show\nfn bad() -> Int fails Boom {fail Boom(value: Box([42]))}\npub fn show() -> String {\n  Fiber.attempt(bad) match {Success(_) -> \"unexpected\"\n    Failure(cause) -> Cause.to_string(cause)}\n}\n",
+      "origins": [
+        {
+          "kind": "reviewed-format-materialization",
+          "review": "emit::completion_types::derived::nested_generic_error_payloads_have_finite_display_functions",
+          "generated_input": "generated:d5a01d80e06079399f3c",
+          "variant": "nested-wrap",
+          "fields": {
+            "definition": "enum Wrap[A] { Box(List[A]) } derive Show",
+            "ty": "Wrap[Int]",
+            "value": "Box([42])"
+          },
+          "template_origin": {
+            "path": "crates/emela-codegen-emb/tests/completion_types/derived.rs",
+            "line": 10,
+            "end_line": 23,
+            "rust_expression": "format!(\n        r#\"\nimport Std.Fiber.{{Fiber, Success, Failure}}\nimport Std.Cause.{{Cause}}\n{definition}\nerror Boom(value: {ty}) derive Show\nfn bad() -> Int fails Boom {{fail Boom(value: {value})}}\npub fn show() -> String {{\n  Fiber.attempt(bad) match {{Success(_) -> \"unexpected\"\n    Failure(cause) -> Cause.to_string(cause)}}\n}}\n\"#,\n        ty = \"Wrap[Int]\"\n    )"
+          }
         }
       ],
       "new_status": "unmapped",
@@ -47387,6 +47862,39 @@
       "is_resolved_program_input": true
     },
     {
+      "id": "source:4e6fda2411d90e9731ec",
+      "kind": "concrete",
+      "sha256": "4e6fda2411d90e9731ecd721da7238d9e6114aa4823d0cd28dd724f2624d17ca",
+      "utf8_bytes": 268,
+      "source": "fn double(value: String) -> String { String.append(value,value) }\nconst VALUE = double(double(double(double(double(double(double(double(double(double(double(double(double(double(double(double(double(\"x\")))))))))))))))))\npub fn size() -> Int { String.byte_size(VALUE) }",
+      "origins": [
+        {
+          "kind": "reviewed-format-materialization",
+          "review": "emit::const_runtime::oversized_static_string_growth_falls_back_before_unbounded_compiler_allocation",
+          "generated_input": "generated:cf02caf71021add92ccf",
+          "variant": "double-17",
+          "fields": {
+            "expression": {
+              "wrap": {
+                "initial": "\"x\"",
+                "template": "double({value})",
+                "repeat": 17
+              }
+            }
+          },
+          "template_origin": {
+            "path": "crates/emela-codegen-emb/tests/const_runtime/mod.rs",
+            "line": 1099,
+            "end_line": 1101,
+            "rust_expression": "format!(\n        \"fn double(value: String) -> String {{ String.append(value,value) }}\\nconst VALUE = {expression}\\npub fn size() -> Int {{ String.byte_size(VALUE) }}\"\n    )"
+          }
+        }
+      ],
+      "new_status": "unmapped",
+      "new_evidence": [],
+      "is_resolved_program_input": true
+    },
+    {
       "id": "source:50099ef750a4253a4a9e",
       "kind": "concrete",
       "sha256": "50099ef750a4253a4a9e1c9499fda7d81fe0c77c2f173ba4c4b071e28f48fe45",
@@ -47532,6 +48040,33 @@
           "included_from": {
             "path": "crates/emela-codegen-emb/tests/cell/mod.rs",
             "line": 31
+          }
+        }
+      ],
+      "new_status": "unmapped",
+      "new_evidence": [],
+      "is_resolved_program_input": true
+    },
+    {
+      "id": "source:5a0f57185295f477b997",
+      "kind": "concrete",
+      "sha256": "5a0f57185295f477b99708ffcbc95c026b070ebd428ba3103d80cb036160297a",
+      "utf8_bytes": 541,
+      "source": "\nimport Std.Fiber.{Fiber, Scope}\nimport Std.Deferred.{Deferred}\n@external(c, \"mark\")\nfn mark(n: Int) -> () use {}\neffect Gate { suspend fn go(child: Fiber[Int]) -> Int }\nhandler Gated: Gate {\n  suspend fn go(child, resume) {\n    mark(1)\n    resume(7)\n    Fiber.await(child)\n    mark(99)\n  }\n}\npub fn boundary() -> Int use Async {\n  Fiber.scope(fn() {\n    d: Deferred[Int] = (use Scope).deferred()\n    child = Fiber.fork(fn() { mark(2)\n      Deferred.await(d) })\n    result = with Gated { (use Gate).go(child) }\n    mark(3)\n    result\n  })\n}\n",
+      "origins": [
+        {
+          "kind": "reviewed-format-materialization",
+          "review": "emit::fiber::await_::child_wait_is_a_resume_boundary_and_scope_end_reclaims_the_operation_tail",
+          "generated_input": "generated:f1dfbdc5012a3a33a63a",
+          "variant": "await",
+          "fields": {
+            "operation": "await"
+          },
+          "template_origin": {
+            "path": "crates/emela-codegen-emb/tests/fiber/await_.rs",
+            "line": 257,
+            "end_line": 283,
+            "rust_expression": "format!(\n            r#\"\nimport Std.Fiber.{{Fiber, Scope}}\nimport Std.Deferred.{{Deferred}}\n@external(c, \"mark\")\nfn mark(n: Int) -> () use {{}}\neffect Gate {{ suspend fn go(child: Fiber[Int]) -> Int }}\nhandler Gated: Gate {{\n  suspend fn go(child, resume) {{\n    mark(1)\n    resume(7)\n    Fiber.{operation}(child)\n    mark(99)\n  }}\n}}\npub fn boundary() -> Int use Async {{\n  Fiber.scope(fn() {{\n    d: Deferred[Int] = (use Scope).deferred()\n    child = Fiber.fork(fn() {{ mark(2)\n      Deferred.await(d) }})\n    result = with Gated {{ (use Gate).go(child) }}\n    mark(3)\n    result\n  }})\n}}\n\"#\n        )"
           }
         }
       ],
@@ -47757,6 +48292,35 @@
       "new_status": "unmapped",
       "new_evidence": [],
       "is_resolved_program_input": false
+    },
+    {
+      "id": "source:6454690863d207729427",
+      "kind": "concrete",
+      "sha256": "6454690863d207729427473fed100c1850e4acf4a4007de446e9e8053e10f3ab",
+      "utf8_bytes": 296,
+      "source": "\nimport Std.Fiber.{Fiber, Scope}\nimport Std.Deferred.{Deferred}\npub fn leak() -> (fn() -> Int use Async) use Async {\n  Fiber.scope(fn() {\n    d: Deferred[Int] = (use Scope).deferred()\n    fn() { Deferred.await(d) }\n  })\n}\npub fn invoke(f: fn() -> Int fails {} use Async) -> Int use Async { f() }\n",
+      "origins": [
+        {
+          "kind": "reviewed-format-materialization",
+          "review": "emit::deferred::ended_deferred_poll_and_await_reject_leaked_callbacks_after_slot_reuse",
+          "generated_input": "generated:649eeb43128ae5b9f7ca",
+          "variant": "await",
+          "fields": {
+            "ret": "Int use Async",
+            "operation": "Deferred.await(d)",
+            "invoke": "pub fn invoke(f: fn() -> Int fails {} use Async) -> Int use Async { f() }"
+          },
+          "template_origin": {
+            "path": "crates/emela-codegen-emb/tests/deferred/mod.rs",
+            "line": 745,
+            "end_line": 757,
+            "rust_expression": "format!(\n            r#\"\nimport Std.Fiber.{{Fiber, Scope}}\nimport Std.Deferred.{{Deferred}}\npub fn leak() -> (fn() -> {ret}) use Async {{\n  Fiber.scope(fn() {{\n    d: Deferred[Int] = (use Scope).deferred()\n    fn() {{ {operation} }}\n  }})\n}}\n{invoke}\n\"#\n        )"
+          }
+        }
+      ],
+      "new_status": "unmapped",
+      "new_evidence": [],
+      "is_resolved_program_input": true
     },
     {
       "id": "source:6570121a20b232ff4378",
@@ -48444,6 +49008,33 @@
           "line": 287,
           "end_line": 311,
           "rust_expression": "r#\"\n@external(c, \"host_wait\")\nsuspend fn wait(n: Int) -> Int\n@external(c, \"mark\")\nfn mark(n: Int) -> () use {}\neffect Wait { suspend fn get(n: Int) -> Int }\nhandler Waiting: Wait { suspend fn get(n, resume) { resume(wait(n)) } }\neffect Marker { fn read() -> Int }\nhandler Resource: Marker { fn read() { 1 }\n  release { mark(3)\n    (use Wait).get(2)\n    mark(4) } }\neffect Gate { suspend fn go() -> Int }\nhandler Gated: Gate {\n  suspend fn go(resume) { with Resource { mark(1)\n    resume(7)\n    (use Wait).get(1)\n    () } }\n}\npub fn work() -> Int use Async {\n  with Waiting, Gated { result = (use Gate).go()\n    mark(2)\n    result }\n}\n\"#"
+        }
+      ],
+      "new_status": "unmapped",
+      "new_evidence": [],
+      "is_resolved_program_input": true
+    },
+    {
+      "id": "source:823e637e97a0dbeb7ea0",
+      "kind": "concrete",
+      "sha256": "823e637e97a0dbeb7ea04e02088af922b3433413c10b0a79c4211b2a7046493d",
+      "utf8_bytes": 327,
+      "source": "\n@external(c,\"trigger\")\nfn trigger() -> Int use {}\nconst BROKEN = { dbg(\"once\")\n if trigger() == 1 { panic(\"broken\") } else { [] }\n}\nfn ints(xs:List[Int])->Int{if List.is_empty(xs){42}else{0}}\nfn texts(xs:List[String])->Int{if List.is_empty(xs){42}else{0}}\npub fn integer()->Int{ints(BROKEN)}\npub fn text()->Int{texts(BROKEN)}\n",
+      "origins": [
+        {
+          "kind": "reviewed-format-materialization",
+          "review": "emit::const_runtime::polymorphic_const_defects_have_one_source_context_and_self_reference_retries",
+          "generated_input": "generated:af359e418a0414baa5e0",
+          "variant": "panic",
+          "fields": {
+            "expression": "panic(\"broken\")"
+          },
+          "template_origin": {
+            "path": "crates/emela-codegen-emb/tests/const_runtime/mod.rs",
+            "line": 991,
+            "end_line": 1003,
+            "rust_expression": "format!(\n            r#\"\n@external(c,\"trigger\")\nfn trigger() -> Int use {{}}\nconst BROKEN = {{ dbg(\"once\")\n if trigger() == 1 {{ {expression} }} else {{ [] }}\n}}\nfn ints(xs:List[Int])->Int{{if List.is_empty(xs){{42}}else{{0}}}}\nfn texts(xs:List[String])->Int{{if List.is_empty(xs){{42}}else{{0}}}}\npub fn integer()->Int{{ints(BROKEN)}}\npub fn text()->Int{{texts(BROKEN)}}\n\"#\n        )"
+          }
         }
       ],
       "new_status": "unmapped",
@@ -49375,6 +49966,33 @@
       "is_resolved_program_input": true
     },
     {
+      "id": "source:a90022a09a7452ef951b",
+      "kind": "concrete",
+      "sha256": "a90022a09a7452ef951b489fd35bbd594629625d61791996f617313880e46e9d",
+      "utf8_bytes": 1273,
+      "source": "\nimport Std.Fiber.{Fiber, Success, Failure}\nimport Std.Cause.{Cause, Fail, Die, Interrupt}\n@external(c, \"host_wait\")\nsuspend fn wait(n: Int) -> Int\n@external(c, \"mark\")\nfn mark(n: Int) -> () use {}\nerror Boom(n: Int) derive Show\neffect Wait { suspend fn get(n: Int) -> Int }\nhandler Waiting: Wait { suspend fn get(n,resume) { resume(wait(n)) } }\neffect Resource { fn read() -> Int }\nhandler Res: Resource { fn read() { 0 }\n release { mark(2) }\n}\nfn failure() -> Int fails Boom { fail Boom(n: 42) }\nfn cleanup(c: Cause[{}]) -> () { mark(1)\n Cause.raise(c)\n mark(99)\n}\nfn protected(c: Cause[{}]) -> Int fails Boom { with Res { failure()\n cleanup(c)\n 0 } }\npub fn make() -> Cause[{}] use Async { with Waiting { Fiber.scope(fn() {\n child = Fiber.fork(fn() { (use Wait).get(1) })\n (use Wait).get(2)\n Fiber.interrupt(child)\n Fiber.await(child) match { Success(_) -> panic(\"unexpected\")\n  Failure(c) -> c\n }\n}) } }\npub fn work(c: Cause[{}], failing: Bool) -> Int use Async { with Waiting {\n Fiber.scope(fn() {\n  if failing { fail Boom(n: 0) }\n  child = Fiber.fork(fn() { protected(c) })\n  Fiber.await(child) match { Success(n) -> n\n   Failure(again) -> Cause.kind(again) match { Interrupt -> 42\n    Fail -> -2\n    Die -> -3\n   }\n  }\n }) escape { Boom(n) -> { mark(3)\n  n\n } }\n} }\n",
+      "origins": [
+        {
+          "kind": "reviewed-format-materialization",
+          "review": "emit::fiber::cause::interruption_raised_by_cleanup_replaces_a_body_failure",
+          "generated_input": "generated:4e9c40666c45e10264b0",
+          "variant": "mode-0",
+          "fields": {
+            "protected": "fn protected(c: Cause[{}]) -> Int fails Boom { with Res { failure()\n cleanup(c)\n 0 } }"
+          },
+          "template_origin": {
+            "path": "crates/emela-codegen-emb/tests/fiber/cause.rs",
+            "line": 339,
+            "end_line": 383,
+            "rust_expression": "format!(\n            r#\"\nimport Std.Fiber.{{Fiber, Success, Failure}}\nimport Std.Cause.{{Cause, Fail, Die, Interrupt}}\n@external(c, \"host_wait\")\nsuspend fn wait(n: Int) -> Int\n@external(c, \"mark\")\nfn mark(n: Int) -> () use {{}}\nerror Boom(n: Int) derive Show\neffect Wait {{ suspend fn get(n: Int) -> Int }}\nhandler Waiting: Wait {{ suspend fn get(n,resume) {{ resume(wait(n)) }} }}\neffect Resource {{ fn read() -> Int }}\nhandler Res: Resource {{ fn read() {{ 0 }}\n release {{ mark(2) }}\n}}\nfn failure() -> Int fails Boom {{ fail Boom(n: 42) }}\nfn cleanup(c: Cause[{{}}]) -> () {{ mark(1)\n Cause.raise(c)\n mark(99)\n}}\n{protected}\npub fn make() -> Cause[{{}}] use Async {{ with Waiting {{ Fiber.scope(fn() {{\n child = Fiber.fork(fn() {{ (use Wait).get(1) }})\n (use Wait).get(2)\n Fiber.interrupt(child)\n Fiber.await(child) match {{ Success(_) -> panic(\"unexpected\")\n  Failure(c) -> c\n }}\n}}) }} }}\npub fn work(c: Cause[{{}}], failing: Bool) -> Int use Async {{ with Waiting {{\n Fiber.scope(fn() {{\n  if failing {{ fail Boom(n: 0) }}\n  child = Fiber.fork(fn() {{ protected(c) }})\n  Fiber.await(child) match {{ Success(n) -> n\n   Failure(again) -> Cause.kind(again) match {{ Interrupt -> 42\n    Fail -> -2\n    Die -> -3\n   }}\n  }}\n }}) escape {{ Boom(n) -> {{ mark(3)\n  n\n }} }}\n}} }}\n\"#\n        )"
+          }
+        }
+      ],
+      "new_status": "unmapped",
+      "new_evidence": [],
+      "is_resolved_program_input": true
+    },
+    {
       "id": "source:a958e5ba357850a0c4de",
       "kind": "concrete",
       "sha256": "a958e5ba357850a0c4de5cbfeca3159b8894275fc1bba1b25fafd2a0b8d9c187",
@@ -49817,6 +50435,35 @@
       "is_resolved_program_input": false
     },
     {
+      "id": "source:bb6461d89d845ae8f21e",
+      "kind": "concrete",
+      "sha256": "bb6461d89d845ae8f21ee6742db31a64cb08b002ad574640e288ba4225baee5f",
+      "utf8_bytes": 569,
+      "source": "pub fn eq(a: String, b: String) -> Bool { a == b }\npub fn ne(a: String, b: String) -> Bool { a != b }\npub fn lt(a: String, b: String) -> Bool { a < b }\npub fn le(a: String, b: String) -> Bool { a <= b }\npub fn gt(a: String, b: String) -> Bool { a > b }\npub fn ge(a: String, b: String) -> Bool { a >= b }\npub fn repeated(a: String, b: String, n: Int) -> Bool {\n  if n == 0 { a == b } else { repeated(b, a, n - 1) }\n}\n\npub fn store(text: String) -> List[String] { [text] }\npub fn read(values: List[String]) -> String { values match { [head, ..rest] -> head\n [] -> \"\" } }\n",
+      "origins": [
+        {
+          "kind": "reviewed-format-materialization",
+          "review": "emit::string_comparison::owned_string_views_compare_without_allocating_or_changing_ownership",
+          "generated_input": "generated:68b09248816cdf1f93f8",
+          "variant": "owned-views",
+          "fields": {
+            "SOURCE": {
+              "asset": "crates/emela-codegen-emb/examples/support/string_comparison.emel"
+            }
+          },
+          "template_origin": {
+            "path": "crates/emela-codegen-emb/tests/string_comparison/mod.rs",
+            "line": 132,
+            "end_line": 134,
+            "rust_expression": "format!(\n        \"{SOURCE}\\npub fn store(text: String) -> List[String] {{ [text] }}\\npub fn read(values: List[String]) -> String {{ values match {{ [head, ..rest] -> head\\n [] -> \\\"\\\" }} }}\\n\"\n    )"
+          }
+        }
+      ],
+      "new_status": "unmapped",
+      "new_evidence": [],
+      "is_resolved_program_input": true
+    },
+    {
       "id": "source:bb9a5869439d8f10967c",
       "kind": "concrete",
       "sha256": "bb9a5869439d8f10967ceb3997ec8ac8a9bcbedcc97962e79d1254ae734d58cf",
@@ -49991,6 +50638,33 @@
           "line": 58,
           "end_line": 85,
           "rust_expression": "r#\"\nimport Std.Fiber.{Fiber}\n@external(c, \"host_wait\")\nsuspend fn wait(n: Int) -> Int\n@external(c, \"mark\")\nfn mark(n: Int) -> () use {}\neffect Wait { suspend fn get(n: Int) -> Int }\nhandler Waiting: Wait { suspend fn get(n, resume) { resume(wait(n)) } }\neffect Marker { fn read() -> Int }\nhandler Resource: Marker { fn read() { 1 }\n  release { mark(3)\n    (use Wait).get(3)\n    mark(4) } }\npub fn work() -> Int use Async {\n  with Waiting {\n    Fiber.scope(fn() {\n      child = Fiber.fork(fn() { with Resource { mark(1)\n        (use Wait).get(1) } })\n      result = (use Wait).get(2)\n      mark(2)\n      Fiber.interrupt(child)\n      mark(5)\n      Fiber.interrupt(child)\n      result\n    })\n  }\n}\n\"#"
+        }
+      ],
+      "new_status": "unmapped",
+      "new_evidence": [],
+      "is_resolved_program_input": true
+    },
+    {
+      "id": "source:be4f39329c71752d895a",
+      "kind": "concrete",
+      "sha256": "be4f39329c71752d895a792108d3b88864beed64d9f192aaf0b7e8cd843f05ba",
+      "utf8_bytes": 1301,
+      "source": "\nimport Std.Fiber.{Fiber, Success, Failure}\nimport Std.Cause.{Cause, Fail, Die, Interrupt}\n@external(c, \"host_wait\")\nsuspend fn wait(n: Int) -> Int\n@external(c, \"mark\")\nfn mark(n: Int) -> () use {}\nerror Boom(n: Int) derive Show\neffect Wait { suspend fn get(n: Int) -> Int }\nhandler Waiting: Wait { suspend fn get(n,resume) { resume(wait(n)) } }\neffect Resource { fn read() -> Int }\nhandler Res: Resource { fn read() { 0 }\n release { mark(2) }\n}\nfn failure() -> Int fails Boom { fail Boom(n: 42) }\nfn cleanup(c: Cause[{}]) -> () { mark(1)\n Cause.raise(c)\n mark(99)\n}\nfn protected(c: Cause[{}]) -> Int fails Boom use Wait { with Res { (use Wait).get(3)\n failure()\n cleanup(c)\n 0 } }\npub fn make() -> Cause[{}] use Async { with Waiting { Fiber.scope(fn() {\n child = Fiber.fork(fn() { (use Wait).get(1) })\n (use Wait).get(2)\n Fiber.interrupt(child)\n Fiber.await(child) match { Success(_) -> panic(\"unexpected\")\n  Failure(c) -> c\n }\n}) } }\npub fn work(c: Cause[{}], failing: Bool) -> Int use Async { with Waiting {\n Fiber.scope(fn() {\n  if failing { fail Boom(n: 0) }\n  child = Fiber.fork(fn() { protected(c) })\n  Fiber.await(child) match { Success(n) -> n\n   Failure(again) -> Cause.kind(again) match { Interrupt -> 42\n    Fail -> -2\n    Die -> -3\n   }\n  }\n }) escape { Boom(n) -> { mark(3)\n  n\n } }\n} }\n",
+      "origins": [
+        {
+          "kind": "reviewed-format-materialization",
+          "review": "emit::fiber::cause::interruption_raised_by_cleanup_replaces_a_body_failure",
+          "generated_input": "generated:4e9c40666c45e10264b0",
+          "variant": "mode-1",
+          "fields": {
+            "protected": "fn protected(c: Cause[{}]) -> Int fails Boom use Wait { with Res { (use Wait).get(3)\n failure()\n cleanup(c)\n 0 } }"
+          },
+          "template_origin": {
+            "path": "crates/emela-codegen-emb/tests/fiber/cause.rs",
+            "line": 339,
+            "end_line": 383,
+            "rust_expression": "format!(\n            r#\"\nimport Std.Fiber.{{Fiber, Success, Failure}}\nimport Std.Cause.{{Cause, Fail, Die, Interrupt}}\n@external(c, \"host_wait\")\nsuspend fn wait(n: Int) -> Int\n@external(c, \"mark\")\nfn mark(n: Int) -> () use {{}}\nerror Boom(n: Int) derive Show\neffect Wait {{ suspend fn get(n: Int) -> Int }}\nhandler Waiting: Wait {{ suspend fn get(n,resume) {{ resume(wait(n)) }} }}\neffect Resource {{ fn read() -> Int }}\nhandler Res: Resource {{ fn read() {{ 0 }}\n release {{ mark(2) }}\n}}\nfn failure() -> Int fails Boom {{ fail Boom(n: 42) }}\nfn cleanup(c: Cause[{{}}]) -> () {{ mark(1)\n Cause.raise(c)\n mark(99)\n}}\n{protected}\npub fn make() -> Cause[{{}}] use Async {{ with Waiting {{ Fiber.scope(fn() {{\n child = Fiber.fork(fn() {{ (use Wait).get(1) }})\n (use Wait).get(2)\n Fiber.interrupt(child)\n Fiber.await(child) match {{ Success(_) -> panic(\"unexpected\")\n  Failure(c) -> c\n }}\n}}) }} }}\npub fn work(c: Cause[{{}}], failing: Bool) -> Int use Async {{ with Waiting {{\n Fiber.scope(fn() {{\n  if failing {{ fail Boom(n: 0) }}\n  child = Fiber.fork(fn() {{ protected(c) }})\n  Fiber.await(child) match {{ Success(n) -> n\n   Failure(again) -> Cause.kind(again) match {{ Interrupt -> 42\n    Fail -> -2\n    Die -> -3\n   }}\n  }}\n }}) escape {{ Boom(n) -> {{ mark(3)\n  n\n }} }}\n}} }}\n\"#\n        )"
+          }
         }
       ],
       "new_status": "unmapped",
@@ -50233,6 +50907,35 @@
       "is_resolved_program_input": true
     },
     {
+      "id": "source:c4f1b942172d789f31d4",
+      "kind": "concrete",
+      "sha256": "c4f1b942172d789f31d4b299a7c8ed81c5990455e90b0a5a9f02cf0c7d211bda",
+      "utf8_bytes": 253,
+      "source": "\nimport Std.Fiber.{Fiber, Scope}\nimport Std.Deferred.{Deferred}\npub fn leak() -> (fn() -> Bool) use Async {\n  Fiber.scope(fn() {\n    d: Deferred[Int] = (use Scope).deferred()\n    fn() { Deferred.poll(d) match { Some(_) -> True\nNone -> False } }\n  })\n}\n\n",
+      "origins": [
+        {
+          "kind": "reviewed-format-materialization",
+          "review": "emit::deferred::ended_deferred_poll_and_await_reject_leaked_callbacks_after_slot_reuse",
+          "generated_input": "generated:649eeb43128ae5b9f7ca",
+          "variant": "poll",
+          "fields": {
+            "ret": "Bool",
+            "operation": "Deferred.poll(d) match { Some(_) -> True\nNone -> False }",
+            "invoke": ""
+          },
+          "template_origin": {
+            "path": "crates/emela-codegen-emb/tests/deferred/mod.rs",
+            "line": 745,
+            "end_line": 757,
+            "rust_expression": "format!(\n            r#\"\nimport Std.Fiber.{{Fiber, Scope}}\nimport Std.Deferred.{{Deferred}}\npub fn leak() -> (fn() -> {ret}) use Async {{\n  Fiber.scope(fn() {{\n    d: Deferred[Int] = (use Scope).deferred()\n    fn() {{ {operation} }}\n  }})\n}}\n{invoke}\n\"#\n        )"
+          }
+        }
+      ],
+      "new_status": "unmapped",
+      "new_evidence": [],
+      "is_resolved_program_input": true
+    },
+    {
       "id": "source:c4f75955a8d727026302",
       "kind": "concrete",
       "sha256": "c4f75955a8d72702630245b1905b7d5e6968cf7bd9344cb3050493f3ab7b20fd",
@@ -50323,6 +51026,33 @@
           "line": 422,
           "end_line": 451,
           "rust_expression": "r#\"\nimport Std.Fiber.{Fiber, Scope}\nimport Std.Deferred.{Deferred}\n@external(c, \"mark\")\nfn mark(n: Int) -> () use {}\nfn cleanup(started: Deferred[()], done: Deferred[()]) -> () use Async {\n  mark(1)\n  Deferred.complete(started, ())\n  Deferred.await(done)\n  mark(3)\n}\npub fn work() -> Int use Async {\n  Fiber.scope(fn() {\n    stop: Deferred[Int] = (use Scope).deferred()\n    started: Deferred[()] = (use Scope).deferred()\n    done: Deferred[()] = (use Scope).deferred()\n    child = Fiber.fork(fn() { Deferred.await(stop)\n      cleanup(started, done)\n      7 })\n    canceller = Fiber.fork(fn() { Fiber.interrupt(child) })\n    completer = Fiber.fork(fn() { Deferred.await(started)\n      mark(2)\n      Deferred.complete(done, ()) })\n    Fiber.join(canceller)\n    Fiber.join(completer)\n    mark(4)\n    42\n  })\n}\n\"#"
+        }
+      ],
+      "new_status": "unmapped",
+      "new_evidence": [],
+      "is_resolved_program_input": true
+    },
+    {
+      "id": "source:c986b4c8e5754de0a2f9",
+      "kind": "concrete",
+      "sha256": "c986b4c8e5754de0a2f9b2fe0109553e9bd049a3528d9a8aec33ba2b0bce6bfb",
+      "utf8_bytes": 318,
+      "source": "\n@external(c,\"trigger\")\nfn trigger() -> Int use {}\nconst BROKEN = { dbg(\"once\")\n if trigger() == 1 { BROKEN } else { [] }\n}\nfn ints(xs:List[Int])->Int{if List.is_empty(xs){42}else{0}}\nfn texts(xs:List[String])->Int{if List.is_empty(xs){42}else{0}}\npub fn integer()->Int{ints(BROKEN)}\npub fn text()->Int{texts(BROKEN)}\n",
+      "origins": [
+        {
+          "kind": "reviewed-format-materialization",
+          "review": "emit::const_runtime::polymorphic_const_defects_have_one_source_context_and_self_reference_retries",
+          "generated_input": "generated:af359e418a0414baa5e0",
+          "variant": "self-reference",
+          "fields": {
+            "expression": "BROKEN"
+          },
+          "template_origin": {
+            "path": "crates/emela-codegen-emb/tests/const_runtime/mod.rs",
+            "line": 991,
+            "end_line": 1003,
+            "rust_expression": "format!(\n            r#\"\n@external(c,\"trigger\")\nfn trigger() -> Int use {{}}\nconst BROKEN = {{ dbg(\"once\")\n if trigger() == 1 {{ {expression} }} else {{ [] }}\n}}\nfn ints(xs:List[Int])->Int{{if List.is_empty(xs){{42}}else{{0}}}}\nfn texts(xs:List[String])->Int{{if List.is_empty(xs){{42}}else{{0}}}}\npub fn integer()->Int{{ints(BROKEN)}}\npub fn text()->Int{{texts(BROKEN)}}\n\"#\n        )"
+          }
         }
       ],
       "new_status": "unmapped",
@@ -51338,6 +52068,33 @@
       "is_resolved_program_input": true
     },
     {
+      "id": "source:f3550c720a53dd18af43",
+      "kind": "concrete",
+      "sha256": "f3550c720a53dd18af434b62d672adaf680dae153873e3c1e827eb53af3c42da",
+      "utf8_bytes": 1299,
+      "source": "\nimport Std.Fiber.{Fiber, Success, Failure}\nimport Std.Cause.{Cause, Fail, Die, Interrupt}\n@external(c, \"host_wait\")\nsuspend fn wait(n: Int) -> Int\n@external(c, \"mark\")\nfn mark(n: Int) -> () use {}\nerror Boom(n: Int) derive Show\neffect Wait { suspend fn get(n: Int) -> Int }\nhandler Waiting: Wait { suspend fn get(n,resume) { resume(wait(n)) } }\neffect Resource { fn read() -> Int }\nhandler Res: Resource { fn read() { 0 }\n release { mark(2) }\n}\nfn failure() -> Int fails Boom { fail Boom(n: 42) }\nfn cleanup(c: Cause[{}]) -> () { mark(1)\n Cause.raise(c)\n mark(99)\n}\nfn protected(c: Cause[{}]) -> Int { with Res { failure()\n cleanup(c)\n 0 } escape { Boom(n) -> { mark(3)\n n } } }\npub fn make() -> Cause[{}] use Async { with Waiting { Fiber.scope(fn() {\n child = Fiber.fork(fn() { (use Wait).get(1) })\n (use Wait).get(2)\n Fiber.interrupt(child)\n Fiber.await(child) match { Success(_) -> panic(\"unexpected\")\n  Failure(c) -> c\n }\n}) } }\npub fn work(c: Cause[{}], failing: Bool) -> Int use Async { with Waiting {\n Fiber.scope(fn() {\n  if failing { fail Boom(n: 0) }\n  child = Fiber.fork(fn() { protected(c) })\n  Fiber.await(child) match { Success(n) -> n\n   Failure(again) -> Cause.kind(again) match { Interrupt -> 42\n    Fail -> -2\n    Die -> -3\n   }\n  }\n }) escape { Boom(n) -> { mark(3)\n  n\n } }\n} }\n",
+      "origins": [
+        {
+          "kind": "reviewed-format-materialization",
+          "review": "emit::fiber::cause::interruption_raised_by_cleanup_replaces_a_body_failure",
+          "generated_input": "generated:4e9c40666c45e10264b0",
+          "variant": "mode-2",
+          "fields": {
+            "protected": "fn protected(c: Cause[{}]) -> Int { with Res { failure()\n cleanup(c)\n 0 } escape { Boom(n) -> { mark(3)\n n } } }"
+          },
+          "template_origin": {
+            "path": "crates/emela-codegen-emb/tests/fiber/cause.rs",
+            "line": 339,
+            "end_line": 383,
+            "rust_expression": "format!(\n            r#\"\nimport Std.Fiber.{{Fiber, Success, Failure}}\nimport Std.Cause.{{Cause, Fail, Die, Interrupt}}\n@external(c, \"host_wait\")\nsuspend fn wait(n: Int) -> Int\n@external(c, \"mark\")\nfn mark(n: Int) -> () use {{}}\nerror Boom(n: Int) derive Show\neffect Wait {{ suspend fn get(n: Int) -> Int }}\nhandler Waiting: Wait {{ suspend fn get(n,resume) {{ resume(wait(n)) }} }}\neffect Resource {{ fn read() -> Int }}\nhandler Res: Resource {{ fn read() {{ 0 }}\n release {{ mark(2) }}\n}}\nfn failure() -> Int fails Boom {{ fail Boom(n: 42) }}\nfn cleanup(c: Cause[{{}}]) -> () {{ mark(1)\n Cause.raise(c)\n mark(99)\n}}\n{protected}\npub fn make() -> Cause[{{}}] use Async {{ with Waiting {{ Fiber.scope(fn() {{\n child = Fiber.fork(fn() {{ (use Wait).get(1) }})\n (use Wait).get(2)\n Fiber.interrupt(child)\n Fiber.await(child) match {{ Success(_) -> panic(\"unexpected\")\n  Failure(c) -> c\n }}\n}}) }} }}\npub fn work(c: Cause[{{}}], failing: Bool) -> Int use Async {{ with Waiting {{\n Fiber.scope(fn() {{\n  if failing {{ fail Boom(n: 0) }}\n  child = Fiber.fork(fn() {{ protected(c) }})\n  Fiber.await(child) match {{ Success(n) -> n\n   Failure(again) -> Cause.kind(again) match {{ Interrupt -> 42\n    Fail -> -2\n    Die -> -3\n   }}\n  }}\n }}) escape {{ Boom(n) -> {{ mark(3)\n  n\n }} }}\n}} }}\n\"#\n        )"
+          }
+        }
+      ],
+      "new_status": "unmapped",
+      "new_evidence": [],
+      "is_resolved_program_input": true
+    },
+    {
       "id": "source:f38833ae543c2e6ae942",
       "kind": "concrete",
       "sha256": "f38833ae543c2e6ae94205cdc0a8a539e39997397a486215859291c76000baf0",
@@ -51383,6 +52140,33 @@
           "line": 588,
           "end_line": 592,
           "rust_expression": "r#\"\nimport Std.Bytes.{Bytes}\npub fn discard(s: String) { Bytes.encode_utf8(s)\n  () }\n\"#"
+        }
+      ],
+      "new_status": "unmapped",
+      "new_evidence": [],
+      "is_resolved_program_input": true
+    },
+    {
+      "id": "source:f86ddeba9b739002623e",
+      "kind": "concrete",
+      "sha256": "f86ddeba9b739002623e7ae0ff9d503ed9d716ab0b694175ebd40ff38a1a67c5",
+      "utf8_bytes": 540,
+      "source": "\nimport Std.Fiber.{Fiber, Scope}\nimport Std.Deferred.{Deferred}\n@external(c, \"mark\")\nfn mark(n: Int) -> () use {}\neffect Gate { suspend fn go(child: Fiber[Int]) -> Int }\nhandler Gated: Gate {\n  suspend fn go(child, resume) {\n    mark(1)\n    resume(7)\n    Fiber.join(child)\n    mark(99)\n  }\n}\npub fn boundary() -> Int use Async {\n  Fiber.scope(fn() {\n    d: Deferred[Int] = (use Scope).deferred()\n    child = Fiber.fork(fn() { mark(2)\n      Deferred.await(d) })\n    result = with Gated { (use Gate).go(child) }\n    mark(3)\n    result\n  })\n}\n",
+      "origins": [
+        {
+          "kind": "reviewed-format-materialization",
+          "review": "emit::fiber::await_::child_wait_is_a_resume_boundary_and_scope_end_reclaims_the_operation_tail",
+          "generated_input": "generated:f1dfbdc5012a3a33a63a",
+          "variant": "join",
+          "fields": {
+            "operation": "join"
+          },
+          "template_origin": {
+            "path": "crates/emela-codegen-emb/tests/fiber/await_.rs",
+            "line": 257,
+            "end_line": 283,
+            "rust_expression": "format!(\n            r#\"\nimport Std.Fiber.{{Fiber, Scope}}\nimport Std.Deferred.{{Deferred}}\n@external(c, \"mark\")\nfn mark(n: Int) -> () use {{}}\neffect Gate {{ suspend fn go(child: Fiber[Int]) -> Int }}\nhandler Gated: Gate {{\n  suspend fn go(child, resume) {{\n    mark(1)\n    resume(7)\n    Fiber.{operation}(child)\n    mark(99)\n  }}\n}}\npub fn boundary() -> Int use Async {{\n  Fiber.scope(fn() {{\n    d: Deferred[Int] = (use Scope).deferred()\n    child = Fiber.fork(fn() {{ mark(2)\n      Deferred.await(d) }})\n    result = with Gated {{ (use Gate).go(child) }}\n    mark(3)\n    result\n  }})\n}}\n\"#\n        )"
+          }
         }
       ],
       "new_status": "unmapped",
@@ -51701,7 +52485,7 @@
   ],
   "route_reviews": {
     "path": "docs/tools/legacy_corpus_reviews.json",
-    "sha256": "a61a4c8f76d8b32a8aa05c375d77a9e6b665caeaa2e7acfd6d7cb4a3abb0be03",
-    "test_count": 56
+    "sha256": "b7e2fc2f478d4491b831b090dbb24c6c29595851dade1b5f4f1ffe8011c2e911",
+    "test_count": 65
   }
 }

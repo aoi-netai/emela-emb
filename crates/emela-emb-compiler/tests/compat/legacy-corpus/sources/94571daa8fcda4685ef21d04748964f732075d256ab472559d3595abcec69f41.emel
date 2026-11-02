@@ -1,0 +1,13 @@
+
+import Std.Bytes.{Bytes}
+@external(c, "host_wait")
+suspend fn wait(n: Int) -> Int
+effect Wait { suspend fn get(n: Int) -> Int }
+handler Waiting: Wait { suspend fn get(n, resume) { resume(wait(n)) } }
+pub fn across(b: Bytes) -> Int use Async {
+  with Waiting {
+    snapshot = Bytes.slice(b, 0, Bytes.size(b))
+    (use Wait).get(1)
+    Option.or(Bytes.get(b, 0), 0) + Option.or(Bytes.get(snapshot, 2), 0)
+  }
+}

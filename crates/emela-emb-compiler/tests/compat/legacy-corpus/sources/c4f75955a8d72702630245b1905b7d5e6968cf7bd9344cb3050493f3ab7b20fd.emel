@@ -1,0 +1,7 @@
+
+@external(c, "mark")
+fn mark(n: Int) -> () use {}
+effect Marker { fn read() -> Int }
+handler Resource: Marker { fn read() { 1 }
+  release { mark(99) } }
+pub fn work() -> Int use Async { with Resource { panic("bad") } }

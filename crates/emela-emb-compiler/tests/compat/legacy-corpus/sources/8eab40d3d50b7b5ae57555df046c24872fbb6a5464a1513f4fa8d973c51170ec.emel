@@ -1,0 +1,10 @@
+effect Counter { fn get() -> Int }
+handler Answer: Counter { fn get() { 42 } }
+handler Other: Counter { fn get() { 41 } }
+fn read() -> Int use Counter { (use Counter).get() }
+fn main() -> Int {
+with Answer {
+inner = with Other { read() }
+inner + read()
+}
+}

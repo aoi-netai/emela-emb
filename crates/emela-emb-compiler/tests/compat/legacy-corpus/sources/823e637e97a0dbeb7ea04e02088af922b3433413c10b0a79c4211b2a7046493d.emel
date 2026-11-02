@@ -1,0 +1,10 @@
+
+@external(c,"trigger")
+fn trigger() -> Int use {}
+const BROKEN = { dbg("once")
+ if trigger() == 1 { panic("broken") } else { [] }
+}
+fn ints(xs:List[Int])->Int{if List.is_empty(xs){42}else{0}}
+fn texts(xs:List[String])->Int{if List.is_empty(xs){42}else{0}}
+pub fn integer()->Int{ints(BROKEN)}
+pub fn text()->Int{texts(BROKEN)}

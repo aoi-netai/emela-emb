@@ -1,0 +1,25 @@
+
+@external(c, "host_wait")
+suspend fn wait(n: Int) -> Int
+@external(c, "mark")
+fn mark(n: Int) -> () use {}
+effect Wait { suspend fn get(n: Int) -> Int }
+handler Waiting: Wait {
+  suspend fn get(n, resume) {
+    mark(n * 10 + 1)
+    value = wait(n)
+    mark(n * 10 + 2)
+    callback = fn() { resume(value) }
+    callback()
+    mark(n * 10 + 4)
+  }
+}
+pub fn work() -> Int {
+  with Waiting {
+    a = (use Wait).get(1)
+    mark(13)
+    b = (use Wait).get(2)
+    mark(23)
+    a + b
+  }
+}

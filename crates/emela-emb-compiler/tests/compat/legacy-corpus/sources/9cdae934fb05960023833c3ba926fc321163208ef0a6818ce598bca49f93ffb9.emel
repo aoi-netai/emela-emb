@@ -1,0 +1,7 @@
+
+@external
+type Token
+@external(c,"host_token")
+fn token() -> Token use {}
+const TOKEN = token()
+pub fn read() -> Token { TOKEN }

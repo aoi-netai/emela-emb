@@ -1,0 +1,7 @@
+
+@external(c, "fixture_seed")
+fn raw_seed() -> Int
+effect Seed { fn read() -> Int }
+handler BoardSeed: Seed { fn read() { raw_seed() } }
+const V = with BoardSeed { (use Seed).read() }
+pub fn read() -> Int { V }

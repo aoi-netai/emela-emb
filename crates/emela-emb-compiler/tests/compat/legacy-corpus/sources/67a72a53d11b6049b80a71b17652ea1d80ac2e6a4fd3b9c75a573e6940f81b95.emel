@@ -1,0 +1,14 @@
+
+@external(c, "host_wait")
+suspend fn wait(n: Int) -> Int
+error Boom(n: Int) derive Show
+effect Wait { suspend fn get(n: Int) -> Int fails Boom }
+handler Waiting: Wait {
+ suspend fn get(n,resume) {
+  x = wait(n)
+  if n == 0 { resume(x) } else { fail Boom(n: x) }
+ }
+}
+pub fn caught(n: Int) -> Int use Async {
+ with Waiting { (use Wait).get(n) escape { Boom(n) -> n } }
+}

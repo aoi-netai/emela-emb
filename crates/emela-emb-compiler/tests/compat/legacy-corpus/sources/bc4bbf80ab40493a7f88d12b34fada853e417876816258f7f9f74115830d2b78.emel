@@ -1,0 +1,2 @@
+import Embedded.Local.{value}
+fn main() { value() }

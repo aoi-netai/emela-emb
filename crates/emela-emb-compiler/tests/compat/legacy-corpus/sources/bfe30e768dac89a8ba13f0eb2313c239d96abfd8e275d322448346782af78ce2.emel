@@ -1,0 +1,10 @@
+
+enum Bundle { Call(fn(Int) -> Int, (Int, Bool)) }
+fn apply(f: fn(Bundle) -> (Int, Bool), x: Bundle) -> (Int, Bool) { f(x) }
+fn unpack(x: Bundle) -> (Int, Bool) {
+  x match { Call(f, pair) -> { (n, flag) = pair
+    (f(n), flag) } }
+}
+
+fn plus(n: Int) -> Int { n + 1 }
+pub fn work(n: Int) -> (Int, Bool) { apply(unpack, Call(plus, (n, True))) }

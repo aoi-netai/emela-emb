@@ -1,0 +1,21 @@
+
+@external(c, "host_wait")
+suspend fn wait(n: Int) -> Int
+error Boom(n: Int) derive Show
+effect Wait { suspend fn get(n: Int) -> Int }
+handler Waiting: Wait { suspend fn get(n,resume) { resume(wait(n)) } }
+effect Tick { suspend fn tick() -> Int fails Boom }
+handler Ticking: Tick {
+ suspend fn tick(resume) { resume(42)
+  (use Wait).get(1)
+  fail Boom(n: -2147483647 - 1)
+ }
+}
+fn issue() -> Int use { Tick } { (use Tick).tick() escape { Boom(_) -> -1 } }
+pub fn work() -> Int use Async {
+ with Waiting { with Ticking {
+  n = issue()
+  (use Wait).get(2)
+  n
+ } }
+}

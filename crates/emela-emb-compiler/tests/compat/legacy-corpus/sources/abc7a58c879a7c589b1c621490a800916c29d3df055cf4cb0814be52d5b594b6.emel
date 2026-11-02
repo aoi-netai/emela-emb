@@ -1,0 +1,14 @@
+
+import Std.Fiber.{Fiber}
+pub fn wide(n: Int64) -> Int64 use Async {
+  Fiber.scope(fn() { child = Fiber.fork(fn() { n })
+    Fiber.join(child) })
+}
+pub fn real(n: Float) -> Float use Async {
+  Fiber.scope(fn() { child = Fiber.fork(fn() { n })
+    Fiber.join(child) })
+}
+pub fn flag(n: Bool) -> Bool use Async {
+  Fiber.scope(fn() { child = Fiber.fork(fn() { n })
+    Fiber.join(child) })
+}

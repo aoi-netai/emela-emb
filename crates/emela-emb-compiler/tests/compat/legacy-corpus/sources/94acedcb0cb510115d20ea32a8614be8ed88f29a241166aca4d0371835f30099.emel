@@ -1,0 +1,4 @@
+
+pub fn has_a(text: String) -> Bool { String.contains(text, "a") }
+pub fn starts_a(text: String) -> Bool { String.starts_with(text, "a") }
+pub fn ends_a(text: String) -> Bool { String.ends_with(text, "a") }

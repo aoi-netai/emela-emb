@@ -1,0 +1,9 @@
+
+pub fn formatter(n: Int) -> (fn() -> String) { fn() { Int.to_string(n) } }
+pub fn capture(n: Int) -> (fn() -> String) {
+  first = Int.to_string(n)
+  String.byte_size(first)
+  other = Int.to_string(n + 1)
+  String.byte_size(other)
+  fn() { first }
+}

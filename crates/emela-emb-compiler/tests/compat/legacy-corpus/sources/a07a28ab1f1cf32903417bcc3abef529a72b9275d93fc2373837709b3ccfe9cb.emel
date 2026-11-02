@@ -1,0 +1,9 @@
+
+@external
+type Handle[A]
+@external(c,"host_handle")
+fn handle[A]() -> Handle[A] use {}
+const HANDLE = handle()
+fn number(h: Handle[Int]) -> Int { 42 }
+fn text(h: Handle[String]) -> Int { 42 }
+pub fn work() -> Int { number(HANDLE) + text(HANDLE) - 42 }

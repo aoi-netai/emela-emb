@@ -1,0 +1,17 @@
+
+error Missing(text: String)
+fn produce(n: Int, bad: Bool) -> (String, Option[String]) fails Missing {
+  if bad { fail Missing(Int.to_string(n)) }
+  text = Int.to_string(n + 1)
+  (text, Some(text))
+}
+fn invoke(f: fn(Int, Bool) -> (String, Option[String]) fails Missing, n: Int, bad: Bool) -> (String, Option[String]) fails Missing {
+  f(n, False)
+  f(n, bad)
+}
+pub fn checked(n: Int, bad: Bool) -> String {
+  pair = invoke(produce, n, bad) escape { Missing(text) -> (text, None) }
+  (text, note) = pair
+  note match { Some(suffix) -> String.append(text, suffix)
+    None -> text }
+}

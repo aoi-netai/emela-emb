@@ -1,0 +1,29 @@
+
+import Std.Fiber.{Fiber, Success, Failure}
+@external(c, "host_wait")
+suspend fn wait(n: Int) -> Int
+@external(c, "mark")
+fn mark(n: Int) -> () use {}
+error Boom(n: Int)
+effect Wait { suspend fn get(n: Int) -> Int }
+handler Waiting: Wait { suspend fn get(n,resume) { resume(wait(n)) } }
+effect Resource { fn read() -> Int }
+handler Res: Resource {
+ fn read() { 0 }
+ release { mark(1)
+  (use Wait).get(2)
+  mark(2)
+ }
+}
+pub fn attempt(n: Int) -> Int use Async {
+ with Waiting {
+  a = Fiber.attempt(fn() { with Res {
+   x = (use Wait).get(1)
+   if n == 0 { x } else { fail Boom(n: n) }
+  } })
+  mark(3)
+  a match { Success(v) -> v
+   Failure(_) -> 42
+  }
+ }
+}

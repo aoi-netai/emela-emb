@@ -1,0 +1,16 @@
+
+import Std.Fiber.{Fiber, Scope}
+import Std.Deferred.{Deferred}
+pub fn cycle() -> Bool use Async {
+  Fiber.scope(fn() {
+    d: Deferred[Fiber[fn() -> Bool use Async]] = (use Scope).deferred()
+    child = Fiber.fork(fn() {
+      me = Deferred.await(d)
+      fn() { Fiber.join(me)
+        True }
+    })
+    Deferred.complete(d, child)
+    callback = Fiber.join(child)
+    callback()
+  })
+}

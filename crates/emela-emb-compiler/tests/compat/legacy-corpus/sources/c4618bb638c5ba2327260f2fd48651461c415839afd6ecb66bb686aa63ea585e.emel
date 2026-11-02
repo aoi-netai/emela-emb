@@ -1,0 +1,33 @@
+
+import Std.Fiber.{Fiber, Exit, Success, Failure}
+@external(c, "mark")
+fn mark(n: Int) -> () use {}
+pub fn work(n: Int) -> Int use Async {
+  Fiber.scope(fn() {
+    child = Fiber.fork(fn() { mark(2)
+      n })
+    mark(1)
+    first = Fiber.await(child) match { Success(v) -> v
+      Failure(_) -> -1 }
+    Fiber.fork(fn() { mark(99) })
+    Fiber.await(child)
+    next = Fiber.await(child) match { Success(v) -> v
+      Failure(_) -> -2 }
+    mark(3)
+    first + next + Fiber.join(child)
+  })
+}
+pub fn unit() -> Bool use Async {
+  Fiber.scope(fn() {
+    child = Fiber.fork(fn() { () })
+    Fiber.await(child) match { Success(_) -> True
+      Failure(_) -> False }
+  })
+}
+pub fn discard() -> () use Async {
+  Fiber.scope(fn() {
+    child = Fiber.fork(fn() { mark(1) })
+    Fiber.await(child)
+    mark(2)
+  })
+}

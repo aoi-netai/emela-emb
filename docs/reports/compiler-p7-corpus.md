@@ -18,7 +18,7 @@
 
 source 177testのうち、正常期待174、resolve拒否期待2、同梱moduleのparseだけを検査する期待1。これはtest単位の経路分類であり、174個の新compiler成功を意味しない。
 
-source呼出しへ結び付いた具体program本文はhashで共通化して167個。別に7個の生成式を未具体化のまま保持する。本文候補・文字列置換の断片・Rust fixture・module資産も含む全text記録は218個で、167個のprogram入力と区別する。1testが複数moduleを渡す場合は、`source_invocations[].inputs` にfilenameと本文IDの組を保持する。
+source呼出しへ結び付いた具体program/module本文はhashで共通化して179個。7個の生成式も12variantへ展開した。本文候補・文字列置換の断片・Rust fixture・module資産も含む全text記録は230個で、179個のprogram/module本文と区別する。1testが複数moduleを渡す場合は、`source_invocations[].inputs` にfilenameと本文IDの組を保持する。
 
 ## 期待と根拠
 
@@ -26,7 +26,7 @@ source呼出しへ結び付いた具体program本文はhashで共通化して167
 
 `support::try_lower` はparse/resolve/type diagnosticsが空であることを内部でassertしてからlowerの `Result` を返す。このため、その `.unwrap_err()` をfrontend拒否として分類しない。parse・resolve・typecheck・lowerの期待は別fieldにし、backendやC harnessの呼出しも別に記録した。単に `MemoryFiles::new` やparserを呼ぶだけの経路をC成功へ拡大していない。
 
-[人手の経路review](../tools/legacy_corpus_reviews.json)は56testを補足する。Rust inventory用の `enum`/`fn` 文字列、native contract fixture、同梱sourceのparse loop、driverの2件のresolve拒否などが対象。reviewは旧testの意味だけを述べ、全recordの `new_status` は `unmapped` のままにしている。
+[人手の経路review](../tools/legacy_corpus_reviews.json)は65testを補足する。Rust inventory用の `enum`/`fn` 文字列、native contract fixture、同梱sourceのparse loop、driverの2件のresolve拒否、format生成と条件分岐などが対象。reviewは旧testの意味だけを述べ、全recordの `new_status` は `unmapped` のままにしている。
 
 ## source変形とcross-target参照
 
@@ -34,24 +34,30 @@ source呼出しへ結び付いた具体program本文はhashで共通化して167
 
 - Bytes corpusの `fn main()` → `pub fn main()`、`20000` → `128` を実際に適用した本文を保存する。include元の未変形本文を、そのtestが投入した最終sourceとして扱わない。
 - aggregate ABIの2fileの `.concat()` は結合後のsourceと構成本文IDを保存する。
-- `examples/support/phase7_integration_flow.rs` はsourceを書き換える条件分岐を持つ。元と変形後の候補を保持し、どの分岐が各testで実行されるかはreviewを残す。
+- `examples/support/phase7_integration_flow.rs` はsourceを書き換える条件分岐を持つ。`run(false)` と `run(true)` を呼ぶ各testに対し、対応するhelper traceと、Int/String成功型の最終sourceをreviewで確定する。`with_collector` によるIR差はsourceの差と分ける。
 - `sources.rs` の `bundled_sources()` は定数 `SOURCES` の6moduleへreviewで結び付ける。このtestの期待はparseのみで、typecheck/lower/Cを主張しない。
 
-## 未完了の入力review
+## 生成式と条件分岐の具体化
 
-7個の `format!` 生成式と、2testで共有する条件付きsource書換えが残る。いずれも旧正常sourceの対象に残し、新compilerの不足syntaxを理由に除外していない。生成式はRust式そのもの、呼出し元のfunction本文、helper trace、sourceらしいliteral断片をJSONに残した。
+7個の `format!` 生成式と、2testで共有する条件付きsource書換えをreviewで解決した。未具体化の生成式・入力reviewは0。生成式自体、呼出し元のRust function本文、helper trace、元のliteral断片もJSONに残した。新compilerの不足syntaxを理由に除外していない。
 
-| 生成/分岐元 | 残る作業 |
+| 生成/分岐元 | 具体化 |
 | --- | --- |
-| `tests/completion_types/derived.rs` | type定義とtype名を差し込む生成sourceの組を具体化する |
-| `tests/const_runtime/mod.rs` の2式 | loop/helperから渡すconst式の各variantを具体化する |
-| `tests/deferred/mod.rs` | leakするcallbackの戻り型variantを具体化する |
-| `tests/fiber/await_.rs` | child/scopeの生成source variantを具体化する |
-| `tests/fiber/cause.rs` | cleanup/interruptionの生成source variantを具体化する |
-| `tests/string_comparison/mod.rs` | 共通 `SOURCE` と追記sourceを具体化する |
-| `tests/fiber/integration.rs` の2test | helperのbool引数とsource書換え分岐の対応を確定する |
+| `tests/completion_types/derived.rs` | 固定Wrap定義・`Wrap[Int]`・`Box([42])` の1variant |
+| `tests/const_runtime/mod.rs` の2式 | doubleの17重適用1variant、panic/自己参照2variant |
+| `tests/deferred/mod.rs` | poll/awaitと、対応する戻り型・invoke宣言の2variant |
+| `tests/fiber/await_.rs` | join/awaitの2variant |
+| `tests/fiber/cause.rs` | mode=0,1,2に対応するprotected関数の3variant |
+| `tests/string_comparison/mod.rs` | 共通 `SOURCE` assetとstore/read追記の1variant |
+| `tests/fiber/integration.rs` の2test | helperのbool引数に合わせたInt/String sourceを選択 |
 
-この9test以外についても、索引は旧testを実行した証拠ではない。新compilerへ対応付ける際はsource受理、拒否、Cの各経路を個別に確認する。IR-onlyからsource成功へ格上げしない。
+sourceの具体化は、旧testを実行した証拠ではない。新compilerへ対応付ける際はsource受理、拒否、Cの各経路を個別に確認する。IR-onlyからsource成功へ格上げしない。
+
+## 旧repoに依存しない正常source fixture
+
+正常期待174testを、[fixture manifest](../../crates/emela-emb-compiler/tests/compat/legacy-corpus/manifest.json)から169program/170content filesへ共通化した。元のlogical filename・entry・test名・本文SHA-256を保持する。差し込んだ生成sourceを含め、source本文へC exportの注釈やwrapperを暗黙に足していない。
+
+phase7 integrationのrequest外部関数化/GC anchor、Cause cleanupのFlow後処理などは `execution_configuration` に分ける。これらの旧C期待値を、後処理なしのsource実行と同一視しない。新compilerでの到達・C期待値の移植は、入力保存とは別の検証で記録する。
 
 ## 再生成と独立性
 
@@ -60,8 +66,10 @@ Python 3.10以降の標準libraryとGitだけを使う。旧repoでは固定obje
 ```sh
 python3 docs/tools/index_legacy_corpus.py /path/to/legacy/repository
 python3 docs/tools/index_legacy_corpus.py /path/to/legacy/repository --check
+python3 docs/tools/materialize_legacy_fixtures.py
+python3 docs/tools/materialize_legacy_fixtures.py --check
 ```
 
 生成時に、全test属性の対応・対象file/moduleの訪問・test ID重複・本文hash・source ID参照・reviewの固定revisionを検査する。`--check` は再生成結果とcommit済みJSONのbyte一致を検査する。
 
-旧repoの指定はこの監査成果を再生成するときだけに必要。compilerや通常の `cargo test` は索引生成器を呼ばない。P7の実行試験へ使う本文はこの索引から必要な組だけ `crates/emela-emb-compiler/tests/compat` に保存し、C harness・期待値・出自を添える。最終試験が旧repoのpathやbundleを読む構成にはしない。
+旧repoの指定は索引を固定objectから再抽出するときだけに必要。fixture生成器は保存済みJSONだけを読み、旧repoを参照しない。compilerや通常の `cargo test` は索引生成器を呼ばない。C harness・期待値・adapterは実行試験として個別に移す。最終試験が旧repoのpathやbundleを読む構成にはしない。

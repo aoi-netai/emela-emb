@@ -1,0 +1,2 @@
+# Preserve blank final lines that are part of the fixed legacy source input.
+*.emel whitespace=-blank-at-eof

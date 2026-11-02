@@ -1,0 +1,2 @@
+import Std.Fiber.{Fiber}
+pub fn work() -> Int use Async { Fiber.scope(fn() { 1 }) }

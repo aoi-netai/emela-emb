@@ -1,0 +1,19 @@
+
+@external(c, "mark")
+fn mark(n: Int) -> () use {}
+effect Wait { suspend fn get(n: Int) -> Int }
+handler Instant: Wait {
+  suspend fn get(n, resume) {
+    mark(1)
+    resume(n)
+    mark(2)
+  }
+}
+
+pub fn instant(n: Int) -> Int {
+  with Instant {
+    value = (use Wait).get(n)
+    mark(3)
+    value + 1
+  }
+}

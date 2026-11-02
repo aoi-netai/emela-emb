@@ -1,0 +1,8 @@
+
+const ITEMS={dbg("once")
+ [[]]
+}
+fn ints(xs:List[List[Int]])->Int{42}
+fn texts(xs:List[List[String]])->Int{42}
+pub fn integer()->Int{ints(ITEMS)}
+pub fn text()->Int{texts(ITEMS)}

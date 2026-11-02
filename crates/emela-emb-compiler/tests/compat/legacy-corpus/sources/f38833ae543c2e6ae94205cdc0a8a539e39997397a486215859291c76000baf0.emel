@@ -1,0 +1,8 @@
+effect Counter { fn get() -> Int }
+handler Answer: Counter { fn get() { 2 } }
+pub fn apply(x: Int) -> Int {
+with Answer {
+read = fn() { x + (use Counter).get() }
+read()
+}
+}

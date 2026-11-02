@@ -1,0 +1,34 @@
+
+import Std.Fiber.{Fiber, Scope}
+import Std.Deferred.{Deferred}
+@external(c, "mark")
+fn mark(n: Int) -> () use {}
+effect Gate { suspend fn go(start: Deferred[fn(Int) -> ()], stop: Deferred[()]) -> Int }
+handler Gated: Gate {
+  suspend fn go(start, stop, resume) {
+    Deferred.complete(start, resume)
+    Deferred.await(stop)
+  }
+}
+pub fn ready() -> Int use Async {
+  Fiber.scope(fn() {
+    start: Deferred[fn(Int) -> ()] = (use Scope).deferred()
+    stop: Deferred[()] = (use Scope).deferred()
+    target = Fiber.fork(fn() {
+      resume = Deferred.await(start)
+      resume(7)
+      42
+    })
+    result = Fiber.scope(fn() {
+      registered: Deferred[()] = (use Scope).deferred()
+      Fiber.fork(fn() { Fiber.join(target)
+        mark(99) })
+      Fiber.fork(fn() { Fiber.await(target)
+        mark(99) })
+      Fiber.fork(fn() { Deferred.complete(registered, ()) })
+      Deferred.await(registered)
+      with Gated { (use Gate).go(start, stop) }
+    })
+    result + Fiber.join(target)
+  })
+}

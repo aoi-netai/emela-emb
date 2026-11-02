@@ -1,0 +1,11 @@
+
+import Std.Fiber.{Fiber, Success, Failure}
+error Boom
+pub fn attempt(n: Int) -> Int {
+ Fiber.attempt(fn() { fail Boom })
+ Fiber.attempt(fn() { [n, n+1] })
+ a = Fiber.attempt(fn() { [n, n+1] })
+ a match { Success(xs) -> List.length(xs) + 40
+  Failure(_) -> -1
+ }
+}

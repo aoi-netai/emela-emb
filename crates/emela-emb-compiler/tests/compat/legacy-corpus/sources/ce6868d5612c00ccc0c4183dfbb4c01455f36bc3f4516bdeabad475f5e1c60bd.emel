@@ -1,0 +1,17 @@
+
+import Std.Fiber.{Fiber}
+@external(c, "mark")
+fn mark(n: Int) -> () use {}
+pub fn work() -> Int use Async {
+  Fiber.scope(fn() {
+    skipped = Fiber.fork(fn() { mark(99) })
+    Fiber.interrupt(skipped)
+    Fiber.interrupt(skipped)
+    done = Fiber.fork(fn() { 42 })
+    value = Fiber.join(done)
+    Fiber.fork(fn() { mark(99) })
+    Fiber.interrupt(done)
+    mark(1)
+    value
+  })
+}

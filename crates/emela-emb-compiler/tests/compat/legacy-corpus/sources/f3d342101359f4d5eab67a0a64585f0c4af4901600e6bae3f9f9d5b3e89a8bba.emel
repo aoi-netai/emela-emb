@@ -1,0 +1,4 @@
+
+import Std.Bytes.{Bytes}
+pub fn discard(s: String) { Bytes.encode_utf8(s)
+  () }

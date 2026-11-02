@@ -785,6 +785,50 @@ def apply_reviews(document: dict, evidence: Evidence, path: Path) -> None:
         test["route_review"] = review
         test["category"] = review["category"]
         test["legacy_classes"] = review.get("legacy_classes", [review["category"]])
+        if "select_trace" in review:
+            required = review["select_trace"]
+            test["source_invocations"] = [invocation for invocation in test["source_invocations"] if any(evidence.inventory.functions[function].file.path == required["path"] and evidence.inventory.functions[function].name == required["function"] for function in invocation["trace"])]
+            if not test["source_invocations"]:
+                raise ValueError(f"reviewed source trace was not found: {identifier}")
+        if "select_source_contains" in review:
+            for invocation in test["source_invocations"]:
+                invocation["inputs"] = [value for value in invocation["inputs"] if all(fragment in evidence.inputs[value["input"]].get("source", "") for fragment in review["select_source_contains"])]
+                if not invocation["inputs"]:
+                    raise ValueError(f"reviewed source branch was not found: {identifier}")
+                for value in invocation["inputs"]:
+                    value.pop("binding_review", None)
+                    value["binding_review_resolution"] = review["note"]
+        if "materializations" in review:
+            for materialization in review["materializations"]:
+                generated_id = materialization["generated_input"]
+                generated = evidence.inputs[generated_id]
+                tokens = tokenize(generated["origin"]["rust_expression"])
+                if [token.text for token in tokens[:3]] != ["format", "!", "("] or tokens[3].kind != "string":
+                    raise ValueError(f"reviewed generation is not a format literal: {generated_id}")
+                variants = []
+                for variant in materialization["variants"]:
+                    fields = {name: materialized_field(value, evidence) for name, value in variant["fields"].items()}
+                    text = tokens[3].value.format_map(fields)
+                    origin = {"review": identifier, "generated_input": generated_id, "variant": variant["name"], "fields": variant["fields"], "template_origin": generated["origin"]}
+                    variants.append({"input": evidence.source(text, origin, "reviewed-format-materialization"), "variant": variant["name"]})
+                replaced = 0
+                for invocation in test["source_invocations"]:
+                    values = []
+                    for value in invocation["inputs"]:
+                        if value["input"] == generated_id:
+                            values.extend({**value, **variant} for variant in variants)
+                            replaced += 1
+                        else:
+                            values.append(value)
+                    invocation["inputs"] = values
+                if not replaced:
+                    raise ValueError(f"materialization has no matching invocation: {identifier}:{generated_id}")
+                generated["resolved_by_review"] = identifier
+                generated["materialized_inputs"] = [variant["input"] for variant in variants]
+            test["non_program_literals"].extend({"input": value, "role": "reviewed format template or fragment; the materialized program is indexed separately"} for value in test["unassigned_source_literal_candidates"])
+            test["unassigned_source_literal_candidates"] = []
+        if "execution_configuration" in review:
+            test["execution_configuration"] = review["execution_configuration"]
         if review.get("non_program_literal_language"):
             test["non_program_literals"].extend({"input": value, "role": f"reviewed {review['non_program_literal_language']} fixture, not Emela source"} for value in test["unassigned_source_literal_candidates"])
             test["unassigned_source_literal_candidates"] = []
@@ -802,9 +846,27 @@ def apply_reviews(document: dict, evidence: Evidence, path: Path) -> None:
         if "legacy_expected" in review:
             for invocation in test["source_invocations"]:
                 invocation["legacy_expected"] = {**review["legacy_expected"], "basis": review["note"]}
+        test["source_inputs"] = sorted({value["input"] for invocation in test["source_invocations"] for value in invocation["inputs"] if evidence.inputs[value["input"]]["kind"] == "concrete"})
+        test["generated_inputs"] = sorted({value["input"] for invocation in test["source_invocations"] for value in invocation["inputs"] if evidence.inputs[value["input"]]["kind"] != "concrete"})
         test["review_status"] = "route-reviewed-input-pending" if test["generated_inputs"] or test["unassigned_source_literal_candidates"] else "legacy-route-reviewed"
     document["source_inputs"] = sorted(evidence.inputs.values(), key=lambda source: source["id"])
     document["route_reviews"] = {"path": path.as_posix(), "sha256": hashlib.sha256(path.read_bytes()).hexdigest(), "test_count": len(reviews["tests"])}
+
+
+def materialized_field(value: str | dict, evidence: Evidence) -> str:
+    if isinstance(value, str):
+        return value
+    if set(value) == {"asset"}:
+        return evidence.objects.read(value["asset"])
+    if set(value) == {"wrap"}:
+        wrap = value["wrap"]
+        if not 0 <= wrap["repeat"] <= 128:
+            raise ValueError("reviewed wrap count exceeds its static bound")
+        result = wrap["initial"]
+        for _ in range(wrap["repeat"]):
+            result = wrap["template"].format(value=result)
+        return result
+    raise ValueError(f"unsupported materialization field: {value}")
 
 
 def finish(document: dict) -> None:

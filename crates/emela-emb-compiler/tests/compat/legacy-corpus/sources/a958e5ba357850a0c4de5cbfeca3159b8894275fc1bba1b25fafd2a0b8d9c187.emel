@@ -1,0 +1,6 @@
+
+const EMPTY = { dbg("once")
+ [] }
+fn ints(xs: List[Int]) -> Int { List.length(xs) }
+fn strings(xs: List[String]) -> Int { List.length(xs) }
+pub fn read() -> Int { ints(EMPTY) + strings(EMPTY) }

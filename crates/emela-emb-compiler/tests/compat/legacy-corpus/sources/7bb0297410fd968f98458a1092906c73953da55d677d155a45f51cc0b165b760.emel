@@ -1,0 +1,5 @@
+
+@external(c,"host_value")
+fn value() -> String use {}
+const VALUE = value()
+pub fn size() -> Int { String.byte_size(VALUE) }

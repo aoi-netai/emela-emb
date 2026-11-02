@@ -1,0 +1,10 @@
+
+import Std.Fiber.{Fiber, Scope}
+import Std.Deferred.{Deferred}
+pub fn full() -> Bool use Async {
+  Fiber.scope(fn() {
+    a: Deferred[Int] = (use Scope).deferred()
+    b: Deferred[Int] = (use Scope).deferred()
+    Deferred.complete(a, 1) && Deferred.complete(b, 2)
+  })
+}

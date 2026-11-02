@@ -1,0 +1,11 @@
+
+error Boom
+effect Tick { suspend fn tick() -> Int fails Boom }
+handler Ticking: Tick {
+ suspend fn tick(resume) { resume(42)
+  fail Boom
+ }
+}
+pub fn work() -> Int use Async {
+ with Ticking { (use Tick).tick() escape { Boom -> 0 } }
+}

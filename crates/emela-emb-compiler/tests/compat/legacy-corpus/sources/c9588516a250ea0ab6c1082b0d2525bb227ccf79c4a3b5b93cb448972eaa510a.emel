@@ -1,0 +1,29 @@
+
+import Std.Fiber.{Fiber, Scope}
+import Std.Deferred.{Deferred}
+@external(c, "mark")
+fn mark(n: Int) -> () use {}
+fn cleanup(started: Deferred[()], done: Deferred[()]) -> () use Async {
+  mark(1)
+  Deferred.complete(started, ())
+  Deferred.await(done)
+  mark(3)
+}
+pub fn work() -> Int use Async {
+  Fiber.scope(fn() {
+    stop: Deferred[Int] = (use Scope).deferred()
+    started: Deferred[()] = (use Scope).deferred()
+    done: Deferred[()] = (use Scope).deferred()
+    child = Fiber.fork(fn() { Deferred.await(stop)
+      cleanup(started, done)
+      7 })
+    canceller = Fiber.fork(fn() { Fiber.interrupt(child) })
+    completer = Fiber.fork(fn() { Deferred.await(started)
+      mark(2)
+      Deferred.complete(done, ()) })
+    Fiber.join(canceller)
+    Fiber.join(completer)
+    mark(4)
+    42
+  })
+}

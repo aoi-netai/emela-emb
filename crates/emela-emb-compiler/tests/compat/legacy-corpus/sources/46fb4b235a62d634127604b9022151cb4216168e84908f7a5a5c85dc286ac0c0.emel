@@ -1,0 +1,16 @@
+
+import Std.Bytes.{Bytes}
+import Std.State.{State}
+pub fn captured(s: String) -> Bytes {
+  value = Bytes.encode_utf8(s)
+  read = fn() { value }
+  read()
+}
+pub fn state(b: Bytes) -> Bytes {
+  (value, final) = State.run(b, fn() {
+    state = use State[Bytes]
+    state.set(Bytes.append(state.get(), state.get()))
+    state.get()
+  })
+  value
+}

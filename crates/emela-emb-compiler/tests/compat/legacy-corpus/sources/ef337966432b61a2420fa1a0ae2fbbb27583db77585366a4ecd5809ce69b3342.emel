@@ -1,0 +1,17 @@
+
+import Std.Fiber.{Fiber, Success, Failure}
+pub fn wide(n: Int64) -> Int64 use Async {
+  Fiber.scope(fn() { child = Fiber.fork(fn() { n })
+    Fiber.await(child) match { Success(v) -> v
+      Failure(_) -> n } })
+}
+pub fn real(n: Float) -> Float use Async {
+  Fiber.scope(fn() { child = Fiber.fork(fn() { n })
+    Fiber.await(child) match { Success(v) -> v
+      Failure(_) -> 0.0 } })
+}
+pub fn flag(n: Bool) -> Bool use Async {
+  Fiber.scope(fn() { child = Fiber.fork(fn() { n })
+    Fiber.await(child) match { Success(v) -> v
+      Failure(_) -> False } })
+}

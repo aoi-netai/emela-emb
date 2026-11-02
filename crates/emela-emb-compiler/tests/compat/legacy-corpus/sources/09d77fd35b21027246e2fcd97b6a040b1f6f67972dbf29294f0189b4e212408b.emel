@@ -1,0 +1,18 @@
+
+import Std.Fiber.{Fiber, Scope}
+import Std.Deferred.{Deferred}
+pub fn text(n: Int) -> String use Async {
+  Fiber.scope(fn() {
+    d: Deferred[String] = (use Scope).deferred()
+    Fiber.fork(fn() { Deferred.complete(d, Int.to_string(n)) })
+    Deferred.await(d)
+  })
+}
+pub fn list(n: Int) -> List[Int] use Async {
+  Fiber.scope(fn() {
+    d: Deferred[List[Int]] = (use Scope).deferred()
+    Fiber.fork(fn() { Deferred.complete(d, [n, n + 1]) })
+    Deferred.await(d)
+  })
+}
+pub fn length(xs: List[Int]) -> Int { List.length(xs) }

@@ -1,0 +1,11 @@
+
+import Std.Clock.{Clock}
+import Std.Console.{Console}
+import Embedded.Board.{BoardClock, BoardConsole}
+pub fn main() -> Int use Async {
+  with BoardClock, BoardConsole {
+    (use Clock).sleep(2)
+    (use Console).print_line("connected")
+    42
+  }
+}

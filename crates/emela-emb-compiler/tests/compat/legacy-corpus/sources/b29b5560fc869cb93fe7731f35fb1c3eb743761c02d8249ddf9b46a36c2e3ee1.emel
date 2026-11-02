@@ -1,0 +1,17 @@
+
+import Std.Fiber.{Fiber, Success, Failure}
+import Std.Cause.{Cause}
+@external(c, "mark")
+fn mark(n: Int) -> () use {}
+error Boom(n: Int) derive Show
+effect Resource { fn read() -> Int }
+handler Res: Resource { fn read() { 0 }
+ release { mark(1) }
+}
+fn retry(c: Cause[Boom]) -> Int fails Boom { with Res { Cause.raise(c) } }
+pub fn rethrow(n: Int) -> Int {
+ Fiber.attempt(fn() { fail Boom(n: n) }) match {
+  Success(_) -> 0
+  Failure(c) -> retry(c) escape { Boom(n) -> n }
+ }
+}
