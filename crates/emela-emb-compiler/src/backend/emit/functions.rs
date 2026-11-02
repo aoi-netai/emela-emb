@@ -35,6 +35,9 @@ pub(in crate::backend::emit) fn emit_local_declarations(
                     Some(initial),
                 );
                 writer.decl("int", &owned_variable_name(id), Some("INT32_C(0)"));
+                // A non-returning call can remove every ownership use of a
+                // declared local, just as it can remove uses of the value itself.
+                writer.line(&format!("(void)&{};", owned_variable_name(id)));
             } else {
                 writer.decl(&layouts.c_type(variable.ty), &variable_name(id), None);
             }
