@@ -9,10 +9,11 @@ use crate::{
     Diagnostic, DiagnosticKind, Span,
     contract::ir::{Type, TypeId, TypeTable},
 };
-use std::collections::HashSet;
+use std::collections::{HashMap, HashSet};
 pub(crate) fn normalize(
     program: &mut ir::Program,
     solver: &mut Solver,
+    parameters: &[Vec<TypeId>],
 ) -> Result<(), Vec<Diagnostic>> {
     solver
         .finish_defaults(&mut program.core.types)
@@ -25,11 +26,18 @@ pub(crate) fn normalize(
         })?;
     let mut errors = Vec::new();
     for function in &mut program.functions {
+        let substitutions = parameters[function.id.0]
+            .iter()
+            .enumerate()
+            .map(|(index, &parameter)| (parameter, program.core.types.intern(Type::Param(index))))
+            .collect();
         let mut context = Context {
             solver,
             types: &mut program.core.types,
             source: &function.source_name,
             parameters: function.type_parameters,
+            substitutions,
+            schemes: parameters,
         };
         let result = (|| {
             for parameter in &mut function.signature.params {
@@ -72,12 +80,14 @@ struct Context<'a> {
     types: &'a mut TypeTable,
     source: &'a str,
     parameters: usize,
+    substitutions: HashMap<TypeId, TypeId>,
+    schemes: &'a [Vec<TypeId>],
 }
 impl Context<'_> {
     fn ty(&mut self, ty: &mut ValueType, span: Span) -> Result<(), Diagnostic> {
         let resolved = self
             .solver
-            .resolve(self.types, backend_type(*ty))
+            .substitute(self.types, backend_type(*ty), &self.substitutions)
             .map_err(|e| {
                 Diagnostic::new(DiagnosticKind::Type, span, e.message).in_source(self.source)
             })?;
@@ -166,8 +176,12 @@ impl Context<'_> {
             E::Call {
                 args,
                 type_arguments,
+                target,
                 ..
             } => {
+                // Calls within an unfinished recursive component share its inferred
+                // variables until the entire component has been generalized.
+                type_arguments.extend_from_slice(&self.schemes[target.0][type_arguments.len()..]);
                 for arg in args {
                     self.expression(arg)?;
                 }

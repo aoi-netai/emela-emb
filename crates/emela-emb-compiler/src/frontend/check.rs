@@ -67,6 +67,7 @@ struct Checker {
     scopes: Vec<Scope>,
     checked: Vec<Option<ir::Function>>,
     states: Vec<u8>,
+    schemes: super::schemes::Schemes,
 }
 struct Locals {
     names: HashMap<String, Local>,
@@ -101,11 +102,29 @@ pub(crate) fn check(modules: Modules) -> Result<ir::Program, Vec<Diagnostic>> {
         definitions: Vec::new(),
         checked: Vec::new(),
         states: Vec::new(),
+        schemes: super::schemes::Schemes::default(),
     };
     checker.collect()?;
     checker.imports()?;
     checker.checked.resize(checker.definitions.len(), None);
     checker.states.resize(checker.definitions.len(), 0);
+    checker.schemes.initialize(
+        checker
+            .definitions
+            .iter()
+            .map(|definition| {
+                (0..definition.ast.type_params.len())
+                    .map(|index| {
+                        checker
+                            .catalog
+                            .core
+                            .types
+                            .intern(crate::contract::ir::Type::Param(index))
+                    })
+                    .collect()
+            })
+            .collect(),
+    );
     let mut errors = Vec::new();
     for index in 0..checker.definitions.len() {
         if let Err(error) = checker.function(DefinitionId(index)) {
@@ -126,7 +145,11 @@ pub(crate) fn check(modules: Modules) -> Result<ir::Program, Vec<Diagnostic>> {
         registry: super::traits::Registry::new(),
         functions: checker.checked.into_iter().flatten().collect(),
     };
-    super::normalize::normalize(&mut program, &mut checker.solver)?;
+    super::normalize::normalize(
+        &mut program,
+        &mut checker.solver,
+        &checker.schemes.parameters,
+    )?;
     checker.catalog.core = program.core.clone();
     super::errors::infer(&mut program, &modes, &mut checker.catalog)?;
     Ok(program)
@@ -542,6 +565,7 @@ impl Checker {
     fn function(&mut self, id: DefinitionId) -> Result<Ty, Diagnostic> {
         let definition = self.definitions[id.0].clone();
         if self.states[id.0] != 0 {
+            self.schemes.reference(id);
             return definition.signature.ret.ok_or_else(|| {
                 self.error(
                     definition.module,
@@ -551,6 +575,55 @@ impl Checker {
                 )
             });
         }
+        self.schemes.begin(id);
+        let result = self.function_body(id);
+        let component = self.schemes.finish(id);
+        let ret = result?;
+        if !component.is_empty() {
+            let signatures = self
+                .definitions
+                .iter()
+                .map(|d| d.signature.clone())
+                .collect::<Vec<_>>();
+            let constants = self
+                .definitions
+                .iter()
+                .map(|d| d.ast.constant)
+                .collect::<Vec<_>>();
+            self.schemes
+                .generalize(
+                    &component,
+                    &signatures,
+                    &constants,
+                    &mut self.catalog.core.types,
+                    &mut self.solver,
+                )
+                .map_err(|e| {
+                    self.error(
+                        definition.module,
+                        DK::Type,
+                        definition.ast.name.span,
+                        e.message,
+                    )
+                })?;
+            for member in component {
+                if let Some(function) = &mut self.checked[member.0] {
+                    function.type_parameters = self.schemes.parameters[member.0].len();
+                    if function.type_parameters != 0 && function.exported {
+                        return Err(Diagnostic::new(
+                            DK::Export,
+                            function.span,
+                            "generic functions require a concrete wrapper at the C boundary",
+                        )
+                        .in_source(&function.source_name));
+                    }
+                }
+            }
+        }
+        Ok(ret)
+    }
+    fn function_body(&mut self, id: DefinitionId) -> Result<Ty, Diagnostic> {
+        let definition = self.definitions[id.0].clone();
         self.states[id.0] = 1;
         let mut locals = Locals {
             names: HashMap::new(),
@@ -1054,9 +1127,7 @@ impl Checker {
                             return self.construct(module, ctor, &[], locals, expected, span);
                         }
                         Symbol::Function(id) if self.definitions[id.0].ast.constant => {
-                            if self.states[id.0] == 0 {
-                                self.function(id)?;
-                            }
+                            self.function(id)?;
                             let ret = self.definitions[id.0]
                                 .signature
                                 .ret
@@ -1260,37 +1331,57 @@ impl Checker {
                         "a const value cannot be called",
                     ));
                 }
-                if self.states[id.0] == 0 {
-                    self.function(id)?;
-                }
+                self.function(id)?;
                 let mut signature = self.definitions[id.0].signature.clone();
-                let type_arguments = (0..self.definitions[id.0].ast.type_params.len())
+                let type_arguments = (0..self.schemes.parameters[id.0].len())
                     .map(|_| {
                         self.solver
                             .try_fresh(&mut self.catalog.core.types, super::infer::Constraint::Any)
                     })
                     .collect::<Result<Vec<_>, _>>()
                     .map_err(|e| self.error(module, DK::Type, span, e.message))?;
-                for parameter in &mut signature.params {
-                    let resolved = self
-                        .solver
-                        .resolve(&mut self.catalog.core.types, data::backend_type(*parameter))
-                        .map_err(|e| self.error(module, DK::Type, span, e.message))?;
+                let substitutions: HashMap<_, _> = self.schemes.parameters[id.0]
+                    .iter()
+                    .copied()
+                    .zip(type_arguments.iter().copied())
+                    .collect();
+                if !type_arguments.is_empty() {
+                    if let Some(ret) = signature.ret {
+                        let resolved = self
+                            .solver
+                            .resolve(&mut self.catalog.core.types, data::backend_type(ret))
+                            .map_err(|e| self.error(module, DK::Type, span, e.message))?;
+                        if self.solver.is_meta(resolved) {
+                            let instance = self
+                                .solver
+                                .try_fresh(
+                                    &mut self.catalog.core.types,
+                                    super::infer::Constraint::Any,
+                                )
+                                .map_err(|e| self.error(module, DK::Type, span, e.message))?;
+                            self.schemes.defer_return(
+                                id,
+                                resolved,
+                                instance,
+                                substitutions.clone(),
+                            );
+                            signature.ret = Some(data::frontend_type(instance));
+                        }
+                    }
+                }
+                for parameter in signature.params.iter_mut().chain(signature.ret.iter_mut()) {
                     *parameter = data::frontend_type(
-                        self.catalog.core.types.subst(resolved, &type_arguments),
+                        self.solver
+                            .substitute(
+                                &mut self.catalog.core.types,
+                                data::backend_type(*parameter),
+                                &substitutions,
+                            )
+                            .map_err(|e| self.error(module, DK::Type, span, e.message))?,
                     );
                 }
-                if let Some(ret) = &mut signature.ret {
-                    let resolved = self
-                        .solver
-                        .resolve(&mut self.catalog.core.types, data::backend_type(*ret))
-                        .map_err(|e| self.error(module, DK::Type, span, e.message))?;
-                    *ret = data::frontend_type(
-                        self.catalog.core.types.subst(resolved, &type_arguments),
-                    );
-                    if let Some(expected) = expected {
-                        self.expect_type(module, *ret, expected, span)?;
-                    }
+                if let (Some(ret), Some(expected)) = (signature.ret, expected) {
+                    self.expect_type(module, ret, expected, span)?;
                 }
 
                 let params = self.definitions[id.0].ast.params.clone();
@@ -1867,15 +1958,14 @@ impl Checker {
         }
         let substitutions = bindings
             .into_iter()
-            .collect::<Option<Vec<TypeId>>>()
-            .ok_or_else(|| {
-                self.error(
-                    module,
-                    DK::Type,
-                    span,
-                    "constructor type arguments cannot be inferred; add a type annotation",
-                )
-            })?;
+            .map(|binding| match binding {
+                Some(ty) => Ok(ty),
+                None => self
+                    .solver
+                    .try_fresh(&mut self.catalog.core.types, super::infer::Constraint::Any),
+            })
+            .collect::<Result<Vec<TypeId>, _>>()
+            .map_err(|e| self.error(module, DK::Type, span, e.message))?;
         let value_type = Ty::Compound(
             self.catalog
                 .core

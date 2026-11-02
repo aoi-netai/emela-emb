@@ -11,6 +11,7 @@ pub(crate) mod modules;
 pub(crate) mod normalize;
 pub(crate) mod parser;
 pub(crate) mod patterns;
+pub(crate) mod schemes;
 pub(crate) mod specialize;
 pub(crate) mod strings;
 pub(crate) mod traits;

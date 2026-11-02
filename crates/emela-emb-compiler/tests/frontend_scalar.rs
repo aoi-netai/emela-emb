@@ -64,7 +64,7 @@ fn rejects_invalid_names_types_arity_and_boundaries_with_source_positions() {
             "@intrinsic\npub fn evil() -> Int",
             DiagnosticKind::Unsupported,
         ),
-        ("fn f() { f() }", DiagnosticKind::Type),
+        ("fn f() -> Int { f() + True }", DiagnosticKind::Type),
         ("pub fn f() -> Int { x = 1\n x() }", DiagnosticKind::Type),
         (
             "@export(c, \"same\")\npub fn a() { 1 }\n@export(c, \"same\")\npub fn b() { 2 }",
