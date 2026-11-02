@@ -117,7 +117,7 @@ impl Catalog {
                         params: data.params.len(),
                         variants: Vec::new(),
                         error: data.error,
-                        external: false,
+                        external: data.external.is_some(),
                     });
                     if catalog.types[module_index]
                         .insert(data.name.value.clone(), id)

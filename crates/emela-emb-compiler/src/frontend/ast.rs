@@ -276,6 +276,7 @@ pub(crate) struct TypeParameter {
 pub(crate) struct Data {
     pub name: Text,
     pub intrinsic: Option<Span>,
+    pub external: Option<Span>,
     pub public: bool,
     pub opaque: bool,
     pub error: bool,
