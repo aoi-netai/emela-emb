@@ -14,6 +14,11 @@ fn wider(f:fn()->Int fails Oops)->Int fails Oops {f()}
 pub fn run()->Int {
   a=invoke(fail_now) escape {Oops->20}
   b=explicit(fail_now) escape {Oops->22}
+  untyped=fn(callback){callback()}
+  assert (untyped(fail_now) escape {Oops->0})==0
+  factory=fn(callback){fn(){callback()}}
+  retained=factory(fail_now)
+  assert (retained() escape {Oops->0})==0
   assert invoke(pure)==42
   assert (wider(pure) escape {Oops->0})==42
   a+b

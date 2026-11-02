@@ -114,7 +114,6 @@ impl Solver {
     pub(crate) fn fresh_rigid_parameter(&mut self, types: &mut TypeTable) -> Result<TypeId> {
         self.parameter(types)
     }
-    #[cfg(test)]
     pub(crate) fn fresh_row(
         &mut self,
         types: &mut TypeTable,

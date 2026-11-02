@@ -368,35 +368,62 @@ impl Checker {
             let mut body = self.block(module, body, &mut lambda_locals, result)?;
             bindings.append(&mut body.statements);
             body.statements = bindings;
-            let errors = self.known_errors(
-                module,
-                &ir::Expr {
-                    kind: ir::ExprKind::Block(body.clone()),
-                    ty: body.ty,
-                    span: body.span,
-                },
+            let invocation = ir::Expr {
+                kind: ir::ExprKind::Block(body.clone()),
+                ty: body.ty,
+                span: body.span,
+            };
+            let functions = self.checked.iter().flatten().cloned().collect::<Vec<_>>();
+            let mut preserved_rows = HashSet::new();
+            let captured = &self.closures.last().expect("active lambda").captures;
+            let relevant_types = params
+                .iter()
+                .map(|local| local.ty)
+                .chain(
+                    locals
+                        .names
+                        .values()
+                        .filter(|local| captured.contains(&local.id))
+                        .map(|local| local.ty),
+                )
+                .collect::<Vec<_>>();
+            for ty in relevant_types {
+                for proxy in self
+                    .solver
+                    .free_metas(&mut self.catalog.core.types, data::backend_type(ty))
+                    .map_err(|error| self.error(module, DK::Type, span, error.message))?
+                {
+                    if self.solver.row_kind(proxy).is_some() {
+                        preserved_rows.insert(proxy);
+                    }
+                }
+            }
+            let errors = super::super::errors::latent(
+                &invocation,
+                &functions,
+                &self.traits.registry,
+                &mut self.catalog,
+                &mut self.solver,
+                &self.schemes.parameters,
+                &self.modules.modules[module].source_name,
+                &preserved_rows,
+            )?;
+            let effects = super::super::effects::latent(
+                &invocation,
+                &functions,
+                &self.traits.registry,
+                &mut self.catalog,
+                &mut self.solver,
+                &self.schemes.parameters,
+                &self.modules.modules[module].source_name,
+                &preserved_rows,
             )?;
             let signature = Signature {
                 params: params.iter().map(|parameter| parameter.ty).collect(),
                 ret: Some(result.unwrap_or(body.ty)),
                 sets: InvocationSets {
                     errors,
-                    effects: {
-                        let functions = self.checked.iter().flatten().cloned().collect::<Vec<_>>();
-                        super::super::effects::incoming(
-                            &ir::Expr {
-                                kind: ir::ExprKind::Block(body.clone()),
-                                ty: body.ty,
-                                span: body.span,
-                            },
-                            &functions,
-                            &self.traits.registry,
-                            &mut self.catalog,
-                            &mut self.solver,
-                            &self.schemes.parameters,
-                            &self.modules.modules[module].source_name,
-                        )?
-                    },
+                    effects,
                     ..Default::default()
                 },
             };
@@ -476,11 +503,31 @@ impl Checker {
                         .map_err(|error| self.error(module, DK::Type, span, error.message))?,
                 ),
             };
+            let errors = self
+                .solver
+                .fresh_row(
+                    &mut self.catalog.core.types,
+                    super::super::sets::SetKind::Error,
+                    super::super::sets::Origin::Inferred,
+                )
+                .map_err(|error| self.error(module, DK::Type, span, error.message))?;
+            let effects = self
+                .solver
+                .fresh_row(
+                    &mut self.catalog.core.types,
+                    super::super::sets::SetKind::Effect,
+                    super::super::sets::Origin::Inferred,
+                )
+                .map_err(|error| self.error(module, DK::Type, span, error.message))?;
             let function_type = self.signature_type(
                 &Signature {
                     params: parameter_types,
                     ret: Some(ret),
-                    sets: Default::default(),
+                    sets: InvocationSets {
+                        errors: vec![errors],
+                        effects: vec![effects],
+                        ..Default::default()
+                    },
                 },
                 ret,
             );

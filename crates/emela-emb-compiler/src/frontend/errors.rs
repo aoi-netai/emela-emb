@@ -64,6 +64,52 @@ pub(crate) fn incoming(
     parameters: &[Vec<TypeId>],
     source: &str,
 ) -> Result<Vec<TypeId>, Diagnostic> {
+    invocation(
+        expression,
+        functions,
+        registry,
+        catalog,
+        solver,
+        parameters,
+        source,
+        &HashSet::new(),
+    )
+}
+
+#[allow(clippy::too_many_arguments)]
+pub(crate) fn latent(
+    expression: &ir::Expr,
+    functions: &[ir::Function],
+    registry: &super::traits::Registry,
+    catalog: &mut Catalog,
+    solver: &mut super::infer::Solver,
+    parameters: &[Vec<TypeId>],
+    source: &str,
+    preserved_rows: &HashSet<TypeId>,
+) -> Result<Vec<TypeId>, Diagnostic> {
+    invocation(
+        expression,
+        functions,
+        registry,
+        catalog,
+        solver,
+        parameters,
+        source,
+        preserved_rows,
+    )
+}
+
+#[allow(clippy::too_many_arguments)]
+fn invocation(
+    expression: &ir::Expr,
+    functions: &[ir::Function],
+    registry: &super::traits::Registry,
+    catalog: &mut Catalog,
+    solver: &mut super::infer::Solver,
+    parameters: &[Vec<TypeId>],
+    source: &str,
+    preserved_rows: &HashSet<TypeId>,
+) -> Result<Vec<TypeId>, Diagnostic> {
     let index = functions
         .iter()
         .enumerate()
@@ -77,6 +123,7 @@ pub(crate) fn incoming(
         registry,
         solver: Some(solver),
         parameters: Some(parameters),
+        preserved_rows: preserved_rows.clone(),
     };
     Ok(sorted(
         context.expression(expression, &HashSet::new())?.errors,
@@ -108,6 +155,7 @@ fn infer_phase(
                 registry: &program.registry,
                 solver: solver.as_deref_mut(),
                 parameters,
+                preserved_rows: HashSet::new(),
             };
             let analysis = match &function.body {
                 Some(body) => context.block(body, &HashSet::new()),
@@ -180,6 +228,7 @@ fn infer_phase(
             registry: &program.registry,
             solver: None,
             parameters: None,
+            preserved_rows: HashSet::new(),
         };
         let analysis = match &function.body {
             Some(body) => context.block(body, &HashSet::new()),
@@ -212,6 +261,7 @@ struct Context<'a> {
     registry: &'a super::traits::Registry,
     solver: Option<&'a mut super::infer::Solver>,
     parameters: Option<&'a [Vec<TypeId>]>,
+    preserved_rows: HashSet<TypeId>,
 }
 impl Context<'_> {
     fn resolve(&mut self, ty: TypeId, span: Span) -> Result<TypeId, Diagnostic> {
@@ -305,7 +355,10 @@ impl Context<'_> {
         while let Some(ty) = pending.pop() {
             let mut ty = self.resolve(ty, span)?;
             if let Some(solver) = self.solver.as_deref_mut() {
-                if solver.row_kind(ty) == Some(super::sets::SetKind::Error) && solver.is_meta(ty) {
+                if !self.preserved_rows.contains(&ty)
+                    && solver.row_kind(ty) == Some(super::sets::SetKind::Error)
+                    && solver.is_meta(ty)
+                {
                     ty = solver
                         .resolve_row(&mut self.catalog.core.types, ty)
                         .map_err(|error| {

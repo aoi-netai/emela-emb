@@ -29,6 +29,9 @@ pub fn value()->Int {with One {callback=fn(){read()}
 with Two {callback()}}}
 @export(c,"pure_provider")
 pub fn pure()->Int {with One {(use Read).read()+41}}
+@export(c,"inferred_provider")
+pub fn inferred()->Int {with One {invoke=fn(callback){callback()}
+invoke(fn(){read()})}}
 "#;
     let output = compile_sources(
         &[Source::new("main.emel", source)],
@@ -38,7 +41,7 @@ pub fn pure()->Int {with One {(use Read).read()+41}}
     .unwrap();
     support::compile_and_run(
         &output,
-        "#include <stdlib.h>\n#include \"emela_embedded.h\"\n#include \"emela_board.h\"\n_Noreturn void emela_board_defect(EmelaDefectKind k,const char*m,uint16_t n){(void)k;(void)m;(void)n;abort();}\nint main(void){for(int i=0;i<1000;i++)if(lexical_provider()!=1||pure_provider()!=42)return 1;return 0;}\n",
+        "#include <stdlib.h>\n#include \"emela_embedded.h\"\n#include \"emela_board.h\"\n_Noreturn void emela_board_defect(EmelaDefectKind k,const char*m,uint16_t n){(void)k;(void)m;(void)n;abort();}\nint main(void){for(int i=0;i<1000;i++)if(lexical_provider()!=1||pure_provider()!=42||inferred_provider()!=1)return 1;return 0;}\n",
     );
     let pure = "effect Read {fn read()->Int}\nhandler One:Read{fn read(){42}}\n@export(c,\"pure_provider\")\npub fn pure()->Int{with One{(use Read).read()}}";
     let output = compile_sources(

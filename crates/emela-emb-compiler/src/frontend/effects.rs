@@ -50,6 +50,52 @@ pub(crate) fn incoming(
     parameters: &[Vec<TypeId>],
     source: &str,
 ) -> Result<Vec<TypeId>, Diagnostic> {
+    invocation(
+        expression,
+        functions,
+        registry,
+        catalog,
+        solver,
+        parameters,
+        source,
+        &HashSet::new(),
+    )
+}
+
+#[allow(clippy::too_many_arguments)]
+pub(crate) fn latent(
+    expression: &ir::Expr,
+    functions: &[ir::Function],
+    registry: &Registry,
+    catalog: &mut Catalog,
+    solver: &mut super::infer::Solver,
+    parameters: &[Vec<TypeId>],
+    source: &str,
+    preserved_rows: &HashSet<TypeId>,
+) -> Result<Vec<TypeId>, Diagnostic> {
+    invocation(
+        expression,
+        functions,
+        registry,
+        catalog,
+        solver,
+        parameters,
+        source,
+        preserved_rows,
+    )
+}
+
+#[allow(clippy::too_many_arguments)]
+fn invocation(
+    expression: &ir::Expr,
+    functions: &[ir::Function],
+    registry: &Registry,
+    catalog: &mut Catalog,
+    solver: &mut super::infer::Solver,
+    parameters: &[Vec<TypeId>],
+    source: &str,
+    preserved_rows: &HashSet<TypeId>,
+) -> Result<Vec<TypeId>, Diagnostic> {
     let index = functions
         .iter()
         .enumerate()
@@ -63,6 +109,7 @@ pub(crate) fn incoming(
         source,
         solver: Some(solver),
         parameters: Some(parameters),
+        preserved_rows: preserved_rows.clone(),
     };
     Ok(sorted(context.expression(expression)?))
 }
@@ -91,6 +138,7 @@ fn phase(
                 source: &function.source_name,
                 solver: solver.as_deref_mut(),
                 parameters,
+                preserved_rows: HashSet::new(),
             };
             let needed = match &function.body {
                 Some(body) => context.block(body),
@@ -149,6 +197,7 @@ struct Context<'a> {
     source: &'a str,
     solver: Option<&'a mut super::infer::Solver>,
     parameters: Option<&'a [Vec<TypeId>]>,
+    preserved_rows: HashSet<TypeId>,
 }
 impl Context<'_> {
     fn error(&self, span: Span, message: impl Into<String>) -> Diagnostic {
@@ -161,9 +210,11 @@ impl Context<'_> {
         let ty = solver
             .resolve(&mut self.catalog.core.types, ty)
             .map_err(|error| self.error(span, error.message))?;
-        if self.solver.as_ref().is_some_and(|solver| {
-            solver.row_kind(ty) == Some(super::sets::SetKind::Effect) && solver.is_meta(ty)
-        }) {
+        if !self.preserved_rows.contains(&ty)
+            && self.solver.as_ref().is_some_and(|solver| {
+                solver.row_kind(ty) == Some(super::sets::SetKind::Effect) && solver.is_meta(ty)
+            })
+        {
             return self
                 .solver
                 .as_deref_mut()
