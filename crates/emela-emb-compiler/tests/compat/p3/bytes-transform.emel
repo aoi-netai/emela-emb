@@ -1,0 +1,19 @@
+import Std.Bytes.{Bytes}
+@export(c, "decode_matches")
+pub fn decode_matches(b: Bytes, text: String) -> Bool { Bytes.decode_utf8(b) == Some(text) }
+@export(c, "decode_invalid")
+pub fn decode_invalid(b: Bytes) -> Bool { Option.is_none(Bytes.decode_utf8(b)) }
+@export(c, "bytes_compare")
+pub fn compare(a: Bytes, b: Bytes) -> Int { Ord.compare(a, b) match {
+  Less -> -1
+  Equal -> 0
+  Greater -> 1
+} }
+@export(c, "bytes_show")
+pub fn show(b: Bytes) -> String { inspect(b) }
+@export(c, "bytes_hex")
+pub fn hex(text: String, expected: Bytes) -> Bool { Bytes.from_hex(text) == Some(expected) }
+@export(c, "bytes_bad_hex")
+pub fn bad_hex(text: String) -> Bool { Option.is_none(Bytes.from_hex(text)) }
+@export(c, "bytes_to_hex")
+pub fn to_hex(b: Bytes) -> String { Bytes.to_hex(b) }

@@ -1,0 +1,23 @@
+import Std.Bytes.{Bytes}
+@export(c, "bytes_make")
+pub fn make(s: String) -> Bytes { Bytes.encode_utf8(s) }
+@export(c, "bytes_copy")
+pub fn copy(b: Bytes) -> Bytes { b }
+@export(c, "bytes_part")
+pub fn part(b: Bytes, start: Int, end: Int) -> Bytes { Bytes.slice(b, start, end) }
+@export(c, "bytes_joined")
+pub fn joined(b: Bytes) -> Bytes { Bytes.concat([b, b]) }
+@export(c, "bytes_listed")
+pub fn listed(b: Bytes) -> List[Bytes] { [b] }
+@export(c, "bytes_first")
+pub fn first(values: List[Bytes]) -> Bytes { values match { [value, ..] -> value
+  [] -> Bytes.empty() } }
+@export(c, "bytes_round_trip")
+pub fn round_trip(n: Int) -> Bool {
+  value = Option.or(Bytes.from_list([0, n, 255]), Bytes.empty())
+  if n < 0 || n > 255 { Bytes.is_empty(value) }
+  else { Bytes.to_list(value) == [0, n, 255] }
+}
+@export(c, "bytes_discard")
+pub fn discard(s: String) -> Unit { Bytes.encode_utf8(s)
+  () }
