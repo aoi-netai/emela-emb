@@ -878,3 +878,96 @@ fn suspending_cleanup_preserves_the_failure_until_an_outer_handler_runs() {
         0,
     );
 }
+
+#[test]
+fn constructing_an_immediate_handler_keeps_scheduler_storage_omitted() {
+    let mut p = operation_program(false, false);
+    let (_, answer) = p
+        .functions
+        .iter_mut()
+        .find(|(_, function)| function.exported)
+        .unwrap();
+    let original = answer.seqs[answer.body.unwrap()].stmts.clone();
+    let handler = match &answer.stmts[original[1]] {
+        Stmt::Let {
+            dst: Some(dst),
+            value: Value::Handler { .. },
+            ..
+        } => *dst,
+        _ => unreachable!(),
+    };
+    answer.ret = answer.vars[handler].ty;
+    answer.seqs[answer.body.unwrap()] = Seq {
+        stmts: original[..2].to_vec(),
+        term: Term::Return(Some(handler.into())),
+    };
+    let mut output =
+        crate::backend::compile_program(p, &Options::default().with_heap_bytes(4096)).unwrap();
+    assert!(
+        !output.c_source.contains("emela_frames[")
+            && !output.c_source.contains("struct emela_resume {")
+    );
+    audit_heap(&mut output);
+    execute(
+        &output,
+        "#include <stdlib.h>\n#include \"emela_embedded.h\"\n#include \"emela_board.h\"\nint test_heap_empty(void);\nvoid mark(int32_t n){(void)n;}\n_Noreturn void emela_board_defect(EmelaDefectKind k,const char*m,uint16_t n){(void)k;(void)m;(void)n;abort();}\nint main(void){for(int i=0;i<1000;i++){emela_embedded_release(answer());if(!test_heap_empty())return 1;}return 0;}\n",
+        0,
+    );
+}
+
+#[test]
+fn task_adapter_and_capacities_are_required_and_exhaustion_unlocks_events() {
+    let mut p = program(vec![]);
+    let wait = external_task(&mut p, "wait", &[TypeId::INT], TypeId::INT);
+    let mut answer = simple();
+    answer.suspends = true;
+    let n = variable(&mut answer, TypeId::INT);
+    answer.params.push(n);
+    let result = variable(&mut answer, TypeId::INT);
+    let call = binding(
+        &mut answer,
+        Some(result),
+        Value::Call {
+            callee: Callee::Direct(wait),
+            args: vec![n.into()],
+            suspends: true,
+            on_fail: None,
+        },
+    );
+    answer.seqs[answer.body.unwrap()] = Seq {
+        stmts: vec![call],
+        term: Term::Return(Some(result.into())),
+    };
+    p.functions.alloc(answer);
+    assert!(
+        crate::backend::compile_program(p.clone(), &Options::default())
+            .unwrap_err()
+            .iter()
+            .any(|error| error.message.contains("with_task_adapter"))
+    );
+    let options = Options::default()
+        .with_frame_bytes(512)
+        .with_task_adapter("wait", "board_wait_start");
+    for options in [
+        options.clone().with_task_capacity(0),
+        options.clone().with_event_capacity(0),
+    ] {
+        assert!(
+            crate::backend::compile_program(p.clone(), &options)
+                .unwrap_err()
+                .iter()
+                .any(|error| error.kind == crate::ErrorKind::InvalidOptions)
+        );
+    }
+    for options in [
+        options.clone().with_task_capacity(1),
+        options.clone().with_event_capacity(1),
+    ] {
+        let output = crate::backend::compile_program(p.clone(), &options).unwrap();
+        execute(
+            &output,
+            "#include <stdlib.h>\n#include \"emela_embedded.h\"\n#include \"emela_board.h\"\nstatic int locked;\nstatic unsigned count;\nstatic EmelaTask pending[2];\nuint32_t emela_board_event_lock(void){uint32_t old=(uint32_t)locked;locked=1;return old;}\nvoid emela_board_event_unlock(uint32_t p){if(!locked)abort();locked=(int)p;}\n_Noreturn void emela_board_defect(EmelaDefectKind k,const char*m,uint16_t n){(void)m;(void)n;exit(k==EMELA_DEFECT_HEAP_EXHAUSTED&&!locked?77:78);}\nvoid board_wait_start(EmelaTask t,int32_t n){(void)n;if(count>=2)abort();pending[count++]=t;}\nint main(void){static int32_t a,b;(void)answer_start(1,&a);(void)answer_start(2,&b);(void)emela_scheduler_run(2);if(count!=2)return 1;if(!emela_task_complete_int(pending[0],1))return 2;(void)emela_task_complete_int(pending[1],2);return 3;}\n",
+            77,
+        );
+    }
+}
