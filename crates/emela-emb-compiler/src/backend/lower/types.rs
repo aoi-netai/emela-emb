@@ -23,6 +23,12 @@ pub(super) fn validate_catalog(program: &Program) -> Result<()> {
             "canonical builtin type IDs have been changed",
         ));
     }
+    if program.core.types.has_param.len() != program.core.types.types.len() {
+        return Err(invalid(
+            "<module>",
+            "type parameter metadata has a different length from the catalog",
+        ));
+    }
     for (_, definition) in program.core.enums.iter() {
         for variant in &definition.variants {
             if variant.fields.len() != variant.tys.len() {

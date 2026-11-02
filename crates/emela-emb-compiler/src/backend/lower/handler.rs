@@ -8,6 +8,14 @@ use crate::contract::ir::{
 };
 
 pub(super) fn lower(module: &mut Module, options: &crate::Options) {
+    let bases: HashMap<_, _> = module
+        .core
+        .effects
+        .iter()
+        .filter_map(|(effect, _)| {
+            crate::semantics::effect_base(&module.core, effect).map(|base| (effect, base))
+        })
+        .collect();
     let mut reachable: Vec<_> = super::closure::runtime_reachable(module, options)
         .into_iter()
         .collect();
@@ -86,8 +94,14 @@ pub(super) fn lower(module: &mut Module, options: &crate::Options) {
                 if retired_effects.contains(effect) {
                     return None;
                 }
-                let (_, operations) =
-                    resolve_handler(function, &handlers, *handler, *effect, &mut HashSet::new())?;
+                let (_, operations) = resolve_handler(
+                    function,
+                    &handlers,
+                    &bases,
+                    *handler,
+                    *effect,
+                    &mut HashSet::new(),
+                )?;
                 operations
                     .get(*op)
                     .copied()
@@ -104,13 +118,14 @@ pub(super) fn lower(module: &mut Module, options: &crate::Options) {
             }
         }
 
-        erase_unused_static_values(function);
+        erase_unused_static_values(function, &bases);
     }
 }
 
 fn resolve_handler(
     function: &Function,
     handlers: &HashMap<VarId, (EffectId, Vec<VarId>)>,
+    bases: &HashMap<EffectId, EffectId>,
     value_id: VarId,
     effect: EffectId,
     seen: &mut HashSet<VarId>,
@@ -122,7 +137,7 @@ fn resolve_handler(
         return None;
     }
     if let Some((handler_effect, operations)) = handlers.get(&value_id) {
-        if *handler_effect == effect {
+        if bases.get(handler_effect) == bases.get(&effect) {
             return Some((value_id, operations.clone()));
         }
     }
@@ -144,15 +159,16 @@ fn resolve_handler(
     else {
         return None;
     };
-    if *lookup_effect != effect {
+    if bases.get(lookup_effect) != bases.get(&effect) {
         return None;
     }
-    resolve_evidence(function, handlers, *ev, effect, seen)
+    resolve_evidence(function, handlers, bases, *ev, *lookup_effect, seen)
 }
 
 fn resolve_evidence(
     function: &Function,
     handlers: &HashMap<VarId, (EffectId, Vec<VarId>)>,
+    bases: &HashMap<EffectId, EffectId>,
     evidence: VarId,
     effect: EffectId,
     seen: &mut HashSet<VarId>,
@@ -177,12 +193,12 @@ fn resolve_evidence(
         .rev()
         .find(|(bound_effect, _)| *bound_effect == effect)
     {
-        return resolve_handler(function, handlers, *handler, effect, seen);
+        return resolve_handler(function, handlers, bases, *handler, effect, seen);
     }
-    resolve_evidence(function, handlers, (*base)?, effect, seen)
+    resolve_evidence(function, handlers, bases, (*base)?, effect, seen)
 }
 
-fn erase_unused_static_values(function: &mut Function) {
+fn erase_unused_static_values(function: &mut Function, bases: &HashMap<EffectId, EffectId>) {
     loop {
         let handlers: HashMap<_, _> = function
             .stmts
@@ -210,10 +226,15 @@ fn erase_unused_static_values(function: &mut Function) {
                 };
                 let removable = match value {
                     Value::Handler { .. } | Value::EvExtend { .. } => true,
-                    Value::EvLookup { ev, effect } => {
-                        resolve_evidence(function, &handlers, *ev, *effect, &mut HashSet::new())
-                            .is_some()
-                    }
+                    Value::EvLookup { ev, effect } => resolve_evidence(
+                        function,
+                        &handlers,
+                        bases,
+                        *ev,
+                        *effect,
+                        &mut HashSet::new(),
+                    )
+                    .is_some(),
                     _ => false,
                 };
                 if !removable {

@@ -424,3 +424,212 @@ fn retirement_through_an_erased_alias_keeps_operation_active_checks() {
         77,
     );
 }
+
+#[test]
+fn labeled_evidence_keeps_distinct_keys_and_shares_the_base_handler_lifetime() {
+    let mut p = program(vec![]);
+    let (read, ht, ft) = read_effect(&mut p);
+    let mut definition = p.core.effects[read].clone();
+    definition.name = "Audit".into();
+    definition.decl = "Audit".into();
+    definition.label_of = Some(read);
+    let audit = p.core.effects.alloc(definition);
+    let mut definition = p.core.effects[audit].clone();
+    definition.name = "Debug".into();
+    definition.decl = "Debug".into();
+    definition.label_of = Some(audit);
+    let debug = p.core.effects.alloc(definition);
+    let audit_type = p.core.types.intern(Type::Handler(audit));
+    let debug_type = p.core.types.intern(Type::Handler(debug));
+    let mut targets = vec![];
+    for n in [1, 2] {
+        let mut f = Function::new(&format!("read_{n}"));
+        f.ret = TypeId::INT;
+        f.body = Some(f.seqs.alloc(Seq {
+            stmts: vec![],
+            term: Term::Return(Some(Const::Int(n).into())),
+        }));
+        targets.push(p.functions.alloc(f));
+    }
+    let mut invoke = Function::new("invoke_labels");
+    invoke.ret = TypeId::INT;
+    let ev = reference(&mut invoke, TypeId::EVIDENCE);
+    invoke.params.push(ev);
+    let mut statements = vec![];
+    let mut values = vec![];
+    for (effect, handler_type) in [(read, ht), (audit, audit_type), (debug, debug_type)] {
+        let handler = reference(&mut invoke, handler_type);
+        let value = variable(&mut invoke, TypeId::INT);
+        statements.push(binding(
+            &mut invoke,
+            Some(handler),
+            Value::EvLookup { ev, effect },
+        ));
+        statements.push(binding(
+            &mut invoke,
+            Some(value),
+            Value::Call {
+                callee: Callee::Op {
+                    handler,
+                    effect,
+                    op: 0,
+                },
+                args: vec![],
+                suspends: false,
+                on_fail: None,
+            },
+        ));
+        values.push(value);
+    }
+    let hundreds = variable(&mut invoke, TypeId::INT);
+    let tens = variable(&mut invoke, TypeId::INT);
+    let subtotal = variable(&mut invoke, TypeId::INT);
+    let result = variable(&mut invoke, TypeId::INT);
+    for (dst, op, args) in [
+        (
+            hundreds,
+            PrimOp::Mul,
+            vec![values[0].into(), Const::Int(100).into()],
+        ),
+        (
+            tens,
+            PrimOp::Mul,
+            vec![values[1].into(), Const::Int(10).into()],
+        ),
+        (subtotal, PrimOp::Add, vec![hundreds.into(), tens.into()]),
+        (result, PrimOp::Add, vec![subtotal.into(), values[2].into()]),
+    ] {
+        statements.push(binding(
+            &mut invoke,
+            Some(dst),
+            Value::Prim {
+                op,
+                ty: PrimTy::I32,
+                args,
+            },
+        ));
+    }
+    invoke.body = Some(invoke.seqs.alloc(Seq {
+        stmts: statements,
+        term: Term::Return(Some(result.into())),
+    }));
+    let invoke = p.functions.alloc(invoke);
+    let mut f = simple();
+    let first_op = reference(&mut f, ft);
+    let second_op = reference(&mut f, ft);
+    let first_handler = reference(&mut f, ht);
+    let second_handler = reference(&mut f, audit_type);
+    let evidence = reference(&mut f, TypeId::EVIDENCE);
+    let result = variable(&mut f, TypeId::INT);
+    let a = binding(&mut f, Some(first_op), Value::FnRef(targets[0]));
+    let b = binding(&mut f, Some(second_op), Value::FnRef(targets[1]));
+    let first = binding(
+        &mut f,
+        Some(first_handler),
+        Value::Handler {
+            name: "One".into(),
+            effect: read,
+            ops: vec![first_op],
+        },
+    );
+    let second = binding(
+        &mut f,
+        Some(second_handler),
+        Value::Handler {
+            name: "Two".into(),
+            effect: audit,
+            ops: vec![second_op],
+        },
+    );
+    let extend = binding(
+        &mut f,
+        Some(evidence),
+        Value::EvExtend {
+            base: None,
+            bindings: vec![
+                (read, first_handler),
+                (audit, second_handler),
+                (debug, first_handler),
+            ],
+        },
+    );
+    let call = binding(
+        &mut f,
+        Some(result),
+        Value::Call {
+            callee: Callee::Direct(invoke),
+            args: vec![evidence.into()],
+            suspends: false,
+            on_fail: None,
+        },
+    );
+    f.seqs[f.body.unwrap()] = Seq {
+        stmts: vec![a, b, first, second, extend, call],
+        term: Term::Return(Some(result.into())),
+    };
+    // Exercise canonicalization of compound types and all function signature edges.
+    let tuple_a = p
+        .core
+        .types
+        .intern(Type::Tuple(vec![audit_type, debug_type]));
+    let tuple_b = p.core.types.intern(Type::Tuple(vec![ht, ht]));
+    reference(&mut f, tuple_a);
+    reference(&mut f, tuple_b);
+    let function = p.functions.alloc(f);
+    let lowered = lower_program(p.clone()).unwrap();
+    let unique: HashSet<_> = lowered.lowered.core.types.types.iter().collect();
+    assert_eq!(unique.len(), lowered.lowered.core.types.len());
+    assert!(
+        lowered
+            .lowered
+            .core
+            .types
+            .types
+            .iter()
+            .all(|node| !matches!(node, Type::Handler(effect) if *effect != read))
+    );
+    let mut output =
+        crate::backend::compile_program(p.clone(), &Options::default().with_heap_bytes(4096))
+            .unwrap();
+    audit_heap(&mut output);
+    execute(
+        &output,
+        "#include <stdlib.h>\n#include \"emela_embedded.h\"\n#include \"emela_board.h\"\nint test_heap_empty(void);\n_Noreturn void emela_board_defect(EmelaDefectKind k,const char*m,uint16_t n){(void)k;(void)m;(void)n;abort();}\nint main(void){for(int i=0;i<1000;i++)if(answer()!=121||!test_heap_empty())return 1;return 0;}\n",
+        0,
+    );
+    let mut retired = p.clone();
+    let f = &mut retired.functions[function];
+    let alias = reference(f, debug_type);
+    let lookup = binding(
+        f,
+        Some(alias),
+        Value::EvLookup {
+            ev: evidence,
+            effect: debug,
+        },
+    );
+    let retire = binding(
+        f,
+        None,
+        Value::Runtime {
+            op: RuntimeOp::Retire,
+            args: vec![alias.into(), Const::String("Debug".into()).into()],
+        },
+    );
+    f.seqs[f.body.unwrap()].stmts.splice(5..5, [lookup, retire]);
+    let output =
+        crate::backend::compile_program(retired, &Options::default().with_heap_bytes(4096))
+            .unwrap();
+    execute(
+        &output,
+        "#include <stdlib.h>\n#include <string.h>\n#include \"emela_embedded.h\"\n#include \"emela_board.h\"\n_Noreturn void emela_board_defect(EmelaDefectKind k,const char*m,uint16_t n){const char*expected=\"handler One was used after release\";exit(k==EMELA_DEFECT_PANIC&&n==strlen(expected)&&memcmp(m,expected,n)==0?77:78);}\nint main(void){(void)answer();return 1;}\n",
+        77,
+    );
+    let mut invalid = p;
+    invalid.core.effects[read].label_of = Some(debug);
+    assert!(
+        lower_program(invalid).unwrap_err()[0]
+            .message
+            .contains("cyclic base")
+    );
+}

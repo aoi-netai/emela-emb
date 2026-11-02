@@ -8,6 +8,7 @@ use std::collections::{HashMap, HashSet};
 
 mod closure;
 mod const_eval;
+mod effects;
 mod error_types;
 mod failures;
 mod handler;
@@ -39,6 +40,7 @@ pub(crate) fn lower_program(
     options: &crate::Options,
 ) -> Result<LoweredModule> {
     types::validate_catalog(&program)?;
+    effects::normalize(&mut program)?;
     types::normalize_catalog(&mut program)?;
     error_types::normalize(&mut program)?;
     let mut symbols = HashSet::new();

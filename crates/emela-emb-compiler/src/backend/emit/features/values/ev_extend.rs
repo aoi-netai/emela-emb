@@ -62,7 +62,11 @@ pub(in crate::backend::emit) fn emit_evidence_extend(
     }
     let node_kind = layouts.evidence_node_kind();
     for (index, (effect, handler)) in bindings.iter().enumerate() {
-        if layouts.shapes.types[function.vars[*handler].ty] != Type::Handler(*effect) {
+        let base_effect =
+            crate::semantics::effect_base(layouts.shapes.core, *effect).ok_or_else(|| {
+                invalid_flow_ir(&function.name, "EvExtend effect has an invalid label base")
+            })?;
+        if layouts.shapes.types[function.vars[*handler].ty] != Type::Handler(base_effect) {
             return Err(invalid_flow_ir(
                 &function.name,
                 "EvExtend binding does not match its handler effect",

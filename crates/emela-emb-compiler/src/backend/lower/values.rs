@@ -558,6 +558,8 @@ fn effect_definition<'a>(
 
 fn handler_type(program: &Program, f: &Function, effect: EffectId) -> Result<TypeId> {
     effect_definition(program, f, effect)?;
+    let effect = crate::semantics::effect_base(&program.core, effect)
+        .ok_or_else(|| invalid(&f.name, "handler effect label has an invalid base"))?;
     program
         .core
         .types
