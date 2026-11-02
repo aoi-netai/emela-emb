@@ -111,6 +111,7 @@ fn state_program() -> ir::Program {
     );
     let update = expression(
         ir::ExprKind::OpCall {
+            errors: vec![],
             handler: Box::new(reference(&capability)),
             effect,
             op: 2,
@@ -121,6 +122,7 @@ fn state_program() -> ir::Program {
     );
     let get = expression(
         ir::ExprKind::OpCall {
+            errors: vec![],
             handler: Box::new(reference(&capability)),
             effect,
             op: 0,
