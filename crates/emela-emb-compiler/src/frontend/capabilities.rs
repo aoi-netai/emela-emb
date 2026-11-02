@@ -663,6 +663,7 @@ mod tests {
             constant: false,
             origin: None,
             derivation: None,
+            error_show: None,
             name: format!("function_{id}"),
             source_name: "main.emel".into(),
             span: span(),

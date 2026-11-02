@@ -67,6 +67,7 @@ fn function(id: usize, value: ir::Expr) -> ir::Function {
         constant: false,
         origin: None,
         derivation: None,
+        error_show: None,
         name: format!("f{id}"),
         source_name: "test.emel".into(),
         span: span(),

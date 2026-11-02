@@ -131,6 +131,7 @@ impl Specializer {
             constant: false,
             origin: None,
             derivation: None,
+            error_show: None,
             name: format!("__debug_show_{}_{}", ty.index(), id.0),
             source_name: caller.source_name.clone(),
             span,

@@ -1164,6 +1164,7 @@ impl Checker {
             constant: definition.ast.constant,
             origin: definition.ast.constant.then_some(id),
             derivation: definition.derivation,
+            error_show: None,
             name: definition.name,
             source_name: self.modules.modules[definition.module].source_name.clone(),
             span: definition.ast.name.span,

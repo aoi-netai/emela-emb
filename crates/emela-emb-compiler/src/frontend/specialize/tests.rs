@@ -42,6 +42,7 @@ fn function(
         constant: false,
         origin: None,
         derivation: None,
+        error_show: None,
         name: name.into(),
         source_name: format!("{name}.emel"),
         span: span(),

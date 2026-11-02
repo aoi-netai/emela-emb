@@ -5,7 +5,7 @@ use super::{
     types::ValueType,
 };
 use crate::{Diagnostic, DiagnosticKind, Span, contract::ir as b};
-use std::collections::{HashMap, HashSet};
+use std::collections::{BTreeMap, HashMap, HashSet};
 
 type Result<T> = std::result::Result<T, Vec<Diagnostic>>;
 #[derive(Clone, Copy)]
@@ -67,6 +67,7 @@ fn specialize_with_limits(input: ir::Program, limits: Limits) -> Result<ir::Prog
         debug_show_helpers: HashMap::new(),
         debug_fallback: HashSet::new(),
         debug_locals: HashMap::new(),
+        error_types: BTreeMap::new(),
         next_id,
         instances: 0,
         limits,
@@ -77,6 +78,7 @@ fn specialize_with_limits(input: ir::Program, limits: Limits) -> Result<ir::Prog
         context.function(&mut function, &[], 0)?;
         context.functions[index] = function;
     }
+    context.error_displays()?;
     Ok(ir::Program {
         core: context.core,
         registry: context.registry,
@@ -94,6 +96,7 @@ struct Specializer {
     debug_show_helpers: HashMap<(b::TypeId, bool), ir::DefinitionId>,
     debug_fallback: HashSet<ir::DefinitionId>,
     debug_locals: HashMap<ir::DefinitionId, usize>,
+    error_types: BTreeMap<b::TypeId, ir::DefinitionId>,
     next_id: Option<usize>,
     instances: usize,
     limits: Limits,
@@ -258,7 +261,11 @@ impl Specializer {
                     .into_iter()
                     .map(|arg| self.substitute(function, arg, args, span, memo, active, depth + 1))
                     .collect::<Result<_>>()?;
-                self.core.types.intern(b::Type::Enum(id, arguments))
+                let concrete = self.core.types.intern(b::Type::Enum(id, arguments));
+                if self.core.enums[id].error {
+                    self.error_types.entry(concrete).or_insert(function.id);
+                }
+                concrete
             }
             b::Type::List(element) => {
                 let element =
@@ -814,6 +821,8 @@ mod constant_patterns;
 
 #[path = "specialize/debug.rs"]
 mod debug;
+#[path = "specialize/error_displays.rs"]
+mod error_displays;
 
 #[path = "specialize/effects.rs"]
 mod effects;

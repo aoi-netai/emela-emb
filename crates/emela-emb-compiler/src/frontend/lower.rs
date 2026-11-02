@@ -49,6 +49,11 @@ pub(crate) fn lower(input: &ir::Program) -> b::Program {
             ids.insert(function.id, program.functions.alloc(target));
         }
     }
+    program.error_shows = input
+        .functions
+        .iter()
+        .filter_map(|function| function.error_show.map(|error| (error, ids[&function.id])))
+        .collect();
     let raises = failures::allocate_raises(input, &mut program);
     let structural_equality = constant_patterns::allocate_structural_equality(input, &mut program);
     let failing: HashSet<_> = input

@@ -21,6 +21,8 @@ pub(crate) struct Function {
     pub constant: bool,
     pub origin: Option<DefinitionId>,
     pub derivation: Option<super::traits::BuiltinTrait>,
+    /// Concrete error display entry; its parameter retains generic error arguments.
+    pub error_show: Option<crate::contract::ir::EnumId>,
     pub name: String,
     pub source_name: String,
     pub span: Span,
