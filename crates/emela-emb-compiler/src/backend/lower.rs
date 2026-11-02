@@ -10,6 +10,7 @@ mod closure;
 mod const_eval;
 mod effects;
 mod error_types;
+mod exports;
 mod failures;
 mod fiber_failures;
 mod fibers;
@@ -77,6 +78,7 @@ pub(crate) fn lower_program(
         }
         validate_function(&program, function)?;
     }
+    exports::normalize(&mut program);
     let (mut program, mut closures) = closure::lower(&program, options)?;
     fiber_failures::erase(&mut program, &mut closures, options)?;
     suspend::normalize_handlers(&mut program);

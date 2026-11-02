@@ -459,3 +459,15 @@ child数と取消flagの観測、および弱child link・cycleの直接検査�
 | --- | --- |
 | `spec/language/12-external.md` | `ecc02ca3688fcb9d8e2edbb1dfc314ba0f4af43429d5382da5cb2e9126a376c8` |
 | `crates/emela-codegen-emb/tests/const_runtime/external.rs` | `989a731d161ea029a97df999869410fadaa0126cd970b0fa79083b483ef2e95c` |
+
+## P7の外部exportと同期adapter所有権
+
+固定revision `c34c0aeefdd966d854371b3110db00a47798751d` の外部export正規化を独自backendへ適応する。公開関数のIDとC aliasを維持した通常wrapperから、非公開のexternal宣言を呼ぶ。失敗・中断フラグ、Unit引数消去とNever戻り型を維持し、元入力の検証後に正規化する。旧FnBuilderやCore/LIR crateは取り込まない。
+
+| 参照元 | SHA-256 |
+| --- | --- |
+| `crates/emela-codegen-emb/src/compiler/lower/exports.rs` | `1df3df2de5703a092fb53e0902c8fcdedae464a5a6908ce4aeb7a7f61367172e` |
+| `crates/emela-codegen-emb/tests/sync_external/buffers.rs` | `a0de76ecb00a12d4596324542161e9be4bc055ee93dcb2387faa99f43bb6bcec` |
+| `crates/emela-codegen-emb/tests/sync_external/failure.rs` | `b38606addc896b15787f9a1268475d8af84ff60fa3052fbda95d4a9c59aafc2b` |
+
+`tests/p7_external_values.rs`は、直接export・通常呼出し・関数値・結果破棄の各経路から同期adapterへ接続する。StringBufferはcaller storageを使い、関数値から返した結果は所有化する。容量不足・別buffer・不正owner・容量超過lengthをheapなしで拒否する。Borrowed/Ownedの失敗payloadは元inputを書き換えても生存し、成功channelに置いた無効pointerを読まない。埋込みNUL・1000回の全heap回収・C両最適化を確認する。中断関数値とtask境界はP5/P6の試験も併用する。
