@@ -116,6 +116,7 @@ pub(crate) fn check(modules: Modules) -> Result<ir::Program, Vec<Diagnostic>> {
     }
     let mut program = ir::Program {
         core: checker.catalog.core,
+        registry: super::traits::Registry::new(),
         functions: checker.checked.into_iter().flatten().collect(),
     };
     super::normalize::normalize(&mut program, &mut checker.solver)?;
@@ -547,6 +548,9 @@ impl Checker {
         self.checked[id.0] = Some(ir::Function {
             id,
             type_parameters: definition.ast.type_params.len(),
+            constant: false,
+            origin: None,
+            derivation: None,
             name: definition.name,
             source_name: self.modules.modules[definition.module].source_name.clone(),
             span: definition.ast.name.span,

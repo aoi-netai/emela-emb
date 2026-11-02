@@ -22,7 +22,10 @@ pub(crate) fn lower(input: &ir::Program) -> b::Program {
                 function.signature.sets.errors.is_empty()
                     && function.signature.sets.effects.is_empty()
             );
+            debug_assert!(function.derivation.is_none());
+            debug_assert!(function.origin.is_none() || function.constant);
             let mut target = b::Function::new(&function.name);
+            target.constant = function.constant;
             target.exported = function.exported;
             target.export_symbol = function
                 .exported
@@ -199,6 +202,40 @@ impl Context<'_> {
     ) -> Option<b::Operand> {
         use ir::ExprKind as E;
         match &expression.kind {
+            E::TraitCall { .. } => {
+                unreachable!("trait methods are resolved before backend lowering")
+            }
+            E::Tag(value) => {
+                let b::Operand::Var(value) = self.expression(builder, value, false)? else {
+                    unreachable!("tagged enum is a variable")
+                };
+                self.value(builder, b::Value::Tag(value), expression.ty)
+            }
+            E::Builtin { op, args } => {
+                let mut values = Vec::new();
+                for arg in args {
+                    let value = self.expression(builder, arg, false);
+                    if builder.term.is_some() {
+                        return None;
+                    }
+                    values.push(value.unwrap_or(b::Operand::Const(b::Const::Unit)));
+                }
+                let value = match op {
+                    b::Builtin::ShowNested | b::Builtin::ShowString => b::Value::Runtime {
+                        op: b::RuntimeOp::ShowString,
+                        args: values,
+                    },
+                    b::Builtin::DebugPrint => b::Value::Runtime {
+                        op: b::RuntimeOp::DebugPrint,
+                        args: values,
+                    },
+                    op => b::Value::Builtin {
+                        op: *op,
+                        args: values,
+                    },
+                };
+                self.value(builder, value, expression.ty)
+            }
             E::Match { value, arms } => {
                 let value = self.expression(builder, value, false);
                 if builder.term.is_some() {

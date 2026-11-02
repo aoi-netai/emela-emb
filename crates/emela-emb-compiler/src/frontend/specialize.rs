@@ -58,9 +58,11 @@ fn specialize_with_limits(input: ir::Program, limits: Limits) -> Result<ir::Prog
     let next_id = maximum.map_or(Some(0), |maximum| maximum.checked_add(1));
     let mut context = Specializer {
         core: input.core,
+        registry: input.registry,
         templates,
         functions,
         cache: HashMap::new(),
+        builtin_helpers: HashMap::new(),
         next_id,
         instances: 0,
         limits,
@@ -73,14 +75,17 @@ fn specialize_with_limits(input: ir::Program, limits: Limits) -> Result<ir::Prog
     }
     Ok(ir::Program {
         core: context.core,
+        registry: context.registry,
         functions: context.functions,
     })
 }
 struct Specializer {
     core: b::Definitions,
+    registry: super::traits::Registry,
     templates: HashMap<ir::DefinitionId, ir::Function>,
     functions: Vec<ir::Function>,
     cache: HashMap<(ir::DefinitionId, Vec<b::TypeId>), ir::DefinitionId>,
+    builtin_helpers: HashMap<(super::traits::BuiltinTrait, b::TypeId, bool), ir::DefinitionId>,
     next_id: Option<usize>,
     instances: usize,
     limits: Limits,
@@ -326,6 +331,9 @@ impl Specializer {
         for local in &mut function.params {
             local.ty = self.ty(&source, local.ty, args, source.span)?;
         }
+        if let Some(kind) = function.derivation.take() {
+            function.body = Some(self.derive_body(function, kind, false)?);
+        }
         if let Some(body) = &mut function.body {
             self.block(&source, body, args, depth)?;
         }
@@ -395,7 +403,46 @@ impl Specializer {
         expression.ty = self.ty(function, expression.ty, arguments, expression.span)?;
         match &mut expression.kind {
             ir::ExprKind::Literal(_) | ir::ExprKind::Local(_) => {}
-            ir::ExprKind::Concat(values) | ir::ExprKind::Tuple(values) => {
+            ir::ExprKind::TraitCall {
+                trait_id,
+                method,
+                self_type,
+                args,
+                order,
+                nested_show,
+            } => {
+                Self::order(function, expression.span, order, args.len())?;
+                for argument in args.iter_mut() {
+                    self.expression(function, argument, arguments, depth)?;
+                }
+                let concrete = self.substitute(
+                    function,
+                    *self_type,
+                    arguments,
+                    expression.span,
+                    &mut HashMap::new(),
+                    &mut HashSet::new(),
+                    0,
+                )?;
+                let target = self.trait_target(
+                    function,
+                    concrete,
+                    *trait_id,
+                    method,
+                    *nested_show,
+                    expression.span,
+                    depth,
+                )?;
+                expression.kind = ir::ExprKind::Call {
+                    target,
+                    args: std::mem::take(args),
+                    order: std::mem::take(order),
+                    type_arguments: vec![],
+                };
+            }
+            ir::ExprKind::Concat(values)
+            | ir::ExprKind::Tuple(values)
+            | ir::ExprKind::Builtin { args: values, .. } => {
                 for value in values {
                     self.expression(function, value, arguments, depth)?;
                 }
@@ -408,7 +455,8 @@ impl Specializer {
             }
             ir::ExprKind::Field { base, .. }
             | ir::ExprKind::Unary { value: base, .. }
-            | ir::ExprKind::Assert(base) => self.expression(function, base, arguments, depth)?,
+            | ir::ExprKind::Assert(base)
+            | ir::ExprKind::Tag(base) => self.expression(function, base, arguments, depth)?,
             ir::ExprKind::Binary { left, right, .. } => {
                 self.expression(function, left, arguments, depth)?;
                 self.expression(function, right, arguments, depth)?;
@@ -468,3 +516,6 @@ impl Specializer {
 #[cfg(test)]
 #[path = "specialize/tests.rs"]
 mod tests;
+
+#[path = "specialize/derive.rs"]
+mod derive;

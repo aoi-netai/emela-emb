@@ -209,6 +209,9 @@ impl Registry {
         self.builtins.insert(kind, id);
         Ok(())
     }
+    pub(crate) fn builtin_id(&self, kind: BuiltinTrait) -> Option<TraitId> {
+        self.builtins.get(&kind).copied()
+    }
     pub(crate) fn register_builtin_method(
         &mut self,
         kind: BuiltinTrait,

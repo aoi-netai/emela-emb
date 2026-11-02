@@ -39,6 +39,9 @@ fn function(
     ir::Function {
         id: ir::DefinitionId(id),
         type_parameters: 0,
+        constant: false,
+        origin: None,
+        derivation: None,
         name: name.into(),
         source_name: format!("{name}.emel"),
         span: span(),
@@ -174,6 +177,7 @@ fn one_generic_identity_becomes_independent_int_and_string_instances() {
     );
     let answer = exported(function(1, "answer", vec![], ValueType::Int, body));
     let input = ir::Program {
+        registry: Default::default(),
         core,
         functions: vec![identity, answer],
     };
@@ -249,6 +253,7 @@ fn tuple_patterns_match_local_and_expression_types_are_all_substituted() {
         call(0, vec![tuple], vec![b::TypeId::INT], ValueType::Int),
     ));
     execute(ir::Program {
+        registry: Default::default(),
         core,
         functions: vec![extract, answer],
     });
@@ -312,6 +317,7 @@ fn recursive_input(growing: bool) -> ir::Program {
         ),
     ));
     ir::Program {
+        registry: Default::default(),
         core,
         functions: vec![recursive, answer],
     }
@@ -419,4 +425,572 @@ fn mutually_recursive_templates_share_reserved_concrete_instances() {
         )
     );
     execute(input);
+}
+
+#[test]
+fn structural_trait_helpers_call_custom_fields_inside_tuple_option_and_enum() {
+    use crate::frontend::traits::{BuiltinTrait as BT, Impl, Method, Registry, Trait, TypeHead};
+    let mut core = b::Definitions::default();
+    let ordering = core.enums.alloc(b::EnumDef {
+        name: "Ordering".into(),
+        params: 0,
+        variants: ["Less", "Equal", "Greater"]
+            .into_iter()
+            .map(|name| b::VariantDef {
+                name: name.into(),
+                fields: b::VariantFields::Unit,
+                tys: vec![],
+            })
+            .collect(),
+        error: false,
+        external: false,
+    });
+    let ordering_ty = core.types.intern(b::Type::Enum(ordering, vec![]));
+    let self_param = core.types.intern(b::Type::Param(0));
+    let mut registry = Registry::new();
+    let mut trait_ids = HashMap::new();
+    for (kind, name, method, ret, count) in [
+        (BT::Eq, "Eq", "eq", b::TypeId::BOOL, 2),
+        (BT::Ord, "Ord", "compare", ordering_ty, 2),
+        (BT::Show, "Show", "show", b::TypeId::STRING, 1),
+    ] {
+        let signature = core.types.intern(b::Type::Fn(b::FnType {
+            params: vec![self_param; count],
+            ret,
+            fails: false,
+            suspends: false,
+            ev: false,
+            sets: None,
+        }));
+        let id = registry
+            .add_trait(Trait {
+                name: name.into(),
+                owner_module: 0,
+                supers: vec![],
+                methods: vec![Method {
+                    name: method.into(),
+                    signature,
+                    default_function: None,
+                }],
+            })
+            .unwrap();
+        registry.set_builtin(id, kind).unwrap();
+        trait_ids.insert(kind, id);
+    }
+    registry
+        .set_supers(trait_ids[&BT::Ord], vec![trait_ids[&BT::Eq]])
+        .unwrap();
+    let key = core.enums.alloc(b::EnumDef {
+        name: "Key".into(),
+        params: 0,
+        variants: vec![b::VariantDef {
+            name: "Key".into(),
+            fields: b::VariantFields::Named(vec!["value".into()]),
+            tys: vec![b::TypeId::INT],
+        }],
+        error: false,
+        external: false,
+    });
+    let key_ty = core.types.intern(b::Type::Enum(key, vec![]));
+    let envelope = core.enums.alloc(b::EnumDef {
+        name: "Envelope".into(),
+        params: 0,
+        variants: vec![b::VariantDef {
+            name: "Envelope".into(),
+            fields: b::VariantFields::Named(vec!["key".into(), "text".into()]),
+            tys: vec![key_ty, b::TypeId::STRING],
+        }],
+        error: false,
+        external: false,
+    });
+    let envelope_ty = core.types.intern(b::Type::Enum(envelope, vec![]));
+    let signal = core.enums.alloc(b::EnumDef {
+        name: "Signal".into(),
+        params: 0,
+        variants: vec![
+            b::VariantDef {
+                name: "Missing".into(),
+                fields: b::VariantFields::Unit,
+                tys: vec![],
+            },
+            b::VariantDef {
+                name: "Present".into(),
+                fields: b::VariantFields::Positional(2),
+                tys: vec![key_ty, b::TypeId::STRING],
+            },
+        ],
+        error: false,
+        external: false,
+    });
+    let signal_ty = core.types.intern(b::Type::Enum(signal, vec![]));
+    let option = core.enums.alloc(b::EnumDef {
+        name: "Option".into(),
+        params: 1,
+        variants: vec![
+            b::VariantDef {
+                name: "None".into(),
+                fields: b::VariantFields::Unit,
+                tys: vec![],
+            },
+            b::VariantDef {
+                name: "Some".into(),
+                fields: b::VariantFields::Positional(1),
+                tys: vec![self_param],
+            },
+        ],
+        error: false,
+        external: false,
+    });
+    let option_ty = core.types.intern(b::Type::Enum(option, vec![key_ty]));
+    registry.register_option_type(&core, option).unwrap();
+    let pair_ty = core
+        .types
+        .intern(b::Type::Tuple(vec![key_ty, b::TypeId::STRING]));
+    let display_ty = core
+        .types
+        .intern(b::Type::Tuple(vec![envelope_ty, option_ty, signal_ty]));
+    let key_front = frontend_type(key_ty);
+    let a = local(0, key_front);
+    let b_ = local(1, key_front);
+    let field = |local: &ir::Local| {
+        expression(
+            ir::ExprKind::Field {
+                base: Box::new(expression(ir::ExprKind::Local(local.id), local.ty)),
+                ctor: b::CtorRef {
+                    enum_id: key,
+                    variant: 0,
+                },
+                index: 0,
+            },
+            ValueType::Int,
+        )
+    };
+    let remainder = |value: ir::Expr| {
+        expression(
+            ir::ExprKind::Binary {
+                op: Binary::Rem,
+                left: Box::new(value),
+                right: Box::new(integer(10)),
+            },
+            ValueType::Int,
+        )
+    };
+    let eq_body = expression(
+        ir::ExprKind::Binary {
+            op: Binary::Eq,
+            left: Box::new(remainder(field(&a))),
+            right: Box::new(remainder(field(&b_))),
+        },
+        ValueType::Bool,
+    );
+    let eq = function(
+        0,
+        "key_eq",
+        vec![a.clone(), b_.clone()],
+        ValueType::Bool,
+        eq_body,
+    );
+    let trait_call = |kind: BT, self_type, args: Vec<ir::Expr>, ty| {
+        expression(
+            ir::ExprKind::TraitCall {
+                trait_id: trait_ids[&kind],
+                method: match kind {
+                    BT::Eq => "eq",
+                    BT::Ord => "compare",
+                    BT::Show => "show",
+                }
+                .into(),
+                self_type,
+                order: (0..args.len()).collect(),
+                args,
+                nested_show: false,
+            },
+            ty,
+        )
+    };
+    let ord = function(
+        1,
+        "key_ord",
+        vec![a.clone(), b_],
+        frontend_type(ordering_ty),
+        trait_call(
+            BT::Ord,
+            b::TypeId::INT,
+            vec![remainder(field(&a)), remainder(field(&local(1, key_front)))],
+            frontend_type(ordering_ty),
+        ),
+    );
+    let show = function(
+        2,
+        "key_show",
+        vec![a.clone()],
+        ValueType::String,
+        expression(
+            ir::ExprKind::Concat(vec![
+                expression(
+                    ir::ExprKind::Literal(ir::Literal::String("K".into())),
+                    ValueType::String,
+                ),
+                expression(
+                    ir::ExprKind::Builtin {
+                        op: b::Builtin::IntToString,
+                        args: vec![field(&a)],
+                    },
+                    ValueType::String,
+                ),
+            ]),
+            ValueType::String,
+        ),
+    );
+    registry.register_type_owner(key, 1).unwrap();
+    for (kind, name, id) in [
+        (BT::Eq, "eq", 0),
+        (BT::Ord, "compare", 1),
+        (BT::Show, "show", 2),
+    ] {
+        registry
+            .add_impl(
+                &core,
+                Impl {
+                    head: TypeHead::Enum(key),
+                    trait_id: trait_ids[&kind],
+                    owner_module: 1,
+                    type_parameters: vec![],
+                    methods: HashMap::from([(name.into(), ir::DefinitionId(id))]),
+                },
+            )
+            .unwrap();
+    }
+    let mut functions = vec![eq, ord, show];
+    for (enum_id, ty, prefix) in [
+        (envelope, envelope_ty, "envelope"),
+        (signal, signal_ty, "signal"),
+    ] {
+        registry.register_type_owner(enum_id, 1).unwrap();
+        for (kind, method, ret, count) in [
+            (BT::Eq, "eq", ValueType::Bool, 2),
+            (BT::Ord, "compare", frontend_type(ordering_ty), 2),
+            (BT::Show, "show", ValueType::String, 1),
+        ] {
+            let id = functions.len();
+            let mut derive = function(
+                id,
+                &format!("{prefix}_{method}"),
+                (0..count).map(|id| local(id, frontend_type(ty))).collect(),
+                ret,
+                integer(0),
+            );
+            derive.body = None;
+            derive.derivation = Some(kind);
+            functions.push(derive);
+            registry
+                .add_impl(
+                    &core,
+                    Impl {
+                        head: TypeHead::Enum(enum_id),
+                        trait_id: trait_ids[&kind],
+                        owner_module: 1,
+                        type_parameters: vec![],
+                        methods: HashMap::from([(method.into(), ir::DefinitionId(id))]),
+                    },
+                )
+                .unwrap();
+        }
+    }
+    let make = |ty, enum_id, variant, args: Vec<ir::Expr>| {
+        expression(
+            ir::ExprKind::Make {
+                ctor: b::CtorRef { enum_id, variant },
+                order: (0..args.len()).collect(),
+                args,
+            },
+            frontend_type(ty),
+        )
+    };
+    let key_value = |value| make(key_ty, key, 0, vec![integer(value)]);
+    let text = || {
+        expression(
+            ir::ExprKind::Literal(ir::Literal::String("x".into())),
+            ValueType::String,
+        )
+    };
+    let record = |value| make(envelope_ty, envelope, 0, vec![key_value(value), text()]);
+    let some = |value| make(option_ty, option, 1, vec![key_value(value)]);
+    let present = |value| make(signal_ty, signal, 1, vec![key_value(value), text()]);
+    let mut statements = Vec::new();
+    for (ty, left, right) in [
+        (envelope_ty, record(7), record(17)),
+        (signal_ty, present(7), present(17)),
+        (option_ty, some(7), some(17)),
+        (
+            pair_ty,
+            expression(
+                ir::ExprKind::Tuple(vec![key_value(7), text()]),
+                frontend_type(pair_ty),
+            ),
+            expression(
+                ir::ExprKind::Tuple(vec![key_value(17), text()]),
+                frontend_type(pair_ty),
+            ),
+        ),
+    ] {
+        statements.push(ir::Statement::Expr(expression(
+            ir::ExprKind::Assert(Box::new(trait_call(
+                BT::Eq,
+                ty,
+                vec![left, right],
+                ValueType::Bool,
+            ))),
+            ValueType::Unit,
+        )));
+    }
+    let ordering_value = trait_call(
+        BT::Ord,
+        envelope_ty,
+        vec![record(7), record(17)],
+        frontend_type(ordering_ty),
+    );
+    let equal = ir::Pattern {
+        kind: ir::PatternKind::Constructor {
+            ctor: b::CtorRef {
+                enum_id: ordering,
+                variant: 1,
+            },
+            fields: vec![],
+        },
+        ty: frontend_type(ordering_ty),
+        span: span(),
+    };
+    let compare = expression(
+        ir::ExprKind::Match {
+            value: Box::new(ordering_value),
+            arms: vec![
+                ir::Arm {
+                    pattern: equal,
+                    guard: None,
+                    value: expression(
+                        ir::ExprKind::Literal(ir::Literal::Bool(true)),
+                        ValueType::Bool,
+                    ),
+                },
+                ir::Arm {
+                    pattern: ir::Pattern {
+                        kind: ir::PatternKind::Any,
+                        ty: frontend_type(ordering_ty),
+                        span: span(),
+                    },
+                    guard: None,
+                    value: expression(
+                        ir::ExprKind::Literal(ir::Literal::Bool(false)),
+                        ValueType::Bool,
+                    ),
+                },
+            ],
+        },
+        ValueType::Bool,
+    );
+    statements.push(ir::Statement::Expr(expression(
+        ir::ExprKind::Assert(Box::new(compare)),
+        ValueType::Unit,
+    )));
+    let displayed = trait_call(
+        BT::Show,
+        display_ty,
+        vec![expression(
+            ir::ExprKind::Tuple(vec![record(7), some(7), present(7)]),
+            frontend_type(display_ty),
+        )],
+        ValueType::String,
+    );
+    let expected = expression(
+        ir::ExprKind::Literal(ir::Literal::String(
+            "(Envelope(key: K7, text: \"x\"), Some(K7), Present(K7, \"x\"))".into(),
+        )),
+        ValueType::String,
+    );
+    let matches = expression(
+        ir::ExprKind::Binary {
+            op: Binary::Eq,
+            left: Box::new(displayed),
+            right: Box::new(expected),
+        },
+        ValueType::Bool,
+    );
+    statements.push(ir::Statement::Expr(expression(
+        ir::ExprKind::Assert(Box::new(matches)),
+        ValueType::Unit,
+    )));
+    statements.push(ir::Statement::Expr(integer(42)));
+    let mut answer = exported(function(
+        functions.len(),
+        "answer",
+        vec![],
+        ValueType::Int,
+        integer(0),
+    ));
+    answer.body = Some(ir::Block {
+        statements,
+        ty: ValueType::Int,
+        span: span(),
+    });
+    functions.push(answer);
+    execute(ir::Program {
+        core,
+        registry,
+        functions,
+    });
+}
+
+#[test]
+fn generic_trait_calls_instantiate_default_methods_with_the_concrete_self_type() {
+    use crate::frontend::traits::{Impl, Method, Registry, Trait, TypeHead};
+    let mut core = b::Definitions::default();
+    let parameter = core.types.intern(b::Type::Param(0));
+    let generic = frontend_type(parameter);
+    let key = core.enums.alloc(b::EnumDef {
+        name: "Key".into(),
+        params: 0,
+        variants: vec![b::VariantDef {
+            name: "Key".into(),
+            fields: b::VariantFields::Named(vec!["value".into()]),
+            tys: vec![b::TypeId::INT],
+        }],
+        error: false,
+        external: false,
+    });
+    let key_ty = core.types.intern(b::Type::Enum(key, vec![]));
+    let signature = core.types.intern(b::Type::Fn(b::FnType {
+        params: vec![parameter],
+        ret: b::TypeId::INT,
+        fails: false,
+        suspends: false,
+        ev: false,
+        sets: None,
+    }));
+    let mut registry = Registry::new();
+    let score = registry
+        .add_trait(Trait {
+            name: "Score".into(),
+            owner_module: 0,
+            supers: vec![],
+            methods: vec![
+                Method {
+                    name: "score".into(),
+                    signature,
+                    default_function: None,
+                },
+                Method {
+                    name: "next".into(),
+                    signature,
+                    default_function: Some(ir::DefinitionId(1)),
+                },
+            ],
+        })
+        .unwrap();
+    registry.register_type_owner(key, 1).unwrap();
+    registry
+        .add_impl(
+            &core,
+            Impl {
+                head: TypeHead::Enum(key),
+                trait_id: score,
+                owner_module: 1,
+                type_parameters: vec![],
+                methods: HashMap::from([("score".into(), ir::DefinitionId(0))]),
+            },
+        )
+        .unwrap();
+    let key_param = local(0, frontend_type(key_ty));
+    let value = expression(
+        ir::ExprKind::Field {
+            base: Box::new(expression(ir::ExprKind::Local(key_param.id), key_param.ty)),
+            ctor: b::CtorRef {
+                enum_id: key,
+                variant: 0,
+            },
+            index: 0,
+        },
+        ValueType::Int,
+    );
+    let implementation = function(
+        0,
+        "score",
+        vec![key_param],
+        ValueType::Int,
+        expression(
+            ir::ExprKind::Binary {
+                op: Binary::Add,
+                left: Box::new(value),
+                right: Box::new(integer(1)),
+            },
+            ValueType::Int,
+        ),
+    );
+    let trait_call = |method: &str| {
+        expression(
+            ir::ExprKind::TraitCall {
+                trait_id: score,
+                method: method.into(),
+                self_type: parameter,
+                args: vec![expression(ir::ExprKind::Local(ir::LocalId(0)), generic)],
+                order: vec![0],
+                nested_show: false,
+            },
+            ValueType::Int,
+        )
+    };
+    let mut default = function(
+        1,
+        "next",
+        vec![local(0, generic)],
+        ValueType::Int,
+        expression(
+            ir::ExprKind::Binary {
+                op: Binary::Add,
+                left: Box::new(trait_call("score")),
+                right: Box::new(integer(1)),
+            },
+            ValueType::Int,
+        ),
+    );
+    default.type_parameters = 1;
+    let mut generic_call = function(
+        2,
+        "generic",
+        vec![local(0, generic)],
+        ValueType::Int,
+        trait_call("next"),
+    );
+    generic_call.type_parameters = 1;
+    let key_value = expression(
+        ir::ExprKind::Make {
+            ctor: b::CtorRef {
+                enum_id: key,
+                variant: 0,
+            },
+            args: vec![integer(7)],
+            order: vec![0],
+        },
+        frontend_type(key_ty),
+    );
+    let next = call(2, vec![key_value], vec![key_ty], ValueType::Int);
+    let answer = exported(function(
+        3,
+        "answer",
+        vec![],
+        ValueType::Int,
+        expression(
+            ir::ExprKind::Binary {
+                op: Binary::Add,
+                left: Box::new(next),
+                right: Box::new(integer(33)),
+            },
+            ValueType::Int,
+        ),
+    ));
+    execute(ir::Program {
+        core,
+        registry,
+        functions: vec![implementation, default, generic_call, answer],
+    });
 }

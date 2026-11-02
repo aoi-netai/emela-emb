@@ -18,6 +18,9 @@ pub(crate) struct Local {
 pub(crate) struct Function {
     pub id: DefinitionId,
     pub type_parameters: usize,
+    pub constant: bool,
+    pub origin: Option<DefinitionId>,
+    pub derivation: Option<super::traits::BuiltinTrait>,
     pub name: String,
     pub source_name: String,
     pub span: Span,
@@ -32,6 +35,7 @@ pub(crate) struct Function {
 #[derive(Clone, Debug)]
 pub(crate) struct Program {
     pub core: crate::contract::ir::Definitions,
+    pub registry: super::traits::Registry,
     pub functions: Vec<Function>,
 }
 #[derive(Clone, Debug)]
@@ -55,6 +59,19 @@ pub(crate) struct Expr {
 pub(crate) enum ExprKind {
     Literal(Literal),
     Concat(Vec<Expr>),
+    Tag(Box<Expr>),
+    Builtin {
+        op: crate::contract::ir::Builtin,
+        args: Vec<Expr>,
+    },
+    TraitCall {
+        trait_id: super::traits::TraitId,
+        method: String,
+        self_type: crate::contract::ir::TypeId,
+        args: Vec<Expr>,
+        order: Vec<usize>,
+        nested_show: bool,
+    },
     Match {
         value: Box<Expr>,
         arms: Vec<Arm>,

@@ -125,17 +125,31 @@ impl Context<'_> {
         use ir::ExprKind as E;
         match &mut expression.kind {
             E::Literal(_) | E::Local(_) => {}
-            E::Concat(values) | E::Tuple(values) | E::Make { args: values, .. } => {
+            E::Concat(values)
+            | E::Tuple(values)
+            | E::Make { args: values, .. }
+            | E::Builtin { args: values, .. } => {
                 for value in values {
                     self.expression(value)?;
                 }
             }
-            E::Unary { value, .. } | E::Assert(value) | E::Field { base: value, .. } => {
-                self.expression(value)?
-            }
+            E::Unary { value, .. }
+            | E::Assert(value)
+            | E::Field { base: value, .. }
+            | E::Tag(value) => self.expression(value)?,
             E::Binary { left, right, .. } => {
                 self.expression(left)?;
                 self.expression(right)?;
+            }
+            E::TraitCall {
+                self_type, args, ..
+            } => {
+                let mut ty = frontend_type(*self_type);
+                self.ty(&mut ty, expression.span)?;
+                *self_type = backend_type(ty);
+                for arg in args {
+                    self.expression(arg)?;
+                }
             }
             E::Call {
                 args,
