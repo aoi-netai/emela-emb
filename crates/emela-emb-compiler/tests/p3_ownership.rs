@@ -15,7 +15,7 @@ fn compile_source(source: &str, options: &Options) -> Output {
 fn strings_in_nested_lists_and_error_payloads_outlive_their_original_owners() {
     let output = with_heap_audit(compile_source(
         include_str!("compat/p3/owned-payload.emel"),
-        &Options::default().with_heap_bytes(16384),
+        &Options::default().with_heap_bytes(1024),
     ));
     compile_and_run(&output, include_str!("compat/p3/owned-payload-harness.c"));
 }
@@ -27,7 +27,7 @@ fn owned_string_subviews_compare_without_allocating_or_changing_their_owner() {
             include_str!("compat/p3/owned-payload.emel"),
             include_str!("compat/p2/strings.emel")
         ),
-        &Options::default().with_heap_bytes(16384),
+        &Options::default().with_heap_bytes(1024),
     ));
     compile_and_run(
         &output,
