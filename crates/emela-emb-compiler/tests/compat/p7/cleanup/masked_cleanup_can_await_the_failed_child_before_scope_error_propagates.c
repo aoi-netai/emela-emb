@@ -17,5 +17,6 @@ int main(void) {
   assert(emela_task_complete_int(tasks[0],0));
   while(!emela_fiber_done(f)) assert(emela_scheduler_run(1));
   assert(result==42 && marks==2-joined && !emela_task_complete_int(tasks[1],0));emela_fiber_release(f);
+  assert(test_heap_empty());
  }
 }

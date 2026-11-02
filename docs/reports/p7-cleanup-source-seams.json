@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "legacy_revision": "c34c0aeefdd966d854371b3110db00a47798751d",
-  "policy": "Pending records are not execution evidence. Source API and post-source IR seams are separated.",
+  "policy": "Executed source→IR seam→C evidence; not pure-source-only evidence. Stage/record promotion remains a root-owned proposal.",
   "cases": [
     {
       "legacy_test": "emit::fiber::failure::masked_cleanup_can_await_the_failed_child_before_scope_error_propagates",
@@ -39,14 +39,30 @@
         "emela_scheduler_run(1)",
         "result==42 && marks==2-joined && !emela_task_complete_int(tasks[1],0)"
       ],
-      "status": "pending-runtime",
-      "recommended_ledger_status": "pending",
+      "status": "passed-source-ir-seam-C-O0-O2",
+      "recommended_ledger_status": "verified",
       "seams": [
         "protect_cleanup_call"
       ],
       "seam_steps": [
         "Copy fixed interrupt.rs::protect_cleanup_call: move the final source call to cleanup into a Protect cleanup, preserving required trailing evidence construction/lookup statements and capture operands. No source-body edits."
-      ]
+      ],
+      "new_test": {
+        "kind": "source_to_ir_seam_test",
+        "path": "crates/emela-emb-compiler/src/backend/lower/p7_cleanup_source_seam_tests.rs",
+        "symbol": "masked_cleanup_can_await_the_failed_child_before_scope_error_propagates"
+      },
+      "observations": {
+        "source_check": "passed",
+        "C_generation": "passed",
+        "C_runtime_O0": "passed",
+        "C_runtime_O2": "passed",
+        "pure_source_runtime": false,
+        "iterations": 1000,
+        "heap_empty_after_each": true
+      },
+      "C_harness_sha256": "84b8af67f1a1c5ef1f601218113a9943e371d7bf830526eecc9b475d4a247f0d",
+      "C_harness_adaptation": "Original assertions preserved; add test_heap_empty() after each root release. Original harness declared the hook but did not call it."
     },
     {
       "legacy_test": "emit::fiber::interrupt::interrupted_cleanup_can_close_a_nested_scope_and_wait_for_its_child_release",
@@ -86,14 +102,29 @@
         "emela_scheduler_run(1)",
         "value == 42 && order == 5"
       ],
-      "status": "pending-runtime",
-      "recommended_ledger_status": "pending",
+      "status": "passed-source-ir-seam-C-O0-O2",
+      "recommended_ledger_status": "verified",
       "seams": [
         "protect_cleanup_call"
       ],
       "seam_steps": [
         "Copy fixed interrupt.rs::protect_cleanup_call: move the final source call to cleanup into a Protect cleanup, preserving required trailing evidence construction/lookup statements and capture operands. No source-body edits."
-      ]
+      ],
+      "new_test": {
+        "kind": "source_to_ir_seam_test",
+        "path": "crates/emela-emb-compiler/src/backend/lower/p7_cleanup_source_seam_tests.rs",
+        "symbol": "interrupted_cleanup_can_close_a_nested_scope_and_wait_for_its_child_release"
+      },
+      "observations": {
+        "source_check": "passed",
+        "C_generation": "passed",
+        "C_runtime_O0": "passed",
+        "C_runtime_O2": "passed",
+        "pure_source_runtime": false,
+        "iterations": 1000,
+        "heap_empty_after_each": true
+      },
+      "C_harness_sha256": "465808f1c6febafc39e341e6963583f10177c71c8f2cd2ebefbb45366d6a3112"
     },
     {
       "legacy_test": "emit::fiber::interrupt::interrupted_cleanup_can_wait_on_a_deferred_completed_by_a_sibling",
@@ -128,14 +159,29 @@
         "emela_scheduler_run(1)",
         "value == 42 && order == 4"
       ],
-      "status": "pending-runtime",
-      "recommended_ledger_status": "pending",
+      "status": "passed-source-ir-seam-C-O0-O2",
+      "recommended_ledger_status": "verified",
       "seams": [
         "protect_cleanup_call"
       ],
       "seam_steps": [
         "Copy fixed interrupt.rs::protect_cleanup_call: move the final source call to cleanup into a Protect cleanup, preserving required trailing evidence construction/lookup statements and capture operands. No source-body edits."
-      ]
+      ],
+      "new_test": {
+        "kind": "source_to_ir_seam_test",
+        "path": "crates/emela-emb-compiler/src/backend/lower/p7_cleanup_source_seam_tests.rs",
+        "symbol": "interrupted_cleanup_can_wait_on_a_deferred_completed_by_a_sibling"
+      },
+      "observations": {
+        "source_check": "passed",
+        "C_generation": "passed",
+        "C_runtime_O0": "passed",
+        "C_runtime_O2": "passed",
+        "pure_source_runtime": false,
+        "iterations": 1000,
+        "heap_empty_after_each": true
+      },
+      "C_harness_sha256": "3c8ab8e6178c5ec09216ffa6cbf0ac2e3e14ba7dc5c052a29f66b53f7a106751"
     },
     {
       "legacy_test": "emit::fiber::interrupt::self_interrupt_unwinds_the_body_and_is_deferred_inside_cleanup",
@@ -170,14 +216,29 @@
         "emela_scheduler_run(1)",
         "value == 42 && order == 4"
       ],
-      "status": "pending-runtime",
-      "recommended_ledger_status": "pending",
+      "status": "passed-source-ir-seam-C-O0-O2",
+      "recommended_ledger_status": "verified",
       "seams": [
         "protect_cleanup_call"
       ],
       "seam_steps": [
         "Copy fixed interrupt.rs::protect_cleanup_call: move the final source call to cleanup into a Protect cleanup, preserving required trailing evidence construction/lookup statements and capture operands. No source-body edits."
-      ]
+      ],
+      "new_test": {
+        "kind": "source_to_ir_seam_test",
+        "path": "crates/emela-emb-compiler/src/backend/lower/p7_cleanup_source_seam_tests.rs",
+        "symbol": "self_interrupt_unwinds_the_body_and_is_deferred_inside_cleanup"
+      },
+      "observations": {
+        "source_check": "passed",
+        "C_generation": "passed",
+        "C_runtime_O0": "passed",
+        "C_runtime_O2": "passed",
+        "pure_source_runtime": false,
+        "iterations": 1000,
+        "heap_empty_after_each": true
+      },
+      "C_harness_sha256": "759ca83c076d177216ef0af21a4e587035dd7851cf688add8d257a015c0290c8"
     },
     {
       "legacy_test": "emit::fiber::notes::later_failures_are_ordered_owned_notes_shared_by_rethrown_causes",
@@ -217,14 +278,29 @@
         "emela_export_caught_4(again)==order[0]",
         "test_heap_empty()"
       ],
-      "status": "pending-runtime",
-      "recommended_ledger_status": "pending",
+      "status": "passed-source-ir-seam-C-O0-O2",
+      "recommended_ledger_status": "verified",
       "seams": [
         "hold_late"
       ],
       "seam_steps": [
         "Prepend Let dstNone Value::Runtime Hold args[] to source function late body, as fixed notes.rs::masked_notes_flow and overlap/payload helpers."
-      ]
+      ],
+      "new_test": {
+        "kind": "source_to_ir_seam_test",
+        "path": "crates/emela-emb-compiler/src/backend/lower/p7_cleanup_source_seam_tests.rs",
+        "symbol": "later_failures_are_ordered_owned_notes_shared_by_rethrown_causes"
+      },
+      "observations": {
+        "source_check": "passed",
+        "C_generation": "passed",
+        "C_runtime_O0": "passed",
+        "C_runtime_O2": "passed",
+        "pure_source_runtime": false,
+        "iterations": 1000,
+        "heap_empty_after_each": true
+      },
+      "C_harness_sha256": "aecff0784699d60ec5e11d1a2c8497bd22f2af21a504f2121c3f497d460dbcb9"
     },
     {
       "legacy_test": "emit::fiber::notes::note_display_checks_the_callers_remaining_capacity",
@@ -259,14 +335,30 @@
         "emela_task_complete_int(tasks[i],0)",
         "emela_fiber_done(f) && cause"
       ],
-      "status": "pending-runtime",
-      "recommended_ledger_status": "pending",
+      "status": "passed-source-ir-seam-C-O0-O2",
+      "recommended_ledger_status": "verified",
       "seams": [
         "hold_late"
       ],
       "seam_steps": [
         "Prepend Let dstNone Value::Runtime Hold args[] to source function late body, as fixed notes.rs::masked_notes_flow and overlap/payload helpers."
-      ]
+      ],
+      "new_test": {
+        "kind": "source_to_ir_seam_test",
+        "path": "crates/emela-emb-compiler/src/backend/lower/p7_cleanup_source_seam_tests.rs",
+        "symbol": "note_display_checks_the_callers_remaining_capacity"
+      },
+      "observations": {
+        "source_check": "passed",
+        "C_generation": "passed",
+        "C_runtime_O0": "passed",
+        "C_runtime_O2": "passed",
+        "pure_source_runtime": false,
+        "iterations": 1,
+        "heap_empty_after_each": false
+      },
+      "C_harness_sha256": "35396e60104e2286a88e8a6116fe0944080b3a50b260c23eb8ce55812e18e38c",
+      "observation_limit": "Fatal StringCapacity hook exits once per optimization; cause is intentionally live until the hook. This is not a1000-loop success or heap-after-defect claim."
     },
     {
       "legacy_test": "emit::fiber::overlap::failures_from_cancelled_nested_scopes_become_notes_of_the_outer_first_failure",
@@ -306,14 +398,29 @@
         "text.length==length && memcmp(text.data,expected,length)==0",
         "test_heap_empty()"
       ],
-      "status": "pending-runtime",
-      "recommended_ledger_status": "pending",
+      "status": "passed-source-ir-seam-C-O0-O2",
+      "recommended_ledger_status": "verified",
       "seams": [
         "hold_late"
       ],
       "seam_steps": [
         "Prepend Let dstNone Value::Runtime Hold args[] to source function late body, as fixed notes.rs::masked_notes_flow and overlap/payload helpers."
-      ]
+      ],
+      "new_test": {
+        "kind": "source_to_ir_seam_test",
+        "path": "crates/emela-emb-compiler/src/backend/lower/p7_cleanup_source_seam_tests.rs",
+        "symbol": "failures_from_cancelled_nested_scopes_become_notes_of_the_outer_first_failure"
+      },
+      "observations": {
+        "source_check": "passed",
+        "C_generation": "passed",
+        "C_runtime_O0": "passed",
+        "C_runtime_O2": "passed",
+        "pure_source_runtime": false,
+        "iterations": 1000,
+        "heap_empty_after_each": true
+      },
+      "C_harness_sha256": "d9a6b2d18e7778ec19b5f90ef42cb938d86e6231771d56637bcf882f6e7d64a9"
     },
     {
       "legacy_test": "emit::fiber::overlap::nested_scope_failure_survives_external_interruption_before_and_after_failure",
@@ -354,14 +461,29 @@
         "result==42 && order==3 && !emela_task_complete_int(tasks[1],0)",
         "test_heap_empty()"
       ],
-      "status": "pending-runtime",
-      "recommended_ledger_status": "pending",
+      "status": "passed-source-ir-seam-C-O0-O2",
+      "recommended_ledger_status": "verified",
       "seams": [
         "hold_late"
       ],
       "seam_steps": [
         "Prepend Let dstNone Value::Runtime Hold args[] to source function late body, as fixed notes.rs::masked_notes_flow and overlap/payload helpers."
-      ]
+      ],
+      "new_test": {
+        "kind": "source_to_ir_seam_test",
+        "path": "crates/emela-emb-compiler/src/backend/lower/p7_cleanup_source_seam_tests.rs",
+        "symbol": "nested_scope_failure_survives_external_interruption_before_and_after_failure"
+      },
+      "observations": {
+        "source_check": "passed",
+        "C_generation": "passed",
+        "C_runtime_O0": "passed",
+        "C_runtime_O2": "passed",
+        "pure_source_runtime": false,
+        "iterations": 1000,
+        "heap_empty_after_each": true
+      },
+      "C_harness_sha256": "d5e9e99c30097da5535389a625052b9dab6b1cd3f029c267033a2c46f625b15f"
     },
     {
       "legacy_test": "emit::fiber::overlap::settled_nested_scope_failures_keep_their_notes_when_cleanup_raises_interrupt",
@@ -405,8 +527,8 @@
         "text.length==length && memcmp(text.data,expected,length)==0",
         "test_heap_empty()"
       ],
-      "status": "pending-runtime",
-      "recommended_ledger_status": "pending",
+      "status": "passed-source-ir-seam-C-O0-O2",
+      "recommended_ledger_status": "verified",
       "seams": [
         "protect_cleanup_call",
         "hold_late"
@@ -414,7 +536,22 @@
       "seam_steps": [
         "Copy fixed interrupt.rs::protect_cleanup_call: move the final source call to cleanup into a Protect cleanup, preserving required trailing evidence construction/lookup statements and capture operands. No source-body edits.",
         "Prepend Let dstNone Value::Runtime Hold args[] to source function late body, as fixed notes.rs::masked_notes_flow and overlap/payload helpers."
-      ]
+      ],
+      "new_test": {
+        "kind": "source_to_ir_seam_test",
+        "path": "crates/emela-emb-compiler/src/backend/lower/p7_cleanup_source_seam_tests.rs",
+        "symbol": "settled_nested_scope_failures_keep_their_notes_when_cleanup_raises_interrupt"
+      },
+      "observations": {
+        "source_check": "passed",
+        "C_generation": "passed",
+        "C_runtime_O0": "passed",
+        "C_runtime_O2": "passed",
+        "pure_source_runtime": false,
+        "iterations": 1000,
+        "heap_empty_after_each": true
+      },
+      "C_harness_sha256": "dd0433662bb4fb4411a1d6b986bedcea92ae97ec531c4d2e4125c13e79d0d763"
     },
     {
       "legacy_test": "emit::fiber::payload::scope_causes_and_notes_keep_string_payloads_after_frames_and_scopes_end",
@@ -453,14 +590,29 @@
         "payload.owner && payload.length == 1 && payload.data[0] == '0' + order[0]",
         "test_heap_empty()"
       ],
-      "status": "pending-runtime",
-      "recommended_ledger_status": "pending",
+      "status": "passed-source-ir-seam-C-O0-O2",
+      "recommended_ledger_status": "verified",
       "seams": [
         "hold_late"
       ],
       "seam_steps": [
         "Prepend Let dstNone Value::Runtime Hold args[] to source function late body, as fixed notes.rs::masked_notes_flow and overlap/payload helpers."
-      ]
+      ],
+      "new_test": {
+        "kind": "source_to_ir_seam_test",
+        "path": "crates/emela-emb-compiler/src/backend/lower/p7_cleanup_source_seam_tests.rs",
+        "symbol": "scope_causes_and_notes_keep_string_payloads_after_frames_and_scopes_end"
+      },
+      "observations": {
+        "source_check": "passed",
+        "C_generation": "passed",
+        "C_runtime_O0": "passed",
+        "C_runtime_O2": "passed",
+        "pure_source_runtime": false,
+        "iterations": 1000,
+        "heap_empty_after_each": true
+      },
+      "C_harness_sha256": "054dcca20eaf2dafe4b5c6b971632693e2e6a5aac9b87c0c9edad019eed0a4f9"
     },
     {
       "legacy_test": "emit::fiber::task_failure::external_failure_payload_survives_suspending_cleanup_and_later_interruption",
@@ -501,8 +653,8 @@
         "emela_fiber_done(f)&&marks==1",
         "result==((i%3&&!(i%2))?5:-1)&&test_heap_empty()"
       ],
-      "status": "pending-runtime",
-      "recommended_ledger_status": "pending",
+      "status": "passed-source-ir-seam-C-O0-O2",
+      "recommended_ledger_status": "verified",
       "seams": [
         "external_request",
         "private_C_cancel"
@@ -510,7 +662,22 @@
       "seam_steps": [
         "As examples/support/external_task_failure_flow.rs: source request wrapper must already fails+suspends; remove body and set external C HostRef::Global(host_request). Preserve params/ret/flags.",
         "Append test_cancel(EmelaFiber h){emela_fiber_get(h)->cancelled=1;} to generated C, as old output() helper."
-      ]
+      ],
+      "new_test": {
+        "kind": "source_to_ir_seam_test",
+        "path": "crates/emela-emb-compiler/src/backend/lower/p7_cleanup_source_seam_tests.rs",
+        "symbol": "external_failure_payload_survives_suspending_cleanup_and_later_interruption"
+      },
+      "observations": {
+        "source_check": "passed",
+        "C_generation": "passed",
+        "C_runtime_O0": "passed",
+        "C_runtime_O2": "passed",
+        "pure_source_runtime": false,
+        "iterations": 1000,
+        "heap_empty_after_each": true
+      },
+      "C_harness_sha256": "c735c78debfee38814b281cb893a1a109a892aa89588ab8b5e13539504cc3174"
     },
     {
       "legacy_test": "emit::fiber::task_failure::external_failures_own_borrowed_strings_and_lists_across_escape_attempt_scope_and_cancel",
@@ -574,8 +741,8 @@
         "!emela_task_fail(request,NULL,&c,release)",
         "!produced&&!released&&test_heap_empty()"
       ],
-      "status": "pending-runtime",
-      "recommended_ledger_status": "pending",
+      "status": "passed-source-ir-seam-C-O0-O2",
+      "recommended_ledger_status": "verified",
       "seams": [
         "external_request",
         "private_C_cancel"
@@ -583,7 +750,47 @@
       "seam_steps": [
         "As examples/support/external_task_failure_flow.rs: source request wrapper must already fails+suspends; remove body and set external C HostRef::Global(host_request). Preserve params/ret/flags.",
         "Append test_cancel(EmelaFiber h){emela_fiber_get(h)->cancelled=1;} to generated C, as old output() helper."
-      ]
+      ],
+      "new_test": {
+        "kind": "source_to_ir_seam_test",
+        "path": "crates/emela-emb-compiler/src/backend/lower/p7_cleanup_source_seam_tests.rs",
+        "symbol": "external_failures_own_borrowed_strings_and_lists_across_escape_attempt_scope_and_cancel"
+      },
+      "observations": {
+        "source_check": "passed",
+        "C_generation": "passed",
+        "C_runtime_O0": "passed",
+        "C_runtime_O2": "passed",
+        "pure_source_runtime": false,
+        "iterations": 1000,
+        "heap_empty_after_each": true
+      },
+      "C_harness_sha256": "dcf3099c83f8bde3272313a158195d34cd78e7ec425889910f94e6bca4ea7b11"
     }
-  ]
+  ],
+  "compiler_checkpoint": "a2e8709",
+  "prerequisites": [
+    "49db59e fixture/harness pack",
+    "da721f2 shared Protect cleanup seam",
+    "root closure Fiber failure-edge fix1c1912a",
+    "frontend ev_lookup/frame packing a6110f6 already in combined base"
+  ],
+  "validation": {
+    "C_flags": [
+      "-std=c11",
+      "-Wall",
+      "-Wextra",
+      "-Werror"
+    ],
+    "optimizations": [
+      "-O0",
+      "-O2"
+    ],
+    "tests_passed": 12,
+    "tests_failed": 0,
+    "tests_ignored": 0,
+    "normal_iterations_each": 1000,
+    "fatal_capacity_case_iterations_each": 1,
+    "runtime_capacity_policy": "Use all recorded old options; no frame/heap/pool increase."
+  }
 }
