@@ -3,8 +3,9 @@
   "legacy_revision": "c34c0aeefdd966d854371b3110db00a47798751d",
   "implementation_revision": "13cd3130094ac1f53ba99faa783df271a91b290f",
   "ledger_sha256": "217edadb708662dbc3ec34f9f85f2b865414322b4f3fe0a221a1d4687c86e498",
-  "review_sha256": "a87366b80452b66e11117ab4f14178128407c152fcd619b5f2d46e92fa520de5",
+  "review_sha256": "6a946f32464b9f927519581e03430b4a8a9d8948b1651bf828eca689ec9171b5",
   "corpus_index_sha256": "2a1d100c713a22864e85beba4c902529117b4a2b480bc79170ca0adf35106ff0",
+  "source_fixture_manifest_sha256": "ea5c9837539b20f9d0c639ae55c6b59c11d5bf3189c8be4d7d7f75776a6a9923",
   "purpose": "Read-only completion audit. The authoritative ledger and its statuses are not changed. Candidate matches need semantic review; C generation/object checks are not C execution.",
   "fixed_reference_checks": {
     "record_ids_roles_relations": "match",
@@ -13,6 +14,90 @@
     "requirement_ids": "match"
   },
   "reviews": [
+    {
+      "id": "existing-discarded-float-observation-reviewed",
+      "owner": "audit",
+      "state": "old-assertion-covered-by-existing-source-C-test",
+      "test_ids": [
+        "emit::builtin_audit::discarded_float_rounding_preserves_the_out_of_range_defect"
+      ],
+      "note": "The old IR-only assertion discards FloatFloor(NaN) and checks FloatToInt defect. Existing p2_compat numeric-format source has unused discard_floor; its C harness covers that exact NaN/operation/kind plus three other conversions, infinities/range errors and exact message (40 defects). P5 isolated full run includes it. This correspondence needs no duplicate test and does not turn IR-only discovery into unrelated source coverage.",
+      "candidate_evidence": [
+        {
+          "path": "crates/emela-emb-compiler/tests/p2_compat.rs",
+          "symbol": "legacy_numeric_formatting_rounding_and_unused_defects_execute",
+          "kind": "source_test"
+        },
+        {
+          "path": "crates/emela-emb-compiler/tests/compat/p2/numeric-format.emel",
+          "kind": "source_fixture"
+        },
+        {
+          "path": "crates/emela-emb-compiler/tests/compat/p2/numeric-format-harness.c",
+          "kind": "C_harness"
+        },
+        {
+          "path": "docs/reports/compiler-p5.md",
+          "kind": "run_report"
+        }
+      ],
+      "candidate_reference_ids": [
+        "13cd3130094ac1f53ba99faa783df271a91b290f:crates/emela-emb-compiler/tests/p2_compat.rs#legacy_numeric_formatting_rounding_and_unused_defects_execute",
+        "13cd3130094ac1f53ba99faa783df271a91b290f:crates/emela-emb-compiler/tests/compat/p2/numeric-format.emel",
+        "13cd3130094ac1f53ba99faa783df271a91b290f:crates/emela-emb-compiler/tests/compat/p2/numeric-format-harness.c",
+        "13cd3130094ac1f53ba99faa783df271a91b290f:docs/reports/compiler-p5.md"
+      ]
+    },
+    {
+      "id": "binding-host-metadata-observation-replaced",
+      "owner": "audit",
+      "state": "old-assertions-reconstructed-and-C-executed",
+      "test_ids": [
+        "emit::binding_metadata::imported_c_bindings_preserve_symbols_for_named_file_and_bundled_modules"
+      ],
+      "note": "Global plus Named/File/Bundled Import metadata each preserve the read_number C symbol and return42, exactly as the old IR-only test. c046065 executes all four 1000 times and checks 4000 C calls; no external source syntax or file/bundle read is introduced.",
+      "candidate_evidence": [
+        {
+          "revision": "c046065",
+          "path": "crates/emela-emb-compiler/src/backend/lower/p7_binding_tests.rs",
+          "kind": "ir_test"
+        },
+        {
+          "revision": "c046065",
+          "path": "docs/reports/compiler-p7-binding-metadata.md",
+          "kind": "run_report"
+        }
+      ],
+      "candidate_reference_ids": [
+        "c0460653ca9451cc7199ab0fc914bd517aac7dda:crates/emela-emb-compiler/src/backend/lower/p7_binding_tests.rs",
+        "c0460653ca9451cc7199ab0fc914bd517aac7dda:docs/reports/compiler-p7-binding-metadata.md"
+      ]
+    },
+    {
+      "id": "discarded-runtime-show-observation-fixed",
+      "owner": "audit",
+      "state": "regression-reproduced-fixed-and-C-executed",
+      "test_ids": [
+        "emit::builtin_audit::discarded_runtime_show_string_keeps_its_capacity_check"
+      ],
+      "note": "Old normal IR allows discarded Runtime ShowString and checks StringCapacity for abc at capacity3. New backend rejected it as no String destination. db98ac2 adds this runtime operation to discarded-result temporaries and reproduces the full old C effect after 1000 valid a inputs, at both optimization modes.",
+      "candidate_evidence": [
+        {
+          "revision": "db98ac2",
+          "path": "crates/emela-emb-compiler/src/backend/lower/p7_discarded_tests.rs",
+          "kind": "ir_test"
+        },
+        {
+          "revision": "db98ac2",
+          "path": "docs/reports/compiler-p7-discarded-show.md",
+          "kind": "run_report"
+        }
+      ],
+      "candidate_reference_ids": [
+        "db98ac211a4467ef6aec816fcfafd9a110aefd53:crates/emela-emb-compiler/src/backend/lower/p7_discarded_tests.rs",
+        "db98ac211a4467ef6aec816fcfafd9a110aefd53:docs/reports/compiler-p7-discarded-show.md"
+      ]
+    },
     {
       "id": "legacy-inline-data-observations-replaced",
       "owner": "audit",
@@ -57,7 +142,7 @@
     {
       "id": "P6-fiber-deferred-cause",
       "owner": "frontend/backend",
-      "state": "active-implementation",
+      "state": "source-and-IR-C-checkpoint-await-final-run",
       "record_prefixes": [
         "emela_core::FiberOp",
         "emela_lir::Value::Fiber",
@@ -70,7 +155,7 @@
       "requirement_ids": [
         "concurrency_cleanup"
       ],
-      "note": "Scope E/R inclusion, child providers, Fiber/Deferred scope lifetime, Cause empty error row, interruption and suspended cleanup still need source/C integration. Existing P5 task evidence does not establish these P6 observations.",
+      "note": "cb56194 connects Scope E/R inclusion, child providers, typed Fiber/Deferred/Cause, cancellation FIFO, ready-waiter disposal and child reclamation through source/C at both optimizations. The 174-source runtime crosswalk retains exact old assertions separately; broad feature tests do not close each legacy test. The final independent P6 run and P7 IR assertion audit remain required.",
       "candidate_evidence": [
         {
           "path": "crates/emela-emb-compiler/src/backend/lower/suspend_tests.rs",
@@ -83,12 +168,36 @@
         {
           "path": "docs/reports/compiler-p5.md",
           "kind": "run_report"
+        },
+        {
+          "revision": "cb56194",
+          "path": "crates/emela-emb-compiler/tests/p6_concurrency.rs",
+          "kind": "source_test"
+        },
+        {
+          "revision": "cb56194",
+          "path": "crates/emela-emb-compiler/tests/p6_scope_lifecycle.rs",
+          "kind": "source_test"
+        },
+        {
+          "revision": "cb56194",
+          "path": "crates/emela-emb-compiler/tests/p6_child_waiters.rs",
+          "kind": "source_test"
+        },
+        {
+          "revision": "cb56194",
+          "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+          "kind": "ir_test"
         }
       ],
       "candidate_reference_ids": [
         "13cd3130094ac1f53ba99faa783df271a91b290f:crates/emela-emb-compiler/src/backend/lower/suspend_tests.rs",
         "13cd3130094ac1f53ba99faa783df271a91b290f:crates/emela-emb-compiler/tests/p5_task_failures.rs",
-        "13cd3130094ac1f53ba99faa783df271a91b290f:docs/reports/compiler-p5.md"
+        "13cd3130094ac1f53ba99faa783df271a91b290f:docs/reports/compiler-p5.md",
+        "cb56194a1cb5e8c1ac5d1b4f1cf21d2428804dbf:crates/emela-emb-compiler/tests/p6_concurrency.rs",
+        "cb56194a1cb5e8c1ac5d1b4f1cf21d2428804dbf:crates/emela-emb-compiler/tests/p6_scope_lifecycle.rs",
+        "cb56194a1cb5e8c1ac5d1b4f1cf21d2428804dbf:crates/emela-emb-compiler/tests/p6_child_waiters.rs",
+        "cb56194a1cb5e8c1ac5d1b4f1cf21d2428804dbf:crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs"
       ]
     },
     {
@@ -142,7 +251,7 @@
     {
       "id": "P7-generic-const-identity",
       "owner": "backend",
-      "state": "active-implementation",
+      "state": "owner-C-checkpoint-await-integration",
       "record_ids": [
         "emela_core::Type::Param"
       ],
@@ -158,11 +267,26 @@
       "requirement_ids": [
         "const_identity"
       ],
-      "note": "P4 baseline rejected eight normal polymorphic const programs. Canonical dependency fixed point, source family identity, typed getter bridges, single initialization/defect cache, managed roots and Handle[A] const sharing are backend-owned. Runtime validation cannot be inferred from preserved fixture bytes or a concrete-root object check.",
+      "note": "P4 baseline rejected eight normal polymorphic const programs. f8ac2aa preserves their exact fixture hashes and executes all eight through source/C11/O0/O2/1000 iterations, with initialization/cache/self-retry/capture observations. These correspond to eight distinct old tests and nine test/program associations: one program is shared by two tests, while panic/self-reference variants belong to one test. Canonical root and generic function family implementation is 2508999; extra derived callback tests remain separate. The frozen P4 reach result is unchanged, and final integrated adoption is still required.",
       "candidate_evidence": [
         {
           "path": "crates/emela-emb-compiler/tests/p2_consts.rs",
           "kind": "source_test"
+        },
+        {
+          "revision": "f8ac2aa",
+          "path": "crates/emela-emb-compiler/tests/p7_legacy_generic_consts.rs",
+          "kind": "source_test"
+        },
+        {
+          "revision": "f8ac2aa",
+          "path": "crates/emela-emb-compiler/tests/p7_generic_consts.rs",
+          "kind": "source_test"
+        },
+        {
+          "revision": "f8ac2aa",
+          "path": "docs/reports/p7-generic-const-compat.json",
+          "kind": "run_report"
         },
         {
           "path": "crates/emela-emb-compiler/src/backend/lower/tests.rs",
@@ -172,6 +296,9 @@
       ],
       "candidate_reference_ids": [
         "13cd3130094ac1f53ba99faa783df271a91b290f:crates/emela-emb-compiler/tests/p2_consts.rs",
+        "f8ac2aa2826b0ae5c2eb5fb9b0604abe1df942ec:crates/emela-emb-compiler/tests/p7_legacy_generic_consts.rs",
+        "f8ac2aa2826b0ae5c2eb5fb9b0604abe1df942ec:crates/emela-emb-compiler/tests/p7_generic_consts.rs",
+        "f8ac2aa2826b0ae5c2eb5fb9b0604abe1df942ec:docs/reports/p7-generic-const-compat.json",
         "13cd3130094ac1f53ba99faa783df271a91b290f:crates/emela-emb-compiler/src/backend/lower/tests.rs#static_const_and_aggregate_runtime_const_execute"
       ]
     },
@@ -342,8 +469,18 @@
       "test_ids": [
         "flow::lowers_and_verifies_core_as_flow_ir"
       ],
-      "note": "The new compiler has no old Stage field or Heap-stage input API. Review only that removed representation for possible N/A, and name the replacement for required ownership, closures, error landing, cleanup and source locations. Keep each old test/context decision explicit; no automatic propagation from a parent schema.",
+      "note": "The new Program has no Stage selector. Private contract still defines Unwind/MakeClosure/EnvGet/Dup/Drop/OnFail::Handle: input validation rejects some residuals, while Handle is type/graph-checked then normalized to Block/Break. Review these actual contracts individually and name the replacement for required ownership, closures, error landing, cleanup and source locations. Keep every old test/context decision explicit; do not infer N/A from an assumed absence or propagate it from a parent schema.",
       "candidate_evidence": [
+        {
+          "revision": "bf750f7",
+          "path": "crates/emela-emb-compiler/src/backend/lower/p7_input_tests.rs",
+          "kind": "ir_test"
+        },
+        {
+          "revision": "bf750f7",
+          "path": "docs/reports/compiler-p7-input-residuals.md",
+          "kind": "run_report"
+        },
         {
           "path": "crates/emela-emb-compiler/src/contract/ir.rs",
           "kind": "implementation"
@@ -363,6 +500,8 @@
         }
       ],
       "candidate_reference_ids": [
+        "bf750f76b93701ba593bbcd6dd755323f5c2b23a:crates/emela-emb-compiler/src/backend/lower/p7_input_tests.rs",
+        "bf750f76b93701ba593bbcd6dd755323f5c2b23a:docs/reports/compiler-p7-input-residuals.md",
         "13cd3130094ac1f53ba99faa783df271a91b290f:crates/emela-emb-compiler/src/contract/ir.rs",
         "13cd3130094ac1f53ba99faa783df271a91b290f:crates/emela-emb-compiler/src/frontend/lower.rs",
         "13cd3130094ac1f53ba99faa783df271a91b290f:crates/emela-emb-compiler/src/backend/lower/tests.rs#rejects_invalid_ids_types_and_sequence_cycles_before_planning",
@@ -14958,6 +15097,7 @@
           "key": "emit::binding_metadata::imported_c_bindings_preserve_symbols_for_named_file_and_bundled_modules",
           "ledger_final_status": false,
           "review_groups": [
+            "binding-host-metadata-observation-replaced",
             "P7-C-ABI-and-bindings"
           ],
           "ledger_reference_ids": [
@@ -15010,6 +15150,7 @@
           "key": "emit::builtin_audit::discarded_float_rounding_preserves_the_out_of_range_defect",
           "ledger_final_status": false,
           "review_groups": [
+            "existing-discarded-float-observation-reviewed",
             "control-flow-and-scalar-IR-observations"
           ],
           "ledger_reference_ids": [],
@@ -15033,6 +15174,7 @@
           "key": "emit::builtin_audit::discarded_runtime_show_string_keeps_its_capacity_check",
           "ledger_final_status": false,
           "review_groups": [
+            "discarded-runtime-show-observation-fixed",
             "eight-source-builtins-and-residual-rejection"
           ],
           "ledger_reference_ids": [],
@@ -23544,6 +23686,48 @@
       "execution_inferred_from_discovery": false
     },
     {
+      "revision": "bf750f76b93701ba593bbcd6dd755323f5c2b23a",
+      "path": "crates/emela-emb-compiler/src/backend/lower/p7_input_tests.rs",
+      "symbol": "residual_heap_runtime_operations_are_rejected_in_native_and_suspending_input",
+      "leaf_name": "residual_heap_runtime_operations_are_rejected_in_native_and_suspending_input",
+      "line": 5,
+      "body_sha256": "287bdd974d167ed74dfefb182a9d52a5526b13d912125861e7f47141302fa518",
+      "attributes": [
+        "#[test]"
+      ],
+      "role": "backend-IR-unit-test",
+      "direct_C_helper_seen": [],
+      "execution_inferred_from_discovery": false
+    },
+    {
+      "revision": "bf750f76b93701ba593bbcd6dd755323f5c2b23a",
+      "path": "crates/emela-emb-compiler/src/backend/lower/p7_input_tests.rs",
+      "symbol": "explicit_defect_and_suspension_landing_edges_are_rejected_before_planning",
+      "leaf_name": "explicit_defect_and_suspension_landing_edges_are_rejected_before_planning",
+      "line": 52,
+      "body_sha256": "dd271886ace27d69f47d2b39a6fd9c98fc8c976abe8e75004ba291583dab1c95",
+      "attributes": [
+        "#[test]"
+      ],
+      "role": "backend-IR-unit-test",
+      "direct_C_helper_seen": [],
+      "execution_inferred_from_discovery": false
+    },
+    {
+      "revision": "c0460653ca9451cc7199ab0fc914bd517aac7dda",
+      "path": "crates/emela-emb-compiler/src/backend/lower/p7_binding_tests.rs",
+      "symbol": "global_named_file_and_bundled_host_metadata_preserve_the_external_c_symbol",
+      "leaf_name": "global_named_file_and_bundled_host_metadata_preserve_the_external_c_symbol",
+      "line": 5,
+      "body_sha256": "e272af7d9ca874c8d382bda34fee3014fcbe13346127c5b5e88ac21da1b284bf",
+      "attributes": [
+        "#[test]"
+      ],
+      "role": "backend-IR-unit-test",
+      "direct_C_helper_seen": [],
+      "execution_inferred_from_discovery": false
+    },
+    {
       "revision": "c0f351de90ea7c00424cd417e12f7354e4c22cd4",
       "path": "crates/emela-emb-compiler/tests/p7_external_types.rs",
       "symbol": "opaque_external_values_keep_pointer_identity_and_const_memoization_without_heap",
@@ -23586,6 +23770,770 @@
       "role": "source-integration-test",
       "direct_C_helper_seen": [],
       "execution_inferred_from_discovery": false
+    },
+    {
+      "revision": "cb56194a1cb5e8c1ac5d1b4f1cf21d2428804dbf",
+      "path": "crates/emela-emb-compiler/src/backend/lower/fiber_deferred_tests.rs",
+      "symbol": "deferred::deferred_wakes_fifo_waiters_with_owned_strings_and_releases_the_scope_value",
+      "leaf_name": "deferred_wakes_fifo_waiters_with_owned_strings_and_releases_the_scope_value",
+      "line": 4,
+      "body_sha256": "98727e8e46c0f32e66ce5355d503eaf45c93ab23a0212bac7d386e7c5e209510",
+      "attributes": [
+        "#[path = \"fiber_deferred_tests.rs\"]",
+        "#[test]"
+      ],
+      "role": "backend-IR-unit-test",
+      "direct_C_helper_seen": [],
+      "execution_inferred_from_discovery": false
+    },
+    {
+      "revision": "cb56194a1cb5e8c1ac5d1b4f1cf21d2428804dbf",
+      "path": "crates/emela-emb-compiler/src/backend/lower/fiber_scope_tests.rs",
+      "symbol": "scope_abi::scope_handlers_merge_callback_failure_abis_and_box_typed_child_results",
+      "leaf_name": "scope_handlers_merge_callback_failure_abis_and_box_typed_child_results",
+      "line": 181,
+      "body_sha256": "d59e96606c97138426a96b9eb1283556aa974cdf863ef39ceed278378cd639ea",
+      "attributes": [
+        "#[path = \"fiber_scope_tests.rs\"]",
+        "#[test]"
+      ],
+      "role": "backend-IR-unit-test",
+      "direct_C_helper_seen": [],
+      "execution_inferred_from_discovery": false
+    },
+    {
+      "revision": "cb56194a1cb5e8c1ac5d1b4f1cf21d2428804dbf",
+      "path": "crates/emela-emb-compiler/src/backend/lower/fiber_scope_tests.rs",
+      "symbol": "scope_abi::conservative_scope_failures_remain_when_a_c_boundary_can_supply_failing_values",
+      "leaf_name": "conservative_scope_failures_remain_when_a_c_boundary_can_supply_failing_values",
+      "line": 204,
+      "body_sha256": "0cda2d3b1ed51f54c5ab36825a69c8b1a8ba25a7754e4d076515b0b5bd5968d7",
+      "attributes": [
+        "#[path = \"fiber_scope_tests.rs\"]",
+        "#[test]"
+      ],
+      "role": "backend-IR-unit-test",
+      "direct_C_helper_seen": [],
+      "execution_inferred_from_discovery": false
+    },
+    {
+      "revision": "cb56194a1cb5e8c1ac5d1b4f1cf21d2428804dbf",
+      "path": "crates/emela-emb-compiler/src/backend/lower/fiber_scope_tests.rs",
+      "symbol": "scope_abi::ordinary_error_values_in_a_pure_scope_do_not_keep_unused_display_functions",
+      "leaf_name": "ordinary_error_values_in_a_pure_scope_do_not_keep_unused_display_functions",
+      "line": 223,
+      "body_sha256": "c53ae3d17dd2ff43c8c293a490e388781eec153ed7f5912b9a24541b6ad9b377",
+      "attributes": [
+        "#[path = \"fiber_scope_tests.rs\"]",
+        "#[test]"
+      ],
+      "role": "backend-IR-unit-test",
+      "direct_C_helper_seen": [],
+      "execution_inferred_from_discovery": false
+    },
+    {
+      "revision": "cb56194a1cb5e8c1ac5d1b4f1cf21d2428804dbf",
+      "path": "crates/emela-emb-compiler/src/backend/lower/fiber_scope_tests.rs",
+      "symbol": "scope_abi::scope_normalization_rejects_missing_operations_and_cyclic_generated_bodies",
+      "leaf_name": "scope_normalization_rejects_missing_operations_and_cyclic_generated_bodies",
+      "line": 273,
+      "body_sha256": "4863e2a4141ae7124873f5aec0a6f67de5386233e02e63a39262bde487991bce",
+      "attributes": [
+        "#[path = \"fiber_scope_tests.rs\"]",
+        "#[test]"
+      ],
+      "role": "backend-IR-unit-test",
+      "direct_C_helper_seen": [],
+      "execution_inferred_from_discovery": false
+    },
+    {
+      "revision": "cb56194a1cb5e8c1ac5d1b4f1cf21d2428804dbf",
+      "path": "crates/emela-emb-compiler/src/backend/lower/fiber_scope_tests.rs",
+      "symbol": "scope_abi::calling_the_generated_scope_deferred_operation_requires_its_pool",
+      "leaf_name": "calling_the_generated_scope_deferred_operation_requires_its_pool",
+      "line": 334,
+      "body_sha256": "442b45c6df70275f9f7a19e876e0e213340ea1ed1b7b23251ef5ace5e46bd2e9",
+      "attributes": [
+        "#[path = \"fiber_scope_tests.rs\"]",
+        "#[test]"
+      ],
+      "role": "backend-IR-unit-test",
+      "direct_C_helper_seen": [],
+      "execution_inferred_from_discovery": false
+    },
+    {
+      "revision": "cb56194a1cb5e8c1ac5d1b4f1cf21d2428804dbf",
+      "path": "crates/emela-emb-compiler/src/backend/lower/fiber_source_tests.rs",
+      "symbol": "source_observations::cancelled_nested_scope_failures_become_notes_of_the_first_failure",
+      "leaf_name": "cancelled_nested_scope_failures_become_notes_of_the_first_failure",
+      "line": 5,
+      "body_sha256": "2d455ac27e8a161575d8aa525a52069fa880276b7ffc9ff6fc8ff19592e96ca5",
+      "attributes": [
+        "#[path = \"fiber_source_tests.rs\"]",
+        "#[test]"
+      ],
+      "role": "backend-IR-unit-test",
+      "direct_C_helper_seen": [],
+      "execution_inferred_from_discovery": false
+    },
+    {
+      "revision": "cb56194a1cb5e8c1ac5d1b4f1cf21d2428804dbf",
+      "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+      "symbol": "raw_interrupt_masks_are_unit_operations_and_are_rejected_from_isr_entries",
+      "leaf_name": "raw_interrupt_masks_are_unit_operations_and_are_rejected_from_isr_entries",
+      "line": 13,
+      "body_sha256": "466ed67ad7a46e15c2927569e83cc99c85d940b4d68a673f63f4905c0fd5c5fe",
+      "attributes": [
+        "#[test]"
+      ],
+      "role": "backend-IR-unit-test",
+      "direct_C_helper_seen": [],
+      "execution_inferred_from_discovery": false
+    },
+    {
+      "revision": "cb56194a1cb5e8c1ac5d1b4f1cf21d2428804dbf",
+      "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+      "symbol": "scope_fork_and_join_reclaim_children_and_their_erased_values",
+      "leaf_name": "scope_fork_and_join_reclaim_children_and_their_erased_values",
+      "line": 129,
+      "body_sha256": "ab77e3b745b2ddac6ad5a0abc1c8fabf11dec761fb25b18044d1a6da7a09786d",
+      "attributes": [
+        "#[test]"
+      ],
+      "role": "backend-IR-unit-test",
+      "direct_C_helper_seen": [],
+      "execution_inferred_from_discovery": false
+    },
+    {
+      "revision": "cb56194a1cb5e8c1ac5d1b4f1cf21d2428804dbf",
+      "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+      "symbol": "deferred_complete_poll_and_await_share_one_typed_value_until_scope_closes",
+      "leaf_name": "deferred_complete_poll_and_await_share_one_typed_value_until_scope_closes",
+      "line": 256,
+      "body_sha256": "46b159f35164662ec11e909a28fb0cfc66236da86ce470c62d8d7054a4c36cd1",
+      "attributes": [
+        "#[test]"
+      ],
+      "role": "backend-IR-unit-test",
+      "direct_C_helper_seen": [],
+      "execution_inferred_from_discovery": false
+    },
+    {
+      "revision": "cb56194a1cb5e8c1ac5d1b4f1cf21d2428804dbf",
+      "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+      "symbol": "attempts_preserve_success_and_typed_cause_failures_across_raise",
+      "leaf_name": "attempts_preserve_success_and_typed_cause_failures_across_raise",
+      "line": 424,
+      "body_sha256": "04d24acf471a6e6a129813ceabd26c7274437df62b6247dfbb579c69e89267ac",
+      "attributes": [
+        "#[test]"
+      ],
+      "role": "backend-IR-unit-test",
+      "direct_C_helper_seen": [],
+      "execution_inferred_from_discovery": false
+    },
+    {
+      "revision": "cb56194a1cb5e8c1ac5d1b4f1cf21d2428804dbf",
+      "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+      "symbol": "interruption_waits_for_nested_suspending_cleanup_before_await_reports_its_cause",
+      "leaf_name": "interruption_waits_for_nested_suspending_cleanup_before_await_reports_its_cause",
+      "line": 701,
+      "body_sha256": "42e6d130be47b8a404fa08718414b0e3867cd1c034db40bdf1dc395cfeae0e9d",
+      "attributes": [
+        "#[test]"
+      ],
+      "role": "backend-IR-unit-test",
+      "direct_C_helper_seen": [],
+      "execution_inferred_from_discovery": false
+    },
+    {
+      "revision": "cb56194a1cb5e8c1ac5d1b4f1cf21d2428804dbf",
+      "path": "crates/emela-emb-compiler/src/backend/lower/fiber_unit_tests.rs",
+      "symbol": "unit::unit_any_boxes_round_trip_without_c_storage_and_release_their_heap",
+      "leaf_name": "unit_any_boxes_round_trip_without_c_storage_and_release_their_heap",
+      "line": 4,
+      "body_sha256": "58a16464e2539fa681fba7e42b470f7e18ea7f284c55dca111f47db8debdd827",
+      "attributes": [
+        "#[path = \"fiber_unit_tests.rs\"]",
+        "#[test]"
+      ],
+      "role": "backend-IR-unit-test",
+      "direct_C_helper_seen": [],
+      "execution_inferred_from_discovery": false
+    },
+    {
+      "revision": "cb56194a1cb5e8c1ac5d1b4f1cf21d2428804dbf",
+      "path": "crates/emela-emb-compiler/src/backend/lower/fiber_unit_tests.rs",
+      "symbol": "unit::unit_children_keep_side_effects_and_join_without_a_result_slot",
+      "leaf_name": "unit_children_keep_side_effects_and_join_without_a_result_slot",
+      "line": 27,
+      "body_sha256": "6af09cd07541406f7ea97de9eb79b2d61b6704e10d4a2e1f87a157c5b6118153",
+      "attributes": [
+        "#[path = \"fiber_unit_tests.rs\"]",
+        "#[test]"
+      ],
+      "role": "backend-IR-unit-test",
+      "direct_C_helper_seen": [],
+      "execution_inferred_from_discovery": false
+    },
+    {
+      "revision": "cb56194a1cb5e8c1ac5d1b4f1cf21d2428804dbf",
+      "path": "crates/emela-emb-compiler/src/backend/lower/fiber_unit_tests.rs",
+      "symbol": "unit::unit_deferred_distinguishes_empty_and_full_without_payload_storage",
+      "leaf_name": "unit_deferred_distinguishes_empty_and_full_without_payload_storage",
+      "line": 113,
+      "body_sha256": "6180587ed135c50496417b7ab762f0fc6baea1dc9d094ba09cc996f777f09f0e",
+      "attributes": [
+        "#[path = \"fiber_unit_tests.rs\"]",
+        "#[test]"
+      ],
+      "role": "backend-IR-unit-test",
+      "direct_C_helper_seen": [],
+      "execution_inferred_from_discovery": false
+    },
+    {
+      "revision": "cb56194a1cb5e8c1ac5d1b4f1cf21d2428804dbf",
+      "path": "crates/emela-emb-compiler/tests/p6_child_waiters.rs",
+      "symbol": "child_await_and_join_waiters_resume_fifo_after_the_child_finishes",
+      "leaf_name": "child_await_and_join_waiters_resume_fifo_after_the_child_finishes",
+      "line": 7,
+      "body_sha256": "72b241e00dd819eab0d94953c24ea6bc039a595513b23ace9fced92768eada46",
+      "attributes": [
+        "#[test]"
+      ],
+      "role": "source-integration-test",
+      "direct_C_helper_seen": [
+        "compile_and_run"
+      ],
+      "execution_inferred_from_discovery": false
+    },
+    {
+      "revision": "cb56194a1cb5e8c1ac5d1b4f1cf21d2428804dbf",
+      "path": "crates/emela-emb-compiler/tests/p6_child_waiters.rs",
+      "symbol": "failed_handleless_children_release_records_during_sibling_cleanup",
+      "leaf_name": "failed_handleless_children_release_records_during_sibling_cleanup",
+      "line": 46,
+      "body_sha256": "8e70b70a144a81b8b412e6ef1bb81ca17ba1b13d846c0cdcc07e206b8a28e71b",
+      "attributes": [
+        "#[test]"
+      ],
+      "role": "source-integration-test",
+      "direct_C_helper_seen": [
+        "compile_and_run"
+      ],
+      "execution_inferred_from_discovery": false
+    },
+    {
+      "revision": "cb56194a1cb5e8c1ac5d1b4f1cf21d2428804dbf",
+      "path": "crates/emela-emb-compiler/tests/p6_concurrency.rs",
+      "symbol": "source_concurrency_preserves_handles_values_causes_and_unit_results",
+      "leaf_name": "source_concurrency_preserves_handles_values_causes_and_unit_results",
+      "line": 6,
+      "body_sha256": "ac3926c862b4dd3cfee3827687e1ca3a4cd9333a6b55c320bc291f7075effc8d",
+      "attributes": [
+        "#[test]"
+      ],
+      "role": "source-integration-test",
+      "direct_C_helper_seen": [
+        "compile_and_run"
+      ],
+      "execution_inferred_from_discovery": false
+    },
+    {
+      "revision": "cb56194a1cb5e8c1ac5d1b4f1cf21d2428804dbf",
+      "path": "crates/emela-emb-compiler/tests/p6_concurrency.rs",
+      "symbol": "scope_result_and_row_kind_constraints_report_the_source_boundary",
+      "leaf_name": "scope_result_and_row_kind_constraints_report_the_source_boundary",
+      "line": 74,
+      "body_sha256": "0dfbce59b911cf886e992eb4d6018aa372b29b839ca3b07c644125dbaf7a65e8",
+      "attributes": [
+        "#[test]"
+      ],
+      "role": "source-integration-test",
+      "direct_C_helper_seen": [],
+      "execution_inferred_from_discovery": false
+    },
+    {
+      "revision": "cb56194a1cb5e8c1ac5d1b4f1cf21d2428804dbf",
+      "path": "crates/emela-emb-compiler/tests/p6_scope_lifecycle.rs",
+      "symbol": "closing_a_source_scope_drops_ready_join_and_await_deliveries",
+      "leaf_name": "closing_a_source_scope_drops_ready_join_and_await_deliveries",
+      "line": 40,
+      "body_sha256": "46a28c625d9f7385d2332c80ef17c3a902402a9c9c7c7dba529dd93670838a8c",
+      "attributes": [
+        "#[test]"
+      ],
+      "role": "source-integration-test",
+      "direct_C_helper_seen": [
+        "compile_and_run"
+      ],
+      "execution_inferred_from_discovery": false
+    },
+    {
+      "revision": "cb56194a1cb5e8c1ac5d1b4f1cf21d2428804dbf",
+      "path": "crates/emela-emb-compiler/tests/p6_scope_lifecycle.rs",
+      "symbol": "cancelling_nested_source_scopes_unlinks_all_deferred_waiters",
+      "leaf_name": "cancelling_nested_source_scopes_unlinks_all_deferred_waiters",
+      "line": 45,
+      "body_sha256": "0a523a4c0102a58fc38e1808d472a86b4d5ef5635fb1914ceb26f97bed87d7dd",
+      "attributes": [
+        "#[test]"
+      ],
+      "role": "source-integration-test",
+      "direct_C_helper_seen": [
+        "compile_and_run"
+      ],
+      "execution_inferred_from_discovery": false
+    },
+    {
+      "revision": "cb56194a1cb5e8c1ac5d1b4f1cf21d2428804dbf",
+      "path": "crates/emela-emb-compiler/tests/p6_scope_lifecycle.rs",
+      "symbol": "source_interrupt_waiters_resume_fifo_after_suspending_cleanup",
+      "leaf_name": "source_interrupt_waiters_resume_fifo_after_suspending_cleanup",
+      "line": 50,
+      "body_sha256": "a73c723f977d0f044e6c84e2fb2080d239de5d5e77511f721c70fd162dff9af7",
+      "attributes": [
+        "#[test]"
+      ],
+      "role": "source-integration-test",
+      "direct_C_helper_seen": [
+        "compile_and_run"
+      ],
+      "execution_inferred_from_discovery": false
+    },
+    {
+      "revision": "cb56194a1cb5e8c1ac5d1b4f1cf21d2428804dbf",
+      "path": "crates/emela-emb-compiler/tests/p6_scope_lifecycle.rs",
+      "symbol": "source_scopes_reclaim_completed_children_and_preserve_live_copied_handles",
+      "leaf_name": "source_scopes_reclaim_completed_children_and_preserve_live_copied_handles",
+      "line": 74,
+      "body_sha256": "381b8265f7bb9a1346898a6b20d187988e1ed6881e7ca7939ef9a3ad32e9aef4",
+      "attributes": [
+        "#[test]"
+      ],
+      "role": "source-integration-test",
+      "direct_C_helper_seen": [
+        "compile_and_run"
+      ],
+      "execution_inferred_from_discovery": false
+    },
+    {
+      "revision": "db98ac211a4467ef6aec816fcfafd9a110aefd53",
+      "path": "crates/emela-emb-compiler/src/backend/lower/p7_discarded_tests.rs",
+      "symbol": "discarded_runtime_show_string_still_checks_its_output_capacity",
+      "leaf_name": "discarded_runtime_show_string_still_checks_its_output_capacity",
+      "line": 5,
+      "body_sha256": "165ad979bf4039d909c7e97e00cb00873e1d96cbefe7256f0369e7f956b35332",
+      "attributes": [
+        "#[test]"
+      ],
+      "role": "backend-IR-unit-test",
+      "direct_C_helper_seen": [],
+      "execution_inferred_from_discovery": false
+    },
+    {
+      "revision": "f8ac2aa2826b0ae5c2eb5fb9b0604abe1df942ec",
+      "path": "crates/emela-emb-compiler/tests/p7_generic_consts.rs",
+      "symbol": "polymorphic_empty_list_const_keeps_one_heapless_representation",
+      "leaf_name": "polymorphic_empty_list_const_keeps_one_heapless_representation",
+      "line": 7,
+      "body_sha256": "e9921c097686a83978046565ecfe66fb5013b3703fc5e65b796d785e144c351d",
+      "attributes": [
+        "#[test]"
+      ],
+      "role": "source-integration-test",
+      "direct_C_helper_seen": [
+        "compile_and_run"
+      ],
+      "execution_inferred_from_discovery": false
+    },
+    {
+      "revision": "f8ac2aa2826b0ae5c2eb5fb9b0604abe1df942ec",
+      "path": "crates/emela-emb-compiler/tests/p7_generic_consts.rs",
+      "symbol": "polymorphic_const_closures_share_initialization_across_int_and_string_getters",
+      "leaf_name": "polymorphic_const_closures_share_initialization_across_int_and_string_getters",
+      "line": 26,
+      "body_sha256": "d6bb00fe6f8365bdfbfee23247273f19d24b67a344f5d2b1a84e9df258fb874e",
+      "attributes": [
+        "#[test]"
+      ],
+      "role": "source-integration-test",
+      "direct_C_helper_seen": [
+        "compile_and_run"
+      ],
+      "execution_inferred_from_discovery": false
+    },
+    {
+      "revision": "f8ac2aa2826b0ae5c2eb5fb9b0604abe1df942ec",
+      "path": "crates/emela-emb-compiler/tests/p7_generic_consts.rs",
+      "symbol": "const_function_references_pair_generic_callable_families",
+      "leaf_name": "const_function_references_pair_generic_callable_families",
+      "line": 52,
+      "body_sha256": "9256ad67d9765cc112dbc230dc26103b880f1978fd2f49317e177f1bdb6f0188",
+      "attributes": [
+        "#[test]"
+      ],
+      "role": "source-integration-test",
+      "direct_C_helper_seen": [
+        "compile_and_run"
+      ],
+      "execution_inferred_from_discovery": false
+    },
+    {
+      "revision": "f8ac2aa2826b0ae5c2eb5fb9b0604abe1df942ec",
+      "path": "crates/emela-emb-compiler/tests/p7_generic_consts.rs",
+      "symbol": "canonical_const_dependencies_reach_a_fixed_point_and_initialize_once",
+      "leaf_name": "canonical_const_dependencies_reach_a_fixed_point_and_initialize_once",
+      "line": 76,
+      "body_sha256": "2c135271311ea0631048203fcb2657d6f323e20504b9f41e656b915c63426f48",
+      "attributes": [
+        "#[test]"
+      ],
+      "role": "source-integration-test",
+      "direct_C_helper_seen": [
+        "compile_and_run"
+      ],
+      "execution_inferred_from_discovery": false
+    },
+    {
+      "revision": "f8ac2aa2826b0ae5c2eb5fb9b0604abe1df942ec",
+      "path": "crates/emela-emb-compiler/tests/p7_generic_consts.rs",
+      "symbol": "polymorphic_const_defects_are_cached_once_and_self_reference_can_retry",
+      "leaf_name": "polymorphic_const_defects_are_cached_once_and_self_reference_can_retry",
+      "line": 104,
+      "body_sha256": "5f2f5170ffc1ce887cc38a4b71f7862063df30ef4d724166b5b158b3600946eb",
+      "attributes": [
+        "#[test]"
+      ],
+      "role": "source-integration-test",
+      "direct_C_helper_seen": [
+        "compile_and_run"
+      ],
+      "execution_inferred_from_discovery": false
+    },
+    {
+      "revision": "f8ac2aa2826b0ae5c2eb5fb9b0604abe1df942ec",
+      "path": "crates/emela-emb-compiler/tests/p7_generic_consts.rs",
+      "symbol": "polymorphic_consts_preserve_nested_captures_and_higher_order_invocation_rows",
+      "leaf_name": "polymorphic_consts_preserve_nested_captures_and_higher_order_invocation_rows",
+      "line": 162,
+      "body_sha256": "719f10260a8d15b5c192b57d3720ce4ee7383eacd8606e3131c414ca3ff591b3",
+      "attributes": [
+        "#[test]"
+      ],
+      "role": "source-integration-test",
+      "direct_C_helper_seen": [
+        "compile_and_run"
+      ],
+      "execution_inferred_from_discovery": false
+    },
+    {
+      "revision": "f8ac2aa2826b0ae5c2eb5fb9b0604abe1df942ec",
+      "path": "crates/emela-emb-compiler/tests/p7_generic_consts.rs",
+      "symbol": "const_bridge_heap_defects_use_one_source_context_and_are_cached",
+      "leaf_name": "const_bridge_heap_defects_use_one_source_context_and_are_cached",
+      "line": 188,
+      "body_sha256": "9c7f4e904bd5e44ac21bd50ce863aa403098c51a107ac728adabc52c4244dfc3",
+      "attributes": [
+        "#[test]"
+      ],
+      "role": "source-integration-test",
+      "direct_C_helper_seen": [
+        "compile_and_run"
+      ],
+      "execution_inferred_from_discovery": false
+    },
+    {
+      "revision": "f8ac2aa2826b0ae5c2eb5fb9b0604abe1df942ec",
+      "path": "crates/emela-emb-compiler/tests/p7_generic_consts.rs",
+      "symbol": "generic_external_const_handles_share_one_nullable_host_pointer_without_heap",
+      "leaf_name": "generic_external_const_handles_share_one_nullable_host_pointer_without_heap",
+      "line": 222,
+      "body_sha256": "d486fdae834bea936e441148f9aa99c753f9df31a4851cdb941566656532094a",
+      "attributes": [
+        "#[test]"
+      ],
+      "role": "source-integration-test",
+      "direct_C_helper_seen": [
+        "compile_and_run"
+      ],
+      "execution_inferred_from_discovery": false
+    },
+    {
+      "revision": "f8ac2aa2826b0ae5c2eb5fb9b0604abe1df942ec",
+      "path": "crates/emela-emb-compiler/tests/p7_generic_consts.rs",
+      "symbol": "unreachable_const_initializers_do_not_emit_unused_runtime_context_helpers",
+      "leaf_name": "unreachable_const_initializers_do_not_emit_unused_runtime_context_helpers",
+      "line": 261,
+      "body_sha256": "73ef8a818115c4cc1041f36ce1fe783a05b3f24ce48fc36f8a8ab981eff88aa9",
+      "attributes": [
+        "#[test]"
+      ],
+      "role": "source-integration-test",
+      "direct_C_helper_seen": [
+        "compile_and_run"
+      ],
+      "execution_inferred_from_discovery": false
+    },
+    {
+      "revision": "f8ac2aa2826b0ae5c2eb5fb9b0604abe1df942ec",
+      "path": "crates/emela-emb-compiler/tests/p7_generic_consts.rs",
+      "symbol": "const_callback_families_keep_concrete_error_and_effect_rows",
+      "leaf_name": "const_callback_families_keep_concrete_error_and_effect_rows",
+      "line": 287,
+      "body_sha256": "a454bdafe834cddff561f942fe5e78179a50db412f6756c7e08caf9faf8c6d26",
+      "attributes": [
+        "#[test]"
+      ],
+      "role": "source-integration-test",
+      "direct_C_helper_seen": [
+        "compile_and_run"
+      ],
+      "execution_inferred_from_discovery": false
+    },
+    {
+      "revision": "f8ac2aa2826b0ae5c2eb5fb9b0604abe1df942ec",
+      "path": "crates/emela-emb-compiler/tests/p7_legacy_generic_consts.rs",
+      "symbol": "fixed_legacy_generic_const_inputs_execute_through_the_independent_compiler",
+      "leaf_name": "fixed_legacy_generic_const_inputs_execute_through_the_independent_compiler",
+      "line": 41,
+      "body_sha256": "c63584ab31e7ce7a6f2ed8bcab8a3e329423aee89c2abb558bfde8c65e113bb6",
+      "attributes": [
+        "#[test]"
+      ],
+      "role": "source-integration-test",
+      "direct_C_helper_seen": [
+        "compile_and_run"
+      ],
+      "execution_inferred_from_discovery": false
+    }
+  ],
+  "supplemental_source_execution_reports": [
+    {
+      "reference_id": "f8ac2aa2826b0ae5c2eb5fb9b0604abe1df942ec:docs/reports/p7-generic-const-compat.json",
+      "report_sha256": "e983fcd1115122c5fdd948434656783330b5374387cd31756c99ef2b07cb53dd",
+      "compiler_checkpoint": "b551365",
+      "input_transform": "Insert @export(c,\"name\") before each original pub fn line; retain every original body.",
+      "programs": [
+        {
+          "id": "program:090d8d1bc5a5b8ddd694",
+          "files": [
+            {
+              "name": "main.emel",
+              "fixture": "crates/emela-emb-compiler/tests/compat/p7/generic-consts/090d8d1bc5a5b8ddd694.emel",
+              "sha256": "8390bd800c6070a0b68164ddec005d4af36073bf8487c68ee1da26b9383082f5"
+            }
+          ],
+          "legacy_tests": [
+            "emit::const_runtime::polymorphic_empty_list_const_keeps_the_heapless_representation"
+          ],
+          "observations": {
+            "source_check": "passed",
+            "c_generation": "passed",
+            "strict_c_object": {
+              "O0": "passed",
+              "O2": "passed"
+            },
+            "runtime": {
+              "O0": "passed",
+              "O2": "passed"
+            }
+          },
+          "runtime_assertions": "work returns 42; no live heap blocks after each call",
+          "original_fixture_hashes_match": true
+        },
+        {
+          "id": "program:0e55f902c5bac78b6187",
+          "files": [
+            {
+              "name": "main.emel",
+              "fixture": "crates/emela-emb-compiler/tests/compat/p7/generic-consts/0e55f902c5bac78b6187.emel",
+              "sha256": "5f7efbeaef62d31c1e1f46eaad6e92bcd39f6d285327b6245e4c93ba70c54b4c"
+            }
+          ],
+          "legacy_tests": [
+            "emit::const_runtime::canonical_const_roots_include_dependency_specializations_until_they_reach_a_fixed_point",
+            "emit::const_runtime::canonical_dependency_consts_initialize_once_across_nested_specializations"
+          ],
+          "observations": {
+            "source_check": "passed",
+            "c_generation": "passed",
+            "strict_c_object": {
+              "O0": "passed",
+              "O2": "passed"
+            },
+            "runtime": {
+              "O0": "passed",
+              "O2": "passed"
+            }
+          },
+          "runtime_assertions": "integer/text both return 42; BASE and PAIR initialization log count is exactly two total",
+          "original_fixture_hashes_match": true
+        },
+        {
+          "id": "program:1e18a161ce360199a21e",
+          "files": [
+            {
+              "name": "main.emel",
+              "fixture": "crates/emela-emb-compiler/tests/compat/p7/generic-consts/1e18a161ce360199a21e.emel",
+              "sha256": "267ecea81443467d0abeecdbe3a9226b9453747c353cc442957d562d46dcb1a5"
+            }
+          ],
+          "legacy_tests": [
+            "emit::const_runtime::generic_function_references_returned_by_consts_keep_their_source_family"
+          ],
+          "observations": {
+            "source_check": "passed",
+            "c_generation": "passed",
+            "strict_c_object": {
+              "O0": "passed",
+              "O2": "passed"
+            },
+            "runtime": {
+              "O0": "passed",
+              "O2": "passed"
+            }
+          },
+          "runtime_assertions": "integer returns 42; text returns the two bytes 42 through the shared generic FnRef family",
+          "original_fixture_hashes_match": true
+        },
+        {
+          "id": "program:4ec3db5b593e7e155054",
+          "files": [
+            {
+              "name": "main.emel",
+              "fixture": "crates/emela-emb-compiler/tests/compat/p7/generic-consts/4ec3db5b593e7e155054.emel",
+              "sha256": "823e637e97a0dbeb7ea04e02088af922b3433413c10b0a79c4211b2a7046493d"
+            }
+          ],
+          "legacy_tests": [
+            "emit::const_runtime::polymorphic_const_defects_have_one_source_context_and_self_reference_retries"
+          ],
+          "observations": {
+            "source_check": "passed",
+            "c_generation": "passed",
+            "strict_c_object": {
+              "O0": "passed",
+              "O2": "passed"
+            },
+            "runtime": {
+              "O0": "passed",
+              "O2": "passed"
+            }
+          },
+          "runtime_assertions": "integer/text both replay the same cached defect with one source context; trigger/log once; no live heap blocks",
+          "original_fixture_hashes_match": true
+        },
+        {
+          "id": "program:6509a26b86dc042348d0",
+          "files": [
+            {
+              "name": "main.emel",
+              "fixture": "crates/emela-emb-compiler/tests/compat/p7/generic-consts/6509a26b86dc042348d0.emel",
+              "sha256": "c986b4c8e5754de0a2f9b2fe0109553e9bd049a3528d9a8aec33ba2b0bce6bfb"
+            }
+          ],
+          "legacy_tests": [
+            "emit::const_runtime::polymorphic_const_defects_have_one_source_context_and_self_reference_retries"
+          ],
+          "observations": {
+            "source_check": "passed",
+            "c_generation": "passed",
+            "strict_c_object": {
+              "O0": "passed",
+              "O2": "passed"
+            },
+            "runtime": {
+              "O0": "passed",
+              "O2": "passed"
+            }
+          },
+          "runtime_assertions": "integer/text both retry self-reference; trigger/log 2000 times; no source context prefix or live heap blocks",
+          "original_fixture_hashes_match": true
+        },
+        {
+          "id": "program:82d224825b4fecc59779",
+          "files": [
+            {
+              "name": "main.emel",
+              "fixture": "crates/emela-emb-compiler/tests/compat/p7/generic-consts/82d224825b4fecc59779.emel",
+              "sha256": "fa1ee5cc165e68a73803369872071c65b263140058becc944b02fd1a8c54e56b"
+            }
+          ],
+          "legacy_tests": [
+            "emit::const_runtime::polymorphic_const_bridge_capacity_defects_use_the_source_name_once_and_are_cached"
+          ],
+          "observations": {
+            "source_check": "passed",
+            "c_generation": "passed",
+            "strict_c_object": {
+              "O0": "passed",
+              "O2": "passed"
+            },
+            "runtime": {
+              "O0": "passed",
+              "O2": "passed"
+            }
+          },
+          "runtime_assertions": "integer/text return 42; nested list const initializes once with sufficient heap; separate derived test covers cached bridge exhaustion at 96 bytes",
+          "original_fixture_hashes_match": true
+        },
+        {
+          "id": "program:9d483cae98bfe8662280",
+          "files": [
+            {
+              "name": "main.emel",
+              "fixture": "crates/emela-emb-compiler/tests/compat/p7/generic-consts/9d483cae98bfe8662280.emel",
+              "sha256": "a958e5ba357850a0c4de5cbfeca3159b8894275fc1bba1b25fafd2a0b8d9c187"
+            }
+          ],
+          "legacy_tests": [
+            "emit::const_runtime::source_polymorphic_const_origins_keep_a_canonical_value_and_typed_members_in_verified_flow"
+          ],
+          "observations": {
+            "source_check": "passed",
+            "c_generation": "passed",
+            "strict_c_object": {
+              "O0": "passed",
+              "O2": "passed"
+            },
+            "runtime": {
+              "O0": "passed",
+              "O2": "passed"
+            }
+          },
+          "runtime_assertions": "read returns zero; shared empty list logs once; no live heap blocks after each call",
+          "original_fixture_hashes_match": true
+        },
+        {
+          "id": "program:cd203f34d6ed62e80e19",
+          "files": [
+            {
+              "name": "main.emel",
+              "fixture": "crates/emela-emb-compiler/tests/compat/p7/generic-consts/cd203f34d6ed62e80e19.emel",
+              "sha256": "c9f0f411c6dcdc3595139fa3e214523be9e023c3b2f44b16b16a07f32cdf0953"
+            }
+          ],
+          "legacy_tests": [
+            "emit::const_runtime::source_polymorphic_consts_share_initialization_and_specialize_callable_families"
+          ],
+          "observations": {
+            "source_check": "passed",
+            "c_generation": "passed",
+            "strict_c_object": {
+              "O0": "passed",
+              "O2": "passed"
+            },
+            "runtime": {
+              "O0": "passed",
+              "O2": "passed"
+            }
+          },
+          "runtime_assertions": "integer/text return 42; six const initialization logs total; two tick calls total; selected closure marks branch two on each call",
+          "original_fixture_hashes_match": true
+        }
+      ],
+      "final_integrated_validation": "still-required"
     }
   ],
   "references": {
@@ -28459,6 +29407,30 @@
       "symbol_components_seen": true,
       "semantic_correspondence_verified": false
     },
+    "13cd3130094ac1f53ba99faa783df271a91b290f:crates/emela-emb-compiler/tests/compat/p2/numeric-format-harness.c": {
+      "path": "crates/emela-emb-compiler/tests/compat/p2/numeric-format-harness.c",
+      "kind": "C_harness",
+      "roles": [
+        "C_harness"
+      ],
+      "revision": "13cd3130094ac1f53ba99faa783df271a91b290f",
+      "path_exists": true,
+      "blob": "3220a19a96c7b2c5b5baf6879bbf26c78ffd9741",
+      "symbol_components_seen": null,
+      "semantic_correspondence_verified": false
+    },
+    "13cd3130094ac1f53ba99faa783df271a91b290f:crates/emela-emb-compiler/tests/compat/p2/numeric-format.emel": {
+      "path": "crates/emela-emb-compiler/tests/compat/p2/numeric-format.emel",
+      "kind": "source_fixture",
+      "roles": [
+        "source_fixture"
+      ],
+      "revision": "13cd3130094ac1f53ba99faa783df271a91b290f",
+      "path_exists": true,
+      "blob": "d87d96353503ab62ff4de6b0879a616a8a523ecd",
+      "symbol_components_seen": null,
+      "semantic_correspondence_verified": false
+    },
     "13cd3130094ac1f53ba99faa783df271a91b290f:crates/emela-emb-compiler/tests/coverage_ledger.rs": {
       "path": "crates/emela-emb-compiler/tests/coverage_ledger.rs",
       "kind": "structural_test",
@@ -28508,9 +29480,9 @@
       "semantic_correspondence_verified": false
     },
     "13cd3130094ac1f53ba99faa783df271a91b290f:crates/emela-emb-compiler/tests/p2_compat.rs#legacy_numeric_formatting_rounding_and_unused_defects_execute": {
-      "kind": "source_test",
       "path": "crates/emela-emb-compiler/tests/p2_compat.rs",
       "symbol": "legacy_numeric_formatting_rounding_and_unused_defects_execute",
+      "kind": "source_test",
       "roles": [
         "source_test"
       ],
@@ -29161,6 +30133,54 @@
       "symbol_components_seen": null,
       "semantic_correspondence_verified": false
     },
+    "bf750f76b93701ba593bbcd6dd755323f5c2b23a:crates/emela-emb-compiler/src/backend/lower/p7_input_tests.rs": {
+      "revision": "bf750f76b93701ba593bbcd6dd755323f5c2b23a",
+      "path": "crates/emela-emb-compiler/src/backend/lower/p7_input_tests.rs",
+      "kind": "ir_test",
+      "roles": [
+        "ir_test"
+      ],
+      "path_exists": true,
+      "blob": "a3efa0a92d70b794d9ba7fe6e6bd7f50e79e5975",
+      "symbol_components_seen": null,
+      "semantic_correspondence_verified": false
+    },
+    "bf750f76b93701ba593bbcd6dd755323f5c2b23a:docs/reports/compiler-p7-input-residuals.md": {
+      "revision": "bf750f76b93701ba593bbcd6dd755323f5c2b23a",
+      "path": "docs/reports/compiler-p7-input-residuals.md",
+      "kind": "run_report",
+      "roles": [
+        "run_report"
+      ],
+      "path_exists": true,
+      "blob": "a51d3a1f717e33fa33924b58efe074934a202e8b",
+      "symbol_components_seen": null,
+      "semantic_correspondence_verified": false
+    },
+    "c0460653ca9451cc7199ab0fc914bd517aac7dda:crates/emela-emb-compiler/src/backend/lower/p7_binding_tests.rs": {
+      "revision": "c0460653ca9451cc7199ab0fc914bd517aac7dda",
+      "path": "crates/emela-emb-compiler/src/backend/lower/p7_binding_tests.rs",
+      "kind": "ir_test",
+      "roles": [
+        "ir_test"
+      ],
+      "path_exists": true,
+      "blob": "1283677cd078fba138da4bf503cb836fb36259cb",
+      "symbol_components_seen": null,
+      "semantic_correspondence_verified": false
+    },
+    "c0460653ca9451cc7199ab0fc914bd517aac7dda:docs/reports/compiler-p7-binding-metadata.md": {
+      "revision": "c0460653ca9451cc7199ab0fc914bd517aac7dda",
+      "path": "docs/reports/compiler-p7-binding-metadata.md",
+      "kind": "run_report",
+      "roles": [
+        "run_report"
+      ],
+      "path_exists": true,
+      "blob": "82d4b5babb76e05955a84d32aab58e7df3f71b17",
+      "symbol_components_seen": null,
+      "semantic_correspondence_verified": false
+    },
     "c0f351de90ea7c00424cd417e12f7354e4c22cd4:crates/emela-emb-compiler/tests/p7_external_types.rs": {
       "revision": "c0f351de90ea7c00424cd417e12f7354e4c22cd4",
       "path": "crates/emela-emb-compiler/tests/p7_external_types.rs",
@@ -29172,10 +30192,118 @@
       "blob": "4ab63cdab7a9a4d0a3ca829b7bb91171f885b318",
       "symbol_components_seen": null,
       "semantic_correspondence_verified": false
+    },
+    "cb56194a1cb5e8c1ac5d1b4f1cf21d2428804dbf:crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs": {
+      "revision": "cb56194a1cb5e8c1ac5d1b4f1cf21d2428804dbf",
+      "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
+      "kind": "ir_test",
+      "roles": [
+        "ir_test"
+      ],
+      "path_exists": true,
+      "blob": "e1e5eedfa6e9e788f387619968674f25fc7d86a7",
+      "symbol_components_seen": null,
+      "semantic_correspondence_verified": false
+    },
+    "cb56194a1cb5e8c1ac5d1b4f1cf21d2428804dbf:crates/emela-emb-compiler/tests/p6_child_waiters.rs": {
+      "revision": "cb56194a1cb5e8c1ac5d1b4f1cf21d2428804dbf",
+      "path": "crates/emela-emb-compiler/tests/p6_child_waiters.rs",
+      "kind": "source_test",
+      "roles": [
+        "source_test"
+      ],
+      "path_exists": true,
+      "blob": "51bfe1f2ceb5163c6b76030204381a62718677ff",
+      "symbol_components_seen": null,
+      "semantic_correspondence_verified": false
+    },
+    "cb56194a1cb5e8c1ac5d1b4f1cf21d2428804dbf:crates/emela-emb-compiler/tests/p6_concurrency.rs": {
+      "revision": "cb56194a1cb5e8c1ac5d1b4f1cf21d2428804dbf",
+      "path": "crates/emela-emb-compiler/tests/p6_concurrency.rs",
+      "kind": "source_test",
+      "roles": [
+        "source_test"
+      ],
+      "path_exists": true,
+      "blob": "391657a8cd79dd3cfa876b439d1d395dfe7efb18",
+      "symbol_components_seen": null,
+      "semantic_correspondence_verified": false
+    },
+    "cb56194a1cb5e8c1ac5d1b4f1cf21d2428804dbf:crates/emela-emb-compiler/tests/p6_scope_lifecycle.rs": {
+      "revision": "cb56194a1cb5e8c1ac5d1b4f1cf21d2428804dbf",
+      "path": "crates/emela-emb-compiler/tests/p6_scope_lifecycle.rs",
+      "kind": "source_test",
+      "roles": [
+        "source_test"
+      ],
+      "path_exists": true,
+      "blob": "0440055e416ce7275441350cbb7c1889dca20bf8",
+      "symbol_components_seen": null,
+      "semantic_correspondence_verified": false
+    },
+    "db98ac211a4467ef6aec816fcfafd9a110aefd53:crates/emela-emb-compiler/src/backend/lower/p7_discarded_tests.rs": {
+      "revision": "db98ac211a4467ef6aec816fcfafd9a110aefd53",
+      "path": "crates/emela-emb-compiler/src/backend/lower/p7_discarded_tests.rs",
+      "kind": "ir_test",
+      "roles": [
+        "ir_test"
+      ],
+      "path_exists": true,
+      "blob": "460088fbae1f091d8f8f6cc80922ed7165a00428",
+      "symbol_components_seen": null,
+      "semantic_correspondence_verified": false
+    },
+    "db98ac211a4467ef6aec816fcfafd9a110aefd53:docs/reports/compiler-p7-discarded-show.md": {
+      "revision": "db98ac211a4467ef6aec816fcfafd9a110aefd53",
+      "path": "docs/reports/compiler-p7-discarded-show.md",
+      "kind": "run_report",
+      "roles": [
+        "run_report"
+      ],
+      "path_exists": true,
+      "blob": "43e4bce6bb9e673ab59994f9a22f216d471c92b6",
+      "symbol_components_seen": null,
+      "semantic_correspondence_verified": false
+    },
+    "f8ac2aa2826b0ae5c2eb5fb9b0604abe1df942ec:crates/emela-emb-compiler/tests/p7_generic_consts.rs": {
+      "revision": "f8ac2aa2826b0ae5c2eb5fb9b0604abe1df942ec",
+      "path": "crates/emela-emb-compiler/tests/p7_generic_consts.rs",
+      "kind": "source_test",
+      "roles": [
+        "source_test"
+      ],
+      "path_exists": true,
+      "blob": "9e38a957f9738fced84cb57589bbe058fe72297a",
+      "symbol_components_seen": null,
+      "semantic_correspondence_verified": false
+    },
+    "f8ac2aa2826b0ae5c2eb5fb9b0604abe1df942ec:crates/emela-emb-compiler/tests/p7_legacy_generic_consts.rs": {
+      "revision": "f8ac2aa2826b0ae5c2eb5fb9b0604abe1df942ec",
+      "path": "crates/emela-emb-compiler/tests/p7_legacy_generic_consts.rs",
+      "kind": "source_test",
+      "roles": [
+        "source_test"
+      ],
+      "path_exists": true,
+      "blob": "403c250cf78df1ea8d21a623d1d634bd95bf4508",
+      "symbol_components_seen": null,
+      "semantic_correspondence_verified": false
+    },
+    "f8ac2aa2826b0ae5c2eb5fb9b0604abe1df942ec:docs/reports/p7-generic-const-compat.json": {
+      "revision": "f8ac2aa2826b0ae5c2eb5fb9b0604abe1df942ec",
+      "path": "docs/reports/p7-generic-const-compat.json",
+      "kind": "run_report",
+      "roles": [
+        "run_report"
+      ],
+      "path_exists": true,
+      "blob": "d5cbef4018eeb2c86db8b13a1cdc7b5ddbd7f3da",
+      "symbol_components_seen": null,
+      "semantic_correspondence_verified": false
     }
   },
   "reference_checks": {
-    "count": 435,
+    "count": 450,
     "missing_paths": [],
     "symbol_components_not_seen": [
       "13cd3130094ac1f53ba99faa783df271a91b290f:crates/emela-emb-compiler/src/backend/mod.rs#compile_flow"

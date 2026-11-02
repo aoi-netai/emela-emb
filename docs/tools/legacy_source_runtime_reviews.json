@@ -1,0 +1,294 @@
+{
+  "schema_version": 1,
+  "implementation_revision": "cb56194 plus independent P7 checkpoints",
+  "families": [
+    {
+      "id": "const",
+      "path_pattern": "/const_runtime/",
+      "owner": "root/backend/P7",
+      "candidates": [
+        "tests/p2_consts.rs",
+        "tests/p7_generic_consts.rs",
+        "tests/p7_legacy_generic_consts.rs"
+      ],
+      "remaining_observations": "All22 distinct old cases are compared in f8ac2aa and406a5d6: exact-body runtime, ISR rejection/static alternative, optional GC IR seam and two existing broader opaque observation replacements remain distinct. Final integrated verification is required."
+    },
+    {
+      "id": "deferred",
+      "path_pattern": "/deferred/",
+      "owner": "frontend/P7-concurrency-compat",
+      "candidates": [
+        "tests/p6_concurrency.rs",
+        "src/backend/lower/fiber_deferred_tests.rs"
+      ],
+      "remaining_observations": "First completion/poll/Unit is in basic source C. Match FIFO, all waiters, wide bits/aggregate owners, pool capacity/reuse, leaked callbacks, cancellation/unlink and cycles to source C scenarios separately."
+    },
+    {
+      "id": "join-await",
+      "path_pattern": "/fiber/(join|await_)\\.rs$",
+      "owner": "frontend/P7-concurrency-compat",
+      "candidates": [
+        "tests/p6_concurrency.rs",
+        "tests/p6_child_waiters.rs",
+        "tests/p6_concurrency_advanced.rs",
+        "src/backend/lower/fiber_tests.rs"
+      ],
+      "remaining_observations": "Basic Int/Unit join is source C; exact mixed/pure FIFO checkpoints are separate. Match repeated completed handles, wide bits, String/List/Exit owners, leaked callbacks, waiter unlink/ready cancellation and scope cycles by old assertion."
+    },
+    {
+      "id": "cause-attempt",
+      "path_pattern": "/fiber/(cause|attempt)\\.rs$",
+      "owner": "frontend/backend/P6",
+      "candidates": [
+        "tests/p6_concurrency.rs",
+        "tests/p6_defects.rs",
+        "src/backend/lower/fiber_scope_tests.rs"
+      ],
+      "remaining_observations": "Basic Fail kind/show/re-raise and attempt success is source C. Match defects' immediate stop, interruption re-raise, caller output/capacity, retained success/error owners and suspended cleanup explicitly."
+    },
+    {
+      "id": "child-reclamation",
+      "path_pattern": "/fiber/child_reclaim\\.rs$",
+      "owner": "frontend/backend/P6",
+      "candidates": [
+        "tests/p6_child_waiters.rs",
+        "tests/p6_concurrency_advanced.rs",
+        "src/backend/lower/fiber_tests.rs"
+      ],
+      "remaining_observations": "Exact handleless failure and completed-child shared programs are assigned below. Preserve live handles/repeated join/await, per-slot/frame reuse, record counts, NULL result/cancel and heap reclamation."
+    },
+    {
+      "id": "cleanup-interruption-notes",
+      "path_pattern": "/fiber/(failure|interrupt|protect|notes|overlap|payload|task_failure)\\.rs$",
+      "owner": "frontend/backend/P6",
+      "candidates": [
+        "tests/p5_task_failures.rs",
+        "tests/p6_concurrency_advanced.rs",
+        "tests/p6_child_waiters.rs",
+        "src/backend/lower/fiber_source_tests.rs",
+        "src/backend/lower/fiber_scope_tests.rs",
+        "src/backend/lower/suspend_tests.rs"
+      ],
+      "remaining_observations": "P5 error/cleanup is a subset. Match cancellation masking, FIFO interrupt waiters, task invalidation, one-shot operation tails, native failure payloads, first/later owned notes, nested overlap and cleanup result precedence. A source-to-IR Hold adaptation is not pure-source-only evidence."
+    },
+    {
+      "id": "aggregate-and-integration",
+      "path_pattern": "/fiber/(aggregate|aggregate_abi|function_aggregate|integration)\\.rs$",
+      "owner": "frontend/backend/P6-P7",
+      "candidates": [
+        "tests/p3_ownership.rs",
+        "tests/p4_closure_lifetimes.rs",
+        "tests/p5_suspend.rs",
+        "tests/p6_concurrency.rs",
+        "src/backend/lower/fiber_unit_tests.rs"
+      ],
+      "remaining_observations": "Match String/tuple/enum/List/function/Any aggregates, borrowed versus owned ABI, nested captures and completion/error/cancel ownership. Phase7 integration uses explicit request externalization/GC postprocessing recorded in the fixture manifest."
+    },
+    {
+      "id": "fiber-scope",
+      "path_pattern": "/fiber/mod\\.rs$",
+      "owner": "frontend/backend/P6",
+      "candidates": [
+        "tests/p6_concurrency.rs",
+        "tests/p6_scope_rows.rs",
+        "tests/p6_concurrency_advanced.rs",
+        "src/backend/lower/fiber_scope_tests.rs"
+      ],
+      "remaining_observations": "Basic Scope/Fork/Join is source C. Match source child evidence at scope call, sibling forks, unstarted cancellation, nested scopes/tasks, pool exhaustion, managed captures and fixed-pool reuse."
+    },
+    {
+      "id": "bytes",
+      "path_pattern": "/bytes/mod\\.rs$",
+      "owner": "P3/P4/P5/P6",
+      "candidates": [
+        "tests/p3_bytes.rs",
+        "tests/p4_state.rs",
+        "tests/p5_task_failures.rs"
+      ],
+      "remaining_observations": "Seven existing ledger replacements and the exact 70000-length observation are separate decisions. Full std corpus/trait derivations and suspend/task/cancel owners must be matched rather than inferred from synchronous views."
+    },
+    {
+      "id": "native-external-and-task-values",
+      "path_pattern": "/(external_scalar|sync_external|task_values)/",
+      "owner": "root/P5-P7",
+      "candidates": [
+        "tests/p1.rs",
+        "tests/p3_bytes.rs",
+        "tests/p5_task_failures.rs",
+        "tests/p7_external_values.rs"
+      ],
+      "remaining_observations": "Match mixed scalar bits, Borrowed/Owned/StringBuffer native results/held args, aggregate fields, task success/context release/cancel and NULL outputs. Probe adapters must be supplied explicitly; rejection without them is not a missing source feature."
+    },
+    {
+      "id": "suspend-handlers",
+      "path_pattern": "/suspend/mod\\.rs$",
+      "owner": "P5",
+      "candidates": [
+        "tests/p5_suspend.rs",
+        "tests/p5_clock.rs",
+        "src/backend/lower/suspend_tests.rs"
+      ],
+      "remaining_observations": "Match exact immediate/delayed ordering, duplicate resume defect identity, operation tail and queued-event disposal. Existing suspend tests are candidates; source acceptance alone is insufficient."
+    },
+    {
+      "id": "standard-traits-and-data",
+      "path_pattern": "/(release_0_24|completion_types|value_audit)/",
+      "owner": "P2-P7",
+      "candidates": [
+        "tests/p2_traits.rs",
+        "tests/p3_collections.rs",
+        "tests/p4_functions.rs",
+        "tests/p4_standard_callbacks.rs",
+        "tests/p5_error_displays.rs"
+      ],
+      "remaining_observations": "Compare the complete mixed source fixture, including nested generic error show, custom/derived traits, constructor-pattern lambdas, collection ownership, failures and any concurrent pieces. Synchronous extraction is not completion of the full source."
+    },
+    {
+      "id": "strings-owned",
+      "path_pattern": "/(string_append|string_comparison|owned)/",
+      "owner": "P2-P5/P7",
+      "candidates": [
+        "tests/p2_compat.rs",
+        "tests/p3_ownership.rs",
+        "tests/p5_string_alias.rs",
+        "tests/p7_isr.rs"
+      ],
+      "remaining_observations": "Readonly prefix is reviewed separately. Match heapless comparisons/ISR/tail stack behavior, owned subviews without allocation, returned List[String] lifetime and suspend/cancel capture disposal."
+    },
+    {
+      "id": "embedded-and-frontend",
+      "path_pattern": "/embedded_peripherals/|/tests/(platform|frontend)[.]rs$",
+      "owner": "root/P7",
+      "candidates": [
+        "tests/p7_services.rs",
+        "tests/p6_concurrency.rs"
+      ],
+      "remaining_observations": "Root services checkpoint covers independent Board symbols/Clock/Console/owned receive lists. Preserve required header artifacts, module registration/nonshadowing and timer notification/cancel/reuse observations. Frontend-only old tests do not require fabricated runtime evidence."
+    },
+    {
+      "id": "closures-state-shared-helpers",
+      "path_pattern": "/tests/emit\\.rs$|/cell/mod\\.rs$|/compiler/tests/separation\\.rs$",
+      "owner": "P4-P7",
+      "candidates": [
+        "tests/p4_closure_lifetimes.rs",
+        "tests/p4_state.rs",
+        "tests/p4_functions.rs",
+        "tests/p5_suspend.rs",
+        "tests/p7_external_values.rs"
+      ],
+      "remaining_observations": "Compare nested/captured closures and dynamic evidence, State sharing, String producers/consumers and scratch alias lifetimes. The old library has no public Cell API; retain source State and private IR distinctions."
+    }
+  ],
+  "reviewed_cases": {
+    "emit::bytes::bytes_size_and_get_are_heapless_and_keep_lengths_above_u16": {
+      "assessment": "existing-source-C-observations-match",
+      "evidence_revision": "1b4ca67",
+      "evidence": [
+        "tests/p3_bytes.rs::bytes_views_keep_u32_lengths_and_unsigned_elements_without_a_heap",
+        "tests/compat/p3/bytes-views.emel"
+      ],
+      "observations": [
+        "70000-byte view, element0=128 and69999=255",
+        "negative and70000 index return None/-1",
+        "empty NULL view size0",
+        "no generated heap storage",
+        "Emela source size function is an ISR entry (C alias byte_size)"
+      ],
+      "note": "Fixed-old size/get C assertions and source APIs match. 1b4ca67 adds the missing old ISR option to the existing test; strict C O0/O2 compile/link/runtime passed. No duplicate test was needed."
+    },
+    "emit::string_append::literal_prefixes_are_copied_without_treating_readonly_bytes_as_writable_output": {
+      "assessment": "existing-source-C-observations-match",
+      "evidence_revision": "13cd313",
+      "evidence": [
+        "tests/p2_compat.rs::legacy_string_views_comparisons_append_and_bounded_returns_execute",
+        "tests/compat/p2/strings.emel",
+        "tests/compat/p2/strings-harness.c",
+        "tests/p5_string_alias.rs::append_handles_both_inputs_overlapping_the_output_and_the_capacity_limits"
+      ],
+      "observations": [
+        "same Missing(text: prefix body",
+        "input a/NUL/b, output length18 and exact bytes",
+        "output points at caller buffer and has no owner",
+        "1000 repetitions with readonly literal prefix"
+      ],
+      "note": "The shared strings fixture contains the original message function with explicit export. The C harness preserves the old readonly-prefix observation; P5 additionally tests append alias flags directly. No duplicate test is needed."
+    },
+    "frontend::unrelated_project_modules_under_embedded_remain_available": {
+      "assessment": "old-frontend-only-observation",
+      "observations": [
+        "resolve/typecheck accepts supplied Embedded.Local project module"
+      ],
+      "note": "The fixed old test calls check_sources and asserts diagnostics only. It has no C runtime expectation; check current module registration/typing rather than manufacture a runtime claim."
+    },
+    "frontend::backend_board_handlers_resolve_typecheck_and_lower_with_the_default_frontend": {
+      "assessment": "old-compile-and-artifact-observation",
+      "observations": [
+        "BoardClock/BoardConsole resolve/typecheck/lower",
+        "compile with heap4096/frame2048",
+        "emela_clock.h and emela_console.h generated"
+      ],
+      "note": "The fixed old test does not execute C. Artifact/header presence remains an explicit obligation in addition to source acceptance."
+    }
+  },
+  "active_program_assignments": {
+    "program:48cb903c8f5703bd062c": {
+      "owner": "frontend/P6",
+      "state": "checkpoint-7fd2ba5-C-passed",
+      "note": "Three legacy completed-child tests share this input; preserve all three observation sets."
+    },
+    "program:87aa60141422b5f9141c": {
+      "owner": "backend/P6",
+      "state": "checkpoint-888b821-C-passed"
+    },
+    "program:966e35a933bb50fec529": {
+      "owner": "backend/P6",
+      "state": "checkpoint-888b821-C-passed"
+    },
+    "program:a90d0e707bff9fd0c0d9": {
+      "owner": "backend/P6",
+      "state": "checkpoint-888b821-C-passed"
+    },
+    "program:b351d40891e80eb8b8ec": {
+      "owner": "backend/P6",
+      "state": "checkpoint-888b821-source-then-IR-Hold-C-passed",
+      "note": "Same old Hold seam after source lowering; not pure-source-only execution."
+    },
+    "program:614925d9a7716e4eee7e": {
+      "owner": "root/P7",
+      "state": "original-Options-request-externalization-GC-runtime-validation",
+      "note": "Generic root timeout is not a language feature gap. Preserve old shared State, child, Deferred, typed external failure and GC adaptations."
+    }
+  },
+  "runtime_reports": [
+    {
+      "revision": "f8ac2aa",
+      "path": "docs/reports/p7-generic-const-compat.json",
+      "format": "generic-const"
+    },
+    {
+      "revision": "888b821",
+      "path": "docs/reports/p6-child-waiters-compat.json",
+      "format": "child-waiters"
+    },
+    {
+      "revision": "406a5d6",
+      "path": "docs/reports/p7-const-corpus-compat.json",
+      "format": "const-rest"
+    },
+    {
+      "revision": "b1a83f1",
+      "path": "docs/reports/p7-legacy-traits-compat.json",
+      "format": "traits"
+    },
+    {
+      "revision": "8677ff1",
+      "path": "docs/reports/p7-legacy-helpers-collections-compat.json",
+      "format": "raw-files"
+    },
+    {
+      "revision": "0cb01f9",
+      "path": "docs/reports/compiler-p6-ledger-proposal.json",
+      "format": "lifecycle"
+    }
+  ]
+}

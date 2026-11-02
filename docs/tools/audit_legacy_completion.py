@@ -113,6 +113,7 @@ def main() -> None:
     parser.add_argument("--revision", required=True)
     parser.add_argument("--reviews", type=Path, default=Path("docs/tools/legacy_completion_reviews.json"))
     parser.add_argument("--corpus", type=Path, default=Path("docs/compiler-legacy-source-corpus.json"))
+    parser.add_argument("--fixtures", type=Path, default=Path("crates/emela-emb-compiler/tests/compat/legacy-corpus/manifest.json"))
     parser.add_argument("--out", type=Path, default=Path("docs/compiler-p7-completion-audit.json"))
     parser.add_argument("--check", action="store_true")
     args = parser.parse_args()
@@ -181,6 +182,34 @@ def main() -> None:
     groups = []
     for group in reviews["groups"]:
         groups.append({**group, "candidate_reference_ids": [reference(ref) for ref in group.get("candidate_evidence", [])]})
+    fixture_text = args.fixtures.read_text()
+    fixtures = {program["id"]: program for program in json.loads(fixture_text)["programs"]}
+    source_reports = []
+    for report_ref in reviews.get("source_execution_reports", []):
+        objects = snapshot(report_ref["revision"])
+        report_text = objects.read(report_ref["path"])
+        report = json.loads(report_text)
+        if report["fixed_revision"] != ledger["baseline_revision"]:
+            raise ValueError("source execution report has a different legacy baseline")
+        programs = []
+        for program in report["programs"]:
+            original = fixtures[program["id"]]
+            original_hashes = {entry["name"]: entry["sha256"] for entry in original["files"]}
+            hashes = {entry["name"]: entry["sha256"] for entry in program["files"]}
+            if original_hashes != hashes or not set(program["legacy_tests"]).issubset(original["legacy_tests"]):
+                raise ValueError(f"source execution input does not match saved fixture: {program['id']}")
+            for entry in program["files"]:
+                if digest(objects.read(entry["fixture"])) != entry["sha256"]:
+                    raise ValueError(f"checkpoint fixture hash differs: {entry['fixture']}")
+            programs.append({**program, "original_fixture_hashes_match": True})
+        source_reports.append({
+            "reference_id": reference({**report_ref, "kind": "run_report"}),
+            "report_sha256": digest(report_text),
+            "compiler_checkpoint": report["compiler_checkpoint"],
+            "input_transform": report["input_transform"],
+            "programs": programs,
+            "final_integrated_validation": "still-required",
+        })
     output = {
         "schema_version": 1,
         "legacy_revision": ledger["baseline_revision"],
@@ -188,11 +217,13 @@ def main() -> None:
         "ledger_sha256": digest(ledger_text),
         "review_sha256": digest(reviews_text),
         "corpus_index_sha256": digest(corpus_text),
+        "source_fixture_manifest_sha256": digest(fixture_text),
         "purpose": "Read-only completion audit. The authoritative ledger and its statuses are not changed. Candidate matches need semantic review; C generation/object checks are not C execution.",
         "fixed_reference_checks": fixed_sets,
         "reviews": groups,
         "collections": {},
         "new_tests": tests,
+        "supplemental_source_execution_reports": source_reports,
     }
     final_statuses = {"records": {"verified", "not_applicable"}, "contexts": {"verified", "not_applicable"}, "tests": {"verified", "replaced", "not_applicable"}, "requirements": {"verified"}}
     for collection in ("records", "contexts", "tests", "requirements"):
