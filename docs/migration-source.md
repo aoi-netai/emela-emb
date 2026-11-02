@@ -532,3 +532,5 @@ ISR入口は明示exportされたEmela名で選び、C公開aliasと区別する
 旧8source builtin（AssertFail/Dbg/DebugPrint/Inspect/Panic/ShowNested/ShowString/Todo）はsource機能として維持する。`source_builtin_tests.rs`はsourceから独自lowerを通してこれらが後段に残らないことと、未変換の8操作を不正IRとして後段で拒否することを確認する。Cでの表示・副作用順・assert/defect hookは既存 `p1.rs`、`p2_debug.rs`、`p2_traits.rs`、`p4_function_values.rs` の試験で観測する。
 
 P7統合では、external opaque宣言のconstructorを消去するときにrecord属性も外す。外部型には構造fieldがなく、receiver関数の検査やdot callでrecord fieldを参照しない。`p7_external_types`のfield/method/update拒否とpointer受渡し、`p7_const_fibers`のScope/Fiber sourceを併用し、record updateとの組合せでpanicしないことを確認する。
+
+P7の`tests/p7_legacy_traits.rs`は固定旧`release_0_24/traits.emel`全体（corpus program `dc3d2de098f1b7e80a21`、source SHA-256 `c2cacb8eb0a458543a2c75f44e74015be514f14c24db2ca938af34204d514b74`）を本文変更なしで読み、7個のpub関数に明示exportだけを加える。P2の同期抽出に含めなかったFiber/Cause・debug・通常/derived/未定義Showを同じ入力で確認する。旧`release_0_24/mod.rs`（SHA-256 `306126db1413bac6f4dc96aff3ccb64cade5f2407f84ab5ae7048ba49971377b`）の3試験を、通常1000回の全heap回収と公開failure即時defectの2試験へ統合した。C両最適化で旧の値・NUL/Unicode escape・debug順序・Cause文字列・停止hook文言を維持する。
