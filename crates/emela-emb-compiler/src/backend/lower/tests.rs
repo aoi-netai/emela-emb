@@ -4,6 +4,8 @@ use std::path::PathBuf;
 use std::process::Command;
 use std::sync::atomic::{AtomicU64, Ordering};
 
+#[path = "cell_tests.rs"]
+mod cells;
 #[path = "function_tests.rs"]
 mod functions;
 #[path = "handler_tests.rs"]
