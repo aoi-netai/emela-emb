@@ -596,6 +596,22 @@ fn reserved(name: &str) -> bool {
             | "Self"
             | "as"
             | "var"
+            | "return"
+            | "while"
+            | "loop"
+            | "let"
+            | "mut"
+            | "in"
+            | "where"
+            | "do"
+            | "try"
+            | "catch"
+            | "throw"
+            | "async"
+            | "yield"
+            | "defer"
+            | "macro"
+            | "mod"
     )
 }
 fn binary(kind: K<'_>) -> Option<(Binary, u8)> {
@@ -616,33 +632,6 @@ fn binary(kind: K<'_>) -> Option<(Binary, u8)> {
         K::Percent => (Binary::Rem, 6),
         _ => return None,
     })
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use crate::frontend::lexer::lex;
-    #[test]
-    fn parses_real_bindings_multiple_functions_and_continuation() {
-        let source = "import Math.{add}\nfn twice(n: Int) -> Int { n\n + n }\n@export(c, \"answer\")\npub fn answer() -> Int { x = add(20, 22)\n assert x == 42\n if True { twice(x) } else { 0 } }";
-        let module = parse(&lex(source).unwrap()).unwrap();
-        assert_eq!(module.functions.len(), 2);
-        assert_eq!(module.imports[0].path.value, "Math");
-    }
-    #[test]
-    fn statement_break_and_operator_placement_match_language() {
-        for source in [
-            "fn f() { 1 +\n2 }",
-            "fn f() { 1 < 2 < 3 }",
-            "fn f() { 1 2 }",
-            "fn f() { let x = 1 }",
-            "fn f() { loop {} }",
-        ] {
-            assert!(parse(&lex(source).unwrap()).is_err(), "{source}");
-        }
-        assert!(parse(&lex("fn f() { (1 +\n2) }").unwrap()).is_ok());
-        assert!(parse(&lex("fn f() { 1\n-2 }").unwrap()).is_ok());
-    }
 }
 
 fn parse_string(raw: &str, span: Span, multiline: bool) -> Result<Expr, Diagnostic> {
@@ -710,5 +699,32 @@ fn parse_string(raw: &str, span: Span, multiline: bool) -> Result<Expr, Diagnost
             kind: ExprKind::Interpolate(parts),
             span,
         })
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::frontend::lexer::lex;
+    #[test]
+    fn parses_real_bindings_multiple_functions_and_continuation() {
+        let source = "import Math.{add}\nfn twice(n: Int) -> Int { n\n + n }\n@export(c, \"answer\")\npub fn answer() -> Int { x = add(20, 22)\n assert x == 42\n if True { twice(x) } else { 0 } }";
+        let module = parse(&lex(source).unwrap()).unwrap();
+        assert_eq!(module.functions.len(), 2);
+        assert_eq!(module.imports[0].path.value, "Math");
+    }
+    #[test]
+    fn statement_break_and_operator_placement_match_language() {
+        for source in [
+            "fn f() { 1 +\n2 }",
+            "fn f() { 1 < 2 < 3 }",
+            "fn f() { 1 2 }",
+            "fn f() { let x = 1 }",
+            "fn f() { loop {} }",
+        ] {
+            assert!(parse(&lex(source).unwrap()).is_err(), "{source}");
+        }
+        assert!(parse(&lex("fn f() { (1 +\n2) }").unwrap()).is_ok());
+        assert!(parse(&lex("fn f() { 1\n-2 }").unwrap()).is_ok());
     }
 }

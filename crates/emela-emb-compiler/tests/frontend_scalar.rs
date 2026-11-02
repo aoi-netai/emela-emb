@@ -190,3 +190,24 @@ fn retains_entry_filename_compatibility_and_parenthesized_comparisons() {
         DiagnosticKind::Syntax
     );
 }
+
+#[test]
+fn future_reserved_words_are_rejected_but_contextual_words_remain_names() {
+    for word in [
+        "var", "return", "while", "loop", "let", "mut", "in", "where", "do", "try", "catch",
+        "throw", "async", "yield", "defer", "macro", "mod",
+    ] {
+        for source in [
+            format!("fn {word}() -> Int {{ 1 }}"),
+            format!("fn main({word}: Int) -> Int {{ 1 }}"),
+            format!("fn main() -> Int {{ {word} = 1\n 1 }}"),
+        ] {
+            assert!(compile(&source).is_err(), "{source}");
+        }
+    }
+    for word in [
+        "fails", "derive", "init", "release", "of", "default", "by", "resume",
+    ] {
+        compile(&format!("fn {word}({word}: Int) -> Int {{ {word} = {word} + 1\n {word} }}\nfn main() -> Int {{ {word}(41) }}")).unwrap();
+    }
+}

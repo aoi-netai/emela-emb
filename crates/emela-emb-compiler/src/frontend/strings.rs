@@ -2,6 +2,19 @@
 use crate::{Diagnostic, DiagnosticKind, Span};
 
 pub(crate) fn scan(source: &str, start: usize) -> Result<(usize, usize, bool), Diagnostic> {
+    scan_depth(source, start, 0)
+}
+fn scan_depth(
+    source: &str,
+    start: usize,
+    depth: usize,
+) -> Result<(usize, usize, bool), Diagnostic> {
+    if depth >= 256 {
+        return Err(error(
+            Span::new(start, start),
+            "string interpolation nesting limit exceeded",
+        ));
+    }
     let multiline = source[start..].starts_with("\"\"\"");
     let width = if multiline { 3 } else { 1 };
     let mut cursor = start + width;
@@ -16,7 +29,7 @@ pub(crate) fn scan(source: &str, start: usize) -> Result<(usize, usize, bool), D
             return Ok((cursor, cursor + width, multiline));
         }
         if source[cursor..].starts_with("#{") {
-            cursor = interpolation_end(source, cursor + 2)? + 1;
+            cursor = interpolation_end_depth(source, cursor + 2, depth + 1)? + 1;
             continue;
         }
         let ch = source[cursor..].chars().next().unwrap();
@@ -43,11 +56,20 @@ pub(crate) fn scan(source: &str, start: usize) -> Result<(usize, usize, bool), D
     Err(error(Span::new(start, source.len()), "unterminated string"))
 }
 pub(crate) fn interpolation_end(source: &str, start: usize) -> Result<usize, Diagnostic> {
+    interpolation_end_depth(source, start, 0)
+}
+fn interpolation_end_depth(source: &str, start: usize, depth: usize) -> Result<usize, Diagnostic> {
+    if depth >= 256 {
+        return Err(error(
+            Span::new(start, start),
+            "string interpolation nesting limit exceeded",
+        ));
+    }
     let mut cursor = start;
     let mut braces = 0;
     while cursor < source.len() {
         if source[cursor..].starts_with('"') {
-            cursor = scan(source, cursor)?.1;
+            cursor = scan_depth(source, cursor, depth + 1)?.1;
             continue;
         }
         let ch = source[cursor..].chars().next().unwrap();
@@ -220,6 +242,18 @@ mod tests {
         let (content, positions) = content(raw, Span::new(0, raw.len() + 6), true).unwrap();
         assert_eq!(content, "first\nsecond");
         assert_eq!(content.len() + 1, positions.len());
+    }
+    #[test]
+    fn rejects_deep_interpolation_before_recursive_parsing() {
+        let mut text = "42".to_owned();
+        for _ in 0..2000 {
+            text = format!("\"#{{{text}}}\"");
+        }
+        let source = format!("fn main() {{ {text} }}");
+        let error = lexer::lex(&source).unwrap_err();
+        assert!(error.message.contains("nesting limit"));
+        assert!(error.span.end <= source.len());
+        assert!(source.is_char_boundary(error.span.start));
     }
     #[test]
     fn rejects_malformed_escapes_and_interpolation_without_panicking() {
