@@ -65,6 +65,8 @@ fn external_types_are_nominal_and_cannot_be_constructed_or_inspected() {
         "@external\ntype Token\nfn make(){Token}",
         "@external\ntype Token\nfn make(){Token()}",
         "@external\ntype Token\nfn inspect(value:Token){value.x}",
+        "@external\ntype Token\nfn inspect(value:Token){value.x()}",
+        "@external\ntype Token\nfn update(value:Token){Token(..value)}",
         "@external\ntype Token\nfn inspect(value:Token){value match{Token->42}}",
         "@external\ntype Handle[A]\nfn wrong(value:Handle[Int])->Handle[String]{value}",
         "@external\ntype First\n@external\ntype Second\nfn wrong(value:First)->Second{value}",

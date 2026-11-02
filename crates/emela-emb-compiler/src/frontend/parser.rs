@@ -98,6 +98,7 @@ impl<'t, 's> Parser<'t, 's> {
                         }
                         declaration.variants.clear();
                         declaration.opaque = true;
+                        declaration.record = false;
                     }
                     data.push(declaration);
                 } else {

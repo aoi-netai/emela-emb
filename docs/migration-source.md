@@ -530,3 +530,5 @@ ISR入口は明示exportされたEmela名で選び、C公開aliasと区別する
 ## P7の残余source操作の検証
 
 旧8source builtin（AssertFail/Dbg/DebugPrint/Inspect/Panic/ShowNested/ShowString/Todo）はsource機能として維持する。`source_builtin_tests.rs`はsourceから独自lowerを通してこれらが後段に残らないことと、未変換の8操作を不正IRとして後段で拒否することを確認する。Cでの表示・副作用順・assert/defect hookは既存 `p1.rs`、`p2_debug.rs`、`p2_traits.rs`、`p4_function_values.rs` の試験で観測する。
+
+P7統合では、external opaque宣言のconstructorを消去するときにrecord属性も外す。外部型には構造fieldがなく、receiver関数の検査やdot callでrecord fieldを参照しない。`p7_external_types`のfield/method/update拒否とpointer受渡し、`p7_const_fibers`のScope/Fiber sourceを併用し、record updateとの組合せでpanicしないことを確認する。
