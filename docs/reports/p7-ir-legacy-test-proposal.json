@@ -14,16 +14,11 @@
     "strict generated C compilation and runtime at -O0/-O2; no compiler-absent skip"
   ],
   "status_counts": {
-    "proposed_verified": 71,
+    "proposed_verified": 76,
     "pending_direct_budget_case": 1,
-    "pending_exact_static_view": 1,
     "pending_direct_boundary_case": 1,
-    "pending_scratch_assertion": 1,
-    "pending_checked_add_boundary_matrix": 1,
     "pending_direct_case": 3,
     "pending_direct_rejection": 1,
-    "pending_code_points_heap0": 1,
-    "pending_join_capacity_defect": 1,
     "proposed_verified_representation_replaced": 2,
     "proposed_not_applicable_absent_selector": 1,
     "proposed_verified_policy_replacement": 1
@@ -402,9 +397,15 @@
       "legacy_key": "emit::emits_a_static_string_const_as_a_view",
       "legacy_ledger_index": 38,
       "expected_observation": "Static String const a\\0é is an immutable four-byte view.",
-      "proposed_status": "pending_exact_static_view",
-      "evidence": [],
-      "reason": "Existing static aggregate const test does not itself inspect this String/NUL/Unicode view; add a direct constant String C case."
+      "proposed_status": "proposed_verified",
+      "evidence": [
+        {
+          "path": "crates/emela-emb-compiler/src/backend/lower/p7_misc_value_tests.rs",
+          "symbol": "static_string_constant_returns_a_nul_and_unicode_view_without_an_owner",
+          "layer": "IR/C runtime"
+        }
+      ],
+      "reason": "Exact old a\\0é byte view, static/no owner, repeated1000 times."
     },
     {
       "target": "emit",
@@ -836,15 +837,20 @@
       "legacy_key": "emit::int64_to_string_uses_twenty_byte_scratch_and_matches_decimal_output",
       "legacy_ledger_index": 74,
       "expected_observation": "Int64.to_string matches MIN/MAX/0 and uses exactly20 bytes of scratch.",
-      "proposed_status": "pending_scratch_assertion",
+      "proposed_status": "proposed_verified",
       "evidence": [
         {
           "path": "crates/emela-emb-compiler/tests/p2_compat.rs",
           "symbol": "legacy_numeric_formatting_rounding_and_unused_defects_execute",
           "layer": "source/C runtime"
+        },
+        {
+          "path": "crates/emela-emb-compiler/src/backend/lower/p7_misc_value_tests.rs",
+          "symbol": "int64_decimal_conversion_uses_exactly_twenty_bytes_of_scratch",
+          "layer": "IR/C runtime"
         }
       ],
-      "reason": "The decimal-output assertions are directly contained; a generated-C assertion for the exact20-byte scratch remains to add."
+      "reason": "The generated C declares char emela_string_buffer_0[20]; MIN/MAX/0 decimal outputs are checked1000 times."
     },
     {
       "target": "emit",
@@ -869,15 +875,20 @@
       "legacy_key": "emit::int_checked_add_returns_some_or_none_at_int_boundaries",
       "legacy_ledger_index": 76,
       "expected_observation": "Int.checked_add returns None for MAX+1/MIN-1 and Some(MAX)/Some(-1) for MAX+0/-2+1.",
-      "proposed_status": "pending_checked_add_boundary_matrix",
+      "proposed_status": "proposed_verified",
       "evidence": [
         {
           "path": "crates/emela-emb-compiler/tests/p2_standard_api.rs",
           "symbol": "standard_parameter_names_and_float_total_order_match_fixed_core",
           "layer": "source/C runtime"
+        },
+        {
+          "path": "crates/emela-emb-compiler/src/backend/lower/p7_misc_value_tests.rs",
+          "symbol": "checked_add_preserves_all_four_legacy_option_boundaries",
+          "layer": "IR/C runtime"
         }
       ],
-      "reason": "Existing source checks MAX+1 but not all four original Some/None payload cases."
+      "reason": "All four original tag/payload observations are inspected directly at the C boundary1000 times."
     },
     {
       "target": "emit",
@@ -1102,7 +1113,7 @@
       "legacy_key": "emit::string_code_points_builds_and_releases_a_list_in_code_point_order",
       "legacy_ledger_index": 91,
       "expected_observation": "String.code_points preserves scalar order, empty input and invalid-UTF8 defects; owned list results require a fixed heap.",
-      "proposed_status": "pending_code_points_heap0",
+      "proposed_status": "proposed_verified",
       "evidence": [
         {
           "path": "crates/emela-emb-compiler/tests/p3_unicode.rs",
@@ -1113,9 +1124,14 @@
           "path": "crates/emela-emb-compiler/tests/p3_unicode.rs",
           "symbol": "discarded_unicode_lists_preserve_invalid_utf8_defects",
           "layer": "source/C runtime"
+        },
+        {
+          "path": "crates/emela-emb-compiler/src/backend/lower/p7_misc_value_tests.rs",
+          "symbol": "code_point_lists_require_a_heap_even_when_only_the_head_is_returned",
+          "layer": "IR input rejection"
         }
       ],
-      "reason": "Positive order/empty and malformed UTF8 observations are contained; exact heap0 rejection for the code-points result is still pending."
+      "reason": "Exact StringCodePoints scalar-head shape rejects heap0 before generation; the existing Unicode and malformed-input observations remain referenced."
     },
     {
       "target": "emit",
@@ -1140,7 +1156,7 @@
       "legacy_key": "emit::string_join_reads_split_views_into_a_bounded_stack_buffer",
       "legacy_ledger_index": 93,
       "expected_observation": "String.split keeps views; String.join fills a bounded buffer and defects when capacity is too short.",
-      "proposed_status": "pending_join_capacity_defect",
+      "proposed_status": "proposed_verified",
       "evidence": [
         {
           "path": "crates/emela-emb-compiler/tests/p3_memory_api.rs",
@@ -1156,9 +1172,14 @@
           "path": "crates/emela-emb-compiler/src/backend/lower/p7_string_frame_tests.rs",
           "symbol": "split_views_and_distinct_join_results_survive_a_real_suspension_with_nul_and_unicode",
           "layer": "IR/C runtime"
+        },
+        {
+          "path": "crates/emela-emb-compiler/src/backend/lower/p7_misc_value_tests.rs",
+          "symbol": "split_join_keeps_the_old_multibyte_value_and_capacity_five_defect",
+          "layer": "IR/C runtime"
         }
       ],
-      "reason": "The actual-suspension case preserves pre/post join buffers and NUL/Unicode view bytes. The old capacity5 StringJoin defect needs its own direct assertion; append capacity tests do not substitute for it."
+      "reason": "Exact alpha::βeta success1000/heap2048/heapempty and capacity5 alpha::beta StringJoin defect; append is not substituted."
     },
     {
       "target": "emit",
@@ -1628,12 +1649,23 @@
       "path": "crates/emela-emb-compiler/src/backend/lower/p7_misc_value_tests.rs",
       "symbol": "unreachable_terms_raise_the_native_or_scheduler_defect_when_reached",
       "observation": "Directly reached native node emits ASSERT/unreachable code; suspend node emits ASSERT/invalid scheduler state. Fatal hook executes once per C binary/optimization, not a1000-loop success claim."
+    },
+    {
+      "id": "emela_lir::Value::Fiber.on_fail",
+      "modes": [
+        "Handle",
+        "Break"
+      ],
+      "path": "crates/emela-emb-compiler/src/backend/lower/p7_fiber_edge_tests.rs",
+      "symbols": [
+        "lifting_a_closure_collects_and_remaps_fiber_local_failure_handlers",
+        "lifting_a_closure_remaps_fiber_failure_break_labels_and_their_result_locals"
+      ],
+      "observation": "Parent Var/Seq/Label arenas have11 padding entries. Lifted closure recovers captured typed error42 from CauseRaise through local Handle or enclosing Break; heap4096, each1000 calls, all free."
     }
   ],
   "remaining_work": [
     "Root owns exact List budget/NULL/alias/aggregate and captured-failing-closure cases listed pending.",
-    "Exact Int64-to-String20-byte generated scratch assertion remains.",
-    "Root-requested lifted Fiber Handle/Break shifted-arena regressions follow in a separate checkpoint.",
     "Cleanup12 post-source IR seams and remaining structured127contexts are separate work, not asserted complete by this86-test proposal."
   ]
 }

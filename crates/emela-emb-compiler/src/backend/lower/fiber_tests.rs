@@ -2,6 +2,8 @@ use super::*;
 
 #[path = "fiber_deferred_tests.rs"]
 mod deferred;
+#[path = "p7_fiber_edge_tests.rs"]
+mod p7_edges;
 #[path = "fiber_scope_tests.rs"]
 mod scope_abi;
 #[path = "fiber_source_tests.rs"]
