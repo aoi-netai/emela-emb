@@ -314,9 +314,12 @@ pub(super) fn prepare_frame<'a>(
                     value.for_each_var(|v| {
                         active.insert(v);
                     });
-                    if let Value::FnRef(target) = value
-                        && let Some(&env) = layouts.functions.closure_functions.get(target)
-                    {
+                    if let Some(env) = match value {
+                        Value::FnRef(target) => {
+                            layouts.functions.closure_functions.get(target).copied()
+                        }
+                        _ => None,
+                    } {
                         active.extend(
                             layouts.functions.closure_environments[env]
                                 .captures
@@ -375,13 +378,14 @@ pub(super) fn prepare_frame<'a>(
         .iter()
         .map(|(id, statement)| {
             let mut statement = statement.clone();
-            if let Stmt::Let {
-                value: Value::Call { on_fail, .. } | Value::Fiber { on_fail, .. },
-                ..
-            } = &mut statement
-                && on_fail.is_some()
-            {
-                *on_fail = Some(OnFail::Break(input.error_label));
+            match &mut statement {
+                Stmt::Let {
+                    value: Value::Call { on_fail, .. } | Value::Fiber { on_fail, .. },
+                    ..
+                } if on_fail.is_some() => {
+                    *on_fail = Some(OnFail::Break(input.error_label));
+                }
+                _ => {}
             }
             (id, statement)
         })

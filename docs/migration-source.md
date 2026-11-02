@@ -9,6 +9,7 @@
 - `contract/`・`semantics/`・`compiler/plan/`・`compiler/emit/`・`writer.rs` とartifact manifestの純粋処理を採用。`compiler/`を`backend/`へ移動し内部pathを変更した。
 - upstream adapter、Core/Flowのcrate・入力API、boards・platform製品・CLI・BSPは採用しない。lowerはこのrepoが所有する型付きProgramを検証し、位置・到達性・自己末尾再帰のmetadataを構築する新実装。
 - 明示的なC export名をFunctionに追加し、既存の公開symbolを維持する。Outputには既存API用の`c_source`/`header`を保持し、複数ファイルとexportsも返す。
+- Rust 1.85を維持するため、旧backendのlet-chainを同じpatternとguardを持つmatchへ置き換えた。Unicodeの`is_multiple_of`は剰余比較へ置き換えた。
 - 後続段階用のcontract variantが未使用のため、contract/semanticsでdead_codeを許容。未接続構造をlowerで拒否し、後段コードの採用をsource機能の完成として扱わない。
 - Unicode公式vectorと旧backendの独立fixture/heap実行試験を採用。これはP1ソース対応全体の証明ではない。
 

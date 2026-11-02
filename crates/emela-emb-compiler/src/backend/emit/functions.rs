@@ -149,14 +149,15 @@ pub(in crate::backend::emit) fn emit_retain_operand(
     operand: &Operand,
     writer: &mut Writer,
 ) {
-    if let Operand::Var(variable) = operand
-        && layouts.is_managed_value(function.vars[*variable].ty)
-    {
-        layouts.emit_retain_value_expression(
-            function.vars[*variable].ty,
-            &variable_name(*variable),
-            writer,
-        );
+    match operand {
+        Operand::Var(variable) if layouts.is_managed_value(function.vars[*variable].ty) => {
+            layouts.emit_retain_value_expression(
+                function.vars[*variable].ty,
+                &variable_name(*variable),
+                writer,
+            );
+        }
+        _ => {}
     }
 }
 

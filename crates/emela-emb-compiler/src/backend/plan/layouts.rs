@@ -699,28 +699,31 @@ impl<'a> LayoutPreparation<'a> for LayoutBuilder<'a> {
         function: &str,
         states: &mut HashMap<TypeId, u8>,
     ) -> Result<(), Vec<Error>> {
-        if let Type::Enum(id, args) = self.shapes.types[ty].clone()
-            && self.shapes.core.enums[id].name == "Std.Fiber.Exit"
-            && args
-                .iter()
-                .any(|&arg| matches!(self.shapes.types[arg], Type::Set(_)))
-        {
-            let args = args
-                .into_iter()
-                .map(|arg| {
-                    if matches!(self.shapes.types[arg], Type::Set(_)) {
-                        TypeId::UNIT
-                    } else {
-                        arg
-                    }
-                })
-                .collect();
-            let canonical = self.shapes.types.enum_type(id, args);
-            self.collect(canonical, function, states)?;
-            let index = self.shapes.aggregate_ids[&canonical];
-            self.shapes.aggregate_ids.insert(ty, index);
-            states.insert(ty, 2);
-            return Ok(());
+        match self.shapes.types[ty].clone() {
+            Type::Enum(id, args)
+                if self.shapes.core.enums[id].name == "Std.Fiber.Exit"
+                    && args
+                        .iter()
+                        .any(|&arg| matches!(self.shapes.types[arg], Type::Set(_))) =>
+            {
+                let args = args
+                    .into_iter()
+                    .map(|arg| {
+                        if matches!(self.shapes.types[arg], Type::Set(_)) {
+                            TypeId::UNIT
+                        } else {
+                            arg
+                        }
+                    })
+                    .collect();
+                let canonical = self.shapes.types.enum_type(id, args);
+                self.collect(canonical, function, states)?;
+                let index = self.shapes.aggregate_ids[&canonical];
+                self.shapes.aggregate_ids.insert(ty, index);
+                states.insert(ty, 2);
+                return Ok(());
+            }
+            _ => {}
         }
         if matches!(self.shapes.types[ty], Type::Cell(_)) {
             if !self.shapes.cell_ids.contains_key(&ty) {

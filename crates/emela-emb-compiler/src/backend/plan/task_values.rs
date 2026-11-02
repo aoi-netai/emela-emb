@@ -62,10 +62,13 @@ fn boundary_type(layouts: &TypeLayouts<'_>, ty: TypeId, seen: &mut HashSet<TypeI
             if layouts.is_runtime_handle(ty) {
                 return false;
             }
-            if let Type::Enum(id, _) = layouts.shapes.types[ty]
-                && (layouts.shapes.core.enums[id].external || layouts.enum_is_i32(id))
-            {
-                return true;
+            match layouts.shapes.types[ty] {
+                Type::Enum(id, _)
+                    if (layouts.shapes.core.enums[id].external || layouts.enum_is_i32(id)) =>
+                {
+                    return true;
+                }
+                _ => {}
             }
             let Some(&index) = layouts.shapes.aggregate_ids.get(&ty) else {
                 return false;

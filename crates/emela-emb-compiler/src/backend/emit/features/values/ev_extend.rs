@@ -37,13 +37,14 @@ pub(in crate::backend::emit) fn emit_evidence_extend(
             "EvExtend destination is not Evidence",
         ));
     }
-    if let Some(base) = base
-        && !matches!(layouts.shapes.types[function.vars[base].ty], Type::Evidence)
-    {
-        return Err(invalid_flow_ir(
-            &function.name,
-            "EvExtend base is not Evidence",
-        ));
+    match base {
+        Some(base) if !matches!(layouts.shapes.types[function.vars[base].ty], Type::Evidence) => {
+            return Err(invalid_flow_ir(
+                &function.name,
+                "EvExtend base is not Evidence",
+            ));
+        }
+        _ => {}
     }
     if bindings.is_empty() {
         writer.assign(

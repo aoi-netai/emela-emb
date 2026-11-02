@@ -263,13 +263,14 @@ pub(super) fn prepare<'a>(
         .functions
         .iter()
         .find(|(id, function)| emitted_functions.contains(id) && function.name == options.entry());
-    if let Some((_, function)) = main_entry
-        && !function.params.is_empty()
-    {
-        return Err(unsupported(
-            &function.name,
-            "an embedded main function with parameters",
-        ));
+    match main_entry {
+        Some((_, function)) if !function.params.is_empty() => {
+            return Err(unsupported(
+                &function.name,
+                "an embedded main function with parameters",
+            ));
+        }
+        _ => {}
     }
 
     let mut aliases = Vec::new();

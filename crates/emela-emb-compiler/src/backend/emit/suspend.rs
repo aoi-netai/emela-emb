@@ -459,7 +459,7 @@ pub(super) fn emit_function(
                         },
                         statement,
                     )?;
-                } else if let Stmt::Let {
+                } else if matches!(statement, Stmt::Let {
                     dst: _dst,
                     value:
                         Value::Call {
@@ -474,8 +474,7 @@ pub(super) fn emit_function(
                             ..
                         },
                     ..
-                } = statement
-                    && layouts.shapes.core.effects[*effect].ops[*op].suspend
+                } if layouts.shapes.core.effects[*effect].ops[*op].suspend)
                 {
                     super::features::values::call::emit_suspend_op(
                         &mut super::features::SuspendContext {
@@ -494,7 +493,7 @@ pub(super) fn emit_function(
                         },
                         statement,
                     )?;
-                } else if let Stmt::Let {
+                } else if matches!(statement, Stmt::Let {
                     dst: _dst,
                     value:
                         Value::Call {
@@ -504,8 +503,7 @@ pub(super) fn emit_function(
                             ..
                         },
                     ..
-                } = statement
-                    && matches ! (& layouts.shapes.types [function . vars [* callee] . ty] , Type :: Fn (ft) if ft . suspends)
+                } if matches ! (& layouts.shapes.types [function . vars [* callee] . ty] , Type :: Fn (ft) if ft . suspends))
                 {
                     super::features::values::call::emit_suspend_indirect(
                         &mut super::features::SuspendContext {

@@ -74,14 +74,15 @@ pub(in crate::backend::plan) fn function_needs_heap(
     let fixed_errors = fixed_failure_graph(flow, function_id, layouts, &mut HashSet::new());
     let mut known_empty = HashSet::new();
     for (_, statement) in function.stmts.iter() {
-        if let Stmt::Let {
-            dst: Some(dst),
-            value,
-            ..
-        } = statement
-            && features::values::is_known_empty(value, &known_empty, empty_list_functions)
-        {
-            known_empty.insert(*dst);
+        match statement {
+            Stmt::Let {
+                dst: Some(dst),
+                value,
+                ..
+            } if features::values::is_known_empty(value, &known_empty, empty_list_functions) => {
+                known_empty.insert(*dst);
+            }
+            _ => {}
         }
     }
     let context = HeapContext {

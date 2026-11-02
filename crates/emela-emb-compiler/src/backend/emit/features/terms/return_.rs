@@ -96,16 +96,18 @@ pub(in crate::backend::emit) fn emit_function(
                 writer . decl ("EmelaString" , "emela_string_return_value" , Some (& format ! ("emela_emb_string_copy_to_output(emela_string_return_source, emela_string_output, emela_emb_string_output_capacity, UINT16_C({}))" , string_buffers . capacity)) ,) ;
                 expression = "emela_string_return_value".to_owned();
             }
-            if !copies_string_to_caller
-                && layouts.is_managed_value(function.ret)
-                && let Operand::Var(variable) = operand
-            {
-                if function.params.contains(variable) {
-                    emit_retain_operand(layouts, function, operand, writer);
-                } else {
-                    writer.assign(&owned_variable_name(*variable), "INT32_C(0)");
-                    moved = Some(*variable);
+            match operand {
+                Operand::Var(variable)
+                    if !copies_string_to_caller && layouts.is_managed_value(function.ret) =>
+                {
+                    if function.params.contains(variable) {
+                        emit_retain_operand(layouts, function, operand, writer);
+                    } else {
+                        writer.assign(&owned_variable_name(*variable), "INT32_C(0)");
+                        moved = Some(*variable);
+                    }
                 }
+                _ => {}
             }
             emit_owned_cleanup(layouts, function, moved, writer);
             writer.ret(Some(&expression));
