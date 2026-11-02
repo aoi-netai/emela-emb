@@ -188,6 +188,11 @@ pub(crate) fn lower_program(
         if !emitted_functions.insert(id) {
             continue;
         }
+        // A resolved constant emits its value or defect directly. Its initializer no longer
+        // calls helpers; retaining those edges can emit unused static C functions.
+        if matches!(const_outcomes.get(&id), Some(Ok(_))) {
+            continue;
+        }
         let function = &program.functions[id];
         for (_, stmt) in function
             .stmts

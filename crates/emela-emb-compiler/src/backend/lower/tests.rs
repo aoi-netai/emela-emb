@@ -1110,6 +1110,21 @@ fn monomorphic_runtime_const_initializes_once() {
     );
 }
 #[test]
+fn evaluated_const_does_not_emit_unused_initializer_helpers() {
+    let mut p = runtime_const_program(false);
+    let helper_id = p.functions.iter().next().unwrap().0;
+    let helper = &mut p.functions[helper_id];
+    helper.external = None;
+    helper.body = Some(helper.seqs.alloc(Seq {
+        stmts: vec![],
+        term: Term::Return(Some(Const::Int(21).into())),
+    }));
+    let lowered = lower_program(p.clone()).unwrap();
+    assert!(!lowered.emitted_functions.contains(&helper_id));
+    let output = crate::backend::compile_program(p, &Options::default()).unwrap();
+    execute(&output, DEFECT_HARNESS, 0);
+}
+#[test]
 fn runtime_const_defect_is_cached_with_context() {
     let output =
         crate::backend::compile_program(runtime_const_program(true), &Options::default()).unwrap();
