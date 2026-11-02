@@ -948,3 +948,67 @@ fn rejects_malformed_generic_fields_and_unhandled_failure_channels() {
             .contains("failure edge")
     );
 }
+
+#[test]
+fn string_parameter_tail_recursion_tracks_loop_ownership() {
+    let mut f = simple();
+    f.ret = TypeId::BOOL;
+    let left = aggregate_variable(&mut f, TypeId::STRING);
+    let right = aggregate_variable(&mut f, TypeId::STRING);
+    let count = variable(&mut f, TypeId::INT);
+    f.params = vec![left, right, count];
+    let done = variable(&mut f, TypeId::BOOL);
+    let equal = variable(&mut f, TypeId::BOOL);
+    let next = variable(&mut f, TypeId::INT);
+    let condition = binding(
+        &mut f,
+        Some(done),
+        Value::Prim {
+            op: PrimOp::Eq,
+            ty: PrimTy::I32,
+            args: vec![count.into(), Const::Int(0).into()],
+        },
+    );
+    let compare = binding(
+        &mut f,
+        Some(equal),
+        Value::Prim {
+            op: PrimOp::Eq,
+            ty: PrimTy::String,
+            args: vec![left.into(), right.into()],
+        },
+    );
+    let decrement = binding(
+        &mut f,
+        Some(next),
+        Value::Prim {
+            op: PrimOp::Sub,
+            ty: PrimTy::I32,
+            args: vec![count.into(), Const::Int(1).into()],
+        },
+    );
+    let yes = f.seqs.alloc(Seq {
+        stmts: vec![compare],
+        term: Term::Return(Some(equal.into())),
+    });
+    let no = f.seqs.alloc(Seq {
+        stmts: vec![decrement],
+        term: Term::Recur(vec![right.into(), left.into(), next.into()]),
+    });
+    let branch = f.stmts.alloc(Stmt::If {
+        dst: None,
+        cond: done.into(),
+        then: yes,
+        else_: no,
+    });
+    f.seqs[f.body.unwrap()] = Seq {
+        stmts: vec![condition, branch],
+        term: Term::Unreachable,
+    };
+    let output = crate::backend::compile_program(program(vec![f]), &Options::default()).unwrap();
+    execute(
+        &output,
+        "#include <stdlib.h>\n#include \"emela_embedded.h\"\n#include \"emela_board.h\"\n_Noreturn void emela_board_defect(EmelaDefectKind k,const char*m,uint16_t n) { (void)k;(void)m;(void)n;exit(9); }\nint main(void) { EmelaString a={\"same\",UINT16_C(4),NULL}; EmelaString b={\"other\",UINT16_C(5),NULL}; if (!answer(a,a,100000)) return 1; return answer(a,b,100001) ? 2 : 0; }\n",
+        0,
+    );
+}

@@ -3,7 +3,7 @@ use super::{
     StringBufferPlan, TypeLayouts,
     c::{c_string_literal, function_coerce_adapter_name, owned_variable_name, variable_name},
 };
-use crate::contract::ir::{FnId, Function, Operand, Repr, VarId};
+use crate::contract::ir::{FnId, Function, Operand, Repr, Stmt, VarId};
 use crate::contract::ir::{Type, TypeId};
 use crate::semantics::abi::LayoutRead;
 use crate::writer::Writer;
@@ -15,6 +15,13 @@ pub(in crate::backend::emit) fn emit_local_declarations(
     writer: &mut Writer,
 ) {
     for (id, variable) in function.vars.iter() {
+        if function.params.contains(&id)
+            && parameter_is_loop_variable(function, id)
+            && layouts.is_managed_value(variable.ty)
+        {
+            writer.decl("int", &owned_variable_name(id), Some("INT32_C(0)"));
+            writer.line(&format!("(void)&{};", owned_variable_name(id)));
+        }
         if !function.params.contains(&id) {
             if layouts.is_managed_value(variable.ty) {
                 let initial = if layouts.is_managed_list(variable.ty) {
@@ -161,6 +168,14 @@ pub(in crate::backend::emit) fn emit_retain_operand(
     }
 }
 
+// Ordinary parameters are borrowed. A parameter reused as a loop slot acquires
+// ownership when the loop initializes it and must then participate in cleanup.
+fn parameter_is_loop_variable(function: &Function, variable: VarId) -> bool {
+    function.stmts.iter().any(
+        |(_, statement)| matches!(statement, Stmt::Loop { vars, .. } if vars.contains(&variable)),
+    )
+}
+
 pub(in crate::backend::emit) fn emit_owned_cleanup(
     layouts: &TypeLayouts<'_>,
     function: &Function,
@@ -169,7 +184,8 @@ pub(in crate::backend::emit) fn emit_owned_cleanup(
 ) {
     for (variable, data) in function.vars.iter() {
         if except == Some(variable)
-            || function.params.contains(&variable)
+            || (function.params.contains(&variable)
+                && !parameter_is_loop_variable(function, variable))
             || !layouts.is_managed_value(data.ty)
         {
             continue;
