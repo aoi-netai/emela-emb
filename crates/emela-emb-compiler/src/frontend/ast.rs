@@ -222,6 +222,11 @@ pub(crate) enum ExprKind {
         callee: Box<Expr>,
         args: Vec<Argument>,
     },
+    Update {
+        callee: Box<Expr>,
+        fields: Vec<Argument>,
+        base: Box<Expr>,
+    },
     If {
         condition: Box<Expr>,
         then: Block,
@@ -280,6 +285,8 @@ pub(crate) struct Data {
     pub public: bool,
     pub opaque: bool,
     pub error: bool,
+    /// Product declarations allow field access/update; even a one-variant enum does not.
+    pub record: bool,
     pub params: Vec<TypeParameter>,
     pub variants: Vec<Variant>,
     pub derives: Vec<Text>,

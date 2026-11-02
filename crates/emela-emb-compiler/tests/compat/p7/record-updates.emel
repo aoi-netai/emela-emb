@@ -1,0 +1,109 @@
+@external(c, "board_record_mark")
+fn mark(n: Int) -> Int
+
+type Row(first: Int, second: Int, text: String, items: List[String])
+type Pair[A, B](first: A, second: B)
+error Gone(message: String, items: List[String])
+
+fn base() -> Row {
+  mark(3)
+  Row(first: 30, second: 40, text: "base", items: ["old"])
+}
+@export(c, "record_order")
+pub fn order() -> Int {
+  row = Row(second: mark(1), first: mark(2), ..base())
+  assert row.text == "base" && row.items == ["old"]
+  row.first * 10 + row.second
+}
+
+fn change[A, B](pair: Pair[A, B], value: String) -> Pair[String, B] {
+  Pair(first: value, ..pair)
+}
+@export(c, "record_generic")
+pub fn generic(n: Int) -> Bool {
+  old = Pair(first: n, second: True)
+  changed: Pair[String, Bool] = change(old, "new #{n}")
+  copied = Pair(..changed)
+  all = Pair(second: 42, first: "all", ..old)
+  copied.first == "new #{n}" && copied.second && all.first == "all" && all.second == 42
+}
+
+fn failing_base(n: Int) -> Row fails Gone {
+  mark(2)
+  fail Gone(message: "gone #{n}", items: ["payload #{n}"])
+}
+fn update_value(n: Int) -> String {
+  mark(1)
+  "kept #{n}"
+}
+@export(c, "record_base_failure")
+pub fn base_failure(n: Int) -> Bool {
+  row = Row(text: update_value(n), items: ["new #{n}"], ..failing_base(n)) escape {
+    Gone(message:, items:) -> {
+      assert message == "gone #{n}" && items == ["payload #{n}"]
+      Row(first: 42, second: 0, text: "caught", items: [])
+    }
+  }
+  row.first == 42
+}
+
+fn failing_value(n: Int) -> Int fails Gone {
+  mark(4)
+  fail Gone(message: "value #{n}", items: ["held #{n}"])
+}
+@export(c, "record_field_failure")
+pub fn field_failure(n: Int) -> Bool {
+  Row(text: update_value(n), first: failing_value(n), ..base()) escape {
+    Gone(message:, items:) -> {
+      assert message == "value #{n}" && items == ["held #{n}"]
+      Row(first: 42, second: 0, text: "caught", items: [])
+    }
+  }
+  True
+}
+
+@export(c, "record_never_base")
+pub fn never_base(n: Int) -> Bool {
+  Row(text: update_value(n), ..fail Gone(message: "never", items: [])) escape {
+    Gone(..) -> Row(first: 42, second: 0, text: "caught", items: [])
+  }
+  True
+}
+
+@export(c, "record_error")
+pub fn error_update(n: Int) -> Bool {
+  old = Gone(message: "old #{n}", items: ["retained #{n}"])
+  { fail Gone(message: "new #{n}", ..old) } escape {
+    Gone(message:, items:) -> message == "new #{n}" && items == ["retained #{n}"]
+  }
+}
+
+@export(c, "record_return_updated")
+pub fn return_updated(input: String) -> List[String] {
+  row = Row(text: "copy #{input}", ..base())
+  [row.text]
+}
+@export(c, "record_return_items")
+pub fn return_items(input: String) -> List[String] {
+  old = Row(first: 0, second: 1, text: "before", items: [input])
+  row = Row(text: "after", ..old)
+  row.items
+}
+@export(c, "record_items_first")
+pub fn items_first(items: List[String]) -> String { items match { [head, .._] -> head, [] -> "" } }
+
+effect Read { fn read() -> Int }
+handler Reader(value: Int): Read {
+  init {
+    initial = Reader(value: 1)
+    Reader(value: 42, ..initial)
+  }
+  fn read() { self.value }
+}
+@export(c, "record_handler")
+pub fn handler_update() -> Int { with Reader { (use Read).read() } }
+
+enum One { Only(value: Int) }
+fn value(one: One) -> Int { one match { Only(value:) -> value } }
+@export(c, "record_enum_method")
+pub fn enum_method() -> Int { Only(value: 42).value() }

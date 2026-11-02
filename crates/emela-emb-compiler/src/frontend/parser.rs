@@ -829,10 +829,33 @@ impl<'t, 's> Parser<'t, 's> {
         ))
     }
     fn arguments(&mut self) -> Result<Vec<Argument>, Diagnostic> {
+        Ok(self.call_arguments(false)?.0)
+    }
+    fn call_arguments(
+        &mut self,
+        allow_update: bool,
+    ) -> Result<(Vec<Argument>, Option<Box<Expr>>), Diagnostic> {
         self.expect(K::LParen, "expected '(' before arguments")?;
         self.newlines();
         let mut args = Vec::new();
+        let mut base = None;
         while self.current().kind != K::RParen {
+            if allow_update && self.current().kind == K::Dot && self.peek(1).kind == K::Dot {
+                self.advance();
+                self.advance();
+                self.newlines();
+                base = Some(Box::new(self.expr(0, true)?));
+                self.newlines();
+                self.take(K::Comma);
+                self.newlines();
+                if self.current().kind != K::RParen {
+                    return Err(self.error(
+                        DiagnosticKind::Syntax,
+                        "record update base must be the last argument",
+                    ));
+                }
+                break;
+            }
             let label =
                 if matches!(self.current().kind, K::Name(_)) && self.peek(1).kind == K::Colon {
                     let name = self.lower_name("expected argument label")?;
@@ -861,7 +884,7 @@ impl<'t, 's> Parser<'t, 's> {
             self.newlines();
         }
         self.expect(K::RParen, "expected ')' after arguments")?;
-        Ok(args)
+        Ok((args, base))
     }
     fn with_item(&mut self, allow_by: bool) -> Result<WithItem, Diagnostic> {
         let start = self.current().span.start;
@@ -1173,6 +1196,7 @@ impl<'t, 's> Parser<'t, 's> {
             public,
             opaque,
             error,
+            record: !enumeration,
             params,
             variants,
             derives,
@@ -1477,12 +1501,20 @@ impl<'t, 's> Parser<'t, 's> {
                 continue;
             }
             if self.current().kind == K::LParen && min <= 9 {
-                let args = self.arguments()?;
+                let (args, base) = self.call_arguments(true)?;
                 let start = left.span.start;
                 left = Expr {
-                    kind: ExprKind::Call {
-                        callee: Box::new(left),
-                        args,
+                    kind: if let Some(base) = base {
+                        ExprKind::Update {
+                            callee: Box::new(left),
+                            fields: args,
+                            base,
+                        }
+                    } else {
+                        ExprKind::Call {
+                            callee: Box::new(left),
+                            args,
+                        }
                     },
                     span: Span::new(start, self.previous_end()),
                 };
