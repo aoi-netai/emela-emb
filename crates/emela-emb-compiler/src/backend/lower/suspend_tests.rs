@@ -971,3 +971,305 @@ fn task_adapter_and_capacities_are_required_and_exhaustion_unlocks_events() {
         );
     }
 }
+
+fn scalar_function_type(p: &mut Program, ret: TypeId, suspends: bool, ev: bool) -> TypeId {
+    p.core.types.intern(Type::Fn(FnType {
+        params: vec![TypeId::INT],
+        ret,
+        fails: false,
+        suspends,
+        ev,
+        sets: None,
+    }))
+}
+
+fn scalar_worker(p: &mut Program, wait: FnId) -> FnId {
+    let mut worker = Function::new("worker");
+    worker.suspends = true;
+    worker.ret = TypeId::INT;
+    let n = variable(&mut worker, TypeId::INT);
+    worker.params.push(n);
+    let received = variable(&mut worker, TypeId::INT);
+    let doubled = variable(&mut worker, TypeId::INT);
+    let result = variable(&mut worker, TypeId::INT);
+    let call = binding(
+        &mut worker,
+        Some(received),
+        Value::Call {
+            callee: Callee::Direct(wait),
+            args: vec![n.into()],
+            suspends: true,
+            on_fail: None,
+        },
+    );
+    let double = binding(
+        &mut worker,
+        Some(doubled),
+        Value::Prim {
+            op: PrimOp::Mul,
+            ty: PrimTy::I32,
+            args: vec![received.into(), Const::Int(2).into()],
+        },
+    );
+    let add = binding(
+        &mut worker,
+        Some(result),
+        Value::Prim {
+            op: PrimOp::Add,
+            ty: PrimTy::I32,
+            args: vec![doubled.into(), Const::Int(1).into()],
+        },
+    );
+    worker.body = Some(worker.seqs.alloc(Seq {
+        stmts: vec![call, double, add],
+        term: Term::Return(Some(result.into())),
+    }));
+    p.functions.alloc(worker)
+}
+
+#[test]
+fn function_coercions_adapt_sync_and_suspend_values_to_suspending_evidence_calls() {
+    let mut p = program(vec![]);
+    let wait = external_task(&mut p, "wait", &[TypeId::INT], TypeId::INT);
+    let worker = scalar_worker(&mut p, wait);
+    let pure = scalar_function_type(&mut p, TypeId::INT, false, false);
+    let suspended = scalar_function_type(&mut p, TypeId::INT, true, false);
+    let with_evidence = scalar_function_type(&mut p, TypeId::INT, true, true);
+    let mut increment = Function::new("increment");
+    increment.ret = TypeId::INT;
+    let n = variable(&mut increment, TypeId::INT);
+    increment.params.push(n);
+    let result = variable(&mut increment, TypeId::INT);
+    let add = binding(
+        &mut increment,
+        Some(result),
+        Value::Prim {
+            op: PrimOp::Add,
+            ty: PrimTy::I32,
+            args: vec![n.into(), Const::Int(1).into()],
+        },
+    );
+    increment.body = Some(increment.seqs.alloc(Seq {
+        stmts: vec![add],
+        term: Term::Return(Some(result.into())),
+    }));
+    let increment = p.functions.alloc(increment);
+    let mut answer = simple();
+    answer.suspends = true;
+    let n = variable(&mut answer, TypeId::INT);
+    answer.params.push(n);
+    let sync = aggregate_variable(&mut answer, pure);
+    let adapted_sync = aggregate_variable(&mut answer, with_evidence);
+    let asynchronous = aggregate_variable(&mut answer, suspended);
+    let adapted_async = aggregate_variable(&mut answer, with_evidence);
+    let evidence = aggregate_variable(&mut answer, TypeId::EVIDENCE);
+    let first = variable(&mut answer, TypeId::INT);
+    let result = variable(&mut answer, TypeId::INT);
+    let statements = vec![
+        binding(&mut answer, Some(sync), Value::FnRef(increment)),
+        binding(&mut answer, Some(adapted_sync), Value::Coerce(sync)),
+        binding(
+            &mut answer,
+            Some(evidence),
+            Value::EvExtend {
+                base: None,
+                bindings: vec![],
+            },
+        ),
+        binding(
+            &mut answer,
+            Some(first),
+            Value::Call {
+                callee: Callee::Indirect(adapted_sync),
+                args: vec![n.into(), evidence.into()],
+                suspends: true,
+                on_fail: None,
+            },
+        ),
+        binding(&mut answer, Some(asynchronous), Value::FnRef(worker)),
+        binding(
+            &mut answer,
+            Some(adapted_async),
+            Value::Coerce(asynchronous),
+        ),
+        binding(
+            &mut answer,
+            Some(result),
+            Value::Call {
+                callee: Callee::Indirect(adapted_async),
+                args: vec![first.into(), evidence.into()],
+                suspends: true,
+                on_fail: None,
+            },
+        ),
+    ];
+    answer.seqs[answer.body.unwrap()] = Seq {
+        stmts: statements,
+        term: Term::Return(Some(result.into())),
+    };
+    p.functions.alloc(answer);
+    let mut output = crate::backend::compile_program(
+        p,
+        &Options::default()
+            .with_heap_bytes(4096)
+            .with_frame_bytes(1024)
+            .with_task_adapter("wait", "board_wait_start"),
+    )
+    .unwrap();
+    audit_heap(&mut output);
+    execute(
+        &output,
+        "#include <stdlib.h>\n#include \"emela_embedded.h\"\n#include \"emela_board.h\"\nint test_heap_empty(void);\nuint32_t emela_board_event_lock(void){return 0;}\nvoid emela_board_event_unlock(uint32_t p){(void)p;}\n_Noreturn void emela_board_defect(EmelaDefectKind k,const char*m,uint16_t n){(void)k;(void)m;(void)n;abort();}\nvoid board_wait_start(EmelaTask t,int32_t n){if(!emela_task_complete_int(t,n))abort();}\nint main(void){for(int i=0;i<1000;i++){int32_t result=0;EmelaFiber f=answer_start(i,&result);while(!emela_fiber_done(f))if(!emela_scheduler_run(1))return 1;emela_fiber_release(f);if(result!=i*2+3||!test_heap_empty())return 2;}return 0;}\n",
+        0,
+    );
+}
+
+#[test]
+fn suspending_function_references_dispatch_to_external_tasks_then_internal_frames() {
+    let mut p = program(vec![]);
+    let wait = external_task(&mut p, "wait", &[TypeId::INT], TypeId::INT);
+    let worker = scalar_worker(&mut p, wait);
+    let ty = scalar_function_type(&mut p, TypeId::INT, true, false);
+    let mut answer = simple();
+    answer.suspends = true;
+    let n = variable(&mut answer, TypeId::INT);
+    answer.params.push(n);
+    let external = aggregate_variable(&mut answer, ty);
+    let internal = aggregate_variable(&mut answer, ty);
+    let first = variable(&mut answer, TypeId::INT);
+    let result = variable(&mut answer, TypeId::INT);
+    let statements = vec![
+        binding(&mut answer, Some(external), Value::FnRef(wait)),
+        binding(
+            &mut answer,
+            Some(first),
+            Value::Call {
+                callee: Callee::Indirect(external),
+                args: vec![n.into()],
+                suspends: true,
+                on_fail: None,
+            },
+        ),
+        binding(&mut answer, Some(internal), Value::FnRef(worker)),
+        binding(
+            &mut answer,
+            Some(result),
+            Value::Call {
+                callee: Callee::Indirect(internal),
+                args: vec![first.into()],
+                suspends: true,
+                on_fail: None,
+            },
+        ),
+    ];
+    answer.seqs[answer.body.unwrap()] = Seq {
+        stmts: statements,
+        term: Term::Return(Some(result.into())),
+    };
+    p.functions.alloc(answer);
+    let output = crate::backend::compile_program(
+        p,
+        &Options::default()
+            .with_frame_bytes(1024)
+            .with_task_adapter("wait", "board_wait_start"),
+    )
+    .unwrap();
+    assert!(
+        !output
+            .files
+            .iter()
+            .find(|file| file.path == "emela_embedded.c")
+            .unwrap()
+            .contents
+            .contains("emela_heap_storage")
+    );
+    execute(
+        &output,
+        "#include <stdlib.h>\n#include \"emela_embedded.h\"\n#include \"emela_board.h\"\nstatic int started;\nuint32_t emela_board_event_lock(void){return 0;}\nvoid emela_board_event_unlock(uint32_t p){(void)p;}\n_Noreturn void emela_board_defect(EmelaDefectKind k,const char*m,uint16_t n){(void)k;(void)m;(void)n;abort();}\nvoid board_wait_start(EmelaTask t,int32_t n){started++;if(!emela_task_complete_int(t,n))abort();}\nint main(void){for(int i=0;i<1000;i++){int32_t result=0;EmelaFiber f=answer_start(i,&result);while(!emela_fiber_done(f))if(!emela_scheduler_run(1))return 1;emela_fiber_release(f);if(result!=i*2+1||started!=(i+1)*2)return 2;}return 0;}\n",
+        0,
+    );
+}
+
+#[test]
+fn synchronous_string_producers_coerced_to_suspend_values_keep_small_buffers_and_owned_results() {
+    let mut p = program(vec![]);
+    let pure = scalar_function_type(&mut p, TypeId::STRING, false, false);
+    let suspended = scalar_function_type(&mut p, TypeId::STRING, true, false);
+    let mut format = Function::new("format");
+    format.ret = TypeId::STRING;
+    let n = variable(&mut format, TypeId::INT);
+    format.params.push(n);
+    let text = aggregate_variable(&mut format, TypeId::STRING);
+    let render = binding(
+        &mut format,
+        Some(text),
+        Value::Builtin {
+            op: Builtin::IntToString,
+            args: vec![n.into()],
+        },
+    );
+    format.body = Some(format.seqs.alloc(Seq {
+        stmts: vec![render],
+        term: Term::Return(Some(text.into())),
+    }));
+    let format = p.functions.alloc(format);
+    for discard in [false, true] {
+        let mut answer = simple();
+        answer.name = if discard { "discard" } else { "text" }.into();
+        answer.export_symbol = Some(answer.name.clone());
+        answer.suspends = true;
+        answer.ret = if discard {
+            TypeId::UNIT
+        } else {
+            TypeId::STRING
+        };
+        let n = variable(&mut answer, TypeId::INT);
+        answer.params.push(n);
+        let producer = aggregate_variable(&mut answer, pure);
+        let adapted = aggregate_variable(&mut answer, suspended);
+        let result = (!discard).then(|| aggregate_variable(&mut answer, TypeId::STRING));
+        let statements = vec![
+            binding(&mut answer, Some(producer), Value::FnRef(format)),
+            binding(&mut answer, Some(adapted), Value::Coerce(producer)),
+            binding(
+                &mut answer,
+                result,
+                Value::Call {
+                    callee: Callee::Indirect(adapted),
+                    args: vec![n.into()],
+                    suspends: true,
+                    on_fail: None,
+                },
+            ),
+        ];
+        answer.seqs[answer.body.unwrap()] = Seq {
+            stmts: statements,
+            term: Term::Return(result.map(Operand::Var)),
+        };
+        p.functions.alloc(answer);
+    }
+    let options = Options::default()
+        .with_heap_bytes(4096)
+        .with_frame_bytes(1024);
+    let mut output = crate::backend::compile_program(p.clone(), &options).unwrap();
+    let source = &output
+        .files
+        .iter()
+        .find(|file| file.path == "emela_embedded.c")
+        .unwrap()
+        .contents;
+    assert!(source.contains("char buffer[11];"));
+    assert!(!source.contains("char buffer[256];"));
+    audit_heap(&mut output);
+    execute(
+        &output,
+        "#include <stdlib.h>\n#include <string.h>\n#include \"emela_embedded.h\"\n#include \"emela_board.h\"\nint test_heap_empty(void);\n_Noreturn void emela_board_defect(EmelaDefectKind k,const char*m,uint16_t n){(void)k;(void)m;(void)n;abort();}\nstatic void finish(EmelaFiber f){while(!emela_fiber_done(f))if(!emela_scheduler_run(1))abort();emela_fiber_release(f);}\nint main(void){for(int i=0;i<1000;i++){EmelaString first={0},second={0};finish(text_start(INT32_MIN,&first));finish(text_start(INT32_MAX,&second));if(!first.owner||first.length!=11||memcmp(first.data,\"-2147483648\",11)||!second.owner||second.length!=10||memcmp(second.data,\"2147483647\",10))return 1;emela_embedded_release_string(&first);emela_embedded_release_string(&second);finish(discard_start(INT32_MIN));finish(text_start(INT32_MIN,NULL));if(!test_heap_empty())return 2;}return 0;}\n",
+        0,
+    );
+    let small = crate::backend::compile_program(p, &options.with_string_capacity(10)).unwrap();
+    execute(
+        &small,
+        "#include <stdlib.h>\n#include \"emela_embedded.h\"\n#include \"emela_board.h\"\n_Noreturn void emela_board_defect(EmelaDefectKind k,const char*m,uint16_t n){(void)m;(void)n;exit(k==EMELA_DEFECT_STRING_CAPACITY?7:8);}\nint main(void){EmelaString result={0};EmelaFiber f=text_start(INT32_MIN,&result);while(!emela_fiber_done(f))if(!emela_scheduler_run(1))return 1;return 2;}\n",
+        7,
+    );
+}
