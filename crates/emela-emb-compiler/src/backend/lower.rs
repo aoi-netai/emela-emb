@@ -180,9 +180,8 @@ pub(crate) fn lower_program(
         .iter()
         .filter_map(|(id, f)| (f.exported || f.name == options.entry()).then_some(id))
         .collect();
-    if pending.is_empty() {
-        pending.extend(program.functions.iter().map(|(id, _)| id));
-    }
+    // Source visibility does not create C roots. A module with neither an export
+    // nor the selected entry still gets validated, but emits no reachable functions.
     let mut emitted_functions = HashSet::new();
     while let Some(id) = pending.pop() {
         if !emitted_functions.insert(id) {
