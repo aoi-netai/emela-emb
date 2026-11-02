@@ -1,33 +1,41 @@
-# P5 中断・再開と外部taskの検証報告（実装中）
+# P5中断・再開と外部taskの検証報告
 
-P4の確定branch `72d7729` を基点に、suspend・task・Clockをsourceから利用できる段階へ進める。固定旧forkは `c34c0aeefdd966d854371b3110db00a47798751d`。現在の独自IR検証と、source接続の完了を区別する。
+P5はsuspend・外部task・Clockを独立source frontendからC実行へ接続する。基点はP4の `72d7729`、固定旧forkは `c34c0aeefdd966d854371b3110db00a47798751d`。Scope/Fiber/Deferredと取消はP6、汎化constと残るC境界はP7で判定する。
 
-## 統合した基盤
+## sourceから接続した機能
 
-- 独自IRのsuspend関数・operation、frame変換、即時/遅延resume、同期関数値の中断ABIへの拡大を接続する。
-- 外部taskの引数・型付き成功/失敗、producer/context leaseを扱う。完了通知はqueueへ積み、producerと解放callbackはmainのschedulerで一度だけ実行する。
-- 中断中のclosure・所有String、再帰frame、cleanupの中断と元結果の配送順、stale/重複通知、task/event/frameの容量不足を検査する。
-- error診断から暗黙に呼ばれる表示関数を到達解析に含める。静的constの不要なinitializer呼出しは除外したままにする。
-- Duration/Instantの独立sourceを供給し、Clock宣言を準備する。Clockの登録とSystemClock/TestClockのsource実行を接続済み。
+| 範囲 | 確認した動作 | 主な試験 |
+| --- | --- | --- |
+| 中断判定 | Asyncはevidence不要のruntime要求、通常effectはoperationと集合に従う。同期operationの実際の中断を拒否し、resume保持はhandler構築側へAsyncを要求 | `p5_suspend.rs` |
+| 再開 | 即時・queue経由のone-shot resume、lambda・closure・関数参照、同期/中断/evidence付き関数ABIの適合 | `p5_suspend.rs`、`backend/lower/suspend_tests.rs` |
+| task | 明示adapter、型付き成功/失敗、所有String・capture、producer/context lease、通知後のmain側実行 | `p5_task_failures.rs`、`backend/lower/suspend_tests.rs` |
+| cleanup | 成功/失敗中のsuspendと元結果の保持、再帰frame、失敗payloadの外側escapeへの配送順 | `backend/lower/suspend_tests.rs` |
+| 時刻 | Duration/Instant、SystemClock/TestClock、State[Instant]、nowだけを使うhelper、List.mapのeffect多相callbackからの順次再開 | `p5_time.rs`、`p5_clock.rs` |
+| 診断 | written/derived Show、Showのないerror名、同じgeneric errorのInt/String payloadを具体型ごとに表示 | `p5_error_displays.rs` |
+| CLI | task adapter、fiber/frame/task/event固定容量の明示指定、実CLIから生成したtaskの再開 | CLI `tests/build.rs` |
 
-source revision `ac677e1` の `cargo test -p emela-emb-compiler --lib backend::lower --locked --offline` は60 pass、失敗/ignore 0。C実行は `cc -std=c11 -Wall -Werror -O0` / `-O2` の両方で成功。所有権・再開・cleanupの正常経路は1000回反復し、各回のheap回収を確認した。これは独自IR基盤の検証で、P5全体の完了を示さない。
+外部suspend関数の呼出し・参照はhandler operation内に限定する。未供給のAsync/effectはexportや起動entryへ持ち出せない。同期operationで中断するcalleeを呼ぶ場合も、source位置付きで拒否する。Immediateで具体化した通常wrapperから中断calleeへ橋渡しする経路は固定旧embedded plannerも対応していないため、独自runtime bridgeを新設しない。
 
-String appendでは出力と入力が重なる場合も両入力を固定容量snapshotへ退避する。固定旧runtimeにあったalias破壊を修正し、Duration/Instantの負年・拡張年表記にも適用する。最大容量512 byteの一時領域を使い、VLA・heapを追加しない。出自と境界検証は [migration-source.md](../migration-source.md) に記録する。
+producerと解放callbackは完了通知の場で実行せず、mainのschedulerから一度だけ呼ぶ。型付きString完了は借用inputの変更後も元の内容と埋込みNULを保ち、failureはsourceで構築したerrorからescapeへ到達する。success/failureを交互に1000回実行し、callbackがISR/lockの外で動くことと全heap回収を確認する。
 
-CLIはtask adapterとfiber/frame/task/eventの固定容量を明示指定できる。Emela本体やboard packageへの依存は追加しない。実CLIからの生成とtask再開もC両最適化で1000回確認した。
+## 独自IR・容量・所有権の境界
 
-## source接続と統合検証
+`backend/lower/suspend_tests.rs` はsourceでは構成しにくいframe・task・event不足、stale/重複通知、二重resume、lock復元を検査する。同期/中断関数値から中断evidence ABIへの拡大、外部task/内部frameへのFnRef、String producerの11byte保存先・同時保持・NULL出力・小容量defectを検証する。suspendを使わないImmediate handlerではschedulerを省略する。
 
-`cc9387f` はPrelude.Asyncをruntime要求として扱い、普通のeffect evidenceと区別してFunction/Call/FnRef/Lambda/Applyの中断可能性を確定する。外部suspend関数の呼出し・参照はhandler operation内に限定する。custom effectからhost taskへ待機するlambdaと、直ちにresumeする同期exportをsource/Cで確認した。
+String appendは入力と出力が重なる場合に両入力を固定容量snapshotへ退避する。最大512byteのscratchを用い、malloc・VLAを追加しない。`p5_string_alias.rs` は重複view、prepend/self-concat、0/1/512/513の容量境界、小caller bufferと10万回末尾再帰のstack非増加を確認する。Duration/Instantの負年・拡張年表記もこの修正を通る。出自は [migration-source.md](../migration-source.md) に記録する。
 
-`8247709` / `14923fe` はSystemClock・TestClockを明示task adapterへ接続する。State[Instant]の共有更新、負の待機時間のclamp、nowだけを呼ぶhelperの中断可能性、List.mapのeffect多相callbackによる順次再開を1000回・C両最適化・heap全回収で確認する。
+error表示関数は具体化後に登録し、runtimeからの暗黙呼出しを到達解析へ含める。静的constの不要なinitializer呼出しは除外する。CのString buffer・所有値の成功経路は両最適化で原則1000回反復する。
 
-`5c6c578` は固定旧の関数値ABI試験3件を追加する。同期/中断関数値から中断evidence ABIへの変換、外部task/内部frameへのFnRef、String producerの11byte保存先・同時保持・NULL出力・小容量defectを直接検証する。
+## 最終検証
 
-source revision `1a1210a` で全workspace358試験が成功（失敗/ignore 0、全Cは両最適化）。strict Clippy全target・実Rust1.85全target check・fmt/diff checkも成功し、警告0。ローカルログは `.local/experiment/p5-integrated-{tests,clippy,msrv}.log`。後続のList.map回帰と関数値ABI3件は個別実行で確認済みで、この358件の件数には含めない。
+source revision: `d7e8538a6f04e4ea4d526b37202e0a04af964c54`。WSL2 `x86_64-unknown-linux-gnu`、Rust 1.99.1、GCC 11.4.0。
 
-## 残る完了条件
+- 独立snapshotの `cargo test --workspace --locked --offline`: **365 pass、失敗/ignore 0**。全Cは `cc -std=c11 -Wall -Werror -O0` / `-O2` とも成功。
+- source境界の最終集中確認: Clock 3、suspend 6、task failure 1、error display 1の計11試験が成功。
+- `cargo fmt --all --check`、`git diff --check`、strict Clippy全target: 終了0、警告0。
+- 実Rust 1.85.0の `cargo check --workspace --all-targets --locked --offline`: 終了0、警告0。
+- Linux Landlockで元workspaceの読取りを拒否し、clean CARGO_HOME・lock済み第三者crateの一時vendorだけで全build・全試験・CLI生成・C両最適化実行が成功。
 
-同期operation実装での中断制約、resume保持時のAsync要求、sourceからの型付きtask失敗と所有String、失敗表示関数の登録を補う。最後の点は、独自IRではerror_showsを明示供給できる一方、source経路からruntime診断へ渡す登録が不足している。
+独立snapshotは `/tmp/emela-emb-standalone-3g3pv6qo/repo`。ローカルログは `.local/experiment/p5-final-{source,clippy,msrv,standalone}.log`。workspaceはcompilerとCLIの2crateを維持し、Emela本体・Pome・旧checkoutへのbuild/test依存、新規第三者crateは追加していない。
 
-最終sourceで全体検証と元workspaceを読めない独立環境を確認し、対応表とこの報告を更新する。P6のScope/Fiber/Deferredと取消の完了は別に判定する。
+中間版 `1a1210a` の358 passと、最終版の上記件数を区別する。対応台帳はP5で確認した項目だけを更新し、Scopeの集合・取消cleanup・旧corpus全照合の未完了項目はP6/P7へ残す。
