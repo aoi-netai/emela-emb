@@ -179,6 +179,15 @@ fn scope_program() -> Program {
 
 #[test]
 fn scope_handlers_merge_callback_failure_abis_and_box_typed_child_results() {
+    let lowered = lower_program(scope_program()).unwrap();
+    assert!(
+        lowered
+            .emitted_functions
+            .iter()
+            .all(|id| !lowered.lowered.functions[*id].fails)
+    );
+    assert!(lowered.emitted_functions.iter().all(|id| lowered.lowered.functions[*id].vars.iter()
+        .all(|(_, variable)| !matches!(lowered.lowered.core.ty(variable.ty), Type::Fn(ft) if ft.fails))));
     let output = crate::backend::compile_program(
         scope_program(),
         &Options::default()
@@ -187,7 +196,77 @@ fn scope_handlers_merge_callback_failure_abis_and_box_typed_child_results() {
             .with_deferred_capacity(0),
     )
     .unwrap();
+    assert!(!output.c_source.contains("#define EMELA_FAILURE_RUNTIME 1"));
     execute_answer(output);
+}
+
+#[test]
+fn conservative_scope_failures_remain_when_a_c_boundary_can_supply_failing_values() {
+    for boundary in [0, 1, 2] {
+        let mut p = scope_program();
+        let failing = function_type(&mut p, vec![], TypeId::INT, true);
+        let ty = match boundary {
+            0 => TypeId::ANY,
+            1 => failing,
+            _ => p.core.types.intern(Type::Tuple(vec![TypeId::INT, failing])),
+        };
+        let (_, function) = p.functions.iter_mut().next().unwrap();
+        let param = aggregate_variable(function, ty);
+        function.params.push(param);
+        let lowered = lower_program(p).unwrap();
+        assert!(lowered.emitted_functions.iter().any(|id| lowered.lowered.functions[*id].vars.iter()
+            .any(|(_, variable)| matches!(lowered.lowered.core.ty(variable.ty), Type::Fn(ft) if ft.fails))));
+    }
+}
+
+#[test]
+fn ordinary_error_values_in_a_pure_scope_do_not_keep_unused_display_functions() {
+    let mut p = scope_program();
+    let error = p.core.enums.alloc(EnumDef {
+        name: "OrdinaryErrorValue".into(),
+        params: 0,
+        variants: vec![VariantDef {
+            name: "OrdinaryErrorValue".into(),
+            fields: VariantFields::Unit,
+            tys: vec![],
+        }],
+        error: true,
+        external: false,
+    });
+    let error_type = p.core.types.intern(Type::Enum(error, vec![]));
+    let mut show = Function::new("show_ordinary_error");
+    show.ret = TypeId::STRING;
+    let argument = aggregate_variable(&mut show, error_type);
+    show.params.push(argument);
+    show.body = Some(show.seqs.alloc(Seq {
+        stmts: vec![],
+        term: Term::Return(Some(Const::String("ordinary error".into()).into())),
+    }));
+    let show = p.functions.alloc(show);
+    p.error_shows.push((error, show));
+    let (_, function) = p.functions.iter_mut().next().unwrap();
+    let value = aggregate_variable(function, error_type);
+    let make = binding(
+        function,
+        Some(value),
+        Value::Make {
+            ctor: CtorRef {
+                enum_id: error,
+                variant: 0,
+            },
+            args: vec![],
+        },
+    );
+    function.seqs[function.body.unwrap()].stmts.insert(0, make);
+    execute_answer(
+        crate::backend::compile_program(
+            p,
+            &Options::default()
+                .with_heap_bytes(16384)
+                .with_frame_bytes(2048),
+        )
+        .unwrap(),
+    );
 }
 
 #[test]

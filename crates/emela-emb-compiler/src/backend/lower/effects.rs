@@ -1,7 +1,7 @@
 //! Keep labeled evidence keys distinct while sharing one capability ABI and lifetime.
 use super::*;
 
-pub(super) fn normalize(program: &mut Program) -> Result<()> {
+pub(super) fn normalize(program: &mut Program) -> Result<Vec<TypeId>> {
     let mut bases = HashMap::new();
     for (effect, definition) in program.core.effects.iter() {
         let base = crate::semantics::effect_base(&program.core, effect).ok_or_else(|| {
@@ -135,7 +135,7 @@ pub(super) fn normalize(program: &mut Program) -> Result<()> {
         }
     }
     program.core.types = types;
-    Ok(())
+    Ok(mapped)
 }
 
 fn remap_children(node: &mut Type, map: &[TypeId]) -> Result<()> {

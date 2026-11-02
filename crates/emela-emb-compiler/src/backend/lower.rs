@@ -11,6 +11,7 @@ mod const_eval;
 mod effects;
 mod error_types;
 mod failures;
+mod fiber_failures;
 mod fibers;
 mod handler;
 mod scope_abi;
@@ -76,7 +77,8 @@ pub(crate) fn lower_program(
         }
         validate_function(&program, function)?;
     }
-    let (mut program, closures) = closure::lower(&program, options)?;
+    let (mut program, mut closures) = closure::lower(&program, options)?;
+    fiber_failures::erase(&mut program, &mut closures, options)?;
     suspend::normalize_handlers(&mut program);
     fibers::normalize_values(&mut program);
     let deferred_pool = fibers::needs_deferred_pool(&program, &closures, options);
