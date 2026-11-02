@@ -15,6 +15,7 @@ pub(super) struct Rows {
     pub proxies: HashMap<VarId, TypeId>,
     pub effects: HashMap<crate::contract::ir::EffectId, (usize, Vec<TypeId>, bool)>,
     pub tags: Vec<SourceTag>,
+    pub scope_declarations: HashSet<usize>,
     tag_heads: HashMap<(bool, usize, Vec<TypeId>), usize>,
 }
 
@@ -229,6 +230,52 @@ mod tests {
         solver.finish_unused(&mut types).unwrap();
         assert_eq!(solver.resolve(&mut types, first).unwrap(), actual);
         assert_eq!(solver.resolve(&mut types, second).unwrap(), actual);
+    }
+    #[test]
+    fn scope_children_contribute_rows_without_closing_the_provider_to_the_first_child() {
+        let mut core = crate::contract::ir::Definitions::default();
+        let mut solver = Solver::new();
+        let empty = set(&mut core.types, vec![]);
+        let async_id = core.effects.alloc(crate::contract::ir::EffectDef {
+            name: "Async".into(),
+            decl: "Async".into(),
+            args: vec![],
+            ops: vec![],
+            label_of: None,
+        });
+        let async_ty = core.types.intern(Type::Handler(async_id));
+        let async_row = set(&mut core.types, vec![async_ty]);
+        let wanted = solver
+            .fresh_row(&mut core.types, SetKind::Effect, Origin::Inferred)
+            .unwrap();
+        let mut scopes = Vec::new();
+        for effects in [empty, async_row, wanted] {
+            let id = core.effects.alloc(crate::contract::ir::EffectDef {
+                name: "Scope".into(),
+                decl: "Std.Fiber.Scope".into(),
+                args: vec![empty, effects],
+                ops: vec![],
+                label_of: None,
+            });
+            scopes.push(core.types.intern(Type::Handler(id)));
+        }
+        solver.register_effects(&core);
+        let actual = set(&mut core.types, scopes[..2].to_vec());
+        let expected = set(&mut core.types, vec![scopes[2]]);
+        solver
+            .include_sets(&mut core.types, actual, expected, SetKind::Effect)
+            .unwrap();
+        assert_eq!(
+            solver.resolve_row(&mut core.types, wanted).unwrap(),
+            async_row
+        );
+        let actual = set(&mut core.types, vec![scopes[1]]);
+        let closed = set(&mut core.types, vec![scopes[0]]);
+        assert!(
+            solver
+                .include_sets(&mut core.types, actual, closed, SetKind::Effect)
+                .is_err()
+        );
     }
     #[test]
     fn concrete_generic_errors_stay_distinct_while_unknown_arguments_are_inferred() {

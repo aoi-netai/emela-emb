@@ -201,6 +201,9 @@ impl Solver {
             let nominal = *declarations
                 .entry(effect.decl.clone())
                 .or_insert(id.into_raw().into_u32() as usize);
+            if effect.decl == "Std.Fiber.Scope" {
+                self.rows.scope_declarations.insert(nominal);
+            }
             self.rows.effects.insert(
                 id,
                 (
@@ -246,6 +249,9 @@ impl Solver {
         let expected_tags = self.rows.row(types, expected, kind, &self.metas)?.tags;
         for actual_tag in actual_tags {
             let nominal = self.rows.tags[actual_tag.head].nominal;
+            if kind == SetKind::Effect && self.rows.scope_declarations.contains(&nominal) {
+                continue;
+            }
             for expected_tag in &expected_tags {
                 if nominal != self.rows.tags[expected_tag.head].nominal
                     || actual_tag.args.len() != expected_tag.args.len()
@@ -279,8 +285,45 @@ impl Solver {
         }
         let actual = self.resolve(types, actual)?;
         let expected = self.resolve(types, expected)?;
-        let actual = self.rows.row(types, actual, kind, &self.metas)?;
+        let mut actual = self.rows.row(types, actual, kind, &self.metas)?;
         let expected = self.rows.row(types, expected, kind, &self.metas)?;
+        if kind == SetKind::Effect {
+            for tag in &mut actual.tags {
+                let nominal = self.rows.tags[tag.head].nominal;
+                if !self.rows.scope_declarations.contains(&nominal) || tag.args.len() != 2 {
+                    continue;
+                }
+                for wanted in &expected.tags {
+                    if self.rows.tags[wanted.head].nominal != nominal || wanted.args.len() != 2 {
+                        continue;
+                    }
+                    let mut trial = self.clone();
+                    let mut trial_types = types.clone();
+                    if trial
+                        .include_sets_inner(
+                            &mut trial_types,
+                            tag.args[0],
+                            wanted.args[0],
+                            SetKind::Error,
+                        )
+                        .is_ok()
+                        && trial
+                            .include_sets_inner(
+                                &mut trial_types,
+                                tag.args[1],
+                                wanted.args[1],
+                                SetKind::Effect,
+                            )
+                            .is_ok()
+                    {
+                        *self = trial;
+                        *types = trial_types;
+                        *tag = wanted.clone();
+                        break;
+                    }
+                }
+            }
+        }
         self.rows
             .solver
             .includes(actual, expected)

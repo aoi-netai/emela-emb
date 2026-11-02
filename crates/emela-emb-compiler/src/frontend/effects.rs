@@ -391,14 +391,18 @@ impl Context<'_> {
                 )
                 .map_err(|error| self.error(span, error.message));
         }
-        if needed.iter().any(|&actual| {
-            !allowed
-                .iter()
-                .any(|&expected| self.same_effect(actual, expected))
-        }) {
-            return Err(self.error(span, "function requires an undeclared effect; add a use annotation or provide its handler"));
-        }
-        Ok(())
+        let actual = self.catalog.core.types.intern(Type::Set(SetSummary {
+            params: sorted(needed.clone()),
+            ..Default::default()
+        }));
+        let expected = self.catalog.core.types.intern(Type::Set(SetSummary {
+            params: sorted(allowed),
+            ..Default::default()
+        }));
+        let mut solver = super::infer::Solver::new();
+        solver.register_effects(&self.catalog.core);
+        solver.include_sets(&mut self.catalog.core.types, actual, expected, super::sets::SetKind::Effect)
+            .map_err(|error| self.error(span, format!("function requires an undeclared effect; add a use annotation or provide its handler: {}", error.message)))
     }
     fn callback(&mut self, expression: &ir::Expr) -> Result<Requirements, Diagnostic> {
         let ty = self.resolve(backend_type(expression.ty), expression.span)?;
