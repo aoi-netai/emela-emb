@@ -1,0 +1,43 @@
+error Missing(text: String)
+error Other(code: Int)
+@external(c, "board_smash")
+fn smash() -> Unit
+fn maybe(n: Int) -> Int fails Missing {
+  if n < 0 { fail Missing(text: Int.to_string(n)) } else { n + 1 }
+}
+fn propagate(n: Int) -> Int fails Missing { maybe(n) * 2 }
+fn failing_text(n: Int) -> String fails Missing { fail Missing(text: Int.to_string(n)) }
+fn propagate_text(n: Int) -> String fails Missing { failing_text(n) }
+fn raise_input(text: String) -> String fails Missing { fail Missing(text:) }
+fn guarded(n: Int) -> Int fails Missing {
+  maybe(n) escape { Missing(text) if String.byte_size(text) > 2 -> 100 }
+}
+@export(c, "caught_value")
+pub fn caught_value(n: Int) -> Int {
+  propagate(n) escape { Missing(text) -> String.byte_size(text) }
+}
+@export(c, "caught_text_matches")
+pub fn caught_text_matches(n: Int) -> Bool {
+  caught = propagate_text(n) escape { Missing(text) -> {
+    smash()
+    text
+  } }
+  caught == Int.to_string(n)
+}
+@export(c, "original_error_input_matches")
+pub fn original_error_input_matches(text: String) -> Bool {
+  caught = raise_input(text) escape { Missing(contents) -> {
+    smash()
+    contents
+  } }
+  caught == text
+}
+@export(c, "nested_catch")
+pub fn nested_catch(n: Int) -> Int {
+  { maybe(n) escape { Missing(text) -> fail Other(code: String.byte_size(text)) } }
+    escape { Other(code) -> code + 10 }
+}
+@export(c, "guarded_catch")
+pub fn guarded_catch(n: Int) -> Int {
+  guarded(n) escape { Missing(text) -> String.byte_size(text) }
+}

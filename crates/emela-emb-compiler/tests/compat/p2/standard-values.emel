@@ -1,0 +1,47 @@
+error Empty(code: Int)
+@external(c, "board_mark")
+fn mark(n: Int) -> Int
+@export(c, "option_default")
+pub fn option_default(n: Int) -> Int {
+  value: Option[Int] = if n < 0 { None } else { Some(n) }
+  assert Option.is_some(value) == (n >= 0)
+  assert Option.is_none(value) == (n < 0)
+  Option.or(value, 7)
+}
+@export(c, "option_failure")
+pub fn option_failure(n: Int) -> Int {
+  value: Option[Int] = if n < 0 { None } else { Some(n) }
+  Option.or_fail(value, Empty(code: mark(7))) escape { Empty(code) -> code }
+}
+@export(c, "option_traits")
+pub fn option_traits(n: Int, text: String) -> Int {
+  none: Option[Int] = None
+  assert Some(n) == Some(n)
+  assert Some(n) != Some(n + 1)
+  assert none < Some(n)
+  assert Ord.compare(none, Some(n)) == Less
+  assert inspect(Some(text)) == String.append(String.append("Some(", inspect(text)), ")")
+  assert inspect(none) == "None"
+  n
+}
+@export(c, "checked_add_default")
+pub fn checked_add_default(a: Int, b: Int, fallback: Int) -> Int {
+  Option.or(Int.checked_add(a, b), fallback)
+}
+@export(c, "float_order")
+pub fn float_order(a: Float, b: Float) -> Int {
+  Float.compare(a, b) match { Less -> -1
+    Equal -> 0
+    Greater -> 1 }
+}
+@export(c, "float_minimum")
+pub fn float_minimum(a: Float, b: Float) -> Float { Float.min(a, b) }
+@export(c, "float_maximum")
+pub fn float_maximum(a: Float, b: Float) -> Float { Float.max(a, b) }
+@export(c, "code_point_matches")
+pub fn code_point_matches(n: Int, expected: String) -> Bool {
+  String.from_code_point(n) match { Some(text) -> text == expected
+    None -> False }
+}
+@export(c, "code_point_none")
+pub fn code_point_none(n: Int) -> Bool { Option.is_none(String.from_code_point(n)) }
