@@ -671,3 +671,280 @@ fn discarded_string_results_keep_capacity_checks() {
         7,
     );
 }
+
+fn aggregate_variable(f: &mut Function, ty: TypeId) -> VarId {
+    f.vars.alloc(VarData {
+        hint: String::new(),
+        ty,
+        repr: Repr::Ref,
+    })
+}
+#[test]
+fn tuple_constructor_projection_and_enum_switch_execute() {
+    let mut p = program(vec![]);
+    let tuple_ty = p
+        .core
+        .types
+        .intern(Type::Tuple(vec![TypeId::INT, TypeId::BOOL]));
+    let enum_id = p.core.enums.alloc(EnumDef {
+        name: "Choice".into(),
+        params: 0,
+        variants: vec![
+            VariantDef {
+                name: "Number".into(),
+                fields: VariantFields::Positional(1),
+                tys: vec![TypeId::INT],
+            },
+            VariantDef {
+                name: "Empty".into(),
+                fields: VariantFields::Unit,
+                tys: vec![],
+            },
+        ],
+        error: false,
+        external: false,
+    });
+    let enum_ty = p.core.types.intern(Type::Enum(enum_id, vec![]));
+    let mut f = simple();
+    let pair = aggregate_variable(&mut f, tuple_ty);
+    let number = variable(&mut f, TypeId::INT);
+    let choice = aggregate_variable(&mut f, enum_ty);
+    let payload = variable(&mut f, TypeId::INT);
+    let result = variable(&mut f, TypeId::INT);
+    let tuple = binding(
+        &mut f,
+        Some(pair),
+        Value::Tuple(vec![Const::Int(42).into(), Const::Bool(true).into()]),
+    );
+    let project = binding(
+        &mut f,
+        Some(number),
+        Value::TupleGet {
+            base: pair,
+            index: 0,
+        },
+    );
+    let make = binding(
+        &mut f,
+        Some(choice),
+        Value::Make {
+            ctor: CtorRef {
+                enum_id,
+                variant: 0,
+            },
+            args: vec![number.into()],
+        },
+    );
+    let field = binding(
+        &mut f,
+        Some(payload),
+        Value::Field {
+            base: choice,
+            ctor: CtorRef {
+                enum_id,
+                variant: 0,
+            },
+            index: 0,
+        },
+    );
+    let number_case = f.seqs.alloc(Seq {
+        stmts: vec![field],
+        term: Term::Yield(Some(payload.into())),
+    });
+    let empty_case = f.seqs.alloc(Seq {
+        stmts: vec![],
+        term: Term::Yield(Some(Const::Int(0).into())),
+    });
+    let switch = f.stmts.alloc(Stmt::Switch {
+        dst: Some(result),
+        on: SwitchOn::Tag(choice),
+        cases: vec![
+            Case {
+                key: CaseKey::Variant(0),
+                body: number_case,
+            },
+            Case {
+                key: CaseKey::Variant(1),
+                body: empty_case,
+            },
+        ],
+        default: None,
+    });
+    f.seqs[f.body.unwrap()] = Seq {
+        stmts: vec![tuple, project, make, switch],
+        term: Term::Return(Some(result.into())),
+    };
+    p.functions.alloc(f);
+    let output = crate::backend::compile_program(p, &Options::default()).unwrap();
+    execute(&output, DEFECT_HARNESS, 0);
+}
+
+#[test]
+fn failure_payload_recovery_runs_cleanup_once() {
+    let mut p = program(vec![]);
+    let error_id = p.core.enums.alloc(EnumDef {
+        name: "Failure".into(),
+        params: 0,
+        variants: vec![VariantDef {
+            name: "Failure".into(),
+            fields: VariantFields::Positional(1),
+            tys: vec![TypeId::INT],
+        }],
+        error: true,
+        external: false,
+    });
+    let error_ty = p.core.types.intern(Type::Enum(error_id, vec![]));
+    let mut tick = Function::new("tick");
+    tick.external = Some(External {
+        bindings: vec![ExternalBinding {
+            target: "c".into(),
+            host: HostRef::Global("tick".into()),
+        }],
+    });
+    let tick_id = p.functions.alloc(tick);
+    let mut fail = Function::new("fail");
+    fail.fails = true;
+    fail.ret = TypeId::INT;
+    let error_value = aggregate_variable(&mut fail, error_ty);
+    let error_make = binding(
+        &mut fail,
+        Some(error_value),
+        Value::Make {
+            ctor: CtorRef {
+                enum_id: error_id,
+                variant: 0,
+            },
+            args: vec![Const::Int(42).into()],
+        },
+    );
+    let body = fail.seqs.alloc(Seq {
+        stmts: vec![error_make],
+        term: Term::Fail(error_value.into()),
+    });
+    let cleanup_call = binding(
+        &mut fail,
+        None,
+        Value::Call {
+            callee: Callee::Direct(tick_id),
+            args: vec![],
+            suspends: false,
+            on_fail: None,
+        },
+    );
+    let cleanup = fail.seqs.alloc(Seq {
+        stmts: vec![cleanup_call],
+        term: Term::Yield(None),
+    });
+    let protect = fail.stmts.alloc(Stmt::Protect {
+        dst: None,
+        body,
+        cleanup,
+    });
+    fail.body = Some(fail.seqs.alloc(Seq {
+        stmts: vec![protect],
+        term: Term::Unreachable,
+    }));
+    let fail_id = p.functions.alloc(fail);
+    let mut answer = simple();
+    let caught = aggregate_variable(&mut answer, TypeId::ANY);
+    let unpacked = aggregate_variable(&mut answer, error_ty);
+    let code = variable(&mut answer, TypeId::INT);
+    let result = variable(&mut answer, TypeId::INT);
+    let unpack = binding(
+        &mut answer,
+        Some(unpacked),
+        Value::AsError {
+            error: caught,
+            enum_id: error_id,
+        },
+    );
+    let field = binding(
+        &mut answer,
+        Some(code),
+        Value::Field {
+            base: unpacked,
+            ctor: CtorRef {
+                enum_id: error_id,
+                variant: 0,
+            },
+            index: 0,
+        },
+    );
+    let handler = answer.seqs.alloc(Seq {
+        stmts: vec![unpack, field],
+        term: Term::Yield(Some(code.into())),
+    });
+    let call = binding(
+        &mut answer,
+        Some(result),
+        Value::Call {
+            callee: Callee::Direct(fail_id),
+            args: vec![],
+            suspends: false,
+            on_fail: Some(OnFail::Handle {
+                error: caught,
+                body: handler,
+            }),
+        },
+    );
+    answer.seqs[answer.body.unwrap()] = Seq {
+        stmts: vec![call],
+        term: Term::Return(Some(result.into())),
+    };
+    p.functions.alloc(answer);
+    let output = crate::backend::compile_program(p, &Options::default()).unwrap();
+    execute(
+        &output,
+        "#include <stdlib.h>\n#include \"emela_embedded.h\"\n#include \"emela_board.h\"\nstatic int ticks;\nvoid tick(void) { ++ticks; }\n_Noreturn void emela_board_defect(EmelaDefectKind k,const char*m,uint16_t n) { (void)k;(void)m;(void)n;exit(9); }\nint main(void) { int value=answer(); return value==42 && ticks==1 ? 0 : 1; }\n",
+        0,
+    );
+}
+
+#[test]
+fn rejects_malformed_generic_fields_and_unhandled_failure_channels() {
+    let mut p = program(vec![simple()]);
+    let param = p.core.types.intern(Type::Param(3));
+    let tuple = p.core.types.intern(Type::Tuple(vec![param]));
+    p.core.enums.alloc(EnumDef {
+        name: "Invalid".into(),
+        params: 1,
+        variants: vec![VariantDef {
+            name: "Invalid".into(),
+            fields: VariantFields::Positional(1),
+            tys: vec![tuple],
+        }],
+        error: false,
+        external: false,
+    });
+    assert!(
+        lower_program(p).unwrap_err()[0]
+            .message
+            .contains("undeclared type parameter")
+    );
+    let mut p = program(vec![]);
+    let mut fail = Function::new("fails");
+    fail.fails = true;
+    fail.body = Some(fail.seqs.alloc(Seq {
+        stmts: vec![],
+        term: Term::Return(None),
+    }));
+    let fail_id = p.functions.alloc(fail);
+    let mut f = simple();
+    let call = binding(
+        &mut f,
+        None,
+        Value::Call {
+            callee: Callee::Direct(fail_id),
+            args: vec![],
+            suspends: false,
+            on_fail: None,
+        },
+    );
+    f.seqs[f.body.unwrap()].stmts.push(call);
+    p.functions.alloc(f);
+    assert!(
+        lower_program(p).unwrap_err()[0]
+            .message
+            .contains("failure edge")
+    );
+}

@@ -6,6 +6,7 @@ use crate::contract::lowered::LoweredModule;
 use crate::{Error, ErrorKind};
 use std::collections::{HashMap, HashSet};
 
+mod failures;
 mod types;
 mod values;
 use values::value_type;
@@ -62,6 +63,7 @@ pub(crate) fn lower_program(
         }
         validate_function(&program, function)?;
     }
+    failures::normalize(&mut program);
     // Numeric builtins still execute their checks when their result is unused. Their
     // renderers require a destination, so create an immediately discarded scalar slot.
     let mut discarded_results: HashMap<FnId, HashSet<VarId>> = HashMap::new();
@@ -178,7 +180,7 @@ pub(crate) fn lower_program(
 }
 
 fn validate_function(program: &Program, f: &Function) -> Result<()> {
-    if f.constant || f.fails || f.suspends || f.env.is_some() || f.infallible_cause_fail {
+    if f.constant || f.suspends || f.env.is_some() || f.infallible_cause_fail {
         return Err(unsupported(
             &f.name,
             "const, failure, suspension, closure or derived function",
@@ -292,6 +294,44 @@ fn validate_sequence(
                 ..
             } => {
                 let result = value_type(program, f, value, &available, dst_type)?;
+                if let Value::Call {
+                    on_fail: Some(edge),
+                    ..
+                } = value
+                {
+                    match edge {
+                        OnFail::Propagate if !f.fails => {
+                            return Err(invalid(
+                                &f.name,
+                                "failure propagation has no function failure channel",
+                            ));
+                        }
+                        OnFail::Propagate => {}
+                        OnFail::Break(label) => {
+                            if blocks.get(label) != Some(&TypeId::ANY) {
+                                return Err(invalid(
+                                    &f.name,
+                                    "failure Break requires an active Any block destination",
+                                ));
+                            }
+                        }
+                        OnFail::Handle { error, body } => {
+                            expect_type(f, variable(f, *error)?, TypeId::ANY)?;
+                            let mut handler_available = available.clone();
+                            handler_available.insert(*error);
+                            validate_sequence(
+                                program,
+                                f,
+                                *body,
+                                &handler_available,
+                                visiting,
+                                Some(dst_type.unwrap_or(TypeId::UNIT)),
+                                recur_vars,
+                                blocks,
+                            )?;
+                        }
+                    }
+                }
                 if let Some(ty) = dst_type {
                     expect_type(f, result, ty)?;
                 }
@@ -343,6 +383,79 @@ fn validate_sequence(
                     visiting,
                     Some(dst_type.unwrap_or(TypeId::UNIT)),
                     vars,
+                    blocks,
+                )?;
+            }
+            Stmt::Switch {
+                on, cases, default, ..
+            } => {
+                let base = match on {
+                    SwitchOn::Tag(base) | SwitchOn::Lit(base) => *base,
+                };
+                let ty = operand(f, &Operand::Var(base), &available)?;
+                let mut seen = Vec::new();
+                for case in cases {
+                    if seen.contains(&case.key) {
+                        return Err(invalid(&f.name, "duplicate switch case"));
+                    }
+                    seen.push(case.key.clone());
+                    match (&case.key, on, program.core.ty(ty)) {
+                        (CaseKey::Variant(variant), SwitchOn::Tag(_), Type::Enum(id, _))
+                            if *variant < program.core.enums[*id].variants.len() => {}
+                        (CaseKey::Lit(Const::Int(_)), SwitchOn::Lit(_), Type::Int)
+                        | (CaseKey::Lit(Const::Int64(_)), SwitchOn::Lit(_), Type::Int64) => {}
+                        _ => {
+                            return Err(invalid(
+                                &f.name,
+                                "switch case key differs from its scrutinee type",
+                            ));
+                        }
+                    }
+                    validate_sequence(
+                        program,
+                        f,
+                        case.body,
+                        &available,
+                        visiting,
+                        Some(dst_type.unwrap_or(TypeId::UNIT)),
+                        recur_vars,
+                        blocks,
+                    )?;
+                }
+                if let Some(body) = default {
+                    validate_sequence(
+                        program,
+                        f,
+                        *body,
+                        &available,
+                        visiting,
+                        Some(dst_type.unwrap_or(TypeId::UNIT)),
+                        recur_vars,
+                        blocks,
+                    )?;
+                } else if matches!(on, SwitchOn::Lit(_)) {
+                    return Err(invalid(&f.name, "literal switch has no default sequence"));
+                }
+            }
+            Stmt::Protect { body, cleanup, .. } => {
+                validate_sequence(
+                    program,
+                    f,
+                    *body,
+                    &available,
+                    visiting,
+                    Some(dst_type.unwrap_or(TypeId::UNIT)),
+                    recur_vars,
+                    blocks,
+                )?;
+                validate_sequence(
+                    program,
+                    f,
+                    *cleanup,
+                    &available,
+                    visiting,
+                    Some(TypeId::UNIT),
+                    recur_vars,
                     blocks,
                 )?;
             }
@@ -422,6 +535,17 @@ fn validate_sequence(
                 .unwrap_or(TypeId::UNIT);
             expect_type(f, actual, expected)?;
         }
+        Term::Fail(error) => {
+            if !f.fails {
+                return Err(invalid(&f.name, "Fail has no function failure channel"));
+            }
+            let ty = operand(f, error, &available)?;
+            if ty != TypeId::ANY
+                && !matches!(program.core.ty(ty),Type::Enum(id,_) if program.core.enums[*id].error)
+            {
+                return Err(invalid(&f.name, "Fail value is not an error enum or Any"));
+            }
+        }
         Term::Defect(message) => {
             expect_type(f, operand(f, message, &available)?, TypeId::STRING)?;
         }
@@ -446,6 +570,21 @@ fn has_function_recur(f: &Function) -> bool {
                 }
                 Stmt::Block { body, .. } => pending.push((*body, in_loop)),
                 Stmt::Loop { body, .. } => pending.push((*body, true)),
+                Stmt::Switch { cases, default, .. } => {
+                    pending.extend(cases.iter().map(|case| (case.body, in_loop)));
+                    pending.extend(default.iter().map(|&body| (body, in_loop)));
+                }
+                Stmt::Protect { body, cleanup, .. } => {
+                    pending.extend([(*body, in_loop), (*cleanup, in_loop)])
+                }
+                Stmt::Let {
+                    value:
+                        Value::Call {
+                            on_fail: Some(OnFail::Handle { body, .. }),
+                            ..
+                        },
+                    ..
+                } => pending.push((*body, in_loop)),
                 _ => {}
             }
         }
@@ -476,6 +615,26 @@ fn positions(f: &Function) -> (HashMap<StmtId, usize>, HashMap<SeqId, usize>) {
                 Stmt::Loop { body, .. } | Stmt::Block { body, .. } => {
                     visit(f, *body, next, stmts, seqs)
                 }
+                Stmt::Switch { cases, default, .. } => {
+                    for case in cases {
+                        visit(f, case.body, next, stmts, seqs);
+                    }
+                    if let Some(body) = default {
+                        visit(f, *body, next, stmts, seqs);
+                    }
+                }
+                Stmt::Protect { body, cleanup, .. } => {
+                    visit(f, *body, next, stmts, seqs);
+                    visit(f, *cleanup, next, stmts, seqs);
+                }
+                Stmt::Let {
+                    value:
+                        Value::Call {
+                            on_fail: Some(OnFail::Handle { body, .. }),
+                            ..
+                        },
+                    ..
+                } => visit(f, *body, next, stmts, seqs),
                 _ => {}
             }
         }

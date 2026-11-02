@@ -20,7 +20,7 @@ pub(super) fn validate_catalog(program: &Program) -> Result<()> {
             "canonical builtin type IDs have been changed",
         ));
     }
-    for (id, definition) in program.core.enums.iter() {
+    for (_, definition) in program.core.enums.iter() {
         for variant in &definition.variants {
             if variant.fields.len() != variant.tys.len() {
                 return Err(invalid(
@@ -29,22 +29,15 @@ pub(super) fn validate_catalog(program: &Program) -> Result<()> {
                 ));
             }
             for &ty in &variant.tys {
-                if ty.index() >= program.core.types.len() {
-                    return Err(invalid(
-                        &definition.name,
-                        "enum field type ID is out of bounds",
-                    ));
-                }
-                if matches!(program.core.ty(ty), Type::Param(index) if *index >= definition.params)
-                {
-                    return Err(invalid(
-                        &definition.name,
-                        "enum field references an undeclared type parameter",
-                    ));
-                }
+                validate_declared_type(
+                    program,
+                    &definition.name,
+                    ty,
+                    definition.params,
+                    &mut HashSet::new(),
+                )?;
             }
         }
-        let _ = id;
     }
     for &(enum_id, show) in &program.error_shows {
         if !program
@@ -59,6 +52,53 @@ pub(super) fn validate_catalog(program: &Program) -> Result<()> {
                 "error display metadata references an invalid definition",
             ));
         }
+    }
+    Ok(())
+}
+
+fn validate_declared_type(
+    program: &Program,
+    name: &str,
+    ty: TypeId,
+    parameters: usize,
+    seen: &mut HashSet<TypeId>,
+) -> Result<()> {
+    if ty.index() >= program.core.types.len() {
+        return Err(invalid(name, "enum field type ID is out of bounds"));
+    }
+    if !seen.insert(ty) {
+        return Ok(());
+    }
+    let children = match program.core.ty(ty) {
+        Type::Param(index) if *index >= parameters => {
+            return Err(invalid(
+                name,
+                "enum field references an undeclared type parameter",
+            ));
+        }
+        Type::Tuple(fields) => fields.clone(),
+        Type::Enum(id, args) => {
+            let definition = program
+                .core
+                .enums
+                .iter()
+                .find_map(|(key, value)| (key == *id).then_some(value))
+                .ok_or_else(|| invalid(name, "enum field references an invalid enum ID"))?;
+            if definition.params != args.len() {
+                return Err(invalid(
+                    name,
+                    "enum field type argument count differs from its declaration",
+                ));
+            }
+            args.clone()
+        }
+        Type::List(element) | Type::Cell(element) => vec![*element],
+        Type::Fn(ft) => ft.params.iter().copied().chain([ft.ret]).collect(),
+        Type::Set(summary) => summary.params.clone(),
+        _ => vec![],
+    };
+    for child in children {
+        validate_declared_type(program, name, child, parameters, seen)?;
     }
     Ok(())
 }
