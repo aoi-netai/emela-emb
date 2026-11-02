@@ -340,3 +340,14 @@
 `@intrinsic pub opaque type Bytes`は信頼済みStd.Bytes宣言IDからだけ`TypeId::BYTES`へ解決する。利用者の同名型、未importのStd型、不正なintrinsic型宣言はその表現を選ばない。List/Bytesのmethod sugarはreceiver型のmoduleへ接続する。
 
 `tests/p3_memory_api.rs`はsourceからString/List/Bytesの実行、UTF-8不正・範囲外byte・hexの失敗、custom型同名の分離と公開範囲を確認する。容量・所有権の大きな境界試験は別のsource/IR回帰として扱い、これら小さなAPI実行だけでP3全体を完了扱いしない。
+
+## P3 Map/Set標準sourceの出自
+
+固定旧fork `c34c0aeefdd966d854371b3110db00a47798751d` のweight-balanced tree実装と公開データAPIをcompiler所有sourceへ採用する。Apache-2.0、repository rootのLICENSEに従う。本体bundleの読込みやcrate依存は追加しない。
+
+| 固定旧source | SHA-256 | 新source |
+| --- | --- | --- |
+| `crates/emela-core/lib/std/map.emel` | `b7e46cfd4441c7df762276f1e2c99ed36b3485aad7b58c3c18623a3e3d7ffb7d` | `crates/emela-emb-compiler/lib/std/map.emel` |
+| `crates/emela-core/lib/std/set.emel` | `535f00a6ad55adf2f5d619b6b116aa3d15e56b8102eba66d15c3d5093dc2298d` | `crates/emela-emb-compiler/lib/std/set.emel` |
+
+Map.from_list/keys/valuesとSet.from_listの内部callbackを、評価順と結果の順序を保つ直接再帰helperへ置き換える。公開update/fold/map_values/filterはcallback対応のP4で供給する。回転・削除・unionの木構造アルゴリズム、Eq/Showの順序、opaque境界は保持する。
