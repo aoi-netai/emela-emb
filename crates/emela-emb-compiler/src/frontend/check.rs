@@ -2097,18 +2097,13 @@ impl Checker {
                 .iter()
                 .position(|&position| position == index)
                 .unwrap();
-            let substitutions: Vec<_> = bindings
-                .iter()
-                .enumerate()
-                .map(|(i, ty)| ty.unwrap_or_else(|| self.catalog.core.types.intern(Type::Param(i))))
-                .collect();
+            let substitutions = self.constructor_arguments(module, &mut bindings, span)?;
             let field_type = self
                 .catalog
                 .core
                 .types
                 .subst(raw_types[parameter], &substitutions);
-            let hint = (!self.catalog.core.types.has_param(field_type))
-                .then_some(data::frontend_type(field_type));
+            let hint = Some(data::frontend_type(field_type));
             let value = self.expr(module, &argument.value, locals, hint)?;
             self.infer_constructor(
                 module,
@@ -2154,6 +2149,27 @@ impl Checker {
             span,
         })
     }
+    fn constructor_arguments(
+        &mut self,
+        module: usize,
+        bindings: &mut [Option<crate::contract::ir::TypeId>],
+        span: Span,
+    ) -> Result<Vec<crate::contract::ir::TypeId>, Diagnostic> {
+        bindings
+            .iter_mut()
+            .map(|binding| {
+                if let Some(ty) = *binding {
+                    return Ok(ty);
+                }
+                let ty = self
+                    .solver
+                    .try_fresh(&mut self.catalog.core.types, super::infer::Constraint::Any)
+                    .map_err(|e| self.error(module, DK::Type, span, e.message))?;
+                *binding = Some(ty);
+                Ok(ty)
+            })
+            .collect()
+    }
     fn infer_constructor(
         &mut self,
         module: usize,
@@ -2162,51 +2178,14 @@ impl Checker {
         bindings: &mut [Option<crate::contract::ir::TypeId>],
         span: Span,
     ) -> Result<(), Diagnostic> {
-        use crate::contract::ir::{Type, TypeId};
-        if actual == TypeId::NEVER {
-            return Ok(());
-        }
-        match (
-            self.catalog.core.ty(template).clone(),
-            self.catalog.core.ty(actual).clone(),
-        ) {
-            (Type::Param(parameter), _) => {
-                if let Some(previous) = bindings[parameter] {
-                    self.expect_type(
-                        module,
-                        data::frontend_type(actual),
-                        data::frontend_type(previous),
-                        span,
-                    )?;
-                } else {
-                    bindings[parameter] = Some(actual);
-                }
-                Ok(())
-            }
-            (Type::Tuple(left), Type::Tuple(right)) if left.len() == right.len() => {
-                for (&left, right) in left.iter().zip(right) {
-                    self.infer_constructor(module, left, right, bindings, span)?;
-                }
-                Ok(())
-            }
-            (Type::Enum(left, a), Type::Enum(right, b)) if left == right && a.len() == b.len() => {
-                for (&left, right) in a.iter().zip(b) {
-                    self.infer_constructor(module, left, right, bindings, span)?;
-                }
-                Ok(())
-            }
-            _ if template == actual => Ok(()),
-            _ => Err(self.error(
-                module,
-                DK::Type,
-                span,
-                format!(
-                    "constructor field has type {}, expected {}",
-                    data::frontend_type(actual),
-                    data::frontend_type(template)
-                ),
-            )),
-        }
+        let arguments = self.constructor_arguments(module, bindings, span)?;
+        let expected = self.catalog.core.types.subst(template, &arguments);
+        self.expect_type(
+            module,
+            data::frontend_type(actual),
+            data::frontend_type(expected),
+            span,
+        )
     }
 
     fn resolve(&self, module: usize, path: &[ast::Text]) -> Result<Symbol, Diagnostic> {

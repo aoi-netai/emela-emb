@@ -139,3 +139,46 @@ pub fn inference() -> Int {
     .unwrap();
     support::compile_and_run(&output, BOARD);
 }
+
+#[test]
+fn constructor_fields_infer_nested_generic_results_from_their_declared_type() {
+    let source = r#"
+enum Assoc[K,V] { Empty
+  Entry(K,V) }
+type Bag[A](inner: Assoc[A, ()])
+fn empty[K,V]() -> Assoc[K,V] { Empty }
+fn bag[A]() -> Bag[A] { Bag(inner: empty()) }
+type Envelope[A](value: Option[A], spare: Option[Int])
+fn missing() { None }
+fn envelope[A]() -> Envelope[A] { Envelope(value: missing(), spare: missing()) }
+type Wide(value: Int64)
+@export(c,"nested_inference")
+pub fn nested_inference() -> Int {
+  b: Bag[String] = bag()
+  e: Envelope[Bool] = envelope()
+  assert e.value == None && e.spare == None
+  assert Wide(value: 9223372036854775807).value == Int64.MAX
+  b.inner match { Empty -> 42
+    Entry(_,_) -> 0 }
+}
+"#;
+    let output = emela_emb_compiler::compile(source).unwrap();
+    support::compile_and_run(
+        &output,
+        r#"
+#include <assert.h>
+#include <stdint.h>
+#include <stdlib.h>
+#include "emela_embedded.h"
+#include "emela_board.h"
+_Noreturn void emela_board_defect(EmelaDefectKind k,const char*m,uint16_t n){(void)k;(void)m;(void)n;abort();}
+int main(void){assert(nested_inference()==42);return 0;}
+"#,
+    );
+    assert!(
+        emela_emb_compiler::compile(
+            "type Wrapper[A](value:A)\nfn wrong[A]() -> Wrapper[A] { Wrapper(value:1) }"
+        )
+        .is_err()
+    );
+}
