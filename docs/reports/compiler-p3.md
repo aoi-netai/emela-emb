@@ -46,7 +46,9 @@ Unicodeのclusterを返す関数は生成headerに従って所有者を持ち得
 
 ## 独自IRと再帰表現
 
-`src/backend/lower/memory_tests.rs` の8件は、List/Bytes/Anyの型検証、固定heapの10000回再利用、戻り値・tuple/List要素内の参照、深さ20000の解放、未使用Listの容量defectをCで確認する。Anyへのbox/unbox自体はIR限定の検証として記録する。
+`src/backend/lower/memory_tests.rs` の9件は、List/Bytes/Anyの型検証、固定heapの10000回再利用、戻り値・tuple/List要素内の参照、深さ20000の解放、未使用Listの容量defectをCで確認する。Anyへのbox/unbox自体はIR限定の検証として記録する。
+
+`b225f71` は旧 `any_boxes_retain_managed_list_payloads_until_the_box_is_released` のList[Int](17)→Any box→List unbox→head(17)を再構成した。固定4KiB heapで10000回実行し、毎回の全block解放も観測した。`cargo test -p emela-emb-compiler --lib any_boxes_retain_managed_lists_and_release_their_payloads --locked --offline` は1 pass、Cの両最適化とも成功。公開sourceのAny構文対応とは数えない。
 
 増大型 `Growing[A]` の未使用payloadを無限に型展開しないよう、型パラメーターの伝播を調べて再帰辺を箱にする。相互再帰・型引数の入替え・定数型へのresetを区別し、公開Cからのaggregate戻り値のtagも確認した。型引数が増えることだけを理由に、正常な未使用payloadを拒否しない。
 
