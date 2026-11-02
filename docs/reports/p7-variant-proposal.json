@@ -1036,7 +1036,7 @@
           "kind": "IR_C_test",
           "path": "crates/emela-emb-compiler/src/backend/lower/p7_data_tests.rs",
           "symbol": "legacy_literal_and_enum_switches_cover_numeric_extremes_and_reject_invalid_tags",
-          "observation": "Dynamic Bool/I32/I64 literals, enum tags, default branches and invalid enum tags are observed through C."
+          "observation": "Dynamic I32/I64 literals, enum tags, default branches and invalid enum tags are observed through C."
         }
       ],
       "review_reason": "Literal and variant keys select exact C branches, defaults and invalid-tag defects.",
@@ -1062,7 +1062,7 @@
           "kind": "IR_C_test",
           "path": "crates/emela-emb-compiler/src/backend/lower/p7_data_tests.rs",
           "symbol": "legacy_literal_and_enum_switches_cover_numeric_extremes_and_reject_invalid_tags",
-          "observation": "Dynamic Bool/I32/I64 literals, enum tags, default branches and invalid enum tags are observed through C."
+          "observation": "Dynamic I32/I64 literals, enum tags, default branches and invalid enum tags are observed through C."
         }
       ],
       "review_reason": "Literal and variant keys select exact C branches, defaults and invalid-tag defects.",
@@ -2185,7 +2185,7 @@
           "kind": "IR_C_test",
           "path": "crates/emela-emb-compiler/src/backend/lower/p7_data_tests.rs",
           "symbol": "legacy_literal_and_enum_switches_cover_numeric_extremes_and_reject_invalid_tags",
-          "observation": "Dynamic Bool/I32/I64 literals, enum tags, default branches and invalid enum tags are observed through C."
+          "observation": "Dynamic I32/I64 literals, enum tags, default branches and invalid enum tags are observed through C."
         }
       ],
       "review_reason": "Literal/tag switches and default/invalid-tag paths execute.",
@@ -2211,7 +2211,7 @@
           "kind": "IR_C_test",
           "path": "crates/emela-emb-compiler/src/backend/lower/p7_data_tests.rs",
           "symbol": "legacy_literal_and_enum_switches_cover_numeric_extremes_and_reject_invalid_tags",
-          "observation": "Dynamic Bool/I32/I64 literals, enum tags, default branches and invalid enum tags are observed through C."
+          "observation": "Dynamic I32/I64 literals, enum tags, default branches and invalid enum tags are observed through C."
         }
       ],
       "review_reason": "Dynamic scalar and enum-tag scrutinees select the expected branches.",
@@ -2237,7 +2237,7 @@
           "kind": "IR_C_test",
           "path": "crates/emela-emb-compiler/src/backend/lower/p7_data_tests.rs",
           "symbol": "legacy_literal_and_enum_switches_cover_numeric_extremes_and_reject_invalid_tags",
-          "observation": "Dynamic Bool/I32/I64 literals, enum tags, default branches and invalid enum tags are observed through C."
+          "observation": "Dynamic I32/I64 literals, enum tags, default branches and invalid enum tags are observed through C."
         }
       ],
       "review_reason": "Dynamic scalar and enum-tag scrutinees select the expected branches.",

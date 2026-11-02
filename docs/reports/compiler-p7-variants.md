@@ -9,3 +9,5 @@
 metadata variantは、schema上にfieldがあるだけで完了とせず、generic dataの具体配置、host symbolの4形式、Handler/Evidence/Cell/Anyの所有・寿命、String/Bytes/List/Tupleの実C値を結び付けた。型やcontextの直積すべてを各variantの代表試験から推定しない。別担当と合わせた226 contextの照合、最終統合HEADでの全体runとMSRV/strict Clippyは別に必要である。
 
 この照合時点のlibrary 240試験と、旧concurrency32・cleanup API24のC入力は成功している。C11の両最適化を必須実行し、後者の元resource budgetも維持した。stage2 IRの参照は `aeb7c53` に固定し、最終統合runで再確認する。
+
+構造contextの追加監査では、SwitchOn::LitとCaseKey::Litのsuspend経路についてsourceのBool/enum matchを代用しない。source側はIfへ下がるため、受理されるI32/I64 literal selectorを実task待機後まで保持する `p7_switch_frame_tests::literal_i32_and_i64_switches_resume_into_cases_and_default` を追加した。min/max/defaultを1000回、heap0・128 byte/frame・fiber/task/event各1で実行し、未完了・重複/stale通知も確認した。C11両最適化で値とcase/defaultの遷移を観測する。Boolのsource条件分岐はIfの証拠へ対応付ける。

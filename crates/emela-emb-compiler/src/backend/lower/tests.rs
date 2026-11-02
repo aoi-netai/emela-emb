@@ -48,6 +48,8 @@ mod p7_recursive_source;
 mod p7_source_seams;
 #[path = "p7_string_frame_tests.rs"]
 mod p7_string_frames;
+#[path = "p7_switch_frame_tests.rs"]
+mod p7_switch_frames;
 #[path = "service_tests.rs"]
 mod services;
 #[path = "source_builtin_tests.rs"]
