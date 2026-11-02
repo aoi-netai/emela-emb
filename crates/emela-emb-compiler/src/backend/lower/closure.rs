@@ -74,13 +74,6 @@ pub(super) fn lower(
                 "Closure destination is not a function value",
             ));
         };
-        if parent_function.constant {
-            return Err(unsupported(
-                &parent_function.name,
-                "closure in a const function",
-            ));
-        }
-
         let static_captures = static_capture_constants(&lowered, &parent_function, &closure);
         let (mut lifted, capture_locals) = lift_body(
             &parent_function,
@@ -612,15 +605,6 @@ fn mapped_id<K: Copy + std::hash::Hash + Eq, V: Copy>(
     map.get(&id)
         .copied()
         .ok_or_else(|| invalid_flow_ir(owner, "closure body references an unmapped backend IR id"))
-}
-
-fn unsupported(function: &str, construct: &str) -> Vec<Error> {
-    vec![Error {
-        kind: ErrorKind::Unsupported,
-        message: format!(
-            "embedded C codegen does not support {construct} in function `{function}` yet"
-        ),
-    }]
 }
 
 fn invalid_flow_ir(function: &str, message: &str) -> Vec<Error> {

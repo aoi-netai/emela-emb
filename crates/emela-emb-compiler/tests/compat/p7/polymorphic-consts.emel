@@ -1,0 +1,44 @@
+
+@external(c, "tick")
+fn tick() -> Int use {}
+@external(c, "mark")
+fn mark(n: Int) -> () use {}
+const EMPTY = { dbg("EMPTY")
+ []
+}
+const MISSING = { dbg("MISSING")
+ None
+}
+const IDENTITY = { dbg("IDENTITY")
+ (fn(value) { value }, ())
+}
+const APPLY = { dbg("APPLY")
+ (fn(callback) { callback() }, ())
+}
+const CHOICE = { dbg("CHOICE")
+ if tick() == 1 { (fn(value) { mark(1)
+ value }, ()) } else { (fn(value) { mark(2)
+ value }, ()) }
+}
+const CAPTURE = { dbg("CAPTURE")
+ text = Int.to_string(tick())
+ (fn(value) { fn() { (value, text) } }, ())
+}
+fn ints(xs: List[Int], o: Option[Int]) -> Int { List.length(xs) + (o match {Some(n)->n
+ None->0}) }
+fn texts(xs: List[String], o: Option[String]) -> Int { List.length(xs) + (o match {Some(s)->String.byte_size(s)
+ None->0}) }
+@export(c,"integer")
+pub fn integer() -> Int { (capture,_) = CAPTURE
+ (identity,_) = IDENTITY
+ (apply,_) = APPLY
+ (choice,_) = CHOICE
+ (value,text)=capture(identity(20))()
+ ints(EMPTY,MISSING) + value + apply(fn(){21}) + choice(1) + String.byte_size(text) - 1 }
+@export(c,"text")
+pub fn text() -> Int { (capture,_) = CAPTURE
+ (identity,_) = IDENTITY
+ (apply,_) = APPLY
+ (choice,_) = CHOICE
+ (value,text)=capture(identity("42"))()
+ texts(EMPTY,MISSING) + String.byte_size(value) + String.byte_size(apply(fn(){"42"})) + String.byte_size(choice("")) + String.byte_size(text) + 37 }

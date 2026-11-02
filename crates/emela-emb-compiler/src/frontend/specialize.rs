@@ -78,6 +78,7 @@ fn specialize_with_limits(input: ir::Program, limits: Limits) -> Result<ir::Prog
         context.function(&mut function, &[], 0)?;
         context.functions[index] = function;
     }
+    context.canonical_constants()?;
     context.error_displays()?;
     Ok(ir::Program {
         core: context.core,
@@ -163,6 +164,7 @@ impl Specializer {
         self.next_id = id.0.checked_add(1);
         self.instances += 1;
         let mut function = template;
+        function.origin = Some(function.origin.unwrap_or(target));
         function.id = id;
         function.type_parameters = 0;
         function.exported = false;
@@ -900,6 +902,8 @@ mod derive;
 
 #[path = "specialize/constant_patterns.rs"]
 mod constant_patterns;
+#[path = "specialize/consts.rs"]
+mod consts;
 
 #[path = "specialize/debug.rs"]
 mod debug;

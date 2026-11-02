@@ -118,24 +118,28 @@ impl Schemes {
         let mut values = Vec::new();
         for (index, signature) in signatures.iter().enumerate() {
             let signature_values = signature_types(signature);
-            if component.contains(&DefinitionId(index)) && !constants[index] {
+            if component.contains(&DefinitionId(index)) {
                 values.extend(signature_values);
             } else {
-                // Monomorphic constants and unfinished surrounding functions keep their
-                // variables shared. A callee cannot quantify a variable owned by them.
+                // Unfinished surrounding functions retain their shared variables.
+                // A callee cannot quantify a variable owned by that environment.
                 environment.extend(signature_values);
             }
         }
         let tuple = types.intern(Type::Tuple(values));
-        let row_candidates = component
+        let mut row_candidates = component
             .iter()
             .flat_map(|id| signatures[id.0].params.iter().copied().map(backend_type))
             .collect::<Vec<_>>();
+        row_candidates.extend(
+            component
+                .iter()
+                .filter(|id| constants[id.0])
+                .filter_map(|id| signatures[id.0].ret)
+                .map(backend_type),
+        );
         let scheme = solver.generalize_with_rows(types, tuple, &environment, &row_candidates)?;
         for &id in component {
-            if constants[id.0] {
-                continue;
-            }
             let mut seen = HashSet::new();
             let mut pending = signature_types(&signatures[id.0]);
             while let Some(ty) = pending.pop() {

@@ -1169,6 +1169,7 @@ impl Checker {
             immediate: matches!(definition.effect_method, Some(super::effect_collect::MethodKind::Operation { handler, operation }) if !self.catalog.core.effects[self.effects.handlers[handler].effect].ops[operation].suspend),
             constant: definition.ast.constant,
             origin: definition.ast.constant.then_some(id),
+            canonical_const: None,
             derivation: definition.derivation,
             error_show: None,
             name: definition.name,
@@ -1673,11 +1674,9 @@ impl Checker {
                             return self.construct(module, ctor, &[], locals, expected, span);
                         }
                         Symbol::Function(id) if self.definitions[id.0].ast.constant => {
-                            self.function(id)?;
-                            let ret = self.definitions[id.0]
-                                .signature
-                                .ret
-                                .expect("const inference return type");
+                            let (signature, type_arguments) =
+                                self.function_instance(module, id, span)?;
+                            let ret = signature.ret.expect("const inference return type");
                             if let Some(expected) = expected {
                                 self.expect_type(module, ret, expected, span)?;
                             }
@@ -1685,7 +1684,7 @@ impl Checker {
                             return Ok(ir::Expr {
                                 kind: ir::ExprKind::Call {
                                     target: id,
-                                    type_arguments: vec![],
+                                    type_arguments,
                                     args: vec![],
                                     order: vec![],
                                 },

@@ -42,6 +42,7 @@ fn function(
         immediate: false,
         constant: false,
         origin: None,
+        canonical_const: None,
         derivation: None,
         error_show: None,
         name: name.into(),

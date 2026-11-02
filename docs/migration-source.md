@@ -471,3 +471,17 @@ child数と取消flagの観測、および弱child link・cycleの直接検査�
 | `crates/emela-codegen-emb/tests/sync_external/failure.rs` | `b38606addc896b15787f9a1268475d8af84ff60fa3052fbda95d4a9c59aafc2b` |
 
 `tests/p7_external_values.rs`は、直接export・通常呼出し・関数値・結果破棄の各経路から同期adapterへ接続する。StringBufferはcaller storageを使い、関数値から返した結果は所有化する。容量不足・別buffer・不正owner・容量超過lengthをheapなしで拒否する。Borrowed/Ownedの失敗payloadは元inputを書き換えても生存し、成功channelに置いた無効pointerを読まない。埋込みNUL・1000回の全heap回収・C両最適化を確認する。中断関数値とtask境界はP5/P6の試験も併用する。
+## P7の汎化constとcanonical root
+
+固定revisionのspec 5.6に従い、constの結果型に残る型変数を汎化し、参照ごとに具体化する。初期化はsource宣言ごとに共有する。複数の具体型から参照されるconstには、通常の型引数をAny、error/effect行引数をopaqueな行要約へ置換したcanonical rootを追加する。canonical bodyから新しいconst依存の具体化が生じるため、共有rootの発見を固定点まで繰り返す。
+
+旧版の到達不能な関数名markerは使わず、typed functionの`origin`と`canonical_const`、backend functionの`canonical_const`、`Program.const_function_groups`で対応を表す。通常の汎用関数参照と入れ子closureの出自も保持し、既存のconst bridgeで同じ初期値から型ごとのcallable/captureを構築する。bridge対象のgetterはcanonical initializerへの仮の辺を保持し、closure変換と到達解析の後に専用getterへ置換する。最終到達集合にないconst outcome・runtime const・familyは出力対象から外す。
+
+| 固定参照 | SHA-256 |
+| --- | --- |
+| `crates/emela-codegen-emb/src/input/upstream/const_origins.rs` | `2c83450294984444662e7cc0d4d93a7da0f9ecabcc88231bec3640c8c611136e` |
+| `crates/emela-codegen-emb/src/compiler/lower/const_bridge.rs` | `70a762af004ad560c3fface7558b20dfa78b50ed4ff26c30ca81e33d1039a657` |
+
+上記2ファイルのroot固定点・bridge保持の契約を独立frontend/backendの明示metadataへ適応した。新規依存と旧checkoutへのビルド時参照はない。Apache-2.0、repository rootのLICENSEに従う。
+
+`tests/p7_generic_consts.rs`はList[Int]/List[String]の共有、通常のgeneric FnRef、依存rootの固定点、入れ子capture・高階callbackのerror/effect行、source名が一度だけ付く共有defect、自己参照後の再試行、96byte heapでのbridge失敗のキャッシュをC両最適化で確認する。外部Handle[Int]/Handle[String]の共有ではBorrowed/Owned・NULL/非NULLをheapなしで各1000回確認する。`compat/p7/polymorphic-consts.emel`は固定旧`source_polymorphic_consts_share_initialization_and_specialize_callable_families`の入力（元SHA-256 `c9f0f411c6dcdc3595139fa3e214523be9e023c3b2f44b16b16a07f32cdf0953`）にC exportを加えた。未使用constから生成されたcontext helperのstrict C警告も独立回帰に含める。
