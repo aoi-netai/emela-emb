@@ -25,7 +25,10 @@ fn unsupported(name: &str, message: &str) -> Vec<Error> {
     }]
 }
 
-pub(crate) fn lower_program(mut program: Program) -> Result<LoweredModule> {
+pub(crate) fn lower_program(
+    mut program: Program,
+    options: &crate::Options,
+) -> Result<LoweredModule> {
     let mut symbols = HashSet::new();
     for (_, function) in program.functions.iter() {
         if function.exported {
@@ -53,6 +56,52 @@ pub(crate) fn lower_program(mut program: Program) -> Result<LoweredModule> {
             ));
         }
         validate_function(&program, function)?;
+    }
+    // Numeric builtins still execute their checks when their result is unused. Their
+    // renderers require a destination, so create an immediately discarded scalar slot.
+    let mut discarded_results: HashMap<FnId, HashSet<VarId>> = HashMap::new();
+    let mut discarded = Vec::new();
+    for (function_id, function) in program.functions.iter() {
+        let available = function.vars.iter().map(|(id, _)| id).collect();
+        for (statement, stmt) in function.stmts.iter() {
+            if let Stmt::Let {
+                dst: None,
+                value: Value::Builtin { .. },
+                ..
+            } = stmt
+            {
+                let Stmt::Let { value, .. } = stmt else {
+                    unreachable!()
+                };
+                discarded.push((
+                    function_id,
+                    statement,
+                    value_type(&program, function, value, &available)?,
+                ));
+            }
+        }
+    }
+    for (function_id, statement, ty) in discarded {
+        let function = &mut program.functions[function_id];
+        let repr = match ty {
+            TypeId::INT | TypeId::BOOL => Repr::I32,
+            TypeId::INT64 => Repr::I64,
+            TypeId::FLOAT => Repr::F64,
+            _ => unreachable!("validated scalar builtin result"),
+        };
+        let variable = function.vars.alloc(VarData {
+            hint: "discarded_result".into(),
+            repr,
+            ty,
+        });
+        let Stmt::Let { dst, .. } = &mut function.stmts[statement] else {
+            unreachable!()
+        };
+        *dst = Some(variable);
+        discarded_results
+            .entry(function_id)
+            .or_default()
+            .insert(variable);
     }
     for (_, function) in program.functions.iter_mut() {
         // A self tail call is represented by a loop over the original parameters. Recur's
@@ -84,7 +133,7 @@ pub(crate) fn lower_program(mut program: Program) -> Result<LoweredModule> {
     let mut pending: Vec<_> = program
         .functions
         .iter()
-        .filter_map(|(id, f)| f.exported.then_some(id))
+        .filter_map(|(id, f)| (f.exported || f.name == options.entry()).then_some(id))
         .collect();
     if pending.is_empty() {
         pending.extend(program.functions.iter().map(|(id, _)| id));
@@ -121,7 +170,7 @@ pub(crate) fn lower_program(mut program: Program) -> Result<LoweredModule> {
         runtime_consts: HashSet::new(),
         deferred_pool: false,
         emitted_functions,
-        discarded_results: HashMap::new(),
+        discarded_results,
         const_outcomes: HashMap::new(),
     })
 }
@@ -190,6 +239,7 @@ fn validate_function(program: &Program, f: &Function) -> Result<()> {
             &mut HashSet::new(),
             None,
             &f.params,
+            &HashMap::new(),
         ),
     }
 }
@@ -233,6 +283,7 @@ fn validate_sequence(
     visiting: &mut HashSet<SeqId>,
     yielded: Option<TypeId>,
     recur_vars: &[VarId],
+    blocks: &HashMap<LabelId, TypeId>,
 ) -> Result<()> {
     let seq = f
         .seqs
@@ -275,6 +326,7 @@ fn validate_sequence(
                     visiting,
                     Some(dst_type.unwrap_or(TypeId::UNIT)),
                     recur_vars,
+                    blocks,
                 )?;
                 validate_sequence(
                     program,
@@ -284,6 +336,7 @@ fn validate_sequence(
                     visiting,
                     Some(dst_type.unwrap_or(TypeId::UNIT)),
                     recur_vars,
+                    blocks,
                 )?;
             }
             Stmt::Loop {
@@ -308,6 +361,29 @@ fn validate_sequence(
                     visiting,
                     Some(dst_type.unwrap_or(TypeId::UNIT)),
                     vars,
+                    blocks,
+                )?;
+            }
+            Stmt::Block { label, body, .. } => {
+                if !f.labels.iter().any(|(id, _)| id == *label) {
+                    return Err(invalid(&f.name, "block label ID is out of bounds"));
+                }
+                let mut nested = blocks.clone();
+                if nested
+                    .insert(*label, dst_type.unwrap_or(TypeId::UNIT))
+                    .is_some()
+                {
+                    return Err(invalid(&f.name, "block label is already active"));
+                }
+                validate_sequence(
+                    program,
+                    f,
+                    *body,
+                    &available,
+                    visiting,
+                    Some(dst_type.unwrap_or(TypeId::UNIT)),
+                    recur_vars,
+                    &nested,
                 )?;
             }
             _ => return Err(unsupported(&f.name, "statement variant")),
@@ -351,6 +427,18 @@ fn validate_sequence(
             for (arg, &var) in args.iter().zip(recur_vars) {
                 expect_type(f, operand(f, arg, &available)?, variable(f, var)?)?;
             }
+        }
+        Term::Break { label, value } => {
+            let expected = blocks
+                .get(label)
+                .copied()
+                .ok_or_else(|| invalid(&f.name, "Break refers to an inactive block label"))?;
+            let actual = value
+                .as_ref()
+                .map(|value| operand(f, value, &available))
+                .transpose()?
+                .unwrap_or(TypeId::UNIT);
+            expect_type(f, actual, expected)?;
         }
         Term::Defect(message) => {
             expect_type(f, operand(f, message, &available)?, TypeId::STRING)?;
@@ -403,8 +491,13 @@ fn value_type(
             if args.len() != if unary { 1 } else { 2 } {
                 return Err(invalid(&f.name, "primitive argument count is invalid"));
             }
+            let mut first_type = None;
             for arg in args {
                 let actual = operand(f, arg, available)?;
+                if first_type.is_some_and(|first| first != actual) {
+                    return Err(invalid(&f.name, "primitive operands have different types"));
+                }
+                first_type = Some(actual);
                 // Bool comparisons use the I32 primitive representation.
                 if !(ty == TypeId::INT
                     && actual == TypeId::BOOL
@@ -494,7 +587,9 @@ fn positions(f: &Function) -> (HashMap<StmtId, usize>, HashMap<SeqId, usize>) {
                     visit(f, *then, next, stmts, seqs);
                     visit(f, *else_, next, stmts, seqs);
                 }
-                Stmt::Loop { body, .. } => visit(f, *body, next, stmts, seqs),
+                Stmt::Loop { body, .. } | Stmt::Block { body, .. } => {
+                    visit(f, *body, next, stmts, seqs)
+                }
                 _ => {}
             }
         }
@@ -508,3 +603,7 @@ fn positions(f: &Function) -> (HashMap<StmtId, usize>, HashMap<SeqId, usize>) {
     }
     (statements, sequences)
 }
+
+#[cfg(test)]
+#[path = "lower/tests.rs"]
+mod tests;

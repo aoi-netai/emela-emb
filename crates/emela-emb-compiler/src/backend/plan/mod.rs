@@ -259,9 +259,10 @@ pub(super) fn prepare<'a>(
         &names,
         options,
     )?;
-    let main_entry = flow.functions.iter().find(|(id, function)| {
-        emitted_functions.contains(id) && function.exported && function.name == options.entry()
-    });
+    let main_entry = flow
+        .functions
+        .iter()
+        .find(|(id, function)| emitted_functions.contains(id) && function.name == options.entry());
     if let Some((_, function)) = main_entry
         && !function.params.is_empty()
     {

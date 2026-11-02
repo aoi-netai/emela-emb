@@ -1,7 +1,7 @@
 //! Generated artifact data shared with independent consumers.
 
 /// Generated C, headers, their artifact manifest, and public entry points.
-#[derive(Debug, Clone, Default)]
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
 pub struct Output {
     /// Primary C translation unit, retained for the single-source convenience API.
     pub c_source: String,
