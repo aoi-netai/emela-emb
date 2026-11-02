@@ -41,7 +41,7 @@ pub(crate) struct Block {
 }
 #[derive(Clone, Debug)]
 pub(crate) enum Statement {
-    Bind { local: Local, value: Expr },
+    Pattern { pattern: Pattern, value: Expr },
     Expr(Expr),
 }
 #[derive(Clone, Debug)]
@@ -54,6 +54,10 @@ pub(crate) struct Expr {
 pub(crate) enum ExprKind {
     Literal(Literal),
     Concat(Vec<Expr>),
+    Match {
+        value: Box<Expr>,
+        arms: Vec<Arm>,
+    },
     Tuple(Vec<Expr>),
     Make {
         ctor: crate::contract::ir::CtorRef,
@@ -96,4 +100,28 @@ pub(crate) enum Literal {
     String(String),
     Bool(bool),
     Unit,
+}
+
+#[derive(Clone, Debug)]
+pub(crate) struct Pattern {
+    pub kind: PatternKind,
+    pub ty: ValueType,
+    pub span: Span,
+}
+#[derive(Clone, Debug)]
+pub(crate) enum PatternKind {
+    Any,
+    Bind(Local),
+    Literal(Literal),
+    Tuple(Vec<Pattern>),
+    Constructor {
+        ctor: crate::contract::ir::CtorRef,
+        fields: Vec<Pattern>,
+    },
+}
+#[derive(Clone, Debug)]
+pub(crate) struct Arm {
+    pub pattern: Pattern,
+    pub guard: Option<Expr>,
+    pub value: Expr,
 }

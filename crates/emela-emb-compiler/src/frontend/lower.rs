@@ -76,6 +76,10 @@ pub(crate) fn lower(input: &ir::Program) -> b::Program {
     }
     program
 }
+enum PatternStep {
+    Statement(b::StmtId),
+    Test(b::Operand),
+}
 struct Builder {
     statements: Vec<b::StmtId>,
     term: Option<b::Term>,
@@ -157,10 +161,23 @@ impl Context<'_> {
                 break;
             }
             match statement {
-                ir::Statement::Bind { local, value } => {
+                ir::Statement::Pattern { pattern, value } => {
                     let value = self.expression(builder, value, false);
-                    self.locals
-                        .insert(local.id, value.unwrap_or(b::Operand::Const(b::Const::Unit)));
+                    if builder.term.is_some() {
+                        break;
+                    }
+                    let mut steps = Vec::new();
+                    self.prepare_pattern(
+                        pattern,
+                        value.unwrap_or(b::Operand::Const(b::Const::Unit)),
+                        &mut steps,
+                    );
+                    for step in steps {
+                        match step {
+                            PatternStep::Statement(id) => builder.statements.push(id),
+                            PatternStep::Test(_) => unreachable!("irrefutable binding pattern"),
+                        }
+                    }
                     result = None;
                 }
                 ir::Statement::Expr(expression) => {
@@ -182,6 +199,60 @@ impl Context<'_> {
     ) -> Option<b::Operand> {
         use ir::ExprKind as E;
         match &expression.kind {
+            E::Match { value, arms } => {
+                let value = self.expression(builder, value, false);
+                if builder.term.is_some() {
+                    return None;
+                }
+                let value = value.unwrap_or(b::Operand::Const(b::Const::Unit));
+                let mut failure = self.function.seqs.alloc(b::Seq {
+                    stmts: vec![],
+                    term: b::Term::Unreachable,
+                });
+                for arm in arms.iter().rev() {
+                    let mut steps = Vec::new();
+                    self.prepare_pattern(&arm.pattern, value.clone(), &mut steps);
+                    let body = ir::Block {
+                        statements: vec![ir::Statement::Expr(arm.value.clone())],
+                        ty: arm.value.ty,
+                        span: arm.value.span,
+                    };
+                    let mut success = self.block(&body, tail);
+                    if let Some(guard) = &arm.guard {
+                        let mut guard_builder = Builder {
+                            statements: Vec::new(),
+                            term: None,
+                        };
+                        let condition = self.expression(&mut guard_builder, guard, false);
+                        if let Some(term) = guard_builder.term {
+                            success = self.function.seqs.alloc(b::Seq {
+                                stmts: guard_builder.statements,
+                                term,
+                            });
+                        } else {
+                            let choice = self.choose(
+                                condition.expect("Bool guard"),
+                                success,
+                                failure,
+                                expression.ty,
+                                tail,
+                            );
+                            guard_builder.statements.reverse();
+                            success = self.prepend(&mut guard_builder.statements, choice);
+                        }
+                    }
+                    failure = self.pattern_steps(steps, success, failure, expression.ty, tail);
+                }
+                let sequence = self.function.seqs[failure].clone();
+                builder.statements.extend(sequence.stmts);
+                match sequence.term {
+                    b::Term::Yield(value) => value,
+                    term => {
+                        builder.term = Some(term);
+                        None
+                    }
+                }
+            }
             E::Tuple(elements) => {
                 let mut values = Vec::new();
                 for element in elements {
@@ -404,6 +475,173 @@ impl Context<'_> {
             }
         }
     }
+    fn pattern_value(
+        &mut self,
+        steps: &mut Vec<PatternStep>,
+        value: b::Value,
+        value_type: Ty,
+    ) -> b::Operand {
+        let dst = self.var("pattern", value_type);
+        steps.push(PatternStep::Statement(self.function.stmts.alloc(
+            b::Stmt::Let {
+                dst: Some(dst),
+                value,
+                on_defect: None,
+                on_suspend: None,
+            },
+        )));
+        b::Operand::Var(dst)
+    }
+    fn prepare_pattern(
+        &mut self,
+        pattern: &ir::Pattern,
+        value: b::Operand,
+        steps: &mut Vec<PatternStep>,
+    ) {
+        use ir::PatternKind as P;
+        match &pattern.kind {
+            P::Any => {}
+            P::Bind(local) => {
+                self.locals.insert(local.id, value);
+            }
+            P::Literal(ir::Literal::Unit) => {}
+            P::Literal(lit) => {
+                let condition = self.pattern_value(
+                    steps,
+                    b::Value::Prim {
+                        op: b::PrimOp::Eq,
+                        ty: prim_ty(pattern.ty),
+                        args: vec![value, b::Operand::Const(literal(lit))],
+                    },
+                    Ty::Bool,
+                );
+                steps.push(PatternStep::Test(condition));
+            }
+            P::Tuple(fields) => {
+                let base = match value {
+                    b::Operand::Var(var) => var,
+                    b::Operand::Const(value) => {
+                        let b::Operand::Var(var) =
+                            self.pattern_value(steps, b::Value::Const(value), pattern.ty)
+                        else {
+                            unreachable!()
+                        };
+                        var
+                    }
+                };
+                for (index, field) in fields.iter().enumerate() {
+                    let value = if field.ty == Ty::Unit {
+                        b::Operand::Const(b::Const::Unit)
+                    } else {
+                        self.pattern_value(steps, b::Value::TupleGet { base, index }, field.ty)
+                    };
+                    self.prepare_pattern(field, value, steps);
+                }
+            }
+            P::Constructor { ctor, fields } => {
+                let base = match value {
+                    b::Operand::Var(var) => var,
+                    b::Operand::Const(value) => {
+                        let b::Operand::Var(var) =
+                            self.pattern_value(steps, b::Value::Const(value), pattern.ty)
+                        else {
+                            unreachable!()
+                        };
+                        var
+                    }
+                };
+                if self.core.enums[ctor.enum_id].variants.len() > 1 {
+                    let tag = self.pattern_value(steps, b::Value::Tag(base), Ty::Int);
+                    let condition = self.pattern_value(
+                        steps,
+                        b::Value::Prim {
+                            op: b::PrimOp::Eq,
+                            ty: b::PrimTy::I32,
+                            args: vec![tag, b::Operand::Const(b::Const::Int(ctor.variant as i32))],
+                        },
+                        Ty::Bool,
+                    );
+                    steps.push(PatternStep::Test(condition));
+                }
+                for (index, field) in fields.iter().enumerate() {
+                    let value = if field.ty == Ty::Unit {
+                        b::Operand::Const(b::Const::Unit)
+                    } else {
+                        self.pattern_value(
+                            steps,
+                            b::Value::Field {
+                                base,
+                                ctor: *ctor,
+                                index,
+                            },
+                            field.ty,
+                        )
+                    };
+                    self.prepare_pattern(field, value, steps);
+                }
+            }
+        }
+    }
+    fn prepend(&mut self, statements: &mut Vec<b::StmtId>, body: b::SeqId) -> b::SeqId {
+        if statements.is_empty() {
+            return body;
+        }
+        let mut seq = self.function.seqs[body].clone();
+        let mut prefix: Vec<_> = statements.drain(..).rev().collect();
+        prefix.append(&mut seq.stmts);
+        seq.stmts = prefix;
+        self.function.seqs.alloc(seq)
+    }
+    fn choose(
+        &mut self,
+        condition: b::Operand,
+        then: b::SeqId,
+        else_: b::SeqId,
+        value_type: Ty,
+        tail: bool,
+    ) -> b::SeqId {
+        let dst = if tail || matches!(value_type, Ty::Unit | Ty::Never) {
+            None
+        } else {
+            Some(self.var("matched", value_type))
+        };
+        let statement = self.function.stmts.alloc(b::Stmt::If {
+            dst,
+            cond: condition,
+            then,
+            else_,
+        });
+        self.function.seqs.alloc(b::Seq {
+            stmts: vec![statement],
+            term: if tail || value_type == Ty::Never {
+                b::Term::Unreachable
+            } else {
+                b::Term::Yield(dst.map(b::Operand::Var))
+            },
+        })
+    }
+    fn pattern_steps(
+        &mut self,
+        steps: Vec<PatternStep>,
+        success: b::SeqId,
+        failure: b::SeqId,
+        value_type: Ty,
+        tail: bool,
+    ) -> b::SeqId {
+        let mut result = success;
+        let mut statements = Vec::new();
+        for step in steps.into_iter().rev() {
+            match step {
+                PatternStep::Statement(id) => statements.push(id),
+                PatternStep::Test(condition) => {
+                    result = self.prepend(&mut statements, result);
+                    result = self.choose(condition, result, failure, value_type, tail);
+                }
+            }
+        }
+        self.prepend(&mut statements, result)
+    }
+
     fn branch(
         &mut self,
         builder: &mut Builder,

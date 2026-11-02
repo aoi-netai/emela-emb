@@ -95,3 +95,67 @@ fn rejects_invalid_constructor_fields_type_arguments_and_duplicate_definitions()
         assert!(errors[0].span.end <= source.len());
     }
 }
+
+#[test]
+fn tuple_constructor_patterns_guards_nested_coverage_and_tail_match_execute() {
+    let source = r#"
+enum Choice { Empty, Pair(left: Int, right: Int64) }
+type Point(x: Int, y: Int)
+fn read(value: Choice) -> Int {
+  value match {
+    Empty -> 0
+    Pair(right: r, left: l) if l > 0 -> l + Int64.to_int(r)
+    Pair(..) -> -1
+  }
+}
+fn count(n: Int) -> Int { n match { 0 -> 0
+_ -> count(n - 1) } }
+fn minimum(n: Int) -> Int { n match { -2147483648 -> 42
+_ -> 0 } }
+fn boolean_pair(value: (Bool, Bool)) -> Int {
+  value match { (True, _) -> 1
+(False, True) -> 2
+(False, False) -> 3 }
+}
+@export(c, "patterns")
+pub fn patterns() -> Int {
+  Point(x:, ..) = Point(x: 3, y: 99)
+  ((), a, (), b) = ((), 10, (), 20)
+  assert x + a + b == 33
+  assert read(Empty) == 0
+  assert read(Pair(right: 32, left: 10)) == 42
+  assert read(Pair(left: -1, right: 99)) == -1
+  assert boolean_pair((True, False)) == 1
+  assert boolean_pair((False, True)) == 2
+  assert boolean_pair((False, False)) == 3
+  assert minimum(Int.MIN) == 42
+  count(1000000)
+  42
+}
+"#;
+    let output = compile(source).unwrap();
+    support::compile_and_run(
+        &output,
+        &format!("{BOARD}\nint main(void) {{ assert(patterns() == 42); return 0; }}"),
+    );
+}
+
+#[test]
+fn rejects_refutable_bindings_non_exhaustive_matches_and_wrong_patterns() {
+    for source in [
+        "fn main() { True = False\n () }",
+        "fn main() { (a, a) = (1, 2)\n a }",
+        "fn main() { (a, b) = (1, 2, 3)\n a }",
+        "fn main(value: Bool) -> Int { value match { True -> 1 } }",
+        "fn main(value: Bool) -> Int { value match { True if value -> 1\n False -> 2 } }",
+        "fn main(value: Int) -> Int { value match { 0 -> 1 } }",
+        "fn main(value: (Bool, Bool)) -> Int { value match { (True, _) -> 1\n (False, True) -> 2 } }",
+        "type Point(x: Int, y: Int)\nfn main(value: Point) { Point(x:) = value\n x }",
+        "type Point(x: Int)\nfn main(value: Point) { Point(0) = value\n () }",
+        "enum Choice { First, Second(Int) }\nfn main(value: Choice) { value match { First -> 1 } }",
+        "fn main(value: Bool) -> Int { value match {} }",
+        "fn main(value: Int) { value match { -2147483649 -> 1\n _ -> 0 } }",
+    ] {
+        assert!(compile(source).is_err(), "{source}");
+    }
+}

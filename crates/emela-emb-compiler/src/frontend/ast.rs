@@ -54,7 +54,7 @@ pub(crate) struct Block {
 #[derive(Clone, Debug)]
 pub(crate) enum Statement {
     Bind {
-        name: Text,
+        pattern: Pattern,
         annotation: Option<Text>,
         value: Expr,
     },
@@ -72,6 +72,10 @@ pub(crate) enum ExprKind {
     String(String),
     Interpolate(Vec<Expr>),
     Tuple(Vec<Expr>),
+    Match {
+        value: Box<Expr>,
+        arms: Vec<Arm>,
+    },
     Field {
         base: Box<Expr>,
         name: Text,
@@ -161,4 +165,33 @@ pub(crate) struct Variant {
 pub(crate) struct Field {
     pub name: Option<Text>,
     pub ty: Text,
+}
+
+#[derive(Clone, Debug)]
+pub(crate) struct Pattern {
+    pub kind: PatternKind,
+    pub span: Span,
+}
+#[derive(Clone, Debug)]
+pub(crate) enum PatternKind {
+    Any,
+    Bind(Text),
+    Literal(Box<Expr>),
+    Tuple(Vec<Pattern>),
+    Constructor {
+        path: Vec<Text>,
+        args: Vec<PatternArgument>,
+        rest: bool,
+    },
+}
+#[derive(Clone, Debug)]
+pub(crate) struct PatternArgument {
+    pub label: Option<Text>,
+    pub value: Pattern,
+}
+#[derive(Clone, Debug)]
+pub(crate) struct Arm {
+    pub pattern: Pattern,
+    pub guard: Option<Expr>,
+    pub value: Expr,
 }

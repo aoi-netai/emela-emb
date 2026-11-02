@@ -519,7 +519,7 @@ impl Checker {
             let last = index + 1 == block.statements.len();
             match statement {
                 ast::Statement::Bind {
-                    name,
+                    pattern,
                     annotation,
                     value,
                 } => {
@@ -532,11 +532,24 @@ impl Checker {
                         .transpose()
                         .map_err(|e| e.in_source(&self.modules.modules[module].source_name))?;
                     let value = self.expr(module, value, locals, annotation)?;
-                    let local = locals.bind(name.value.clone(), value.ty);
+                    let pattern =
+                        self.pattern(module, pattern, value.ty, locals, &mut HashSet::new())?;
+                    if !super::patterns::exhaustive(
+                        std::slice::from_ref(&pattern),
+                        value.ty,
+                        &mut self.catalog,
+                    ) {
+                        return Err(self.error(
+                            module,
+                            DK::Type,
+                            pattern.span,
+                            "binding pattern can fail; use postfix match",
+                        ));
+                    }
                     if value.ty == Ty::Never {
                         terminated = true;
                     }
-                    statements.push(ir::Statement::Bind { local, value });
+                    statements.push(ir::Statement::Pattern { pattern, value });
                     ty = Ty::Unit;
                 }
                 ast::Statement::Expr(expression) => {
@@ -668,6 +681,45 @@ impl Checker {
                     }
                 }
                 (ir::ExprKind::Concat(checked), Ty::String)
+            }
+            A::Match { value, arms } => {
+                let value = self.expr(module, value, locals, None)?;
+                let mut checked = Vec::new();
+                let mut coverage = Vec::new();
+                let mut result = expected;
+                for arm in arms {
+                    let saved = locals.names.clone();
+                    let pattern =
+                        self.pattern(module, &arm.pattern, value.ty, locals, &mut HashSet::new())?;
+                    let guard = arm
+                        .guard
+                        .as_ref()
+                        .map(|guard| self.expr(module, guard, locals, Some(Ty::Bool)))
+                        .transpose()?;
+                    if guard.is_none() {
+                        coverage.push(pattern.clone());
+                    }
+                    let body = self.expr(module, &arm.value, locals, result)?;
+                    if result.is_none() && body.ty != Ty::Never {
+                        result = Some(body.ty);
+                    }
+                    checked.push(ir::Arm {
+                        pattern,
+                        guard,
+                        value: body,
+                    });
+                    locals.names = saved;
+                }
+                if !super::patterns::exhaustive(&coverage, value.ty, &mut self.catalog) {
+                    return Err(self.error(module, DK::Type, span, "match is not exhaustive"));
+                }
+                (
+                    ir::ExprKind::Match {
+                        value: Box::new(value),
+                        arms: checked,
+                    },
+                    result.unwrap_or(Ty::Never),
+                )
             }
             A::Tuple(elements) => {
                 let hints =
@@ -1103,6 +1155,240 @@ impl Checker {
         }
         Ok(ir::Expr { kind, ty, span })
     }
+    fn pattern(
+        &mut self,
+        module: usize,
+        pattern: &ast::Pattern,
+        value_type: Ty,
+        locals: &mut Locals,
+        names: &mut HashSet<String>,
+    ) -> Result<ir::Pattern, Diagnostic> {
+        use crate::contract::ir::Type;
+        use ast::PatternKind as P;
+        let span = pattern.span;
+        let kind = match &pattern.kind {
+            P::Any => ir::PatternKind::Any,
+            P::Bind(name) => {
+                if !names.insert(name.value.clone()) {
+                    return Err(self.error(
+                        module,
+                        DK::Name,
+                        name.span,
+                        format!("duplicate pattern binding '{}'", name.value),
+                    ));
+                }
+                ir::PatternKind::Bind(locals.bind(name.value.clone(), value_type))
+            }
+            P::Literal(expression) => {
+                let literal = if let ast::ExprKind::Unary {
+                    op: ast::Unary::Neg,
+                    value,
+                } = &expression.kind
+                {
+                    if let ast::ExprKind::Integer(raw) = &value.kind {
+                        let text = raw.replace('_', "");
+                        let (text, radix) = if let Some(s) = text.strip_prefix("0x") {
+                            (s, 16)
+                        } else if let Some(s) = text.strip_prefix("0b") {
+                            (s, 2)
+                        } else {
+                            (text.as_str(), 10)
+                        };
+                        let limit = if value_type == Ty::Int64 {
+                            (i64::MAX as u64) + 1
+                        } else {
+                            (i32::MAX as u64) + 1
+                        };
+                        let number = u64::from_str_radix(text, radix)
+                            .ok()
+                            .filter(|n| *n <= limit)
+                            .ok_or_else(|| {
+                                self.error(
+                                    module,
+                                    DK::Range,
+                                    span,
+                                    "negative pattern literal is outside its value type range",
+                                )
+                            })?;
+                        match value_type {
+                            Ty::Int => ir::Literal::Int((-(number as i128)) as i32),
+                            Ty::Int64 => ir::Literal::Int64((-(number as i128)) as i64),
+                            _ => {
+                                return Err(self.error(
+                                    module,
+                                    DK::Type,
+                                    span,
+                                    "integer pattern requires Int or Int64",
+                                ));
+                            }
+                        }
+                    } else if let ast::ExprKind::Float(raw) = &value.kind {
+                        if value_type != Ty::Float {
+                            return Err(self.error(
+                                module,
+                                DK::Type,
+                                span,
+                                "Float pattern has the wrong value type",
+                            ));
+                        }
+                        let number = raw
+                            .replace('_', "")
+                            .parse::<f64>()
+                            .ok()
+                            .filter(|n| n.is_finite())
+                            .ok_or_else(|| {
+                                self.error(
+                                    module,
+                                    DK::Range,
+                                    span,
+                                    "Float pattern is outside the finite range",
+                                )
+                            })?;
+                        ir::Literal::Float(-number)
+                    } else {
+                        return Err(self.error(
+                            module,
+                            DK::Syntax,
+                            span,
+                            "negative patterns require a numeric literal",
+                        ));
+                    }
+                } else {
+                    let value = self.expr(module, expression, locals, Some(value_type))?;
+                    let ir::ExprKind::Literal(literal) = value.kind else {
+                        return Err(self.error(
+                            module,
+                            DK::Syntax,
+                            span,
+                            "pattern requires a constant literal",
+                        ));
+                    };
+                    literal
+                };
+                ir::PatternKind::Literal(literal)
+            }
+            P::Tuple(fields) => {
+                let Type::Tuple(types) = self.catalog.core.ty(data::backend_type(value_type))
+                else {
+                    return Err(self.error(
+                        module,
+                        DK::Type,
+                        span,
+                        "tuple pattern requires a tuple value",
+                    ));
+                };
+                let types = types.clone();
+                if types.len() != fields.len() {
+                    return Err(self.error(
+                        module,
+                        DK::Type,
+                        span,
+                        "tuple pattern has the wrong arity",
+                    ));
+                }
+                let mut checked = Vec::new();
+                for (field, ty) in fields.iter().zip(types) {
+                    checked.push(self.pattern(
+                        module,
+                        field,
+                        data::frontend_type(ty),
+                        locals,
+                        names,
+                    )?);
+                }
+                ir::PatternKind::Tuple(checked)
+            }
+            P::Constructor { path, args, rest } => {
+                let Symbol::Constructor(ctor) = self.resolve(module, path)? else {
+                    return Err(self.error(
+                        module,
+                        DK::Type,
+                        span,
+                        "pattern name is not a constructor",
+                    ));
+                };
+                if !matches!(self.catalog.core.ty(data::backend_type(value_type)), Type::Enum(id,_) if *id == ctor.enum_id)
+                {
+                    return Err(self.error(
+                        module,
+                        DK::Type,
+                        span,
+                        "constructor pattern has the wrong value type",
+                    ));
+                }
+                let declaration = self.catalog.declaration(ctor.enum_id).clone();
+                let fields = &declaration.ast.variants[ctor.variant].fields;
+                let types = self.catalog.fields(ctor, value_type);
+                let mut checked = types
+                    .iter()
+                    .map(|&ty| ir::Pattern {
+                        kind: ir::PatternKind::Any,
+                        ty,
+                        span,
+                    })
+                    .collect::<Vec<_>>();
+                let mut assigned = HashSet::new();
+                let mut named = false;
+                for (index, argument) in args.iter().enumerate() {
+                    let parameter = if let Some(label) = &argument.label {
+                        named = true;
+                        fields
+                            .iter()
+                            .position(|f| f.name.as_ref().is_some_and(|n| n.value == label.value))
+                            .ok_or_else(|| {
+                                self.error(module, DK::Name, label.span, "unknown pattern field")
+                            })?
+                    } else {
+                        if named {
+                            return Err(self.error(
+                                module,
+                                DK::Type,
+                                argument.value.span,
+                                "positional patterns must precede named patterns",
+                            ));
+                        }
+                        index
+                    };
+                    if parameter >= fields.len() {
+                        return Err(self.error(
+                            module,
+                            DK::Type,
+                            span,
+                            "too many constructor pattern fields",
+                        ));
+                    }
+                    if !assigned.insert(parameter) {
+                        return Err(self.error(
+                            module,
+                            DK::Name,
+                            argument.value.span,
+                            "duplicate constructor pattern field",
+                        ));
+                    }
+                    checked[parameter] =
+                        self.pattern(module, &argument.value, types[parameter], locals, names)?;
+                }
+                if !rest && assigned.len() != fields.len() {
+                    return Err(self.error(
+                        module,
+                        DK::Type,
+                        span,
+                        "constructor pattern omits fields; write '..' to ignore the rest",
+                    ));
+                }
+                ir::PatternKind::Constructor {
+                    ctor,
+                    fields: checked,
+                }
+            }
+        };
+        Ok(ir::Pattern {
+            kind,
+            ty: value_type,
+            span,
+        })
+    }
+
     fn construct(
         &mut self,
         module: usize,

@@ -374,23 +374,22 @@ impl<'t, 's> Parser<'t, 's> {
         self.newlines();
         let mut statements = Vec::new();
         while !matches!(self.current().kind, K::RBrace | K::Eof) {
-            let binding = matches!(self.current().kind, K::Name(_))
-                && matches!(self.peek(1).kind, K::Eq | K::Colon);
-            if binding {
-                let name = self.lower_name("bindings require a lowercase name or '_'")?;
-                let annotation = if self.take(K::Colon) {
-                    Some(self.type_name()?)
-                } else {
-                    None
-                };
-                self.expect(K::Eq, "expected '=' in binding")?;
+            let checkpoint = self.cursor;
+            let candidate = self.pattern();
+            let annotation = if candidate.is_ok() && self.take(K::Colon) {
+                Some(self.type_name()?)
+            } else {
+                None
+            };
+            if let Some(pattern) = candidate.ok().filter(|_| self.take(K::Eq)) {
                 let value = self.expr(0, false)?;
                 statements.push(Statement::Bind {
-                    name,
+                    pattern,
                     annotation,
                     value,
                 });
             } else {
+                self.cursor = checkpoint;
                 statements.push(Statement::Expr(self.expr(0, false)?));
             }
             if !matches!(self.current().kind, K::Newline | K::RBrace) {
@@ -544,7 +543,8 @@ impl<'t, 's> Parser<'t, 's> {
                 }
                 if matches!(
                     self.tokens[next].kind,
-                    K::Dot
+                    K::Name("match")
+                        | K::Dot
                         | K::Plus
                         | K::Star
                         | K::Slash
@@ -561,6 +561,42 @@ impl<'t, 's> Parser<'t, 's> {
                 ) {
                     self.cursor = next;
                 }
+            }
+            if self.word("match") && min == 0 {
+                let start = left.span.start;
+                self.advance();
+                self.expect(K::LBrace, "expected '{' after postfix match")?;
+                self.newlines();
+                let mut arms = Vec::new();
+                while self.current().kind != K::RBrace {
+                    let pattern = self.pattern()?;
+                    let guard = if self.take_word("if") {
+                        Some(self.expr(0, false)?)
+                    } else {
+                        None
+                    };
+                    self.expect(K::Arrow, "expected '->' after match pattern")?;
+                    let value = self.expr(0, false)?;
+                    arms.push(Arm {
+                        pattern,
+                        guard,
+                        value,
+                    });
+                    if self.take(K::Comma) || self.current().kind == K::Newline {
+                        self.newlines();
+                    } else {
+                        break;
+                    }
+                }
+                self.expect(K::RBrace, "expected '}' after match arms")?;
+                left = Expr {
+                    kind: ExprKind::Match {
+                        value: Box::new(left),
+                        arms,
+                    },
+                    span: Span::new(start, self.previous_end()),
+                };
+                continue;
             }
             if self.current().kind == K::LParen && min <= 9 {
                 self.advance();
@@ -683,6 +719,132 @@ impl<'t, 's> Parser<'t, 's> {
             span: Span::new(start, end),
         })
     }
+
+    fn pattern(&mut self) -> Result<Pattern, Diagnostic> {
+        if self.depth >= 256 {
+            return Err(self.error(DiagnosticKind::Syntax, "pattern nesting limit exceeded"));
+        }
+        self.depth += 1;
+        let result = self.pattern_inner();
+        self.depth -= 1;
+        result
+    }
+    fn pattern_inner(&mut self) -> Result<Pattern, Diagnostic> {
+        let token = self.current();
+        let start = token.span.start;
+        let kind = match token.kind {
+            K::Name("_") => {
+                self.advance();
+                PatternKind::Any
+            }
+            K::Name(name) if name.as_bytes()[0].is_ascii_lowercase() && !reserved(name) => {
+                self.advance();
+                PatternKind::Bind(Text::new(name, token.span))
+            }
+            K::Name("True" | "False")
+            | K::Integer(_)
+            | K::Float(_)
+            | K::String(_)
+            | K::MultilineString(_)
+            | K::Minus => {
+                let expression = self.expr(8, false)?;
+                match expression.kind {
+                    ExprKind::Integer(_)
+                    | ExprKind::Float(_)
+                    | ExprKind::String(_)
+                    | ExprKind::Bool(_)
+                    | ExprKind::Unary { op: Unary::Neg, .. } => {
+                        PatternKind::Literal(Box::new(expression))
+                    }
+                    _ => {
+                        return Err(
+                            self.error(DiagnosticKind::Syntax, "pattern requires a literal")
+                        );
+                    }
+                }
+            }
+            K::LParen => {
+                self.advance();
+                self.newlines();
+                let mut elements = Vec::new();
+                while self.current().kind != K::RParen {
+                    elements.push(self.pattern()?);
+                    self.newlines();
+                    if !self.take(K::Comma) {
+                        break;
+                    }
+                    self.newlines();
+                }
+                self.expect(K::RParen, "expected ')' after tuple pattern")?;
+                if elements.is_empty() {
+                    PatternKind::Literal(Box::new(Expr {
+                        kind: ExprKind::Unit,
+                        span: Span::new(start, self.previous_end()),
+                    }))
+                } else if elements.len() == 1 {
+                    return Ok(elements.remove(0));
+                } else {
+                    PatternKind::Tuple(elements)
+                }
+            }
+            K::Name(name) if name.as_bytes()[0].is_ascii_uppercase() => {
+                self.advance();
+                let mut path = vec![Text::new(name, token.span)];
+                while self.take(K::Dot) {
+                    path.push(self.name("expected constructor name")?);
+                }
+                let mut args = Vec::new();
+                let mut rest = false;
+                if self.take(K::LParen) {
+                    self.newlines();
+                    while self.current().kind != K::RParen {
+                        if self.current().kind == K::Dot && self.peek(1).kind == K::Dot {
+                            self.advance();
+                            self.advance();
+                            rest = true;
+                            self.newlines();
+                            break;
+                        }
+                        let label = if matches!(self.current().kind, K::Name(_))
+                            && self.peek(1).kind == K::Colon
+                        {
+                            let name = self.lower_name("expected field name")?;
+                            self.advance();
+                            self.newlines();
+                            Some(name)
+                        } else {
+                            None
+                        };
+                        let value = if matches!(self.current().kind, K::Comma | K::RParen) {
+                            let Some(label) = &label else {
+                                return Err(self.error(DiagnosticKind::Syntax, "expected pattern"));
+                            };
+                            Pattern {
+                                kind: PatternKind::Bind(label.clone()),
+                                span: label.span,
+                            }
+                        } else {
+                            self.pattern()?
+                        };
+                        args.push(PatternArgument { label, value });
+                        self.newlines();
+                        if !self.take(K::Comma) {
+                            break;
+                        }
+                        self.newlines();
+                    }
+                    self.expect(K::RParen, "expected ')' after constructor pattern")?;
+                }
+                PatternKind::Constructor { path, args, rest }
+            }
+            _ => return Err(self.error(DiagnosticKind::Syntax, "expected pattern")),
+        };
+        Ok(Pattern {
+            kind,
+            span: Span::new(start, self.previous_end()),
+        })
+    }
+
     fn current(&self) -> Token<'s> {
         self.tokens[self.cursor]
     }
