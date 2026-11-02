@@ -50,6 +50,38 @@ fn bytes_ownership_snapshots_aliases_and_invalid_list_elements_release_every_all
             .with_string_capacity(1),
     ));
     compile_and_run(&output, include_str!("compat/p3/bytes-owned-harness.c"));
+
+    // The shared corpus also contains a 70000-byte case. Reuse its small-value
+    // assertions at the old 4096-byte budget instead of inferring that budget
+    // from the large-buffer run above.
+    let output = with_heap_audit(compile_source(
+        include_str!("compat/p3/bytes-owned.emel"),
+        &Options::default()
+            .with_heap_bytes(4096)
+            .with_string_capacity(1),
+    ));
+    let small = include_str!("compat/p3/bytes-owned-harness.c")
+        .split_once("  static uint8_t input[70000]")
+        .unwrap()
+        .0;
+    compile_and_run(&output, &format!("{small}\nreturn 0;\n}}\n"));
+
+    let output = with_heap_audit(compile_source(
+        include_str!("compat/p3/bytes-owned.emel"),
+        &Options::default().with_heap_bytes(256),
+    ));
+    compile_and_run(
+        &output,
+        r#"
+#include <assert.h>
+#include <stdlib.h>
+#include "emela_embedded.h"
+#include "emela_board.h"
+int test_heap_empty(void);
+_Noreturn void emela_board_defect(EmelaDefectKind k,const char*m,uint16_t n){(void)k;(void)m;(void)n;abort();}
+int main(void){for(int i=0;i<1000;i++){bytes_discard((EmelaString){"abc",3,NULL});assert(test_heap_empty());}return 0;}
+"#,
+    );
 }
 
 #[test]
