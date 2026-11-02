@@ -26,6 +26,8 @@ mod suspend;
 mod p7_bindings;
 #[path = "p7_data_tests.rs"]
 mod p7_data;
+#[path = "p7_discarded_tests.rs"]
+mod p7_discarded;
 #[path = "p7_input_tests.rs"]
 mod p7_input;
 

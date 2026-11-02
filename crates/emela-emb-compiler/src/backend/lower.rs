@@ -132,8 +132,8 @@ pub(crate) fn lower_program(
             .flat_map(|group| group.specializations.iter().copied()),
     );
     failures::normalize(&mut program);
-    // Calls, checked builtins and List construction retain allocation/defect behavior even when
-    // unused. A temporary destination also lets ownership planning release their results.
+    // Calls, checked builtins, string rendering and List construction retain effects
+    // when unused. Temporary destinations let ownership release their results.
     let mut discarded_results: HashMap<FnId, HashSet<VarId>> = HashMap::new();
     let mut discarded = Vec::new();
     for (function_id, function) in program.functions.iter() {
@@ -147,7 +147,14 @@ pub(crate) fn lower_program(
             }
             if let Stmt::Let {
                 dst: None,
-                value: Value::Builtin { .. } | Value::List { .. } | Value::Call { .. },
+                value:
+                    Value::Builtin { .. }
+                    | Value::List { .. }
+                    | Value::Call { .. }
+                    | Value::Runtime {
+                        op: RuntimeOp::ShowString,
+                        ..
+                    },
                 ..
             } = stmt
             {
