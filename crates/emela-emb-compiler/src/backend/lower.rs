@@ -123,16 +123,22 @@ pub(crate) fn lower_program(
         program.functions[id].constant = false;
     }
     failures::normalize(&mut program);
-    // Checked builtins and List construction retain allocation/defect behavior even when
+    // Calls, checked builtins and List construction retain allocation/defect behavior even when
     // unused. A temporary destination also lets ownership planning release their results.
     let mut discarded_results: HashMap<FnId, HashSet<VarId>> = HashMap::new();
     let mut discarded = Vec::new();
     for (function_id, function) in program.functions.iter() {
+        // Lifted closure bodies remain in their original statement arena. Only the
+        // current function body has this caller's ABI and needs result disposal.
+        let (active, _) = positions(function);
         let available = function.vars.iter().map(|(id, _)| id).collect();
         for (statement, stmt) in function.stmts.iter() {
+            if !active.contains_key(&statement) {
+                continue;
+            }
             if let Stmt::Let {
                 dst: None,
-                value: Value::Builtin { .. } | Value::List { .. },
+                value: Value::Builtin { .. } | Value::List { .. } | Value::Call { .. },
                 ..
             } = stmt
             {
@@ -770,6 +776,10 @@ fn positions(f: &Function) -> (HashMap<StmtId, usize>, HashMap<SeqId, usize>) {
                 Stmt::Let {
                     value:
                         Value::Call {
+                            on_fail: Some(OnFail::Handle { body, .. }),
+                            ..
+                        }
+                        | Value::Fiber {
                             on_fail: Some(OnFail::Handle { body, .. }),
                             ..
                         },

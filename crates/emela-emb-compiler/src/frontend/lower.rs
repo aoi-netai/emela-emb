@@ -251,11 +251,32 @@ impl Context<'_> {
                     result = None;
                 }
                 ir::Statement::Expr(expression) => {
+                    let first_statement = builder.statements.len();
                     result = self.expression(
                         builder,
                         expression,
                         tail && index + 1 == block.statements.len(),
                     );
+                    if index + 1 != block.statements.len() {
+                        // Only a result produced by this statement can be discarded here.
+                        // An existing local may still be used after this expression.
+                        if let Some(b::Operand::Var(variable)) = result {
+                            for &statement in &builder.statements[first_statement..] {
+                                if let b::Stmt::Let {
+                                    dst,
+                                    value: b::Value::Call { .. },
+                                    ..
+                                } = &mut self.function.stmts[statement]
+                                {
+                                    if *dst == Some(variable) {
+                                        *dst = None;
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                        result = None;
+                    }
                 }
             }
         }
