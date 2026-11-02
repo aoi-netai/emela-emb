@@ -104,6 +104,21 @@ pub(crate) struct Solver {
 }
 
 impl Solver {
+    pub(crate) fn map_tags(&mut self, map: &mut dyn FnMut(&Tag) -> Tag) {
+        fn row(row: &mut Row, map: &mut dyn FnMut(&Tag) -> Tag) {
+            row.tags = row.tags.iter().map(map).collect();
+        }
+        for variable in &mut self.variables {
+            row(&mut variable.lower, map);
+        }
+        for (actual, expected) in &mut self.inclusions {
+            row(actual, map);
+            row(expected, map);
+        }
+        for immediate in &mut self.immediate_rows {
+            row(immediate, map);
+        }
+    }
     pub(crate) fn fresh(&mut self, kind: SetKind, origin: Origin) -> VarId {
         let id = VarId(self.variables.len());
         self.variables.push(Variable {
@@ -145,6 +160,15 @@ impl Solver {
         self.validate(&actual)?;
         self.validate(&expected)?;
         same_kind(actual.kind, expected.kind)?;
+        if actual == expected
+            || (actual.tags.is_empty() && actual.vars.is_empty())
+            || self
+                .inclusions
+                .iter()
+                .any(|(left, right)| *left == actual && *right == expected)
+        {
+            return Ok(());
+        }
         self.inclusions.push((actual, expected));
         Ok(())
     }

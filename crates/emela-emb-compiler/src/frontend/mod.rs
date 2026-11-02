@@ -15,8 +15,6 @@ pub(crate) mod normalize;
 pub(crate) mod parser;
 pub(crate) mod patterns;
 pub(crate) mod schemes;
-// The P4 frontend adapter enables this module in the production pipeline.
-#[cfg(test)]
 pub(crate) mod sets;
 pub(crate) mod specialize;
 pub(crate) mod strings;
