@@ -3,6 +3,7 @@ mod functions;
 mod methods;
 mod references;
 mod trait_methods;
+mod with;
 use super::{
     ast,
     data::{self, Catalog},
@@ -558,12 +559,12 @@ impl Checker {
                     let mut written_effects = Vec::new();
                     if let Some(effects) = &function.effects {
                         for effect in effects {
-                            let ty = data::backend_type(self.catalog.resolve_type(
+                            let ty = self.catalog.effect_member(
                                 &self.modules,
                                 module_index,
                                 effect,
                                 &type_parameters,
-                            )?);
+                            )?;
                             if !matches!(
                                 self.catalog.core.ty(ty),
                                 crate::contract::ir::Type::Param(_)
@@ -1230,13 +1231,8 @@ impl Checker {
             .transpose()?;
         let (kind, ty) = match &expression.kind {
             A::Use(name) => return self.use_effect(module, name, span),
-            A::With { .. } => {
-                return Err(self.error(
-                    module,
-                    DK::Unsupported,
-                    span,
-                    "function values and effects are awaiting their typed source connection",
-                ));
+            A::With { items, body } => {
+                return self.with_handlers(module, items, body, locals, expected, span);
             }
             A::Lambda {
                 params,

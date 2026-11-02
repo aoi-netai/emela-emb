@@ -122,14 +122,12 @@ impl Catalog {
                 .unwrap_or(written);
             let mut members = Vec::new();
             for effect in split(written) {
-                let ty = backend_type(self.type_text(
+                let ty = self.effect_member(
                     modules,
                     module,
-                    effect.trim(),
-                    span,
+                    &ast::Text::new(effect.trim(), span),
                     parameters,
-                    self_type,
-                )?);
+                )?;
                 if !matches!(self.core.ty(ty), b::Type::Param(_) | b::Type::Handler(_)) {
                     return Err(Diagnostic::new(
                         DK::Type,

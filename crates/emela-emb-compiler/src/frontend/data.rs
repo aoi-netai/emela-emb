@@ -269,6 +269,19 @@ impl Catalog {
             args,
         )
     }
+    pub fn effect_member(
+        &mut self,
+        modules: &Modules,
+        module: usize,
+        text: &ast::Text,
+        parameters: &HashMap<String, usize>,
+    ) -> Result<b::TypeId, Diagnostic> {
+        if let Some(&index) = parameters.get(text.value.trim()) {
+            return Ok(self.core.types.intern(b::Type::Param(index)));
+        }
+        let effect = self.resolve_effect(modules, module, text, parameters)?;
+        Ok(self.core.types.intern(b::Type::Handler(effect)))
+    }
     pub fn resolve_type_with_self(
         &mut self,
         modules: &Modules,
