@@ -309,6 +309,14 @@ impl Solver {
         let eligible: HashSet<_> = candidates.iter().copied().collect();
         let mut excluded = HashSet::new();
         let mut pending = environment.to_vec();
+        // If A flows into an upper-bounded B, A is bounded too. Quantifying A
+        // after solving B <= {} would otherwise turn a proved pure row unknown.
+        pending.extend(
+            self.variables
+                .iter()
+                .enumerate()
+                .filter_map(|(index, var)| var.upper_bounded.then_some(VarId(index))),
+        );
         while let Some(id) = pending.pop() {
             let variable = self.variable(id)?;
             if excluded.insert(id) {
@@ -755,6 +763,33 @@ mod tests {
                 .resolve(&Row::variable(SetKind::Effect, expression), &mut unify)
                 .unwrap(),
             Row::empty(SetKind::Effect)
+        );
+    }
+
+    #[test]
+    fn an_upper_bound_propagates_back_through_inclusion_before_generalization() {
+        let mut solver = Solver::default();
+        let source = solver.fresh(SetKind::Error, Origin::Inferred);
+        let result = solver.fresh(SetKind::Error, Origin::Inferred);
+        solver
+            .includes(
+                Row::variable(SetKind::Error, source),
+                Row::variable(SetKind::Error, result),
+            )
+            .unwrap();
+        solver
+            .includes(
+                Row::variable(SetKind::Error, result),
+                Row::empty(SetKind::Error),
+            )
+            .unwrap();
+        solver.solve(&mut unify, &mut |_| true).unwrap();
+        assert!(solver.generalize_from(&[source], &[]).unwrap().is_empty());
+        assert_eq!(
+            solver
+                .resolve(&Row::variable(SetKind::Error, source), &mut unify)
+                .unwrap(),
+            Row::empty(SetKind::Error)
         );
     }
 }
