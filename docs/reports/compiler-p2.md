@@ -101,9 +101,24 @@ P1時点の`fn f() { f() }`拒否は、戻り型の自動汎化に伴って更�
 
 `tests/p2_reachability.rs` は、未使用external・失敗payloadを含むライブラリsourceをheap 0で生成し、関数・external参照・heapを生成しないCを`-O0`/`-O2`でコンパイル・実行した。未使用bodyの型エラーは引き続き拒否する。全146試験とfmt/Clippyが成功し、IR試験のroot指定を変える必要はなかった。
 
+## trait・標準source・const patternの統合
+
+`cf9b746` でtrait/implの収集、署名・Self・制約の検査、method解決を具体化へ接続した。`tests/p2_traits.rs` はcustom Eq/Ord/Showを持つfield、tuple/Option/enumのderive、defaultとgeneric関数、失敗を返すmethodとescapeをsourceからCで観測する。不正なimpl、supertrait循環・未充足、重複derive、FloatのOrd、pure署名に漏れる失敗は拒否する。別moduleの同名traitはmodule IDと名前の組で分離する。
+
+固定旧sourceのPrelude/OptionとInt/Int64/Float/Bool、Stringの同期APIをcompiler所有の標準sourceとして登録した。`tests/p2_standard_api.rs` と `tests/p2_parse.rs` は公開APIから数値境界、FloatのNaN順序・signed zero、長いdecimalと丸めtie、ParseErrorのinputを確認する。Floatの`-0.0`の文字列は固定旧実装と同じ`"0.0"`であり、min/maxの符号はCでbit比較する。parse失敗のString payloadには固定heapを設定し、C mockへの複合値受渡しは明示したborrowed adapterを使う。
+
+`tests/p2_const_patterns.rs` はliteralによる網羅性とruntime constの一度初期化、custom Eq、Neverのconst patternで後続処理が実行されないことを確認する。`tests/p2_debug.rs` は入力を一度だけ評価し、custom Showを優先して未実装のfieldだけを再帰表示し、元の値を返すdbgをC hookで確認する。inspectには引き続きShow制約を要求する。
+
+`62254f7` は相互再帰内で一部の関数だけが汎化する変数を、各関数の署名の範囲に正規化する。`tests/p2_inference.rs` の5件目で、Intを返す関数がgenericなNoneの戻り値を破棄する場合に他関数の型変数を漏らさないことを確認した。
+
+- 検証したcode revision: `cf9b746`。OS/target・C compilerは前述のWSL2 x86_64/GCC 11.4、通常Rustは1.99.1。
+- `cargo test --workspace --locked --offline`: 172 pass、失敗/skip 0、終了0。全C実行試験は`-O0`/`-O2`両方pass。
+- `cargo fmt --all --check` と `cargo clippy --workspace --all-targets --locked --offline -- -D warnings`: 終了0。
+- 実際のRust 1.85.0で `cargo check --workspace --all-targets --locked --offline`: 終了0。通常のtoolchain設定を変更せず、cargo/rustc/rustdocを明示して実行した。
+
 ## P2の残りの確認
 
-trait/default/supertrait/derive、標準Prelude/Optionと数値parse、const patternを後続の機能別検証へ接続する。旧`release_0_24/traits.emel`は同期部分を独立fixtureへ抽出し、List/closure/Fiber/Causeを含む元fixture全体の実行はP6以降に残す。先行String成功だけで旧混在fixture・旧115関連試験・横断要件全体をverifiedにしない。
+method呼出しの省略記法、generic trait method、型宣言のfield制約と旧fixture由来の追加回帰を確認中。旧`release_0_24/traits.emel`は同期部分を独立fixtureへ抽出し、List/closure/Fiber/Causeを含む元fixture全体の実行はP6以降に残す。先行成功だけで旧混在fixture・旧115関連試験・横断要件全体をverifiedにしない。
 
 ## 最終統合の追記欄
 
