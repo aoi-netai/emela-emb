@@ -18,7 +18,7 @@ pub enum Command {
         inputs: Vec<PathBuf>,
         out_dir: PathBuf,
         entry: Option<String>,
-        options: Options,
+        options: Box<Options>,
     },
     Help,
 }
@@ -121,7 +121,7 @@ pub fn parse(args: impl IntoIterator<Item = OsString>) -> Result<Command, String
         inputs,
         out_dir: out_dir.ok_or("expected --out-dir <dir>")?,
         entry,
-        options,
+        options: Box::new(options),
     })
 }
 
