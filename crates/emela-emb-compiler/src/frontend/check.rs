@@ -68,6 +68,7 @@ struct Checker {
     traits: super::trait_collect::TraitCollection,
     current_bounds: super::traits::ParamBounds,
     current_self_type: Option<crate::contract::ir::TypeId>,
+    trait_obligations: Vec<trait_methods::Obligation>,
     solver: super::infer::Solver,
     current_parameters: HashMap<String, usize>,
     definitions: Vec<Definition>,
@@ -104,6 +105,7 @@ pub(crate) fn check(mut modules: Modules) -> Result<ir::Program, Vec<Diagnostic>
         traits,
         current_bounds: Default::default(),
         current_self_type: None,
+        trait_obligations: Vec::new(),
         solver: super::infer::Solver::new(),
         current_parameters: HashMap::new(),
         module_definitions: vec![HashMap::new(); modules.modules.len()],
@@ -177,6 +179,7 @@ pub(crate) fn check(mut modules: Modules) -> Result<ir::Program, Vec<Diagnostic>
     if !errors.is_empty() {
         return Err(errors);
     }
+    checker.validate_trait_obligations()?;
     let modes: HashMap<_, _> = checker
         .definitions
         .iter()

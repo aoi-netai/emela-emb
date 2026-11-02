@@ -1,7 +1,62 @@
 use super::*;
 use crate::contract::ir::{self as b, Type};
 use crate::frontend::traits::{BuiltinTrait, TraitId};
+pub(super) struct Obligation {
+    module: usize,
+    self_type: b::TypeId,
+    trait_id: TraitId,
+    method: String,
+    method_type_arguments: Vec<b::TypeId>,
+    bounds: super::super::traits::ParamBounds,
+    span: Span,
+}
 impl Checker {
+    pub(super) fn validate_trait_obligations(&mut self) -> Result<(), Vec<Diagnostic>> {
+        self.solver
+            .finish_defaults(&mut self.catalog.core.types)
+            .map_err(|error| vec![Diagnostic::new(DK::Type, Span::new(0, 0), error.message)])?;
+        let mut errors = Vec::new();
+        for obligation in std::mem::take(&mut self.trait_obligations) {
+            let result = (|| {
+                let receiver = self
+                    .solver
+                    .resolve(&mut self.catalog.core.types, obligation.self_type)
+                    .map_err(|e| {
+                        self.error(obligation.module, DK::Type, obligation.span, e.message)
+                    })?;
+                let arguments = obligation
+                    .method_type_arguments
+                    .iter()
+                    .map(|&ty| self.solver.resolve(&mut self.catalog.core.types, ty))
+                    .collect::<Result<Vec<_>, _>>()
+                    .map_err(|e| {
+                        self.error(obligation.module, DK::Type, obligation.span, e.message)
+                    })?;
+                self.traits
+                    .registry
+                    .resolve_generic(
+                        &self.catalog.core,
+                        receiver,
+                        obligation.trait_id,
+                        &obligation.method,
+                        &arguments,
+                        &obligation.bounds,
+                    )
+                    .map_err(|e| {
+                        self.error(obligation.module, DK::Type, obligation.span, e.message)
+                    })?;
+                Ok(())
+            })();
+            if let Err(error) = result {
+                errors.push(error);
+            }
+        }
+        if errors.is_empty() {
+            Ok(())
+        } else {
+            Err(errors)
+        }
+    }
     pub(super) fn validate_data_declarations(&mut self) -> Result<(), Diagnostic> {
         for declaration in self.catalog.declarations.clone() {
             let mut bounds = super::super::traits::ParamBounds::new();
@@ -323,17 +378,15 @@ impl Checker {
         ret: Ty,
         span: Span,
     ) -> Result<ir::Expr, Diagnostic> {
-        self.traits
-            .registry
-            .resolve_generic(
-                &self.catalog.core,
-                self_type,
-                trait_id,
-                method,
-                &method_type_arguments,
-                &self.current_bounds,
-            )
-            .map_err(|e| self.error(module, DK::Type, span, e.message))?;
+        self.trait_obligations.push(Obligation {
+            module,
+            self_type,
+            trait_id,
+            method: method.into(),
+            method_type_arguments: method_type_arguments.clone(),
+            bounds: self.current_bounds.clone(),
+            span,
+        });
         Ok(ir::Expr {
             kind: ir::ExprKind::TraitCall {
                 trait_id,

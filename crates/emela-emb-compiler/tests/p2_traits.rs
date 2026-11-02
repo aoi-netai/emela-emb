@@ -80,3 +80,50 @@ fn invalid_impls_supertraits_bounds_and_derives_are_rejected_before_lowering() {
         assert!(emela_emb_compiler::compile(source).is_err(), "{source}");
     }
 }
+
+#[test]
+fn trait_impl_selection_uses_later_constraints_without_defaulting_unknown_self() {
+    let base = r#"
+trait Parse { fn parse(text:String)->Self }
+impl Int:Parse { fn parse(text) { Int.parse(text) escape { ParseError(_) -> 0 } } }
+impl String:Parse { fn parse(text) { text } }
+"#;
+    let source = format!(
+        r#"{base}
+fn inferred() {{ value=Parse.parse("41")
+value+1 }}
+@export(c,"delayed_trait_int")
+pub fn integer()->Int {{ inferred() }}
+@export(c,"delayed_trait_string")
+pub fn text()->String {{ value=Parse.parse("x")
+String.append(value,"!") }}
+"#
+    );
+    let output = compile_sources(
+        &[Source::new("main.emel", &source)],
+        "main.emel",
+        &Options::default().with_heap_bytes(1024),
+    )
+    .unwrap();
+    support::compile_and_run(
+        &output,
+        r#"
+#include <assert.h>
+#include <stdlib.h>
+#include <string.h>
+#include "emela_embedded.h"
+#include "emela_board.h"
+_Noreturn void emela_board_defect(EmelaDefectKind k,const char*m,uint16_t n){(void)k;(void)m;(void)n;abort();}
+int main(void){char out[8];assert(delayed_trait_int()==42);EmelaString value=delayed_trait_string(out,8);assert(value.length==2&&memcmp(value.data,"x!",2)==0);return 0;}
+"#,
+    );
+    for body in ["Parse.parse(\"x\")", "Parse.parse(\"x\")\n()"] {
+        let invalid = format!("{base}\nfn unknown(){{{body}}}");
+        let errors = emela_emb_compiler::compile(&invalid).unwrap_err();
+        assert!(
+            errors
+                .iter()
+                .all(|error| error.kind == emela_emb_compiler::DiagnosticKind::Type)
+        );
+    }
+}
