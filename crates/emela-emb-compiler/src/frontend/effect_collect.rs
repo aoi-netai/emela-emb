@@ -362,13 +362,31 @@ impl EffectRegistry {
         ty: b::TypeId,
         arguments: &[b::TypeId],
     ) -> b::TypeId {
+        let substitutions = arguments
+            .iter()
+            .enumerate()
+            .map(|(index, &argument)| (core.types.intern(b::Type::Param(index)), argument))
+            .collect();
+        self.substitute_map(core, ty, &substitutions)
+    }
+
+    /// Definition schemes use distinct TypeIds after their positional parameters have been
+    /// scoped. Apply those substitutions simultaneously, including capability arguments.
+    pub fn substitute_map(
+        &mut self,
+        core: &mut b::Definitions,
+        ty: b::TypeId,
+        substitutions: &HashMap<b::TypeId, b::TypeId>,
+    ) -> b::TypeId {
+        if let Some(&replacement) = substitutions.get(&ty) {
+            return replacement;
+        }
         let node = match core.ty(ty).clone() {
-            b::Type::Param(index) => return arguments.get(index).copied().unwrap_or(ty),
             b::Type::Handler(effect) => {
                 let original = core.effects[effect].args.clone();
                 let args = original
                     .iter()
-                    .map(|&arg| self.substitute_type(core, arg, arguments))
+                    .map(|&arg| self.substitute_map(core, arg, substitutions))
                     .collect::<Vec<_>>();
                 if original == args {
                     return ty;
@@ -379,28 +397,28 @@ impl EffectRegistry {
             b::Type::Tuple(fields) => b::Type::Tuple(
                 fields
                     .into_iter()
-                    .map(|field| self.substitute_type(core, field, arguments))
+                    .map(|field| self.substitute_map(core, field, substitutions))
                     .collect(),
             ),
             b::Type::Enum(id, fields) => b::Type::Enum(
                 id,
                 fields
                     .into_iter()
-                    .map(|field| self.substitute_type(core, field, arguments))
+                    .map(|field| self.substitute_map(core, field, substitutions))
                     .collect(),
             ),
-            b::Type::List(item) => b::Type::List(self.substitute_type(core, item, arguments)),
-            b::Type::Cell(item) => b::Type::Cell(self.substitute_type(core, item, arguments)),
+            b::Type::List(item) => b::Type::List(self.substitute_map(core, item, substitutions)),
+            b::Type::Cell(item) => b::Type::Cell(self.substitute_map(core, item, substitutions)),
             b::Type::Fn(mut function) => {
                 function.params = function
                     .params
                     .into_iter()
-                    .map(|param| self.substitute_type(core, param, arguments))
+                    .map(|param| self.substitute_map(core, param, substitutions))
                     .collect();
-                function.ret = self.substitute_type(core, function.ret, arguments);
+                function.ret = self.substitute_map(core, function.ret, substitutions);
                 if let Some(sets) = &mut function.sets {
-                    sets.errors = self.substitute_type(core, sets.errors, arguments);
-                    sets.effects = self.substitute_type(core, sets.effects, arguments);
+                    sets.errors = self.substitute_map(core, sets.errors, substitutions);
+                    sets.effects = self.substitute_map(core, sets.effects, substitutions);
                 }
                 b::Type::Fn(function)
             }
@@ -408,7 +426,7 @@ impl EffectRegistry {
                 let members = row
                     .params
                     .into_iter()
-                    .map(|member| self.substitute_type(core, member, arguments))
+                    .map(|member| self.substitute_map(core, member, substitutions))
                     .collect::<Vec<_>>();
                 row.params = Vec::new();
                 for member in members {
@@ -1916,6 +1934,58 @@ mod tests {
             catalog.core.ty(catalog.core.effects[recursive].ops[0].ret),
             &b::Type::Handler(recursive)
         );
+    }
+
+    #[test]
+    fn scoped_substitution_maps_capability_arguments_and_function_rows_simultaneously() {
+        let modules = modules(&[("Main", "effect State[S] { fn get()->S }", false)]);
+        let mut catalog = Catalog::collect(&modules).unwrap();
+        fill_operations(&modules, &mut catalog).unwrap();
+        let scoped = catalog.core.types.intern(b::Type::Param(100));
+        let unrelated = catalog.core.types.intern(b::Type::Param(101));
+        let effect = catalog
+            .effects
+            .resolve_instance(&modules, &mut catalog.core, 0, &text("State"), vec![scoped])
+            .unwrap();
+        let capability = catalog.core.types.intern(b::Type::Handler(effect));
+        let errors = catalog.core.types.intern(b::Type::Set(b::SetSummary {
+            params: vec![unrelated],
+            ..Default::default()
+        }));
+        let effects = catalog.core.types.intern(b::Type::Set(b::SetSummary {
+            params: vec![capability],
+            ..Default::default()
+        }));
+        let function = catalog.core.types.intern(b::Type::Fn(b::FnType {
+            params: vec![capability],
+            ret: scoped,
+            fails: false,
+            suspends: false,
+            ev: true,
+            sets: Some(b::FnSets { errors, effects }),
+        }));
+        let mapped = catalog.effects.substitute_map(
+            &mut catalog.core,
+            function,
+            &HashMap::from([(scoped, unrelated), (unrelated, b::TypeId::INT)]),
+        );
+        let b::Type::Fn(mapped) = catalog.core.ty(mapped) else {
+            panic!("function type changed")
+        };
+        assert_eq!(mapped.ret, unrelated);
+        let b::Type::Handler(mapped_effect) = catalog.core.ty(mapped.params[0]) else {
+            panic!("capability type changed")
+        };
+        assert_eq!(catalog.core.effects[*mapped_effect].args, [unrelated]);
+        let sets = mapped.sets.unwrap();
+        let b::Type::Set(mapped_errors) = catalog.core.ty(sets.errors) else {
+            panic!("failure row changed")
+        };
+        assert_eq!(mapped_errors.params, [b::TypeId::INT]);
+        let b::Type::Set(mapped_effects) = catalog.core.ty(sets.effects) else {
+            panic!("effect row changed")
+        };
+        assert_eq!(mapped_effects.params, mapped.params);
     }
 
     #[test]
