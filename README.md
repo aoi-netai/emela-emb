@@ -11,7 +11,7 @@ pub fn answer() -> Int {
 }
 ```
 
-P1の基盤とP2の同期データ・型システムが完了しました。対応するデータ型・String・汎化・trait・失敗・constは [対応仕様](docs/language-subset.md)、201試験と独立環境での実行結果は [P2検証報告](docs/reports/compiler-p2.md) を参照してください。[7段階の計画](docs/compiler-parity-plan.md) に沿って、固定した旧fork相当の独立コンパイラーを実現します。
+P1〜P3の基盤・同期型システム・固定heapとコレクションが完了しました。対応するデータ型・String・汎化・trait・失敗・List/Bytes/Map/Setは [対応仕様](docs/language-subset.md)、231試験と独立環境での実行結果は [P3検証報告](docs/reports/compiler-p3.md) を参照してください。[7段階の計画](docs/compiler-parity-plan.md) に沿って、固定した旧fork相当の独立コンパイラーを実現します。
 
 ## ビルドと生成
 

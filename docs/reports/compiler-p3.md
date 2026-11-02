@@ -62,4 +62,18 @@ source revision `d43ee10`。WSL2 `x86_64-unknown-linux-gnu`、Rust 1.99.1、GCC 
 
 標準Mapのconstを追加した際に、errors単体試験のhelperだけがconst展開を省略していたことを検出した。通常pipelineと同じ `collect → consts::expand → check` へ揃え、製品のconst処理を変えずに単体試験を修正した。
 
-この結果はP3先行branchの確認である。P2の最終修正を正式stackへ統合した後の全体・MSRV・独立環境確認は、最終追記で記録する。Cell/closureのcycle、suspend・取消をまたぐ所有権、callback APIはP4以降に残し、同期成功からverifiedを自動で広げない。
+この結果はP3先行branchの確認である。P2の最終修正を正式stackへ統合した結果は次節へ記録する。Cell/closureのcycle、suspend・取消をまたぐ所有権、callback APIはP4以降に残し、同期成功からverifiedを自動で広げない。
+
+## P3最終統合の結果
+
+正式なP2 branch `ae9f519` を基点に、P3を機能単位の日本語commitで統合した。検証source revisionは `91ea80af4028d4e801f8a88e6130d68a982fcbf0`。P2で確定したgeneric errorの推論・具体化と、P3のList・再帰値・所有権を同時に検証した。環境はWSL2 `x86_64-unknown-linux-gnu`、Rust 1.99.1、`cc`（GCC 11.4.0）。
+
+- `cargo test --workspace --locked --offline`: **231 pass、失敗/skip 0、終了0**。全C実行試験は `cc -std=c11 -Wall -Werror -O0` / `-O2` とも成功。
+- `cargo fmt --all --check`: 終了0。
+- `cargo clippy --workspace --all-targets --locked --offline -- -D warnings`: 終了0。
+- 実際のRust 1.85.0のcargo/rustc/rustdocを指定した `cargo check --workspace --all-targets --locked --offline`: 終了0。
+- 当該revisionのgit archiveとlock済み第三者依存だけの一時snapshotで、元Emela workspaceをLinux Landlockにより読取禁止。アクセス拒否を実際に確認し、clean CARGO_HOMEでworkspace build、全231試験、CLI生成、minimal Cの `-O0` / `-O2` がすべて終了0。metadataの全packageはsnapshot内にあり、Emela packageはrepoの2 crateだけである。
+
+[台帳](../compiler-coverage.json) へBytesの8 builtinとStringChars/StringCodePointsのcommon経路、Listの4 sync経路、対応する旧Any/Bytes試験の置換証拠を記録した。List/Bytes/Any全体のclosure・suspend・cancel経路や旧全corpusは別の残件として保持し、件数をまとめて完了へ移していない。既存428 records・226 contexts・115関連試験・10横断要件の集合を保持する構造試験も成功した。
+
+P3の同期データ・固定heap・所有権の範囲を完了と判定する。変更はcompilerとdocs内だけで、Cargo依存・workspace crate数・本体非依存の契約を維持した。P4では関数値・effect/handler・Cell/Stateとcycle、標準callback APIへ接続する。
