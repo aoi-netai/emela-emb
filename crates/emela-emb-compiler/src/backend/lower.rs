@@ -738,7 +738,34 @@ fn positions(f: &Function) -> (HashMap<StmtId, usize>, HashMap<SeqId, usize>) {
                 }
                 Stmt::Protect { body, cleanup, .. } => {
                     visit(f, *body, next, stmts, seqs);
-                    visit(f, *cleanup, next, stmts, seqs);
+                    let stops_at_defect = !f.suspends
+                        && matches!(f.seqs[*body].term, Term::Defect(_))
+                        && f.seqs[*body].stmts.iter().all(|statement| {
+                            let Stmt::Let {
+                                value,
+                                on_defect: None,
+                                on_suspend: None,
+                                ..
+                            } = &f.stmts[*statement]
+                            else {
+                                return false;
+                            };
+                            !matches!(
+                                value,
+                                Value::Call {
+                                    on_fail: Some(_),
+                                    ..
+                                } | Value::Fiber {
+                                    on_fail: Some(_),
+                                    ..
+                                }
+                            )
+                        });
+                    // Embedded defects stop immediately. No synchronous exit above can
+                    // enter this cleanup; suspended frames retain cancellation cleanup.
+                    if !stops_at_defect {
+                        visit(f, *cleanup, next, stmts, seqs);
+                    }
                 }
                 Stmt::Let {
                     value:
