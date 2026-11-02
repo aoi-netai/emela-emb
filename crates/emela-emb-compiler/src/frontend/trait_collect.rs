@@ -166,6 +166,28 @@ fn synthetic_function(
 }
 
 impl TraitCollection {
+    pub fn visible_traits(&self, module: usize) -> Vec<TraitId> {
+        let scope = &self.scopes[module];
+        let names = scope
+            .names
+            .keys()
+            .chain(self.scopes[self.prelude].names.keys())
+            .map(String::as_str)
+            .chain(
+                scope
+                    .imports
+                    .iter()
+                    .filter_map(|import| import.members.as_ref())
+                    .flatten()
+                    .map(|name| name.value.as_str()),
+            );
+        let mut visible: Vec<_> = names
+            .filter_map(|name| self.find_trait(module, name))
+            .collect();
+        visible.sort_unstable();
+        visible.dedup();
+        visible
+    }
     pub fn find_trait(&self, module: usize, path: &str) -> Option<TraitId> {
         let scope = self.scopes.get(module)?;
         if let Some((alias, name)) = path.split_once('.') {

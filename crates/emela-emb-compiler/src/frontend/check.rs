@@ -1,3 +1,4 @@
+mod methods;
 mod trait_methods;
 use super::{
     ast,
@@ -126,6 +127,10 @@ pub(crate) fn check(mut modules: Modules) -> Result<ir::Program, Vec<Diagnostic>
         .traits
         .bind_functions(&mut checker.catalog.core, &ids)?;
     checker.imports()?;
+    checker.validate_data_declarations().map_err(|e| vec![e])?;
+    checker
+        .validate_method_declarations()
+        .map_err(|e| vec![e])?;
     for definition in &checker.definitions {
         for ty in definition
             .signature
@@ -1336,6 +1341,9 @@ impl Checker {
                 )
             }
             A::Call { callee, args } => {
+                if let A::Field { base, name } = &callee.kind {
+                    return self.method_call(module, base, name, args, locals, expected, span);
+                }
                 let A::Name(path) = &callee.kind else {
                     return Err(self.error(
                         module,

@@ -2,6 +2,37 @@ use super::*;
 use crate::contract::ir::{self as b, Type};
 use crate::frontend::traits::{BuiltinTrait, TraitId};
 impl Checker {
+    pub(super) fn validate_data_declarations(&mut self) -> Result<(), Diagnostic> {
+        for declaration in self.catalog.declarations.clone() {
+            let mut bounds = super::super::traits::ParamBounds::new();
+            for (index, parameter) in declaration.ast.params.iter().enumerate() {
+                let ty = self.catalog.core.types.intern(Type::Param(index));
+                let mut required = Vec::new();
+                for bound in &parameter.bounds {
+                    required.push(
+                        self.traits
+                            .find_trait(declaration.module, &bound.value)
+                            .ok_or_else(|| {
+                                self.error(
+                                    declaration.module,
+                                    DK::Name,
+                                    bound.span,
+                                    "undefined data type trait bound",
+                                )
+                            })?,
+                    );
+                }
+                bounds.insert(ty, required);
+            }
+            let variants = self.catalog.core.enums[declaration.id].variants.clone();
+            for (variant, source) in variants.iter().zip(&declaration.ast.variants) {
+                for (&ty, field) in variant.tys.iter().zip(&source.fields) {
+                    self.validate_type_bounds(declaration.module, ty, &bounds, field.ty.span)?;
+                }
+            }
+        }
+        Ok(())
+    }
     pub(super) fn validate_type_bounds(
         &self,
         module: usize,
