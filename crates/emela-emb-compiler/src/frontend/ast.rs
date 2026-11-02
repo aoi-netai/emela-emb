@@ -100,6 +100,10 @@ pub(crate) enum ExprKind {
     String(String),
     Interpolate(Vec<Expr>),
     Tuple(Vec<Expr>),
+    List {
+        elements: Vec<Expr>,
+        tail: Option<Box<Expr>>,
+    },
     Match {
         value: Box<Expr>,
         arms: Vec<Arm>,
@@ -211,6 +215,10 @@ pub(crate) enum PatternKind {
     Bind(Text),
     Literal(Box<Expr>),
     Tuple(Vec<Pattern>),
+    List {
+        elements: Vec<Pattern>,
+        tail: Option<Box<Pattern>>,
+    },
     Constructor {
         path: Vec<Text>,
         args: Vec<PatternArgument>,

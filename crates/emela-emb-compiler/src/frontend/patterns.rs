@@ -10,6 +10,8 @@ enum Head {
     Bool(bool),
     Unit,
     Tuple,
+    ListNil,
+    ListCons,
     Variant(CtorRef),
 }
 pub(crate) fn exhaustive(patterns: &[Pattern], ty: Ty, catalog: &mut Catalog) -> bool {
@@ -38,6 +40,8 @@ fn head(pattern: &Pattern) -> Option<(Head, Vec<Pattern>)> {
         P::Literal(Literal::Bool(value)) => Some((Head::Bool(*value), Vec::new())),
         P::Literal(Literal::Unit) => Some((Head::Unit, Vec::new())),
         P::Tuple(fields) => Some((Head::Tuple, fields.clone())),
+        P::ListNil => Some((Head::ListNil, vec![])),
+        P::ListCons { head, tail } => Some((Head::ListCons, vec![*head.clone(), *tail.clone()])),
         P::Constructor { ctor, fields } => Some((Head::Variant(*ctor), fields.clone())),
         _ => None,
     }
@@ -46,6 +50,10 @@ fn constructors(ty: Ty, catalog: &mut Catalog) -> Option<Vec<(Head, Vec<Ty>)>> {
     Some(match catalog.core.ty(backend_type(ty)).clone() {
         Type::Bool => vec![(Head::Bool(false), vec![]), (Head::Bool(true), vec![])],
         Type::Unit => vec![(Head::Unit, vec![])],
+        Type::List(element) => vec![
+            (Head::ListNil, vec![]),
+            (Head::ListCons, vec![frontend_type(element), ty]),
+        ],
         Type::Tuple(fields) => vec![(Head::Tuple, fields.into_iter().map(frontend_type).collect())],
         Type::Enum(id, _) => {
             let count = catalog.core.enums[id].variants.len();

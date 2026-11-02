@@ -39,6 +39,28 @@ pub(crate) fn coverage(
                     .map(|field| expand(field, functions, active, depth + 1))
                     .collect::<Option<_>>()?,
             ),
+            ir::ExprKind::List { elements, tail } => {
+                let mut result = if let Some(tail) = tail {
+                    expand(tail, functions, active, depth + 1)?
+                } else {
+                    ir::Pattern {
+                        kind: ir::PatternKind::ListNil,
+                        ty: value.ty,
+                        span: value.span,
+                    }
+                };
+                for head in elements.iter().rev() {
+                    result = ir::Pattern {
+                        kind: ir::PatternKind::ListCons {
+                            head: Box::new(expand(head, functions, active, depth + 1)?),
+                            tail: Box::new(result),
+                        },
+                        ty: value.ty,
+                        span: value.span,
+                    };
+                }
+                return Some(result);
+            }
             ir::ExprKind::Make { ctor, args, order } => {
                 if order.len() != args.len()
                     || order.iter().any(|&index| index >= args.len())

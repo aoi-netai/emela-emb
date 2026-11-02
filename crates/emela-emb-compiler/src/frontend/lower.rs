@@ -334,6 +334,26 @@ impl Context<'_> {
                     }
                 }
             }
+            E::List { elements, tail } => {
+                let mut elems = Vec::new();
+                for element in elements {
+                    let value = self.expression(builder, element, false);
+                    if builder.term.is_some() {
+                        return None;
+                    }
+                    elems.push(value.unwrap_or(b::Operand::Const(b::Const::Unit)));
+                }
+                let tail = if let Some(tail) = tail {
+                    let tail = self.expression(builder, tail, false);
+                    if builder.term.is_some() {
+                        return None;
+                    }
+                    tail
+                } else {
+                    None
+                };
+                self.value(builder, b::Value::List { elems, tail }, expression.ty)
+            }
             E::Tuple(elements) => {
                 let mut values = Vec::new();
                 for element in elements {
@@ -607,6 +627,36 @@ impl Context<'_> {
                     Ty::Bool,
                 );
                 steps.push(PatternStep::Test(condition));
+            }
+            P::ListNil | P::ListCons { .. } => {
+                let b::Operand::Var(base) = value else {
+                    unreachable!("list values are bound to variables")
+                };
+                let empty = self.pattern_value(steps, b::Value::ListIsEmpty(base), Ty::Bool);
+                let condition = if matches!(pattern.kind, P::ListCons { .. }) {
+                    self.pattern_value(
+                        steps,
+                        b::Value::Prim {
+                            op: b::PrimOp::Not,
+                            ty: b::PrimTy::I32,
+                            args: vec![empty],
+                        },
+                        Ty::Bool,
+                    )
+                } else {
+                    empty
+                };
+                steps.push(PatternStep::Test(condition));
+                if let P::ListCons { head, tail } = &pattern.kind {
+                    let value = if head.ty == Ty::Unit {
+                        b::Operand::Const(b::Const::Unit)
+                    } else {
+                        self.pattern_value(steps, b::Value::ListHead(base), head.ty)
+                    };
+                    self.prepare_pattern(head, value, steps);
+                    let value = self.pattern_value(steps, b::Value::ListTail(base), tail.ty);
+                    self.prepare_pattern(tail, value, steps);
+                }
             }
             P::Tuple(fields) => {
                 let base = match value {

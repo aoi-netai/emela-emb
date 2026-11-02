@@ -233,6 +233,18 @@ impl Catalog {
         } else {
             (text, Vec::new())
         };
+        if head == "List" {
+            if arguments.len() != 1 {
+                return Err(Diagnostic::new(
+                    DK::Type,
+                    span,
+                    "type 'List' expects one argument",
+                ));
+            }
+            let element =
+                backend_type(self.type_text(modules, module, arguments[0], span, params)?);
+            return Ok(Ty::Compound(self.core.types.intern(b::Type::List(element))));
+        }
         let id = self
             .lookup_type(modules, module, head)
             .ok_or_else(|| Diagnostic::new(DK::Name, span, format!("undefined type '{head}'")))?;

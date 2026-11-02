@@ -14,6 +14,10 @@ pub(super) fn allocate_structural_equality(
                 }
                 expression(value, types);
             }
+            ir::PatternKind::ListCons { head, tail } => {
+                pattern(head, types);
+                pattern(tail, types);
+            }
             ir::PatternKind::Tuple(fields) | ir::PatternKind::Constructor { fields, .. } => {
                 for field in fields {
                     pattern(field, types);
@@ -25,6 +29,14 @@ pub(super) fn allocate_structural_equality(
     fn expression(value: &ir::Expr, types: &mut HashSet<b::TypeId>) {
         use ir::ExprKind as E;
         match &value.kind {
+            E::List { elements, tail } => {
+                for element in elements {
+                    expression(element, types);
+                }
+                if let Some(tail) = tail {
+                    expression(tail, types);
+                }
+            }
             E::Call { args, .. }
             | E::Make { args, .. }
             | E::TraitCall { args, .. }

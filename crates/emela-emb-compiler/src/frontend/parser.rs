@@ -738,6 +738,38 @@ impl<'t, 's> Parser<'t, 's> {
                     }
                 }
             }
+            K::LBracket => {
+                self.advance();
+                self.newlines();
+                let mut elements = Vec::new();
+                let mut tail = None;
+                while self.current().kind != K::RBracket {
+                    if self.current().kind == K::Dot && self.peek(1).kind == K::Dot {
+                        self.advance();
+                        self.advance();
+                        self.newlines();
+                        tail = Some(Box::new(self.expr(0, true)?));
+                        self.newlines();
+                        self.take(K::Comma);
+                        self.newlines();
+                        break;
+                    }
+                    elements.push(self.expr(0, true)?);
+                    self.newlines();
+                    if !self.take(K::Comma) {
+                        break;
+                    }
+                    self.newlines();
+                }
+                self.expect(
+                    K::RBracket,
+                    "expected ']' after list; a spread must be last",
+                )?;
+                Expr {
+                    kind: ExprKind::List { elements, tail },
+                    span: Span::new(token.span.start, self.previous_end()),
+                }
+            }
             K::LBrace => {
                 let block = self.block()?;
                 Expr {
@@ -745,7 +777,7 @@ impl<'t, 's> Parser<'t, 's> {
                     kind: ExprKind::Block(block),
                 }
             }
-            K::Name(_) | K::LBracket => {
+            K::Name(_) => {
                 return Err(self.error(
                     DiagnosticKind::Unsupported,
                     "this expression requires a later phase",
@@ -1016,6 +1048,45 @@ impl<'t, 's> Parser<'t, 's> {
                 } else {
                     PatternKind::Tuple(elements)
                 }
+            }
+            K::LBracket => {
+                self.advance();
+                self.newlines();
+                let mut elements = Vec::new();
+                let mut tail = None;
+                while self.current().kind != K::RBracket {
+                    if self.current().kind == K::Dot && self.peek(1).kind == K::Dot {
+                        let start = self.current().span.start;
+                        self.advance();
+                        self.advance();
+                        self.newlines();
+                        tail = Some(Box::new(
+                            if matches!(self.current().kind, K::RBracket | K::Comma) {
+                                Pattern {
+                                    kind: PatternKind::Any,
+                                    span: Span::new(start, self.previous_end()),
+                                }
+                            } else {
+                                self.pattern()?
+                            },
+                        ));
+                        self.newlines();
+                        self.take(K::Comma);
+                        self.newlines();
+                        break;
+                    }
+                    elements.push(self.pattern()?);
+                    self.newlines();
+                    if !self.take(K::Comma) {
+                        break;
+                    }
+                    self.newlines();
+                }
+                self.expect(
+                    K::RBracket,
+                    "expected ']' after list pattern; a spread must be last",
+                )?;
+                PatternKind::List { elements, tail }
             }
             K::Name(name) if name.as_bytes()[0].is_ascii_uppercase() => {
                 self.advance();

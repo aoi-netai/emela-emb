@@ -84,6 +84,10 @@ pub(crate) enum ExprKind {
         arms: Vec<Arm>,
     },
     Tuple(Vec<Expr>),
+    List {
+        elements: Vec<Expr>,
+        tail: Option<Box<Expr>>,
+    },
     Make {
         ctor: crate::contract::ir::CtorRef,
         args: Vec<Expr>,
@@ -145,6 +149,11 @@ pub(crate) enum PatternKind {
     Bind(Local),
     Literal(Literal),
     Tuple(Vec<Pattern>),
+    ListNil,
+    ListCons {
+        head: Box<Pattern>,
+        tail: Box<Pattern>,
+    },
     Constructor {
         ctor: crate::contract::ir::CtorRef,
         fields: Vec<Pattern>,
