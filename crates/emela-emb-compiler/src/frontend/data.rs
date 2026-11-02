@@ -12,6 +12,7 @@ pub(crate) struct Catalog {
     pub core: b::Definitions,
     pub declarations: Vec<Declaration>,
     types: Vec<HashMap<String, b::EnumId>>,
+    native_types: Vec<HashMap<String, b::TypeId>>,
     constructors: Vec<HashMap<String, b::CtorRef>>,
 }
 impl Catalog {
@@ -20,12 +21,43 @@ impl Catalog {
             core: b::Definitions::default(),
             declarations: Vec::new(),
             types: vec![HashMap::new(); modules.modules.len()],
+            native_types: vec![HashMap::new(); modules.modules.len()],
             constructors: vec![HashMap::new(); modules.modules.len()],
         };
         let mut errors = Vec::new();
         for (module_index, module) in modules.modules.iter().enumerate() {
             for data in &module.ast.data {
                 let mut validate = || -> Result<(), Diagnostic> {
+                    if let Some(span) = data.intrinsic {
+                        if !module.builtin
+                            || module.name != "Std.Bytes"
+                            || data.name.value != "Bytes"
+                            || !data.public
+                            || !data.opaque
+                            || data.error
+                            || !data.params.is_empty()
+                            || !data.derives.is_empty()
+                            || data.variants.len() != 1
+                            || !data.variants[0].fields.is_empty()
+                        {
+                            return Err(Diagnostic::new(
+                                DK::Type,
+                                span,
+                                "intrinsic data types require a compiler-owned declaration",
+                            ));
+                        }
+                        if catalog.native_types[module_index]
+                            .insert(data.name.value.clone(), b::TypeId::BYTES)
+                            .is_some()
+                        {
+                            return Err(Diagnostic::new(
+                                DK::Name,
+                                data.name.span,
+                                "duplicate intrinsic data type",
+                            ));
+                        }
+                        return Ok(());
+                    }
                     if !data
                         .name
                         .value
@@ -233,6 +265,34 @@ impl Catalog {
         } else {
             (text, Vec::new())
         };
+        if head == "List" {
+            if arguments.len() != 1 {
+                return Err(Diagnostic::new(
+                    DK::Type,
+                    span,
+                    "type 'List' expects one argument",
+                ));
+            }
+            let element = backend_type(self.type_text(
+                modules,
+                module,
+                arguments[0],
+                span,
+                params,
+                self_type,
+            )?);
+            return Ok(Ty::Compound(self.core.types.intern(b::Type::List(element))));
+        }
+        if let Some(ty) = self.lookup(modules, module, head, &self.native_types, false) {
+            if !arguments.is_empty() {
+                return Err(Diagnostic::new(
+                    DK::Type,
+                    span,
+                    "intrinsic type expects no arguments",
+                ));
+            }
+            return Ok(frontend_type(ty));
+        }
         let id = self
             .lookup_type(modules, module, head)
             .ok_or_else(|| Diagnostic::new(DK::Name, span, format!("undefined type '{head}'")))?;
@@ -338,6 +398,9 @@ impl Catalog {
     }
     pub fn type_id(&self, module: usize, name: &str) -> Option<b::EnumId> {
         self.types[module].get(name).copied()
+    }
+    pub fn has_native_type(&self, module: usize, name: &str) -> bool {
+        self.native_types[module].contains_key(name)
     }
     pub fn declaration(&self, id: b::EnumId) -> &Declaration {
         self.declarations

@@ -1,0 +1,5 @@
+import Std.Bytes.{Bytes}
+@export(c, "byte_size")
+pub fn size(b: Bytes) -> Int { Bytes.size(b) }
+@export(c, "byte_at")
+pub fn at(b: Bytes, index: Int) -> Int { Option.or(Bytes.get(b, index), -1) }

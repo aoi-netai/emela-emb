@@ -18,3 +18,33 @@ pub fn from_code_point(n: Int) -> Option[String]
 
 @intrinsic
 pub fn show_nested[A: Show](value: A) -> String
+
+# List-producing operations and their synchronous source helpers (legacy spec 16.2).
+pub fn concat(parts: List[String]) -> String { List.join(parts, "") }
+@intrinsic
+pub fn split(s: String, sep: String) -> List[String]
+@intrinsic
+pub fn chars(s: String) -> List[String]
+pub fn join(parts: List[String], sep: String) -> String { List.join(parts, sep) }
+@intrinsic
+pub fn code_points(s: String) -> List[Int]
+pub fn to_ascii_lowercase(s: String) -> String {
+  concat(List.reverse(ascii_parts(code_points(s), True, [])))
+}
+pub fn to_ascii_uppercase(s: String) -> String {
+  concat(List.reverse(ascii_parts(code_points(s), False, [])))
+}
+# Adapt only the legacy internal map lambda; public callback APIs remain P4.
+fn ascii_parts(points: List[Int], lower: Bool, acc: List[String]) -> List[String] {
+  points match {
+    [] -> acc
+    [c, ..rest] -> {
+      changed = if lower {
+        if c >= 65 && c <= 90 { c + 32 } else { c }
+      } else {
+        if c >= 97 && c <= 122 { c - 32 } else { c }
+      }
+      ascii_parts(rest, lower, [Option.or(from_code_point(changed), ""), ..acc])
+    }
+  }
+}

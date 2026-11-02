@@ -8,6 +8,14 @@ pub(super) fn allocate_raises(
     fn collect(expression: &ir::Expr, types: &mut std::collections::HashSet<b::TypeId>) {
         use ir::ExprKind as E;
         match &expression.kind {
+            E::List { elements, tail } => {
+                for element in elements {
+                    collect(element, types);
+                }
+                if let Some(tail) = tail {
+                    collect(tail, types);
+                }
+            }
             E::Fail(value) => {
                 types.insert(ty(value.ty));
                 collect(value, types);

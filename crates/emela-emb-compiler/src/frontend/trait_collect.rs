@@ -344,6 +344,10 @@ impl TraitCollection {
         for implementation in &self.implementations {
             let bounds = parameter_bounds(core, &implementation.bounds);
             let target = match implementation.head {
+                TypeHead::List => {
+                    let element = core.types.intern(b::Type::Param(0));
+                    core.types.intern(b::Type::List(element))
+                }
                 TypeHead::Enum(id) => {
                     let args = (0..implementation.bounds.len())
                         .map(|index| core.types.intern(b::Type::Param(index)))
@@ -356,6 +360,7 @@ impl TraitCollection {
                     super::traits::PrimitiveType::Float => b::TypeId::FLOAT,
                     super::traits::PrimitiveType::Bool => b::TypeId::BOOL,
                     super::traits::PrimitiveType::String => b::TypeId::STRING,
+                    super::traits::PrimitiveType::Bytes => b::TypeId::BYTES,
                     super::traits::PrimitiveType::Unit => b::TypeId::UNIT,
                     super::traits::PrimitiveType::Never => b::TypeId::NEVER,
                 },
@@ -1245,15 +1250,13 @@ fn existing_type(modules: &Modules, catalog: &Catalog, module: usize, name: &str
     ) {
         return true;
     }
-    if catalog.type_id(module, name).is_some() {
+    if catalog.type_id(module, name).is_some() || catalog.has_native_type(module, name) {
         return true;
     }
-    if modules
-        .modules
-        .iter()
-        .enumerate()
-        .any(|(index, module)| module.builtin && catalog.type_id(index, name).is_some())
-    {
+    if modules.modules.iter().enumerate().any(|(index, module)| {
+        module.builtin
+            && (catalog.type_id(index, name).is_some() || catalog.has_native_type(index, name))
+    }) {
         return true;
     }
     modules.modules[module].ast.imports.iter().any(|import| {
@@ -1262,7 +1265,9 @@ fn existing_type(modules: &Modules, catalog: &Catalog, module: usize, name: &str
             .as_ref()
             .is_some_and(|members| members.iter().any(|member| member.value == name))
             && modules.modules.iter().enumerate().any(|(index, module)| {
-                module.name == import.path.value && catalog.type_id(index, name).is_some()
+                module.name == import.path.value
+                    && (catalog.type_id(index, name).is_some()
+                        || catalog.has_native_type(index, name))
             })
     })
 }

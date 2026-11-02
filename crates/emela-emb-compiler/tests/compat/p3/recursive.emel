@@ -1,0 +1,22 @@
+# Fixed completion_types finite-changing source, with explicit C export.
+pub enum Nest[A] { End(A), Next(Nest[Bool]) }
+fn count(value: Nest[Bool]) -> Int {
+  value match { End(ok) -> if ok { 1 } else { 0 }
+    Next(rest) -> count(rest) + 1 }
+}
+@export(c, "finite_recursive")
+pub fn work(n: Int) -> Int {
+  value: Nest[Int] = if n == 0 { End(42) } else { Next(Next(End(n == 1))) }
+  value match { End(number) -> number
+    Next(rest) -> count(rest) + 1 }
+}
+enum Chain { Nil, Link(String, Chain) }
+fn build(n: Int, tail: Chain) -> Chain {
+  if n == 0 { tail } else { build(n - 1, Link(Int.to_string(n), tail)) }
+}
+@export(c, "deep_release")
+pub fn deep_release(n: Int) -> Int {
+  value = build(n, Nil)
+  value match { Nil -> 0
+    Link(text, _) -> String.byte_size(text) }
+}

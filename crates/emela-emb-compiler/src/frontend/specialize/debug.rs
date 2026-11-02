@@ -150,7 +150,7 @@ impl Specializer {
         self.debug_fallback.insert(id);
         let slot = self.functions.len();
         self.functions.push(function.clone());
-        function.body = Some(self.derive_body(&function, BuiltinTrait::Show, nested)?);
+        function.body = Some(self.derive_body(&function, BuiltinTrait::Show, nested, depth)?);
         self.function(&mut function, &[], depth + 1)?;
         self.functions[slot] = function;
         Ok(id)
@@ -163,6 +163,10 @@ fn maximum_local(function: &ir::Function) -> Option<usize> {
     fn pattern(value: &ir::Pattern, maximum: &mut Option<usize>) {
         match &value.kind {
             ir::PatternKind::Bind(local) => record(local.id, maximum),
+            ir::PatternKind::ListCons { head, tail } => {
+                pattern(head, maximum);
+                pattern(tail, maximum);
+            }
             ir::PatternKind::Tuple(fields) | ir::PatternKind::Constructor { fields, .. } => {
                 for field in fields {
                     pattern(field, maximum);
@@ -197,6 +201,14 @@ fn maximum_local(function: &ir::Function) -> Option<usize> {
         use ir::ExprKind as E;
         match &value.kind {
             E::Local(id) => record(*id, maximum),
+            E::List { elements, tail } => {
+                for value in elements {
+                    expression(value, maximum);
+                }
+                if let Some(tail) = tail {
+                    expression(tail, maximum);
+                }
+            }
             E::Call { args, .. }
             | E::Make { args, .. }
             | E::TraitCall { args, .. }

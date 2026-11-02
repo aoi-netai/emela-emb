@@ -103,6 +103,7 @@ impl Checker {
             }
             match self.catalog.core.ty(ty) {
                 Type::Tuple(fields) => pending.extend(fields),
+                Type::List(element) => pending.push(*element),
                 Type::Enum(id, args) => {
                     let declaration = self.catalog.declaration(*id);
                     for (argument, parameter) in args.iter().zip(&declaration.ast.params) {

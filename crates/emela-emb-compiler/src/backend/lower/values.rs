@@ -166,7 +166,48 @@ pub(super) fn value_type(
             }
             Ok(TypeId::INT)
         }
-        Value::Coerce(base) => operand(f, &Operand::Var(*base), available),
+        Value::List { elems, tail } => {
+            let inferred = match (expected, tail, elems.first()) {
+                (Some(ty), _, _) => Some(ty),
+                (_, Some(tail), _) => Some(operand(f, tail, available)?),
+                (_, _, Some(first)) => Some(list_type(program, f, operand(f, first, available)?)?),
+                _ => None,
+            };
+            let ty = inferred
+                .ok_or_else(|| invalid(&f.name, "empty List needs a concrete destination type"))?;
+            let Type::List(element) = program.core.ty(ty) else {
+                return Err(invalid(&f.name, "List destination is not a List"));
+            };
+            for item in elems {
+                expect_type(f, operand(f, item, available)?, *element)?;
+            }
+            if let Some(tail) = tail {
+                expect_type(f, operand(f, tail, available)?, ty)?;
+            }
+            Ok(ty)
+        }
+        Value::ListIsEmpty(base) | Value::ListHead(base) | Value::ListTail(base) => {
+            let ty = operand(f, &Operand::Var(*base), available)?;
+            let Type::List(element) = program.core.ty(ty) else {
+                return Err(invalid(&f.name, "List operation base is not a List"));
+            };
+            Ok(match value {
+                Value::ListIsEmpty(_) => TypeId::BOOL,
+                Value::ListHead(_) => *element,
+                _ => ty,
+            })
+        }
+        Value::Coerce(base) => {
+            let source = operand(f, &Operand::Var(*base), available)?;
+            let destination = expected.unwrap_or(source);
+            if source != destination && source != TypeId::ANY && destination != TypeId::ANY {
+                return Err(invalid(
+                    &f.name,
+                    "data coercion requires identical types or Any",
+                ));
+            }
+            Ok(destination)
+        }
         Value::IsError {
             error,
             enum_id,
@@ -278,6 +319,30 @@ fn builtin_type(
             (vec![TypeId::STRING; 2], TypeId::BOOL)
         }
         StringTrim => (vec![TypeId::STRING], TypeId::STRING),
+        StringSplit => (
+            vec![TypeId::STRING; 2],
+            list_type(program, f, TypeId::STRING)?,
+        ),
+        StringChars => (vec![TypeId::STRING], list_type(program, f, TypeId::STRING)?),
+        StringCodePoints => (vec![TypeId::STRING], list_type(program, f, TypeId::INT)?),
+        StringJoin => (
+            vec![list_type(program, f, TypeId::STRING)?, TypeId::STRING],
+            TypeId::STRING,
+        ),
+        BytesToList => (vec![TypeId::BYTES], list_type(program, f, TypeId::INT)?),
+        BytesSize => (vec![TypeId::BYTES], TypeId::INT),
+        BytesSlice => (vec![TypeId::BYTES, TypeId::INT, TypeId::INT], TypeId::BYTES),
+        BytesConcat => (vec![list_type(program, f, TypeId::BYTES)?], TypeId::BYTES),
+        BytesEncodeUtf8 => (vec![TypeId::STRING], TypeId::BYTES),
+        BytesDecodeValidUtf8 => (vec![TypeId::BYTES], TypeId::STRING),
+        BytesFromList | BytesGet => {
+            let (inputs, payload) = match op {
+                BytesFromList => (vec![list_type(program, f, TypeId::INT)?], TypeId::BYTES),
+                _ => (vec![TypeId::BYTES, TypeId::INT], TypeId::INT),
+            };
+            arguments(f, args, &inputs, available)?;
+            return types::option_type(program, &f.name, payload, expected);
+        }
         IntParse | FloatParse | IntCheckedAdd | StringFromCodePoint => {
             let (inputs, payload) = match op {
                 IntParse => (vec![TypeId::STRING], TypeId::INT),
@@ -292,4 +357,14 @@ fn builtin_type(
     };
     arguments(f, args, &inputs, available)?;
     Ok(result)
+}
+
+fn list_type(program: &Program, f: &Function, element: TypeId) -> Result<TypeId> {
+    program
+        .core
+        .types
+        .ids
+        .get(&Type::List(element))
+        .copied()
+        .ok_or_else(|| invalid(&f.name, "List type is missing from the type catalog"))
 }

@@ -591,7 +591,9 @@ impl Checker {
                             Some(Symbol::Function(*id))
                         } else if let Some(constant) = constant(&import.path.value, &member.value) {
                             Some(Symbol::Constant(constant))
-                        } else if self.traits.find_trait(index, &member.value).is_some() {
+                        } else if self.traits.find_trait(index, &member.value).is_some()
+                            || self.catalog.has_native_type(target, &member.value)
+                        {
                             continue;
                         } else if let Some(id) = self.catalog.type_id(target, &member.value) {
                             if !self.catalog.declaration(id).ast.public {
@@ -1152,6 +1154,44 @@ impl Checker {
                         arms: checked,
                     },
                     result,
+                )
+            }
+            A::List { elements, tail } => {
+                let element = match expected
+                    .map(data::backend_type)
+                    .map(|id| self.catalog.core.ty(id))
+                {
+                    Some(crate::contract::ir::Type::List(element)) => *element,
+                    _ => self
+                        .solver
+                        .try_fresh(&mut self.catalog.core.types, super::infer::Constraint::Any)
+                        .map_err(|e| self.error(module, DK::Type, span, e.message))?,
+                };
+                let list = Ty::Compound(
+                    self.catalog
+                        .core
+                        .types
+                        .intern(crate::contract::ir::Type::List(element)),
+                );
+                let mut checked = Vec::new();
+                for value in elements {
+                    checked.push(self.expr(
+                        module,
+                        value,
+                        locals,
+                        Some(data::frontend_type(element)),
+                    )?);
+                }
+                let tail = tail
+                    .as_ref()
+                    .map(|tail| self.expr(module, tail, locals, Some(list)).map(Box::new))
+                    .transpose()?;
+                (
+                    ir::ExprKind::List {
+                        elements: checked,
+                        tail,
+                    },
+                    list,
                 )
             }
             A::Tuple(elements) => {
@@ -1873,6 +1913,43 @@ impl Checker {
                     literal
                 };
                 ir::PatternKind::Literal(literal)
+            }
+            P::List { elements, tail } => {
+                let value_type = self.resolve_type(module, value_type, span)?;
+                let Type::List(element) = self.catalog.core.ty(data::backend_type(value_type))
+                else {
+                    return Err(self.error(
+                        module,
+                        DK::Type,
+                        span,
+                        "list pattern requires a List value",
+                    ));
+                };
+                let element = data::frontend_type(*element);
+                let mut checked = Vec::new();
+                for value in elements {
+                    checked.push(self.pattern(module, value, element, locals, names)?);
+                }
+                let mut result = if let Some(tail) = tail {
+                    self.pattern(module, tail, value_type, locals, names)?
+                } else {
+                    ir::Pattern {
+                        kind: ir::PatternKind::ListNil,
+                        ty: value_type,
+                        span,
+                    }
+                };
+                for head in checked.into_iter().rev() {
+                    result = ir::Pattern {
+                        kind: ir::PatternKind::ListCons {
+                            head: Box::new(head),
+                            tail: Box::new(result),
+                        },
+                        ty: value_type,
+                        span,
+                    };
+                }
+                return Ok(result);
             }
             P::Tuple(fields) => {
                 let Type::Tuple(types) = self.catalog.core.ty(data::backend_type(value_type))

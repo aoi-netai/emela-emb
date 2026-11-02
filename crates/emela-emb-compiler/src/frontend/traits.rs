@@ -31,6 +31,7 @@ pub(crate) enum PrimitiveType {
     Float,
     Bool,
     String,
+    Bytes,
     Unit,
     Never,
 }
@@ -42,6 +43,7 @@ impl PrimitiveType {
             Self::Float => TypeId::FLOAT,
             Self::Bool => TypeId::BOOL,
             Self::String => TypeId::STRING,
+            Self::Bytes => TypeId::BYTES,
             Self::Unit => TypeId::UNIT,
             Self::Never => TypeId::NEVER,
         }
@@ -51,6 +53,7 @@ impl PrimitiveType {
 pub(crate) enum TypeHead {
     Primitive(PrimitiveType),
     Enum(EnumId),
+    List,
 }
 #[derive(Clone, Debug)]
 pub(crate) struct Impl {
@@ -324,9 +327,11 @@ impl Registry {
             Type::Float => Some(TypeHead::Primitive(PrimitiveType::Float)),
             Type::Bool => Some(TypeHead::Primitive(PrimitiveType::Bool)),
             Type::String => Some(TypeHead::Primitive(PrimitiveType::String)),
+            Type::Bytes => Some(TypeHead::Primitive(PrimitiveType::Bytes)),
             Type::Unit => Some(TypeHead::Primitive(PrimitiveType::Unit)),
             Type::Never => Some(TypeHead::Primitive(PrimitiveType::Never)),
             Type::Enum(id, _) => Some(TypeHead::Enum(*id)),
+            Type::List(_) => Some(TypeHead::List),
             _ => None,
         })
     }
@@ -339,6 +344,7 @@ impl Registry {
         }
         let (parameters, type_is_local) = match implementation.head {
             TypeHead::Primitive(_) => (0, false),
+            TypeHead::List => (1, false),
             TypeHead::Enum(id) => {
                 let definition = core
                     .enums
@@ -420,6 +426,7 @@ impl Registry {
             let ty = match implementation.head {
                 TypeHead::Primitive(kind) => kind.ty(),
                 TypeHead::Enum(id) => core.types.intern(Type::Enum(id, args.clone())),
+                TypeHead::List => core.types.intern(Type::List(args[0])),
             };
             let bounds: ParamBounds = args
                 .into_iter()
@@ -470,8 +477,9 @@ impl Registry {
                     implementation.head == head && implementation.trait_id == trait_id
                 }) {
                     let args = match node {
-                        Type::Enum(_, args) => args.as_slice(),
-                        _ => &[],
+                        Type::Enum(_, args) => args.clone(),
+                        Type::List(element) => vec![*element],
+                        _ => vec![],
                     };
                     if args.len() != implementation.type_parameters.len() {
                         return Err(error(
@@ -500,6 +508,9 @@ impl Registry {
             let supported = match node {
                 Type::Int | Type::Int64 | Type::Bool | Type::String | Type::Unit => true,
                 Type::Float => kind != BuiltinTrait::Ord,
+                Type::List(element) => {
+                    self.satisfies_inner(core, *element, trait_id, bounds, active)?
+                }
                 Type::Tuple(fields) => {
                     let mut all = true;
                     for &field in fields {
@@ -648,6 +659,7 @@ impl Registry {
                 if let Some(&definition) = implementation.methods.get(name) {
                     let arguments = match Self::node(core, ty)? {
                         Type::Enum(_, args) => args.clone(),
+                        Type::List(element) => vec![*element],
                         _ => vec![],
                     };
                     return Ok(ResolvedMethod {

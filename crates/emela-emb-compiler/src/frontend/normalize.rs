@@ -152,6 +152,14 @@ impl Context<'_> {
         use ir::ExprKind as E;
         match &mut expression.kind {
             E::Literal(_) | E::Local(_) => {}
+            E::List { elements, tail } => {
+                for value in elements {
+                    self.expression(value)?;
+                }
+                if let Some(tail) = tail {
+                    self.expression(tail)?;
+                }
+            }
             E::Concat(values)
             | E::Tuple(values)
             | E::Make { args: values, .. }
@@ -259,6 +267,10 @@ impl Context<'_> {
             }
 
             ir::PatternKind::Bind(local) => self.ty(&mut local.ty, pattern.span)?,
+            ir::PatternKind::ListCons { head, tail } => {
+                self.pattern(head)?;
+                self.pattern(tail)?;
+            }
             ir::PatternKind::Tuple(fields) | ir::PatternKind::Constructor { fields, .. } => {
                 for field in fields {
                     self.pattern(field)?;

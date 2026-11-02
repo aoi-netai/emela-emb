@@ -245,6 +245,8 @@ impl Checker {
             Type::Float => "Float",
             Type::Bool => "Bool",
             Type::String => "String",
+            Type::List(_) => "List",
+            Type::Bytes => "Std.Bytes",
             Type::Unit => "Unit",
             _ => return None,
         };

@@ -296,6 +296,14 @@ impl Context<'_> {
                     analysis.merge(self.expression(arg, dynamic)?);
                 }
             }
+            E::List { elements, tail } => {
+                for element in elements {
+                    analysis.merge(self.expression(element, dynamic)?);
+                }
+                if let Some(tail) = tail {
+                    analysis.merge(self.expression(tail, dynamic)?);
+                }
+            }
             E::Unary { value, .. }
             | E::Assert(value)
             | E::Tag(value)

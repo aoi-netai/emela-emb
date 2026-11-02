@@ -83,9 +83,9 @@
       "id": "emela_core::Builtin::BytesConcat",
       "relation": "variant_entry",
       "legacy_role": "emit",
-      "phase": null,
-      "status": "mapped",
-      "source_scope": "unclassified",
+      "phase": "P3",
+      "status": "verified",
+      "source_scope": "source",
       "new_implementation": [
         {
           "kind": "implementation",
@@ -106,23 +106,47 @@
           "kind": "implementation",
           "path": "crates/emela-emb-compiler/src/backend/plan/operations/builtins/bytes.rs",
           "symbol": "require_runtime"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/frontend/lower.rs"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/sources.rs"
         }
       ],
       "evidence": [
         {
           "kind": "review",
           "path": "docs/migration-source.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p3_bytes.rs"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p3_memory_api.rs"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/memory_tests.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p3.md"
         }
       ],
-      "reason": "固定revisionの独立backend入口を採用。source・全実行文脈・所有権等の完了は個別の実行証拠が揃うまで判定しない。"
+      "reason": "信頼済みStd.Bytes宣言から同期source/Cへ接続。70000byteの長さ、unsigned要素、借用snapshot・alias・所有adapter、List往復の不正値、UTF-8とString容量、結果破棄のdefectを-O0/-O2で確認。各正常呼出し後のheap全解放を観測。"
     },
     {
       "id": "emela_core::Builtin::BytesDecodeValidUtf8",
       "relation": "variant_entry",
       "legacy_role": "emit",
-      "phase": null,
-      "status": "mapped",
-      "source_scope": "unclassified",
+      "phase": "P3",
+      "status": "verified",
+      "source_scope": "source",
       "new_implementation": [
         {
           "kind": "implementation",
@@ -143,23 +167,47 @@
           "kind": "implementation",
           "path": "crates/emela-emb-compiler/src/backend/plan/operations/builtins/bytes.rs",
           "symbol": "require_runtime"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/frontend/lower.rs"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/sources.rs"
         }
       ],
       "evidence": [
         {
           "kind": "review",
           "path": "docs/migration-source.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p3_bytes.rs"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p3_memory_api.rs"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/memory_tests.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p3.md"
         }
       ],
-      "reason": "固定revisionの独立backend入口を採用。source・全実行文脈・所有権等の完了は個別の実行証拠が揃うまで判定しない。"
+      "reason": "信頼済みStd.Bytes宣言から同期source/Cへ接続。70000byteの長さ、unsigned要素、借用snapshot・alias・所有adapter、List往復の不正値、UTF-8とString容量、結果破棄のdefectを-O0/-O2で確認。各正常呼出し後のheap全解放を観測。"
     },
     {
       "id": "emela_core::Builtin::BytesEncodeUtf8",
       "relation": "variant_entry",
       "legacy_role": "emit",
-      "phase": null,
-      "status": "mapped",
-      "source_scope": "unclassified",
+      "phase": "P3",
+      "status": "verified",
+      "source_scope": "source",
       "new_implementation": [
         {
           "kind": "implementation",
@@ -180,23 +228,47 @@
           "kind": "implementation",
           "path": "crates/emela-emb-compiler/src/backend/plan/operations/builtins/bytes.rs",
           "symbol": "require_runtime"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/frontend/lower.rs"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/sources.rs"
         }
       ],
       "evidence": [
         {
           "kind": "review",
           "path": "docs/migration-source.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p3_bytes.rs"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p3_memory_api.rs"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/memory_tests.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p3.md"
         }
       ],
-      "reason": "固定revisionの独立backend入口を採用。source・全実行文脈・所有権等の完了は個別の実行証拠が揃うまで判定しない。"
+      "reason": "信頼済みStd.Bytes宣言から同期source/Cへ接続。70000byteの長さ、unsigned要素、借用snapshot・alias・所有adapter、List往復の不正値、UTF-8とString容量、結果破棄のdefectを-O0/-O2で確認。各正常呼出し後のheap全解放を観測。"
     },
     {
       "id": "emela_core::Builtin::BytesFromList",
       "relation": "variant_entry",
       "legacy_role": "emit",
-      "phase": null,
-      "status": "mapped",
-      "source_scope": "unclassified",
+      "phase": "P3",
+      "status": "verified",
+      "source_scope": "source",
       "new_implementation": [
         {
           "kind": "implementation",
@@ -217,23 +289,47 @@
           "kind": "implementation",
           "path": "crates/emela-emb-compiler/src/backend/plan/operations/builtins/bytes.rs",
           "symbol": "require_runtime"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/frontend/lower.rs"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/sources.rs"
         }
       ],
       "evidence": [
         {
           "kind": "review",
           "path": "docs/migration-source.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p3_bytes.rs"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p3_memory_api.rs"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/memory_tests.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p3.md"
         }
       ],
-      "reason": "固定revisionの独立backend入口を採用。source・全実行文脈・所有権等の完了は個別の実行証拠が揃うまで判定しない。"
+      "reason": "信頼済みStd.Bytes宣言から同期source/Cへ接続。70000byteの長さ、unsigned要素、借用snapshot・alias・所有adapter、List往復の不正値、UTF-8とString容量、結果破棄のdefectを-O0/-O2で確認。各正常呼出し後のheap全解放を観測。"
     },
     {
       "id": "emela_core::Builtin::BytesGet",
       "relation": "variant_entry",
       "legacy_role": "emit",
-      "phase": null,
-      "status": "mapped",
-      "source_scope": "unclassified",
+      "phase": "P3",
+      "status": "verified",
+      "source_scope": "source",
       "new_implementation": [
         {
           "kind": "implementation",
@@ -254,23 +350,47 @@
           "kind": "implementation",
           "path": "crates/emela-emb-compiler/src/backend/plan/operations/builtins/bytes.rs",
           "symbol": "require_runtime"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/frontend/lower.rs"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/sources.rs"
         }
       ],
       "evidence": [
         {
           "kind": "review",
           "path": "docs/migration-source.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p3_bytes.rs"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p3_memory_api.rs"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/memory_tests.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p3.md"
         }
       ],
-      "reason": "固定revisionの独立backend入口を採用。source・全実行文脈・所有権等の完了は個別の実行証拠が揃うまで判定しない。"
+      "reason": "信頼済みStd.Bytes宣言から同期source/Cへ接続。70000byteの長さ、unsigned要素、借用snapshot・alias・所有adapter、List往復の不正値、UTF-8とString容量、結果破棄のdefectを-O0/-O2で確認。各正常呼出し後のheap全解放を観測。"
     },
     {
       "id": "emela_core::Builtin::BytesSize",
       "relation": "variant_entry",
       "legacy_role": "emit",
-      "phase": null,
-      "status": "mapped",
-      "source_scope": "unclassified",
+      "phase": "P3",
+      "status": "verified",
+      "source_scope": "source",
       "new_implementation": [
         {
           "kind": "implementation",
@@ -291,23 +411,47 @@
           "kind": "implementation",
           "path": "crates/emela-emb-compiler/src/backend/plan/operations/builtins/bytes.rs",
           "symbol": "require_runtime"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/frontend/lower.rs"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/sources.rs"
         }
       ],
       "evidence": [
         {
           "kind": "review",
           "path": "docs/migration-source.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p3_bytes.rs"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p3_memory_api.rs"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/memory_tests.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p3.md"
         }
       ],
-      "reason": "固定revisionの独立backend入口を採用。source・全実行文脈・所有権等の完了は個別の実行証拠が揃うまで判定しない。"
+      "reason": "信頼済みStd.Bytes宣言から同期source/Cへ接続。70000byteの長さ、unsigned要素、借用snapshot・alias・所有adapter、List往復の不正値、UTF-8とString容量、結果破棄のdefectを-O0/-O2で確認。各正常呼出し後のheap全解放を観測。"
     },
     {
       "id": "emela_core::Builtin::BytesSlice",
       "relation": "variant_entry",
       "legacy_role": "emit",
-      "phase": null,
-      "status": "mapped",
-      "source_scope": "unclassified",
+      "phase": "P3",
+      "status": "verified",
+      "source_scope": "source",
       "new_implementation": [
         {
           "kind": "implementation",
@@ -328,23 +472,47 @@
           "kind": "implementation",
           "path": "crates/emela-emb-compiler/src/backend/plan/operations/builtins/bytes.rs",
           "symbol": "require_runtime"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/frontend/lower.rs"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/sources.rs"
         }
       ],
       "evidence": [
         {
           "kind": "review",
           "path": "docs/migration-source.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p3_bytes.rs"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p3_memory_api.rs"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/memory_tests.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p3.md"
         }
       ],
-      "reason": "固定revisionの独立backend入口を採用。source・全実行文脈・所有権等の完了は個別の実行証拠が揃うまで判定しない。"
+      "reason": "信頼済みStd.Bytes宣言から同期source/Cへ接続。70000byteの長さ、unsigned要素、借用snapshot・alias・所有adapter、List往復の不正値、UTF-8とString容量、結果破棄のdefectを-O0/-O2で確認。各正常呼出し後のheap全解放を観測。"
     },
     {
       "id": "emela_core::Builtin::BytesToList",
       "relation": "variant_entry",
       "legacy_role": "emit",
-      "phase": null,
-      "status": "mapped",
-      "source_scope": "unclassified",
+      "phase": "P3",
+      "status": "verified",
+      "source_scope": "source",
       "new_implementation": [
         {
           "kind": "implementation",
@@ -365,15 +533,39 @@
           "kind": "implementation",
           "path": "crates/emela-emb-compiler/src/backend/plan/operations/builtins/bytes.rs",
           "symbol": "require_runtime"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/frontend/lower.rs"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/sources.rs"
         }
       ],
       "evidence": [
         {
           "kind": "review",
           "path": "docs/migration-source.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p3_bytes.rs"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p3_memory_api.rs"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/memory_tests.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p3.md"
         }
       ],
-      "reason": "固定revisionの独立backend入口を採用。source・全実行文脈・所有権等の完了は個別の実行証拠が揃うまで判定しない。"
+      "reason": "信頼済みStd.Bytes宣言から同期source/Cへ接続。70000byteの長さ、unsigned要素、借用snapshot・alias・所有adapter、List往復の不正値、UTF-8とString容量、結果破棄のdefectを-O0/-O2で確認。各正常呼出し後のheap全解放を観測。"
     },
     {
       "id": "emela_core::Builtin::CellGet",
@@ -1992,9 +2184,9 @@
       "id": "emela_core::Builtin::StringChars",
       "relation": "variant_entry",
       "legacy_role": "emit",
-      "phase": null,
-      "status": "mapped",
-      "source_scope": "unclassified",
+      "phase": "P3",
+      "status": "verified",
+      "source_scope": "source",
       "new_implementation": [
         {
           "kind": "implementation",
@@ -2005,23 +2197,47 @@
           "kind": "implementation",
           "path": "crates/emela-emb-compiler/src/backend/plan/operations/builtins/string_chars.rs",
           "symbol": "require_runtime"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/frontend/lower.rs"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/sources.rs"
         }
       ],
       "evidence": [
         {
           "kind": "review",
           "path": "docs/migration-source.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p3_unicode.rs"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p3_memory_api.rs"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/memory_tests.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p3.md"
         }
       ],
-      "reason": "固定revisionの独立backend入口を採用。source・全実行文脈・所有権等の完了は個別の実行証拠が揃うまで判定しない。"
+      "reason": "Unicode18の全853vectorについてsourceから各clusterのbyte境界・全code point・join再構成をC両最適化で確認。4KiB heapの3回再利用と、不正UTF-8で結果破棄してもdefectを維持することを確認。"
     },
     {
       "id": "emela_core::Builtin::StringCodePoints",
       "relation": "variant_entry",
       "legacy_role": "emit",
-      "phase": null,
-      "status": "mapped",
-      "source_scope": "unclassified",
+      "phase": "P3",
+      "status": "verified",
+      "source_scope": "source",
       "new_implementation": [
         {
           "kind": "implementation",
@@ -2032,15 +2248,39 @@
           "kind": "implementation",
           "path": "crates/emela-emb-compiler/src/backend/plan/operations/builtins/string_code_points.rs",
           "symbol": "require_runtime"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/frontend/lower.rs"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/sources.rs"
         }
       ],
       "evidence": [
         {
           "kind": "review",
           "path": "docs/migration-source.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p3_unicode.rs"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p3_memory_api.rs"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/memory_tests.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p3.md"
         }
       ],
-      "reason": "固定revisionの独立backend入口を採用。source・全実行文脈・所有権等の完了は個別の実行証拠が揃うまで判定しない。"
+      "reason": "Unicode18の全853vectorについてsourceから各clusterのbyte境界・全code point・join再構成をC両最適化で確認。4KiB heapの3回再利用と、不正UTF-8で結果破棄してもdefectを維持することを確認。"
     },
     {
       "id": "emela_core::Builtin::StringContains",
@@ -3984,9 +4224,9 @@
       "id": "emela_core::Type::Any",
       "relation": "variant_entry",
       "legacy_role": "metadata",
-      "phase": null,
+      "phase": "P6",
       "status": "mapped",
-      "source_scope": "unclassified",
+      "source_scope": "ir_only",
       "new_implementation": [
         {
           "kind": "implementation",
@@ -3998,9 +4238,21 @@
         {
           "kind": "review",
           "path": "docs/migration-source.md"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/memory_tests.rs"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p3_ownership.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p3.md"
         }
       ],
-      "reason": "固定revisionの独立backend入口を採用。source・全実行文脈・所有権等の完了は個別の実行証拠が揃うまで判定しない。"
+      "reason": "独自IRのString/List box/unboxと同期error payloadの所有権を確認。Anyという公開source構文は追加しない。関数値・suspend/cancelのpayloadは後段。"
     },
     {
       "id": "emela_core::Type::Bool",
@@ -4048,9 +4300,9 @@
       "id": "emela_core::Type::Bytes",
       "relation": "variant_entry",
       "legacy_role": "metadata",
-      "phase": null,
+      "phase": "P6",
       "status": "mapped",
-      "source_scope": "unclassified",
+      "source_scope": "source",
       "new_implementation": [
         {
           "kind": "implementation",
@@ -4062,9 +4314,17 @@
         {
           "kind": "review",
           "path": "docs/migration-source.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p3_bytes.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p3.md"
         }
       ],
-      "reason": "固定revisionの独立backend入口を採用。source・全実行文脈・所有権等の完了は個別の実行証拠が揃うまで判定しない。"
+      "reason": "信頼済みnative Bytesのu32長・view/owner・公開C保持/解放を同期source/Cで確認。closure/State/suspend/cancelの寿命はP4以降。"
     },
     {
       "id": "emela_core::Type::Cell",
@@ -4446,9 +4706,9 @@
       "id": "emela_core::Type::List",
       "relation": "variant_entry",
       "legacy_role": "metadata",
-      "phase": null,
+      "phase": "P5",
       "status": "mapped",
-      "source_scope": "unclassified",
+      "source_scope": "source",
       "new_implementation": [
         {
           "kind": "implementation",
@@ -4460,15 +4720,27 @@
         {
           "kind": "review",
           "path": "docs/migration-source.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p3_lists.rs"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p3_ownership.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p3.md"
         }
       ],
-      "reason": "固定revisionの独立backend入口を採用。source・全実行文脈・所有権等の完了は個別の実行証拠が揃うまで判定しない。"
+      "reason": "Listの構築・spread・pattern・型検査・標準API・所有権の同期source/Cを確認。suspendをまたぐ寿命はP5/P6で確認する。"
     },
     {
       "id": "emela_core::Type::List.0",
       "relation": "member_of_variant",
       "legacy_role": "metadata",
-      "phase": null,
+      "phase": "P5",
       "status": "mapped",
       "source_scope": "schema",
       "new_implementation": [
@@ -4482,9 +4754,21 @@
         {
           "kind": "review",
           "path": "docs/migration-source.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p3_lists.rs"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p3_ownership.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p3.md"
         }
       ],
-      "reason": "固定revisionの独立backend入口を採用。source・全実行文脈・所有権等の完了は個別の実行証拠が揃うまで判定しない。"
+      "reason": "要素TypeIdを型推論・具体化・layout・要素の保持/解放へ接続。Int/Unit/Int64/String/tuple/enumの同期source/Cを確認。中断経路のschema利用は後段。"
     },
     {
       "id": "emela_core::Type::Never",
@@ -7789,9 +8073,9 @@
       "id": "emela_lir::Repr::Ref",
       "relation": "variant_entry",
       "legacy_role": "metadata",
-      "phase": null,
+      "phase": "P6",
       "status": "mapped",
-      "source_scope": "unclassified",
+      "source_scope": "schema",
       "new_implementation": [
         {
           "kind": "implementation",
@@ -7803,9 +8087,21 @@
         {
           "kind": "review",
           "path": "docs/migration-source.md"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/memory_tests.rs"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p3_ownership.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p3.md"
         }
       ],
-      "reason": "固定revisionの独立backend入口を採用。source・全実行文脈・所有権等の完了は個別の実行証拠が揃うまで判定しない。"
+      "reason": "List/Bytes/再帰辺/Anyの固定heap参照・保持/深い反復解放を確認。Cell/closure cycle・suspend/cancelを含む参照全体は後段。"
     },
     {
       "id": "emela_lir::Repr::Void",
@@ -11674,9 +11970,9 @@
       "id": "emela_lir::Value::List",
       "relation": "variant_entry",
       "legacy_role": "emit",
-      "phase": null,
+      "phase": "P5",
       "status": "mapped",
-      "source_scope": "unclassified",
+      "source_scope": "source",
       "new_implementation": [
         {
           "kind": "implementation",
@@ -11703,15 +11999,31 @@
         {
           "kind": "review",
           "path": "docs/migration-source.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p3_lists.rs"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p3_ownership.rs"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/memory_tests.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p3.md"
         }
       ],
-      "reason": "固定revisionの独立backend入口を採用。source・全実行文脈・所有権等の完了は個別の実行証拠が揃うまで判定しない。"
+      "reason": "List構築の要素順/spread tail、空判定、head/tail読取りと共有tailの所有権を同期source/Cで確認。要素型/網羅性の拒否試験を含む。suspend contextは未完了として維持。"
     },
     {
       "id": "emela_lir::Value::List.elems",
       "relation": "member_of_variant",
       "legacy_role": "emit",
-      "phase": null,
+      "phase": "P5",
       "status": "mapped",
       "source_scope": "schema",
       "new_implementation": [
@@ -11740,15 +12052,31 @@
         {
           "kind": "review",
           "path": "docs/migration-source.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p3_lists.rs"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p3_ownership.rs"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/memory_tests.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p3.md"
         }
       ],
-      "reason": "固定revisionの独立backend入口を採用。source・全実行文脈・所有権等の完了は個別の実行証拠が揃うまで判定しない。"
+      "reason": "List構築の要素順/spread tail、空判定、head/tail読取りと共有tailの所有権を同期source/Cで確認。要素型/網羅性の拒否試験を含む。suspend contextは未完了として維持。"
     },
     {
       "id": "emela_lir::Value::List.tail",
       "relation": "member_of_variant",
       "legacy_role": "emit",
-      "phase": null,
+      "phase": "P5",
       "status": "mapped",
       "source_scope": "schema",
       "new_implementation": [
@@ -11777,17 +12105,33 @@
         {
           "kind": "review",
           "path": "docs/migration-source.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p3_lists.rs"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p3_ownership.rs"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/memory_tests.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p3.md"
         }
       ],
-      "reason": "固定revisionの独立backend入口を採用。source・全実行文脈・所有権等の完了は個別の実行証拠が揃うまで判定しない。"
+      "reason": "List構築の要素順/spread tail、空判定、head/tail読取りと共有tailの所有権を同期source/Cで確認。要素型/網羅性の拒否試験を含む。suspend contextは未完了として維持。"
     },
     {
       "id": "emela_lir::Value::ListHead",
       "relation": "variant_entry",
       "legacy_role": "emit",
-      "phase": null,
+      "phase": "P5",
       "status": "mapped",
-      "source_scope": "unclassified",
+      "source_scope": "source",
       "new_implementation": [
         {
           "kind": "implementation",
@@ -11809,15 +12153,31 @@
         {
           "kind": "review",
           "path": "docs/migration-source.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p3_lists.rs"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p3_ownership.rs"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/memory_tests.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p3.md"
         }
       ],
-      "reason": "固定revisionの独立backend入口を採用。source・全実行文脈・所有権等の完了は個別の実行証拠が揃うまで判定しない。"
+      "reason": "List構築の要素順/spread tail、空判定、head/tail読取りと共有tailの所有権を同期source/Cで確認。要素型/網羅性の拒否試験を含む。suspend contextは未完了として維持。"
     },
     {
       "id": "emela_lir::Value::ListHead.0",
       "relation": "member_of_variant",
       "legacy_role": "emit",
-      "phase": null,
+      "phase": "P5",
       "status": "mapped",
       "source_scope": "schema",
       "new_implementation": [
@@ -11841,17 +12201,33 @@
         {
           "kind": "review",
           "path": "docs/migration-source.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p3_lists.rs"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p3_ownership.rs"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/memory_tests.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p3.md"
         }
       ],
-      "reason": "固定revisionの独立backend入口を採用。source・全実行文脈・所有権等の完了は個別の実行証拠が揃うまで判定しない。"
+      "reason": "List構築の要素順/spread tail、空判定、head/tail読取りと共有tailの所有権を同期source/Cで確認。要素型/網羅性の拒否試験を含む。suspend contextは未完了として維持。"
     },
     {
       "id": "emela_lir::Value::ListIsEmpty",
       "relation": "variant_entry",
       "legacy_role": "emit",
-      "phase": null,
+      "phase": "P5",
       "status": "mapped",
-      "source_scope": "unclassified",
+      "source_scope": "source",
       "new_implementation": [
         {
           "kind": "implementation",
@@ -11863,15 +12239,31 @@
         {
           "kind": "review",
           "path": "docs/migration-source.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p3_lists.rs"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p3_ownership.rs"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/memory_tests.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p3.md"
         }
       ],
-      "reason": "固定revisionの独立backend入口を採用。source・全実行文脈・所有権等の完了は個別の実行証拠が揃うまで判定しない。"
+      "reason": "List構築の要素順/spread tail、空判定、head/tail読取りと共有tailの所有権を同期source/Cで確認。要素型/網羅性の拒否試験を含む。suspend contextは未完了として維持。"
     },
     {
       "id": "emela_lir::Value::ListIsEmpty.0",
       "relation": "member_of_variant",
       "legacy_role": "emit",
-      "phase": null,
+      "phase": "P5",
       "status": "mapped",
       "source_scope": "schema",
       "new_implementation": [
@@ -11885,17 +12277,33 @@
         {
           "kind": "review",
           "path": "docs/migration-source.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p3_lists.rs"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p3_ownership.rs"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/memory_tests.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p3.md"
         }
       ],
-      "reason": "固定revisionの独立backend入口を採用。source・全実行文脈・所有権等の完了は個別の実行証拠が揃うまで判定しない。"
+      "reason": "List構築の要素順/spread tail、空判定、head/tail読取りと共有tailの所有権を同期source/Cで確認。要素型/網羅性の拒否試験を含む。suspend contextは未完了として維持。"
     },
     {
       "id": "emela_lir::Value::ListTail",
       "relation": "variant_entry",
       "legacy_role": "emit",
-      "phase": null,
+      "phase": "P5",
       "status": "mapped",
-      "source_scope": "unclassified",
+      "source_scope": "source",
       "new_implementation": [
         {
           "kind": "implementation",
@@ -11917,15 +12325,31 @@
         {
           "kind": "review",
           "path": "docs/migration-source.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p3_lists.rs"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p3_ownership.rs"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/memory_tests.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p3.md"
         }
       ],
-      "reason": "固定revisionの独立backend入口を採用。source・全実行文脈・所有権等の完了は個別の実行証拠が揃うまで判定しない。"
+      "reason": "List構築の要素順/spread tail、空判定、head/tail読取りと共有tailの所有権を同期source/Cで確認。要素型/網羅性の拒否試験を含む。suspend contextは未完了として維持。"
     },
     {
       "id": "emela_lir::Value::ListTail.0",
       "relation": "member_of_variant",
       "legacy_role": "emit",
-      "phase": null,
+      "phase": "P5",
       "status": "mapped",
       "source_scope": "schema",
       "new_implementation": [
@@ -11949,9 +12373,25 @@
         {
           "kind": "review",
           "path": "docs/migration-source.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p3_lists.rs"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p3_ownership.rs"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/memory_tests.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p3.md"
         }
       ],
-      "reason": "固定revisionの独立backend入口を採用。source・全実行文脈・所有権等の完了は個別の実行証拠が揃うまで判定しない。"
+      "reason": "List構築の要素順/spread tail、空判定、head/tail読取りと共有tailの所有権を同期source/Cで確認。要素型/網羅性の拒否試験を含む。suspend contextは未完了として維持。"
     },
     {
       "id": "emela_lir::Value::Make",
@@ -13460,9 +13900,26 @@
     {
       "id": "emela_lir::Value::List",
       "context": "sync",
-      "status": "pending",
-      "evidence": [],
-      "reason": ""
+      "status": "verified",
+      "evidence": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p3_lists.rs"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p3_ownership.rs"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/memory_tests.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p3.md"
+        }
+      ],
+      "reason": "List構築の要素順/spread tail、空判定、head/tail読取りと共有tailの所有権を同期source/Cで確認。要素型/網羅性の拒否試験を含む。suspend contextは未完了として維持。"
     },
     {
       "id": "emela_lir::Value::List",
@@ -13474,9 +13931,26 @@
     {
       "id": "emela_lir::Value::ListIsEmpty",
       "context": "sync",
-      "status": "pending",
-      "evidence": [],
-      "reason": ""
+      "status": "verified",
+      "evidence": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p3_lists.rs"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p3_ownership.rs"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/memory_tests.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p3.md"
+        }
+      ],
+      "reason": "List構築の要素順/spread tail、空判定、head/tail読取りと共有tailの所有権を同期source/Cで確認。要素型/網羅性の拒否試験を含む。suspend contextは未完了として維持。"
     },
     {
       "id": "emela_lir::Value::ListIsEmpty",
@@ -13488,9 +13962,26 @@
     {
       "id": "emela_lir::Value::ListHead",
       "context": "sync",
-      "status": "pending",
-      "evidence": [],
-      "reason": ""
+      "status": "verified",
+      "evidence": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p3_lists.rs"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p3_ownership.rs"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/memory_tests.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p3.md"
+        }
+      ],
+      "reason": "List構築の要素順/spread tail、空判定、head/tail読取りと共有tailの所有権を同期source/Cで確認。要素型/網羅性の拒否試験を含む。suspend contextは未完了として維持。"
     },
     {
       "id": "emela_lir::Value::ListHead",
@@ -13502,9 +13993,26 @@
     {
       "id": "emela_lir::Value::ListTail",
       "context": "sync",
-      "status": "pending",
-      "evidence": [],
-      "reason": ""
+      "status": "verified",
+      "evidence": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p3_lists.rs"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p3_ownership.rs"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/memory_tests.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p3.md"
+        }
+      ],
+      "reason": "List構築の要素順/spread tail、空判定、head/tail読取りと共有tailの所有権を同期source/Cで確認。要素型/網羅性の拒否試験を含む。suspend contextは未完了として維持。"
     },
     {
       "id": "emela_lir::Value::ListTail",
@@ -14263,9 +14771,22 @@
     {
       "id": "emela_lir::Repr::Ref",
       "context": "common",
-      "status": "pending",
-      "evidence": [],
-      "reason": ""
+      "status": "mapped",
+      "evidence": [
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/memory_tests.rs"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p3_ownership.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p3.md"
+        }
+      ],
+      "reason": "List/Bytes/再帰辺/Anyの固定heap参照・保持/深い反復解放を確認。Cell/closure cycle・suspend/cancelを含む参照全体は後段。"
     },
     {
       "id": "emela_lir::Repr::Void",
@@ -14416,9 +14937,26 @@
     {
       "id": "emela_core::Builtin::StringChars",
       "context": "common",
-      "status": "pending",
-      "evidence": [],
-      "reason": ""
+      "status": "verified",
+      "evidence": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p3_unicode.rs"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p3_memory_api.rs"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/memory_tests.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p3.md"
+        }
+      ],
+      "reason": "Unicode18の全853vectorについてsourceから各clusterのbyte境界・全code point・join再構成をC両最適化で確認。4KiB heapの3回再利用と、不正UTF-8で結果破棄してもdefectを維持することを確認。"
     },
     {
       "id": "emela_core::Builtin::StringJoin",
@@ -14447,9 +14985,26 @@
     {
       "id": "emela_core::Builtin::StringCodePoints",
       "context": "common",
-      "status": "pending",
-      "evidence": [],
-      "reason": ""
+      "status": "verified",
+      "evidence": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p3_unicode.rs"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p3_memory_api.rs"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/memory_tests.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p3.md"
+        }
+      ],
+      "reason": "Unicode18の全853vectorについてsourceから各clusterのbyte境界・全code point・join再構成をC両最適化で確認。4KiB heapの3回再利用と、不正UTF-8で結果破棄してもdefectを維持することを確認。"
     },
     {
       "id": "emela_core::Builtin::StringFromCodePoint",
@@ -15080,58 +15635,194 @@
     {
       "id": "emela_core::Builtin::BytesFromList",
       "context": "common",
-      "status": "pending",
-      "evidence": [],
-      "reason": ""
+      "status": "verified",
+      "evidence": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p3_bytes.rs"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p3_memory_api.rs"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/memory_tests.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p3.md"
+        }
+      ],
+      "reason": "信頼済みStd.Bytes宣言から同期source/Cへ接続。70000byteの長さ、unsigned要素、借用snapshot・alias・所有adapter、List往復の不正値、UTF-8とString容量、結果破棄のdefectを-O0/-O2で確認。各正常呼出し後のheap全解放を観測。"
     },
     {
       "id": "emela_core::Builtin::BytesToList",
       "context": "common",
-      "status": "pending",
-      "evidence": [],
-      "reason": ""
+      "status": "verified",
+      "evidence": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p3_bytes.rs"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p3_memory_api.rs"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/memory_tests.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p3.md"
+        }
+      ],
+      "reason": "信頼済みStd.Bytes宣言から同期source/Cへ接続。70000byteの長さ、unsigned要素、借用snapshot・alias・所有adapter、List往復の不正値、UTF-8とString容量、結果破棄のdefectを-O0/-O2で確認。各正常呼出し後のheap全解放を観測。"
     },
     {
       "id": "emela_core::Builtin::BytesSize",
       "context": "common",
-      "status": "pending",
-      "evidence": [],
-      "reason": ""
+      "status": "verified",
+      "evidence": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p3_bytes.rs"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p3_memory_api.rs"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/memory_tests.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p3.md"
+        }
+      ],
+      "reason": "信頼済みStd.Bytes宣言から同期source/Cへ接続。70000byteの長さ、unsigned要素、借用snapshot・alias・所有adapter、List往復の不正値、UTF-8とString容量、結果破棄のdefectを-O0/-O2で確認。各正常呼出し後のheap全解放を観測。"
     },
     {
       "id": "emela_core::Builtin::BytesGet",
       "context": "common",
-      "status": "pending",
-      "evidence": [],
-      "reason": ""
+      "status": "verified",
+      "evidence": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p3_bytes.rs"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p3_memory_api.rs"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/memory_tests.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p3.md"
+        }
+      ],
+      "reason": "信頼済みStd.Bytes宣言から同期source/Cへ接続。70000byteの長さ、unsigned要素、借用snapshot・alias・所有adapter、List往復の不正値、UTF-8とString容量、結果破棄のdefectを-O0/-O2で確認。各正常呼出し後のheap全解放を観測。"
     },
     {
       "id": "emela_core::Builtin::BytesSlice",
       "context": "common",
-      "status": "pending",
-      "evidence": [],
-      "reason": ""
+      "status": "verified",
+      "evidence": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p3_bytes.rs"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p3_memory_api.rs"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/memory_tests.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p3.md"
+        }
+      ],
+      "reason": "信頼済みStd.Bytes宣言から同期source/Cへ接続。70000byteの長さ、unsigned要素、借用snapshot・alias・所有adapter、List往復の不正値、UTF-8とString容量、結果破棄のdefectを-O0/-O2で確認。各正常呼出し後のheap全解放を観測。"
     },
     {
       "id": "emela_core::Builtin::BytesConcat",
       "context": "common",
-      "status": "pending",
-      "evidence": [],
-      "reason": ""
+      "status": "verified",
+      "evidence": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p3_bytes.rs"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p3_memory_api.rs"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/memory_tests.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p3.md"
+        }
+      ],
+      "reason": "信頼済みStd.Bytes宣言から同期source/Cへ接続。70000byteの長さ、unsigned要素、借用snapshot・alias・所有adapter、List往復の不正値、UTF-8とString容量、結果破棄のdefectを-O0/-O2で確認。各正常呼出し後のheap全解放を観測。"
     },
     {
       "id": "emela_core::Builtin::BytesEncodeUtf8",
       "context": "common",
-      "status": "pending",
-      "evidence": [],
-      "reason": ""
+      "status": "verified",
+      "evidence": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p3_bytes.rs"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p3_memory_api.rs"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/memory_tests.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p3.md"
+        }
+      ],
+      "reason": "信頼済みStd.Bytes宣言から同期source/Cへ接続。70000byteの長さ、unsigned要素、借用snapshot・alias・所有adapter、List往復の不正値、UTF-8とString容量、結果破棄のdefectを-O0/-O2で確認。各正常呼出し後のheap全解放を観測。"
     },
     {
       "id": "emela_core::Builtin::BytesDecodeValidUtf8",
       "context": "common",
-      "status": "pending",
-      "evidence": [],
-      "reason": ""
+      "status": "verified",
+      "evidence": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p3_bytes.rs"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p3_memory_api.rs"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/memory_tests.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p3.md"
+        }
+      ],
+      "reason": "信頼済みStd.Bytes宣言から同期source/Cへ接続。70000byteの長さ、unsigned要素、借用snapshot・alias・所有adapter、List往復の不正値、UTF-8とString容量、結果破棄のdefectを-O0/-O2で確認。各正常呼出し後のheap全解放を観測。"
     },
     {
       "id": "emela_core::Builtin::Panic",
@@ -15400,19 +16091,55 @@
       "target": "emit",
       "name": "allocates_and_releases_lists_in_the_fixed_heap",
       "legacy_path": "tests/emit.rs",
-      "status": "pending",
-      "new_tests": [],
-      "evidence": [],
-      "reason": ""
+      "status": "mapped",
+      "new_tests": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p3_lists.rs"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/memory_tests.rs"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p3_lists.rs"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/memory_tests.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p3.md"
+        }
+      ],
+      "reason": "P3の同期source/独自IRと所有権試験への部分対応を記録。旧入力全体・IR導出・ISR指定等の未照合観点はP7の全件監査まで残し、部分成功からreplacedにしない。"
     },
     {
       "target": "emit",
       "name": "any_boxes_retain_managed_list_payloads_until_the_box_is_released",
       "legacy_path": "tests/emit.rs",
-      "status": "pending",
-      "new_tests": [],
-      "evidence": [],
-      "reason": ""
+      "status": "replaced",
+      "new_tests": [
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/memory_tests.rs"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/memory_tests.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p3.md"
+        }
+      ],
+      "reason": "旧独自IRのList[Int](17)→Any box→List unbox→head(17)を再構成し、固定4KiB heapで10000回実行、各回の全解放を追加確認。source対応へ数えない。"
     },
     {
       "target": "emit",
@@ -15468,10 +16195,32 @@
       "target": "emit",
       "name": "builtin_audit::discarded_string_chars_still_builds_and_releases_its_owned_list",
       "legacy_path": "tests/builtin_audit/mod.rs",
-      "status": "pending",
-      "new_tests": [],
-      "evidence": [],
-      "reason": ""
+      "status": "mapped",
+      "new_tests": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p3_unicode.rs"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/memory_tests.rs"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p3_unicode.rs"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/memory_tests.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p3.md"
+        }
+      ],
+      "reason": "P3の同期source/独自IRと所有権試験への部分対応を記録。旧入力全体・IR導出・ISR指定等の未照合観点はP7の全件監査まで残し、部分成功からreplacedにしない。"
     },
     {
       "target": "emit",
@@ -15495,28 +16244,70 @@
       "target": "emit",
       "name": "bytes::bytes_decoding_checks_string_capacity_before_truncating_the_length",
       "legacy_path": "tests/bytes/mod.rs",
-      "status": "pending",
-      "new_tests": [],
-      "evidence": [],
-      "reason": ""
+      "status": "replaced",
+      "new_tests": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p3_bytes.rs"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p3_bytes.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p3.md"
+        }
+      ],
+      "reason": "旧IRの70000byte decode/容量8を公開Bytes.decode_utf8のsourceへ置換。Option tagだけを利用しても長さの切詰め前にSTRING_CAPACITY defectとなることをC両最適化で確認。"
     },
     {
       "target": "emit",
       "name": "bytes::bytes_dynamic_capacity_is_independent_of_string_capacity",
       "legacy_path": "tests/bytes/mod.rs",
-      "status": "pending",
-      "new_tests": [],
-      "evidence": [],
-      "reason": ""
+      "status": "replaced",
+      "new_tests": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p3_bytes.rs"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p3_bytes.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p3.md"
+        }
+      ],
+      "reason": "旧70000byte slice、heap262144/String容量1、全byte比較・releaseを3回実行する同じ境界を独立fixtureで確認。"
     },
     {
       "target": "emit",
       "name": "bytes::bytes_external_adapters_snapshot_borrowed_data_and_transfer_owned_data",
       "legacy_path": "tests/bytes/mod.rs",
-      "status": "pending",
-      "new_tests": [],
-      "evidence": [],
-      "reason": ""
+      "status": "replaced",
+      "new_tests": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p3_bytes.rs"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p3_bytes.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p3.md"
+        }
+      ],
+      "reason": "旧Borrowed/Ownedの両adapter、static bufferを上書きする2呼出しのsnapshot、500回の全解放をsource/Cで確認。Owned producerは公開exportでownerを取得し、旧内部symbolへの依存を除去。adapter指定なしの拒否も確認。"
     },
     {
       "target": "emit",
@@ -15531,55 +16322,147 @@
       "target": "emit",
       "name": "bytes::bytes_finite_flow_derivations_compare_and_display_unsigned_bytes",
       "legacy_path": "tests/bytes/mod.rs",
-      "status": "pending",
-      "new_tests": [],
-      "evidence": [],
-      "reason": ""
+      "status": "mapped",
+      "new_tests": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p3_bytes.rs"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p3_bytes.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p3.md"
+        }
+      ],
+      "reason": "P3の同期source/独自IRと所有権試験への部分対応を記録。旧入力全体・IR導出・ISR指定等の未照合観点はP7の全件監査まで残し、部分成功からreplacedにしない。"
     },
     {
       "target": "emit",
       "name": "bytes::bytes_list_round_trips_and_invalid_elements_reclaim_every_allocation",
       "legacy_path": "tests/bytes/mod.rs",
-      "status": "pending",
-      "new_tests": [],
-      "evidence": [],
-      "reason": ""
+      "status": "replaced",
+      "new_tests": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p3_bytes.rs"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p3_bytes.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p3.md"
+        }
+      ],
+      "reason": "旧[0,n,255]のn=0/128/255/-1/256を各500回、Option成功/失敗とList往復・全heap解放を同じsource式で確認。"
     },
     {
       "target": "emit",
       "name": "bytes::bytes_require_a_fixed_heap_and_defect_when_its_capacity_is_exhausted",
       "legacy_path": "tests/bytes/mod.rs",
-      "status": "pending",
-      "new_tests": [],
-      "evidence": [],
-      "reason": ""
+      "status": "replaced",
+      "new_tests": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p3_bytes.rs"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p3_bytes.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p3.md"
+        }
+      ],
+      "reason": "encode_utf8のheap0拒否、heap128へ1024byte入力してHEAP_EXHAUSTEDとなる旧境界をsource/Cで確認。結果破棄の経路でkind/messageも観測。"
     },
     {
       "target": "emit",
       "name": "bytes::bytes_returns_lists_and_aliases_preserve_ownership_and_release_the_heap",
       "legacy_path": "tests/bytes/mod.rs",
-      "status": "pending",
-      "new_tests": [],
-      "evidence": [],
-      "reason": ""
+      "status": "replaced",
+      "new_tests": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p3_bytes.rs"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p3_bytes.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p3.md"
+        }
+      ],
+      "reason": "旧sourceのencode/copy/slice/concat/List[Bytes]、入力上書き後のsnapshot・所有alias・共有解放を独立fixtureへ移行。500回の正常値とheap全解放をC両最適化で確認。List要素を取り出した後の寿命も確認。"
     },
     {
       "target": "emit",
       "name": "bytes::bytes_size_and_get_are_heapless_and_keep_lengths_above_u16",
       "legacy_path": "tests/bytes/mod.rs",
-      "status": "pending",
-      "new_tests": [],
-      "evidence": [],
-      "reason": ""
+      "status": "mapped",
+      "new_tests": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p3_bytes.rs"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p3_bytes.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p3.md"
+        }
+      ],
+      "reason": "P3の同期source/独自IRと所有権試験への部分対応を記録。旧入力全体・IR導出・ISR指定等の未照合観点はP7の全件監査まで残し、部分成功からreplacedにしない。"
     },
     {
       "target": "emit",
       "name": "bytes::bytes_std_corpus_matches_other_targets_including_const_traits_and_invalid_utf8",
       "legacy_path": "tests/bytes/mod.rs",
-      "status": "pending",
-      "new_tests": [],
-      "evidence": [],
-      "reason": ""
+      "status": "mapped",
+      "new_tests": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p3_bytes.rs"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p3_memory_api.rs"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p3_bytes.rs"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p3_memory_api.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p3.md"
+        }
+      ],
+      "reason": "P3の同期source/独自IRと所有権試験への部分対応を記録。旧入力全体・IR導出・ISR指定等の未照合観点はP7の全件監査まで残し、部分成功からreplacedにしない。"
     },
     {
       "target": "emit",
@@ -15594,10 +16477,24 @@
       "target": "emit",
       "name": "bytes::discarded_bytes_still_check_capacity_and_release_owned_results",
       "legacy_path": "tests/bytes/mod.rs",
-      "status": "pending",
-      "new_tests": [],
-      "evidence": [],
-      "reason": ""
+      "status": "replaced",
+      "new_tests": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p3_bytes.rs"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p3_bytes.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p3.md"
+        }
+      ],
+      "reason": "結果破棄のencode_utf8についてheap128/1024byteのdefectと、短いabc入力500回の全heap解放を独立fixtureへ分割。旧1000回の小heap試験と同じ逐次解放を、毎回全block freeの観測で確認。"
     },
     {
       "target": "emit",
@@ -15676,10 +16573,32 @@
       "target": "emit",
       "name": "completion_types::finite_changing_recursive_enum_arguments_run_with_owned_back_edges",
       "legacy_path": "tests/completion_types/mod.rs",
-      "status": "pending",
-      "new_tests": [],
-      "evidence": [],
-      "reason": ""
+      "status": "mapped",
+      "new_tests": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p3_ownership.rs"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/memory_tests.rs"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p3_ownership.rs"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/memory_tests.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p3.md"
+        }
+      ],
+      "reason": "P3の同期source/独自IRと所有権試験への部分対応を記録。旧入力全体・IR導出・ISR指定等の未照合観点はP7の全件監査まで残し、部分成功からreplacedにしない。"
     },
     {
       "target": "emit",
@@ -16444,10 +17363,32 @@
       "target": "emit",
       "name": "reads_list_heads_and_keeps_shared_tails_alive",
       "legacy_path": "tests/emit.rs",
-      "status": "pending",
-      "new_tests": [],
-      "evidence": [],
-      "reason": ""
+      "status": "mapped",
+      "new_tests": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p3_lists.rs"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p3_ownership.rs"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p3_lists.rs"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p3_ownership.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p3.md"
+        }
+      ],
+      "reason": "P3の同期source/独自IRと所有権試験への部分対応を記録。旧入力全体・IR導出・ISR指定等の未照合観点はP7の全件監査まで残し、部分成功からreplacedにしない。"
     },
     {
       "target": "emit",
@@ -16507,10 +17448,32 @@
       "target": "emit",
       "name": "stores_and_releases_list_references_inside_tuples_and_list_elements",
       "legacy_path": "tests/emit.rs",
-      "status": "pending",
-      "new_tests": [],
-      "evidence": [],
-      "reason": ""
+      "status": "mapped",
+      "new_tests": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p3_ownership.rs"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/memory_tests.rs"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p3_ownership.rs"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/memory_tests.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p3.md"
+        }
+      ],
+      "reason": "P3の同期source/独自IRと所有権試験への部分対応を記録。旧入力全体・IR導出・ISR指定等の未照合観点はP7の全件監査まで残し、部分成功からreplacedにしない。"
     },
     {
       "target": "emit",
@@ -16544,10 +17507,32 @@
       "target": "emit",
       "name": "string_code_points_builds_and_releases_a_list_in_code_point_order",
       "legacy_path": "tests/emit.rs",
-      "status": "pending",
-      "new_tests": [],
-      "evidence": [],
-      "reason": ""
+      "status": "mapped",
+      "new_tests": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p3_unicode.rs"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/memory_tests.rs"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p3_unicode.rs"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/memory_tests.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p3.md"
+        }
+      ],
+      "reason": "P3の同期source/独自IRと所有権試験への部分対応を記録。旧入力全体・IR導出・ISR指定等の未照合観点はP7の全件監査まで残し、部分成功からreplacedにしない。"
     },
     {
       "target": "emit",
@@ -16863,6 +17848,10 @@
         {
           "kind": "review",
           "path": "docs/language-subset.md"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p3.md"
         }
       ]
     },
@@ -16934,6 +17923,10 @@
         {
           "kind": "run_report",
           "path": "docs/reports/compiler-p2.md"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p3.md"
         }
       ]
     },
@@ -16947,8 +17940,25 @@
         "P6",
         "P7"
       ],
-      "status": "pending",
-      "evidence": []
+      "status": "mapped",
+      "evidence": [
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p3.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p3_ownership.rs"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p3_bytes.rs"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/memory_tests.rs"
+        }
+      ]
     },
     {
       "id": "const_identity",
@@ -17030,6 +18040,10 @@
         {
           "kind": "run_report",
           "path": "docs/reports/compiler-p2.md"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p3.md"
         }
       ]
     },
@@ -17062,6 +18076,10 @@
         {
           "kind": "review",
           "path": "docs/language-subset.md"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p3.md"
         }
       ]
     },
@@ -17088,6 +18106,10 @@
         {
           "kind": "review",
           "path": "docs/language-subset.md"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p3.md"
         }
       ]
     }

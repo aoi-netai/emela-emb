@@ -1,0 +1,59 @@
+# Synchronous ownership extraction from the fixed examples/support/owned_payload.emel.
+@export(c, "store_owned")
+pub fn store(n: Int) -> List[(String, Option[String])] {
+  text = Int.to_string(n)
+  [(text, Some(text))]
+}
+@export(c, "store_borrowed")
+pub fn store_borrowed(text: String) -> List[(String, Option[String])] { [(text, Some(text))] }
+@export(c, "prepend_owned")
+pub fn prepend(xs: List[(String, Option[String])], text: String) -> List[(String, Option[String])] {
+  [(text, Some(text)), ..xs]
+}
+@export(c, "shared_tail")
+pub fn shared_tail(xs: List[(String, Option[String])]) -> List[(String, Option[String])] {
+  xs match { [_, ..tail] -> tail
+    [] -> [] }
+}
+@export(c, "read_owned")
+pub fn read(xs: List[(String, Option[String])]) -> String {
+  xs match { [(text, _), ..rest] -> text
+    [] -> "" }
+}
+@export(c, "read_option_owned")
+pub fn read_option(xs: List[(String, Option[String])]) -> String {
+  xs match { [(_, Some(text)), ..] -> text
+    _ -> "" }
+}
+enum Kept { Empty, Held(Unit, List[String]) }
+fn through_tuple(xs: List[String]) -> List[String] { ((), ys) = ((), xs)
+  ys }
+fn through_enum(xs: List[String]) -> List[String] {
+  Held((), through_tuple(xs)) match { Held(_, ys) -> ys
+    Empty -> [] }
+}
+@export(c, "nested_owned")
+pub fn nested(n: Int) -> List[String] { through_enum([Int.to_string(n)]) }
+@export(c, "nested_first")
+pub fn nested_first(xs: List[String]) -> String { xs match { [text, ..] -> text
+  [] -> "" } }
+error Batch(items: List[String]) derive Show
+@external(c, "board_smash")
+fn smash() -> Unit
+fn fail_batch(n: Int) -> Int fails Batch { fail Batch(items: [Int.to_string(n), "tail"]) }
+fn fail_batch_text(n: Int) -> String fails Batch { fail Batch(items: [Int.to_string(n), "tail"]) }
+@export(c, "batch_length")
+pub fn batch(n: Int) -> Int {
+  fail_batch(n) escape { Batch(items) -> items match {
+    [text, ..rest] -> String.byte_size(text) + List.length(rest)
+    [] -> -1
+  } }
+}
+@export(c, "batch_string")
+pub fn batch_string(n: Int) -> String {
+  fail_batch_text(n) escape { Batch(items) -> {
+    smash()
+    items match { [text, ..] -> text
+      [] -> "" }
+  } }
+}

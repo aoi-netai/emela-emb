@@ -316,3 +316,38 @@
 数値parseの比較値は固定 `crates/emela-codegen-emb/tests/emit.rs` の `dynamic_float_formatting_uses_a_bounded_runtime_and_float_parse_uses_the_bounded_parser` からvectorとdecimal generatorを抽出し、`tests/compat/p2/float_parse_cases.rs` に保持する。元ファイルSHA-256: `cfa41127455bb5c5e8ce0c2f02c674286686b12814a9bcec60e56de3a263b2da`。旧IR構築は採用せず、公開Float.parse・Int.parse・Bool.parseとescapeを通すsource試験へ接続する。
 
 採用した標準宣言は `sources.rs` の信頼済みmoduleからだけ登録する。Stringの既存APIのparameter名を固定版の `s/sub/a/b` に合わせ、`from_code_point` と `show_nested` を登録した。後者は型付きShow呼出しへ変換する。Preludeのprimitive trait宣言は独自registryが供給し、source impl/default/deriveは独自collector・checker・具体化を通す。`p2_traits`、`p2_standard_api`、`p2_parse`、`p2_const_patterns`、`p2_debug` で正常・拒否入力と生成Cの `-O0`/`-O2` 実行を確認した。
+
+## P3の同期List API
+
+固定revision `c34c0aeefdd966d854371b3110db00a47798751d` の `crates/emela-core/lib/core/list.emel`（元SHA-256: `d4ab47940c24fa118fd193d30fe931c0f6a9a18a5c63c7a5ca91a8f5192a9ad5`）から、compiler所有の `lib/core/list.emel` へ同期APIを採用した。Apache-2.0の出自は上記と同じ。
+
+- length/is_empty/get/head/tail/reverse/append/join/range/zip/take/drop/last/enumerateとEq/Ordの純粋bodyを維持した。
+- flatten/unzip/Show内の非公開callbackを、同じ走査順・custom field dispatchを維持する自己末尾再帰helperへ適応した。
+- sortは旧stable merge-sortを維持し、内部callbackをOrd.compareの直接解決へ適応した。公開callback APIはP4へ残す。
+- List構文・型推論・pattern・具体化・lowerは独自実装。ListのEq/Ord/Showはsource implを通し、dbgだけに使うShow fallbackもcustom element実装を優先する。
+
+`tests/p3_lists.rs` はsourceから型・pattern診断、評価順、固定heap、custom Eq/Ord/Show、安定sort、dbg fallbackを実行する。Cの両最適化検証は試験helperが必須実行する。sourceで宣言されないAnyは内部のerror union/型消去とIR試験のbox/unboxとして区別し、新しい公開Any構文を追加しない。
+
+## P3のBytes・String/List境界
+
+同じ固定revisionから次の標準sourceを採用した。Apache-2.0のライセンスと旧backend runtimeの出自は上記を維持する。
+
+| 固定旧source | 元SHA-256 | 適応 |
+| --- | --- | --- |
+| `crates/emela-core/lib/std/bytes.emel` | `1d45b6c1c73373433337e65d89211abed5dea32bd21f13006511bc34e1a83d63` | `lib/std/bytes.emel`へ全同期API・UTF-8検証・hex・Eq/Ord/Showのbodyを採用。to_hex内のmap lambdaだけを同順序のtail-rec helperへ適応 |
+| `crates/emela-core/lib/core/string.emel` | `e5b1aa4151d8f39966da98b927ec138fb3e688c0b8fe5331cef908bdbadcc8ca` | split/chars/code_points/concat/joinを接続。ASCII case変換内のmap lambdaを同じcode point変換のtail-rec helperへ適応し、deprecated属性は取り込まない |
+
+`@intrinsic pub opaque type Bytes`は信頼済みStd.Bytes宣言IDからだけ`TypeId::BYTES`へ解決する。利用者の同名型、未importのStd型、不正なintrinsic型宣言はその表現を選ばない。List/Bytesのmethod sugarはreceiver型のmoduleへ接続する。
+
+`tests/p3_memory_api.rs`はsourceからString/List/Bytesの実行、UTF-8不正・範囲外byte・hexの失敗、custom型同名の分離と公開範囲を確認する。容量・所有権の大きな境界試験は別のsource/IR回帰として扱い、これら小さなAPI実行だけでP3全体を完了扱いしない。
+
+## P3 Map/Set標準sourceの出自
+
+固定旧fork `c34c0aeefdd966d854371b3110db00a47798751d` のweight-balanced tree実装と公開データAPIをcompiler所有sourceへ採用する。Apache-2.0、repository rootのLICENSEに従う。本体bundleの読込みやcrate依存は追加しない。
+
+| 固定旧source | SHA-256 | 新source |
+| --- | --- | --- |
+| `crates/emela-core/lib/std/map.emel` | `b7e46cfd4441c7df762276f1e2c99ed36b3485aad7b58c3c18623a3e3d7ffb7d` | `crates/emela-emb-compiler/lib/std/map.emel` |
+| `crates/emela-core/lib/std/set.emel` | `535f00a6ad55adf2f5d619b6b116aa3d15e56b8102eba66d15c3d5093dc2298d` | `crates/emela-emb-compiler/lib/std/set.emel` |
+
+Map.from_list/keys/valuesとSet.from_listの内部callbackを、評価順と結果の順序を保つ直接再帰helperへ置き換える。公開update/fold/map_values/filterはcallback対応のP4で供給する。回転・削除・unionの木構造アルゴリズム、Eq/Showの順序、opaque境界は保持する。

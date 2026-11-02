@@ -378,7 +378,7 @@ impl Specializer {
             local.ty = self.ty(&source, local.ty, args, source.span)?;
         }
         if let Some(kind) = function.derivation.take() {
-            function.body = Some(self.derive_body(function, kind, false)?);
+            function.body = Some(self.derive_body(function, kind, false, depth)?);
         }
         if let Some(body) = &mut function.body {
             self.block(&source, body, args, depth)?;
@@ -440,7 +440,11 @@ impl Specializer {
                     self.pattern(function, field, args, depth)?;
                 }
             }
-            ir::PatternKind::Any | ir::PatternKind::Literal(_) => {}
+            ir::PatternKind::ListCons { head, tail } => {
+                self.pattern(function, head, args, depth)?;
+                self.pattern(function, tail, args, depth)?;
+            }
+            ir::PatternKind::Any | ir::PatternKind::Literal(_) | ir::PatternKind::ListNil => {}
         }
         Ok(())
     }
@@ -467,6 +471,14 @@ impl Specializer {
         expression.ty = self.ty(function, expression.ty, arguments, expression.span)?;
         match &mut expression.kind {
             ir::ExprKind::Literal(_) | ir::ExprKind::Local(_) => {}
+            ir::ExprKind::List { elements, tail } => {
+                for value in elements {
+                    self.expression(function, value, arguments, depth)?;
+                }
+                if let Some(tail) = tail {
+                    self.expression(function, tail, arguments, depth)?;
+                }
+            }
             ir::ExprKind::TraitCall {
                 trait_id,
                 method,

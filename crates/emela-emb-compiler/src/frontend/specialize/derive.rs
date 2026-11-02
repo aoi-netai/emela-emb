@@ -166,7 +166,7 @@ impl Specializer {
         self.builtin_helpers.insert(key, id);
         let slot = self.functions.len();
         self.functions.push(function.clone());
-        function.body = Some(self.derive_body(&function, kind, nested)?);
+        function.body = Some(self.derive_body(&function, kind, nested, depth)?);
         self.function(&mut function, &[], depth + 1)?;
         self.functions[slot] = function;
         Ok(id)
@@ -176,6 +176,7 @@ impl Specializer {
         function: &ir::Function,
         kind: BuiltinTrait,
         nested: bool,
+        depth: usize,
     ) -> Result<ir::Block> {
         let expected = if kind == BuiltinTrait::Show { 1 } else { 2 };
         if function.params.len() != expected {
@@ -199,6 +200,11 @@ impl Specializer {
                     "trait helper type is outside the catalog",
                 )
             })?;
+        if let b::Type::List(element) = node {
+            if kind == BuiltinTrait::Show {
+                return self.list_show_body(function, ty, element, depth);
+            }
+        }
         let mut builder = Builder {
             stage: self,
             function,
@@ -213,6 +219,7 @@ impl Specializer {
         let left = builder.local(&function.params[0]);
         let right = function.params.get(1).map(|param| builder.local(param));
         let expression = match node {
+            b::Type::List(element) => builder.list(kind, ty, element, left, right)?,
             b::Type::Tuple(fields) => builder.tuple(kind, ty, fields, left, right)?,
             b::Type::Enum(id, args) => builder.enumeration(kind, ty, id, args, left, right)?,
             b::Type::Int
@@ -231,6 +238,115 @@ impl Specializer {
             }
         };
         Ok(builder.block(expression))
+    }
+    fn list_show_body(
+        &mut self,
+        caller: &ir::Function,
+        ty: b::TypeId,
+        element: b::TypeId,
+        depth: usize,
+    ) -> Result<ir::Block> {
+        if self.instances >= self.limits.instances || depth >= self.limits.depth {
+            return Err(diagnostic(
+                caller,
+                caller.span,
+                "List Show helper specialization limit exceeded",
+            ));
+        }
+        let id = ir::DefinitionId(self.next_id.ok_or_else(|| {
+            diagnostic(caller, caller.span, "definition ID namespace is exhausted")
+        })?);
+        self.next_id = id.0.checked_add(1);
+        self.instances += 1;
+        let mut helper = caller.clone();
+        helper.id = id;
+        helper.name = format!("__list_show_{}", id.0);
+        helper.derivation = None;
+        helper.type_parameters = 0;
+        helper.constant = false;
+        helper.origin = None;
+        helper.exported = false;
+        helper.export_symbol = None;
+        helper.external = None;
+        helper.intrinsic = None;
+        helper.params = [ty, b::TypeId::STRING, b::TypeId::STRING]
+            .into_iter()
+            .enumerate()
+            .map(|(index, ty)| ir::Local {
+                id: ir::LocalId(index),
+                name: format!("part{index}"),
+                ty: frontend_type(ty),
+            })
+            .collect();
+        helper.signature = Signature {
+            params: helper.params.iter().map(|p| p.ty).collect(),
+            ret: Some(ValueType::String),
+            sets: InvocationSets::default(),
+        };
+        let mut builder = Builder {
+            stage: self,
+            function: &helper,
+            next_local: 3,
+        };
+        let head = builder.fresh(element);
+        let tail = builder.fresh(ty);
+        let nil = builder.list_nil(frontend_type(ty));
+        let cons = builder.list_cons(
+            frontend_type(ty),
+            builder.binding(head.clone()),
+            builder.binding(tail.clone()),
+        );
+        let empty = builder.expression(
+            ir::ExprKind::Concat(vec![builder.local(&helper.params[1]), builder.literal("]")]),
+            ValueType::String,
+        );
+        let shown = builder.trait_call(
+            BuiltinTrait::Show,
+            element,
+            vec![builder.local(&head)],
+            true,
+        )?;
+        let accumulated = builder.expression(
+            ir::ExprKind::Concat(vec![
+                builder.local(&helper.params[1]),
+                builder.local(&helper.params[2]),
+                shown,
+            ]),
+            ValueType::String,
+        );
+        let recur = builder.call(
+            id,
+            vec![builder.local(&tail), accumulated, builder.literal(", ")],
+            ValueType::String,
+        );
+        let body = builder.matching(
+            builder.local(&helper.params[0]),
+            vec![builder.arm(nil, empty), builder.arm(cons, recur)],
+            ValueType::String,
+        );
+        helper.body = Some(builder.block(body));
+        if self.debug_fallback.contains(&caller.id) {
+            self.debug_fallback.insert(id);
+        }
+        self.templates.insert(id, helper.clone());
+        let slot = self.functions.len();
+        self.functions.push(helper.clone());
+        self.function(&mut helper, &[], depth + 1)?;
+        self.functions[slot] = helper;
+        let builder = Builder {
+            stage: self,
+            function: caller,
+            next_local: 0,
+        };
+        Ok(builder.block(builder.call(
+            id,
+            vec![
+                builder.local(&caller.params[0]),
+                builder.literal("["),
+                builder.literal(""),
+            ],
+            ValueType::String,
+        )))
     }
 }
 struct Builder<'a> {
@@ -311,6 +427,121 @@ impl Builder<'_> {
             kind: ir::PatternKind::Bind(local),
             span: self.function.span,
         }
+    }
+    fn list_nil(&self, ty: ValueType) -> ir::Pattern {
+        ir::Pattern {
+            kind: ir::PatternKind::ListNil,
+            ty,
+            span: self.function.span,
+        }
+    }
+    fn list_cons(&self, ty: ValueType, head: ir::Pattern, tail: ir::Pattern) -> ir::Pattern {
+        ir::Pattern {
+            kind: ir::PatternKind::ListCons {
+                head: Box::new(head),
+                tail: Box::new(tail),
+            },
+            ty,
+            span: self.function.span,
+        }
+    }
+    fn call(&self, target: ir::DefinitionId, args: Vec<ir::Expr>, ty: ValueType) -> ir::Expr {
+        let order = (0..args.len()).collect();
+        self.expression(
+            ir::ExprKind::Call {
+                target,
+                args,
+                order,
+                type_arguments: vec![],
+            },
+            ty,
+        )
+    }
+    fn list(
+        &mut self,
+        kind: BuiltinTrait,
+        ty: b::TypeId,
+        element: b::TypeId,
+        left: ir::Expr,
+        right: Option<ir::Expr>,
+    ) -> Result<ir::Expr> {
+        let right = right.expect("List comparison arity checked");
+        let left_head = self.fresh(element);
+        let right_head = self.fresh(element);
+        let left_tail = self.fresh(ty);
+        let right_tail = self.fresh(ty);
+        let pair_type = frontend_type(self.stage.core.types.intern(b::Type::Tuple(vec![ty, ty])));
+        let nil = self.list_nil(frontend_type(ty));
+        let left_cons = self.list_cons(
+            frontend_type(ty),
+            self.binding(left_head.clone()),
+            self.binding(left_tail.clone()),
+        );
+        let right_cons = self.list_cons(
+            frontend_type(ty),
+            self.binding(right_head.clone()),
+            self.binding(right_tail.clone()),
+        );
+        let heads = self.trait_call(
+            kind,
+            element,
+            vec![self.local(&left_head), self.local(&right_head)],
+            false,
+        )?;
+        let tails = self.trait_call(
+            kind,
+            ty,
+            vec![self.local(&left_tail), self.local(&right_tail)],
+            false,
+        )?;
+        let mut arms = Vec::new();
+        let both_empty = self.tuple_pattern(pair_type, vec![nil.clone(), nil.clone()]);
+        let both_cons = self.tuple_pattern(pair_type, vec![left_cons, right_cons]);
+        let ret = if kind == BuiltinTrait::Eq {
+            arms.push(self.arm(both_empty, self.boolean(true)));
+            arms.push(self.arm(both_cons, self.binary(Binary::And, heads, tails)));
+            arms.push(self.arm(self.any(pair_type), self.boolean(false)));
+            ValueType::Bool
+        } else {
+            let equal = self.ordering("Equal")?;
+            let ordering_type = backend_type(equal.ty);
+            let b::Type::Enum(ordering_id, _) = self.stage.core.types[ordering_type] else {
+                unreachable!("Ordering checked")
+            };
+            let equal_variant = self.stage.core.enums[ordering_id]
+                .variants
+                .iter()
+                .position(|v| v.name == "Equal")
+                .expect("Ordering checked");
+            let other = self.fresh(ordering_type);
+            let compared = self.matching(
+                heads,
+                vec![
+                    self.arm(
+                        self.constructor_pattern(equal.ty, ordering_id, equal_variant, vec![]),
+                        tails,
+                    ),
+                    self.arm(self.binding(other.clone()), self.local(&other)),
+                ],
+                equal.ty,
+            );
+            arms.push(self.arm(both_empty, equal.clone()));
+            arms.push(self.arm(
+                self.tuple_pattern(pair_type, vec![nil.clone(), self.any(frontend_type(ty))]),
+                self.ordering("Less")?,
+            ));
+            arms.push(self.arm(
+                self.tuple_pattern(pair_type, vec![self.any(frontend_type(ty)), nil]),
+                self.ordering("Greater")?,
+            ));
+            arms.push(self.arm(both_cons, compared));
+            equal.ty
+        };
+        Ok(self.matching(
+            self.expression(ir::ExprKind::Tuple(vec![left, right]), pair_type),
+            arms,
+            ret,
+        ))
     }
     fn tuple_pattern(&self, ty: ValueType, fields: Vec<ir::Pattern>) -> ir::Pattern {
         ir::Pattern {

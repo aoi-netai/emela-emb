@@ -107,8 +107,8 @@ pub(crate) fn lower_program(
         program.functions[id].constant = false;
     }
     failures::normalize(&mut program);
-    // Numeric builtins still execute their checks when their result is unused. Their
-    // renderers require a destination, so create an immediately discarded scalar slot.
+    // Checked builtins and List construction retain allocation/defect behavior even when
+    // unused. A temporary destination also lets ownership planning release their results.
     let mut discarded_results: HashMap<FnId, HashSet<VarId>> = HashMap::new();
     let mut discarded = Vec::new();
     for (function_id, function) in program.functions.iter() {
@@ -116,7 +116,7 @@ pub(crate) fn lower_program(
         for (statement, stmt) in function.stmts.iter() {
             if let Stmt::Let {
                 dst: None,
-                value: Value::Builtin { .. },
+                value: Value::Builtin { .. } | Value::List { .. },
                 ..
             } = stmt
             {
