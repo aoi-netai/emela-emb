@@ -1,5 +1,5 @@
 mod support;
-use emela_emb_compiler::compile;
+use emela_emb_compiler::{Options, Source, compile, compile_sources};
 const BOARD: &str = r#"
 #include <assert.h>
 #include <stdlib.h>
@@ -8,6 +8,31 @@ const BOARD: &str = r#"
 #include "emela_board.h"
 _Noreturn void emela_board_defect(EmelaDefectKind kind,const char *message,uint16_t length) { (void)kind;(void)message;(void)length;abort(); }
 "#;
+#[test]
+fn a_string_function_with_only_failure_paths_keeps_a_valid_c_output_abi() {
+    let source = r#"
+error Missing(text: String)
+fn failing(n: Int) -> String fails Missing { fail Missing(Int.to_string(n)) }
+fn propagate(n: Int) -> String fails Missing { failing(n) }
+@export(c, "recover_text_length")
+pub fn recover_text_length(n: Int) -> Int {
+  text = propagate(n) escape { Missing(text) -> text }
+  String.byte_size(text)
+}
+"#;
+    let output = compile_sources(
+        &[Source::new("main.emel", source)],
+        "main.emel",
+        &Options::default().with_heap_bytes(4096),
+    )
+    .unwrap();
+    support::compile_and_run(
+        &output,
+        &format!(
+            "{BOARD}\nint main(void) {{ for (int i=0;i<1000;i++) assert(recover_text_length(-42)==3); return 0; }}"
+        ),
+    );
+}
 #[test]
 fn failures_escape_whole_expressions_and_handlers_propagate_outward() {
     let source = r#"
