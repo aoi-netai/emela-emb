@@ -21,3 +21,6 @@ pub(crate) mod strings;
 pub(crate) mod trait_collect;
 pub(crate) mod traits;
 pub(crate) mod types;
+
+#[cfg(test)]
+pub(crate) mod effects;
