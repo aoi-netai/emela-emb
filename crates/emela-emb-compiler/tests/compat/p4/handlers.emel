@@ -69,3 +69,14 @@ pub fn initializer_failure() -> Int {
   { with Configured, Broken { (use Read).read() } } escape { Gone(code) -> { mark(4)
     code } }
 }
+effect FailRead { fn read() -> Int fails Gone }
+handler FailedOp: FailRead {
+  release { mark(8) }
+  fn read() { mark(3)
+    fail Gone(code: 7) }
+}
+@export(c, "operation_failure")
+pub fn operation_failure() -> Int {
+  { with FailedOp { (use FailRead).read() } } escape { Gone(code) -> { mark(4)
+    code } }
+}

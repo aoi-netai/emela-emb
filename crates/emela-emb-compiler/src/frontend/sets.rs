@@ -1,7 +1,9 @@
 //! Error/effect row constraints, independent of syntax and the value-type solver.
 //! Difference removes explicit tags only: a variable keeps its original meaning.
 use crate::contract::ir::TypeId;
-use std::collections::{HashMap, HashSet};
+#[cfg(test)]
+use std::collections::HashMap;
+use std::collections::HashSet;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub(crate) enum SetKind {
@@ -57,6 +59,7 @@ impl Row {
         }
     }
 
+    #[cfg(test)]
     pub(crate) fn difference(&self, heads: &[usize]) -> Self {
         let mut result = self.clone();
         result.tags.retain(|tag| !heads.contains(&tag.head));
@@ -145,6 +148,7 @@ impl Solver {
         Ok(())
     }
 
+    #[cfg(test)]
     pub(crate) fn union(&self, left: &Row, right: &Row, unify: &mut Unify<'_>) -> Result<Row> {
         self.validate(left)?;
         self.validate(right)?;
@@ -173,6 +177,7 @@ impl Solver {
         Ok(())
     }
 
+    #[cfg(test)]
     pub(crate) fn equal(&mut self, left: Row, right: Row) -> Result<()> {
         self.includes(left.clone(), right.clone())?;
         self.includes(right, left)
@@ -315,6 +320,7 @@ impl Solver {
 
     /// Quantify unbounded parameters outside the environment; constrained inferred
     /// rows instead resolve to the smallest set permitted by their lower bounds.
+    #[cfg(test)]
     pub(crate) fn generalize(&mut self, environment: &[VarId]) -> Result<Vec<Quantified>> {
         let candidates: Vec<_> = (0..self.variables.len()).map(VarId).collect();
         self.generalize_from(&candidates, environment)
@@ -416,6 +422,7 @@ impl Solver {
 
     /// Substitute quantified variables simultaneously. Replacement rows are not
     /// recursively substituted, so permutations and per-call fresh variables work.
+    #[cfg(test)]
     pub(crate) fn instantiate(
         &self,
         row: &Row,

@@ -210,7 +210,7 @@ impl Checker {
                         .iter()
                         .find(|handler| handler.name.value == info.name)
                         .is_some_and(|handler| {
-                            handler.fields.is_some()
+                            info.fields_parenthesized
                                 || handler.init.is_some()
                                 || handler.release.is_some()
                         });

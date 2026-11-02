@@ -9,6 +9,7 @@ int32_t board_mark(int32_t n) { trace=trace*10+n;return n; }
 _Noreturn void emela_board_defect(EmelaDefectKind k,const char *m,uint16_t n) { fprintf(stderr,"defect %d: %.*s\n",k,n,m);abort(); }
 int main(void) {
   for(int i=0;i<1000;i++) {
+    trace=0;assert(operation_failure()==7 && trace==384 && test_heap_empty());
     trace=0;assert(layer_lifecycle()==42 && trace==12389 && test_heap_empty());
     trace=0;assert(overridden_arguments()==45 && trace==51289 && test_heap_empty());
     assert(capability_shadow()==12 && test_heap_empty());

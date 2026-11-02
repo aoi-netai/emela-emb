@@ -57,12 +57,14 @@ pub fn pure()->Int {with One {(use Read).read()+41}}
 #[test]
 fn provider_cycles_label_mismatches_and_layer_impurity_are_rejected() {
     for source in [
-        "effect Read{fn read()->Int}\nhandler H:Read{init(n:Int){H}\nfn read(){0}}\nfn f(){with H(n:true),H(n:1){()}}",
-        "effect Read{fn read()->Int}\nhandler H:Read{fn read(){0}}\nfn f(){with H(){()}}",
-        "effect Read{fn read()->Int}\nhandler H:Read{fn read(){0}}\neffect Label of Read\nfn f(){with Label by H,Label by H{()}}",
-        "effect A{fn a()->Int}\neffect B{fn b()->Int}\nhandler H:A{fn a(){0}}\neffect Label of B\nfn f(){with Label by H{()}}",
-        "effect A{fn a()->Int}\neffect B{fn b()->Int}\nhandler H:A{fn a(){(use B).b()}}\nhandler I:B{fn b(){(use A).a()}}\nfn f(){with H,I{()}}",
-        "effect Read{fn read()->Int}\nhandler H:Read{init(n:Int){H}\nfn read(){0}}\nlayer L{H(n:(use Read).read())}\nfn f(){with L{()}}",
+        "effect Read{fn read()->Int}\nhandler Reader:Read{init(n:Int){Reader}\nfn read(){0}}\nlayer Layer{Reader(n:(use Read).read())}",
+        "effect Alpha{fn a()->Int}\neffect Beta{fn b()->Int}\nhandler Reader:Alpha{fn a(){(use Beta).b()}}\nhandler Backup:Beta{fn b(){(use Alpha).a()}}\nlayer Layer{Reader,Backup}",
+        "effect Read{fn read()->Int}\nhandler Reader:Read{init(n:Int){Reader}\nfn read(){0}}\nfn f(){with Reader(n:true),Reader(n:1){()}}",
+        "effect Read{fn read()->Int}\nhandler Reader:Read{fn read(){0}}\nfn f(){with Reader(){()}}",
+        "effect Read{fn read()->Int}\nhandler Reader:Read{fn read(){0}}\neffect Label of Read\nfn f(){with Label by Reader,Label by Reader{()}}",
+        "effect Alpha{fn a()->Int}\neffect Beta{fn b()->Int}\nhandler Reader:Alpha{fn a(){0}}\neffect Label of Beta\nfn f(){with Label by Reader{()}}",
+        "effect Alpha{fn a()->Int}\neffect Beta{fn b()->Int}\nhandler Reader:Alpha{fn a(){(use Beta).b()}}\nhandler Backup:Beta{fn b(){(use Alpha).a()}}\nfn f(){with Reader,Backup{()}}",
+        "effect Read{fn read()->Int}\nhandler Reader:Read{init(n:Int){Reader}\nfn read(){0}}\nlayer Layer{Reader(n:(use Read).read())}\nfn f(){with Layer{()}}",
         "effect Read{fn read()->Int}\nfn f(){with Read{()}}",
     ] {
         assert!(

@@ -186,6 +186,28 @@ pub(crate) fn check(mut modules: Modules) -> Result<ir::Program, Vec<Diagnostic>
             .function(DefinitionId(index))
             .map_err(|error| vec![error])?;
     }
+    for layer in checker.effects.layers.clone() {
+        let item = ast::WithItem {
+            name: ast::Text::new(layer.name, layer.span),
+            args: None,
+            by: None,
+            span: layer.span,
+        };
+        let body = ast::Block {
+            statements: vec![ast::Statement::Expr(ast::Expr {
+                kind: ast::ExprKind::Unit,
+                span: layer.span,
+            })],
+            span: layer.span,
+        };
+        let mut locals = Locals {
+            names: HashMap::new(),
+            next: 0,
+        };
+        checker
+            .with_handlers(layer.module, &[item], &body, &mut locals, None, layer.span)
+            .map_err(|error| vec![error])?;
+    }
     checker.validate_trait_obligations()?;
     let mut modes: HashMap<_, _> = checker
         .definitions
@@ -237,6 +259,7 @@ pub(crate) fn check(mut modules: Modules) -> Result<ir::Program, Vec<Diagnostic>
         .map(|(index, definition)| (DefinitionId(index), definition.effect_mode.clone()))
         .collect();
     super::effects::infer(&mut program, &effect_modes, &mut checker.catalog)?;
+    super::capabilities::audit(&program)?;
     Ok(program)
 }
 impl Checker {

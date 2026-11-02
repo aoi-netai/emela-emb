@@ -1,4 +1,5 @@
 pub(crate) mod ast;
+pub(crate) mod capabilities;
 pub(crate) mod check;
 pub(crate) mod constant_patterns;
 pub(crate) mod consts;

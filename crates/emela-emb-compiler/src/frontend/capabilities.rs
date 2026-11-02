@@ -321,6 +321,7 @@ impl Context<'_> {
                 op,
                 args,
                 order,
+                ..
             } => {
                 let handler = self.expression(handler, locals, providers);
                 let arguments = self.arguments(args, locals, providers, false);
@@ -731,6 +732,7 @@ mod tests {
                         handler: Box::new(reference(&self.cap)),
                         effect: self.effect,
                         op: 0,
+                        errors: vec![],
                         args: vec![],
                         order: vec![],
                     },
@@ -1047,8 +1049,7 @@ mod tests {
             )
             .unwrap();
             super::super::consts::expand(&mut modules).unwrap();
-            let program = super::super::check::check(modules).unwrap();
-            assert!(audit(&program).is_err(), "{body}");
+            assert!(super::super::check::check(modules).is_err(), "{body}");
         }
     }
 

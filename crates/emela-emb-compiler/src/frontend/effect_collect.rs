@@ -61,7 +61,7 @@ impl EffectRegistry {
                     {
                         return Err(Diagnostic::new(
                             DK::Name,
-                            effect.name.span,
+                            effect.span,
                             "duplicate effect/type declaration",
                         ));
                     }
@@ -92,7 +92,7 @@ impl EffectRegistry {
                         if !names.insert(operation.name.value.as_str()) {
                             return Err(Diagnostic::new(
                                 DK::Name,
-                                operation.name.span,
+                                operation.span,
                                 "duplicate effect operation",
                             ));
                         }
@@ -802,7 +802,6 @@ pub(crate) struct HandlerInfo {
     pub release: Option<DefinitionId>,
     pub operations: Vec<DefinitionId>,
     pub fields_parenthesized: bool,
-    pub requirements: Vec<b::EffectId>,
 }
 #[derive(Clone, Debug)]
 pub(crate) struct LayerMember {
@@ -814,7 +813,6 @@ pub(crate) struct LayerMember {
 }
 #[derive(Clone, Debug)]
 pub(crate) struct LayerInfo {
-    pub id: usize,
     pub module: usize,
     pub name: String,
     pub span: Span,
@@ -964,7 +962,7 @@ impl EffectCollection {
         let mut bound = Vec::new();
         for handler in &self.handlers {
             let pending = &self.pending[handler.id];
-            let mut lookup = |name: &String| {
+            let lookup = |name: &String| {
                 functions
                     .get(&(handler.module, name.clone()))
                     .copied()
@@ -978,11 +976,11 @@ impl EffectCollection {
             };
             let result = (|| -> Result<_, Diagnostic> {
                 let init = lookup(&pending.init)?;
-                let release = pending.release.as_ref().map(&mut lookup).transpose()?;
+                let release = pending.release.as_ref().map(lookup).transpose()?;
                 let operations = pending
                     .operations
                     .iter()
-                    .map(&mut lookup)
+                    .map(lookup)
                     .collect::<Result<Vec<_>, _>>()?;
                 Ok((init, release, operations))
             })();
@@ -1135,7 +1133,6 @@ pub fn prepare(
                 release: None,
                 operations: vec![],
                 fields_parenthesized: handler.fields.is_some(),
-                requirements: vec![],
             });
             let init_params = handler
                 .init
@@ -1178,7 +1175,14 @@ pub fn prepare(
             let init = collection.add_method(
                 modules,
                 module,
-                function(handler.name.span, init_params, init_body),
+                function(
+                    handler
+                        .init
+                        .as_ref()
+                        .map_or(handler.name.span, |init| init.span),
+                    init_params,
+                    init_body,
+                ),
                 MethodInfo {
                     signature: method_signature(init_types, state_type, vec![]),
                     type_parameters: 0,
@@ -1249,7 +1253,7 @@ pub fn prepare(
                 if operation.suspend != implementation.suspends {
                     return Err(collection.diagnostic(
                         module,
-                        implementation.name.span,
+                        implementation.span,
                         "handler operation suspend marker must match its effect declaration",
                     ));
                 }
@@ -1419,7 +1423,6 @@ fn collect_layers(
             .layers
             .insert(layer.name.value.clone(), (id, layer.public));
         collection.layers.push(LayerInfo {
-            id,
             module: *module,
             name: layer.name.value.clone(),
             span: layer.span,
