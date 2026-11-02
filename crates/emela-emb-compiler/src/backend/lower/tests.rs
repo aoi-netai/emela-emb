@@ -20,6 +20,8 @@ mod memory;
 mod p7_aggregate_failures;
 #[path = "p7_binding_tests.rs"]
 mod p7_bindings;
+#[path = "p7_cause_source_seam_tests.rs"]
+mod p7_cause_source_seams;
 #[path = "p7_const_source_tests.rs"]
 mod p7_const_source;
 #[path = "p7_contract_tests.rs"]
@@ -42,6 +44,8 @@ mod p7_list_aliases;
 mod p7_misc_values;
 #[path = "p7_string_frame_tests.rs"]
 mod p7_string_frames;
+#[path = "p7_source_seams.rs"]
+mod p7_source_seams;
 #[path = "service_tests.rs"]
 mod services;
 #[path = "source_builtin_tests.rs"]

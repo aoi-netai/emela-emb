@@ -1,0 +1,236 @@
+{
+  "fixed_revision": "c34c0aeefdd966d854371b3110db00a47798751d",
+  "compiler_checkpoint": "2650f67d0b402ef5ed4e7b6da1e417c62e510a9a",
+  "programs": [
+    {
+      "id": "program:46dc34d9a56eaa8cb857",
+      "files": [
+        {
+          "name": "main.emel",
+          "fixture": "crates/emela-emb-compiler/tests/compat/legacy-corpus/sources/8b94498c13cd48b86155cc4004a49fe423a003224fc85cd635df7126c4e45e58.emel",
+          "source_id": "source:8b94498c13cd48b86155",
+          "sha256": "8b94498c13cd48b86155cc4004a49fe423a003224fc85cd635df7126c4e45e58"
+        }
+      ],
+      "legacy_tests": [
+        "emit::fiber::cause::failed_empty_cause_raised_in_cleanup_returns_to_its_failing_scope"
+      ],
+      "new_test": {
+        "kind": "source_test",
+        "path": "crates/emela-emb-compiler/src/backend/lower/p7_cause_source_seam_tests.rs",
+        "symbol": "failed_empty_cause_raised_in_cleanup_returns_to_its_failing_scope"
+      },
+      "post_lowering_ir_seam": {
+        "name": "protect_cleanup_call",
+        "path": "crates/emela-emb-compiler/src/backend/lower/p7_source_seams.rs",
+        "fixed_old_path": "crates/emela-codegen-emb/tests/fiber/interrupt.rs",
+        "fixed_old_line": 251,
+        "algorithm": "Same exactcount1 transform: the finalcleanupCall moves into Protect cleanup. Required EvExtend/EvLookup dependency prefix is hoisted in original order, body Yield result is kept through a fresh typed destination.",
+        "adaptation": "Independent Program/arenas replace Module. Existing variable repr is copied; ConstInt result uses I32. Old letchain is nested if for MSRV1.85."
+      },
+      "source_adaptation": "Fixture original bytes preserved; explicit C exports only. Normal independent frontend pipeline completes before applying the explicit fixed-old IR test adaptation. Not pure-source-only runtime evidence.",
+      "options": {
+        "heap_bytes": 4096,
+        "fiber_capacity": 8,
+        "frame_capacity": 24,
+        "frame_bytes": 512,
+        "task_capacity": 3,
+        "event_capacity": 3,
+        "task_adapter": {
+          "host_wait": "board_wait_start"
+        }
+      },
+      "C_harness": "crates/emela-emb-compiler/tests/compat/p7/cause/failed_empty_cause_raised_in_cleanup_returns_to_its_failing_scope.c",
+      "observations": {
+        "source_check": "passed",
+        "C_generation": "passed",
+        "C_runtime_O0": "passed",
+        "C_runtime_O2": "passed",
+        "iterations": 1000,
+        "heap_empty_after_each": true,
+        "pure_source_runtime": false
+      },
+      "runtime_assertions": [
+        "Empty-row FailureCause raised synchronously or afterthirdwait in cleanup reaches the failingScope and preserves Boom42; NULLoutput/stale task/mark1then2/fullheapfree."
+      ]
+    },
+    {
+      "id": "program:365026ebd97818c119c3",
+      "files": [
+        {
+          "name": "main.emel",
+          "fixture": "crates/emela-emb-compiler/tests/compat/legacy-corpus/sources/f3550c720a53dd18af434b62d672adaf680dae153873e3c1e827eb53af3c42da.emel",
+          "source_id": "source:f3550c720a53dd18af43",
+          "sha256": "f3550c720a53dd18af434b62d672adaf680dae153873e3c1e827eb53af3c42da"
+        }
+      ],
+      "legacy_tests": [
+        "emit::fiber::cause::interruption_raised_by_cleanup_replaces_a_body_failure"
+      ],
+      "new_test": {
+        "kind": "source_test",
+        "path": "crates/emela-emb-compiler/src/backend/lower/p7_cause_source_seam_tests.rs",
+        "symbol": "interruption_raised_by_cleanup_replaces_a_body_failure"
+      },
+      "post_lowering_ir_seam": {
+        "name": "protect_cleanup_call",
+        "path": "crates/emela-emb-compiler/src/backend/lower/p7_source_seams.rs",
+        "fixed_old_path": "crates/emela-codegen-emb/tests/fiber/interrupt.rs",
+        "fixed_old_line": 251,
+        "algorithm": "Same exactcount1 transform: the finalcleanupCall moves into Protect cleanup. Required EvExtend/EvLookup dependency prefix is hoisted in original order, body Yield result is kept through a fresh typed destination.",
+        "adaptation": "Independent Program/arenas replace Module. Existing variable repr is copied; ConstInt result uses I32. Old letchain is nested if for MSRV1.85."
+      },
+      "source_adaptation": "Fixture original bytes preserved; explicit C exports only. Normal independent frontend pipeline completes before applying the explicit fixed-old IR test adaptation. Not pure-source-only runtime evidence.",
+      "options": {
+        "heap_bytes": 4096,
+        "fiber_capacity": 8,
+        "frame_capacity": 24,
+        "frame_bytes": 512,
+        "task_capacity": 3,
+        "event_capacity": 3,
+        "task_adapter": {
+          "host_wait": "board_wait_start"
+        }
+      },
+      "C_harness": "crates/emela-emb-compiler/tests/compat/p7/cause/interruption_raised_by_cleanup_replaces_a_body_failure.c",
+      "observations": {
+        "source_check": "passed",
+        "C_generation": "passed",
+        "C_runtime_O0": "passed",
+        "C_runtime_O2": "passed",
+        "iterations": 1000,
+        "heap_empty_after_each": true,
+        "pure_source_runtime": false
+      },
+      "runtime_assertions": [
+        "Interruption raised by cleanup replaces the bodyBoomfailure, skipsmark99 and errorhandler mark3, waits whenprotectedmode1 is asynchronous, still runs Resource release mark2, result42 or NULLoutput unchanged; Cause and frameheapfree."
+      ]
+    },
+    {
+      "id": "program:595e65424d0f6b93c750",
+      "files": [
+        {
+          "name": "main.emel",
+          "fixture": "crates/emela-emb-compiler/tests/compat/legacy-corpus/sources/a90022a09a7452ef951b489fd35bbd594629625d61791996f617313880e46e9d.emel",
+          "source_id": "source:a90022a09a7452ef951b",
+          "sha256": "a90022a09a7452ef951b489fd35bbd594629625d61791996f617313880e46e9d"
+        }
+      ],
+      "legacy_tests": [
+        "emit::fiber::cause::interruption_raised_by_cleanup_replaces_a_body_failure"
+      ],
+      "new_test": {
+        "kind": "source_test",
+        "path": "crates/emela-emb-compiler/src/backend/lower/p7_cause_source_seam_tests.rs",
+        "symbol": "interruption_raised_by_cleanup_replaces_a_body_failure"
+      },
+      "post_lowering_ir_seam": {
+        "name": "protect_cleanup_call",
+        "path": "crates/emela-emb-compiler/src/backend/lower/p7_source_seams.rs",
+        "fixed_old_path": "crates/emela-codegen-emb/tests/fiber/interrupt.rs",
+        "fixed_old_line": 251,
+        "algorithm": "Same exactcount1 transform: the finalcleanupCall moves into Protect cleanup. Required EvExtend/EvLookup dependency prefix is hoisted in original order, body Yield result is kept through a fresh typed destination.",
+        "adaptation": "Independent Program/arenas replace Module. Existing variable repr is copied; ConstInt result uses I32. Old letchain is nested if for MSRV1.85."
+      },
+      "source_adaptation": "Fixture original bytes preserved; explicit C exports only. Normal independent frontend pipeline completes before applying the explicit fixed-old IR test adaptation. Not pure-source-only runtime evidence.",
+      "options": {
+        "heap_bytes": 4096,
+        "fiber_capacity": 8,
+        "frame_capacity": 24,
+        "frame_bytes": 512,
+        "task_capacity": 3,
+        "event_capacity": 3,
+        "task_adapter": {
+          "host_wait": "board_wait_start"
+        }
+      },
+      "C_harness": "crates/emela-emb-compiler/tests/compat/p7/cause/interruption_raised_by_cleanup_replaces_a_body_failure.c",
+      "observations": {
+        "source_check": "passed",
+        "C_generation": "passed",
+        "C_runtime_O0": "passed",
+        "C_runtime_O2": "passed",
+        "iterations": 1000,
+        "heap_empty_after_each": true,
+        "pure_source_runtime": false
+      },
+      "runtime_assertions": [
+        "Interruption raised by cleanup replaces the bodyBoomfailure, skipsmark99 and errorhandler mark3, waits whenprotectedmode1 is asynchronous, still runs Resource release mark2, result42 or NULLoutput unchanged; Cause and frameheapfree."
+      ]
+    },
+    {
+      "id": "program:7297d3dd83b075ef0fb0",
+      "files": [
+        {
+          "name": "main.emel",
+          "fixture": "crates/emela-emb-compiler/tests/compat/legacy-corpus/sources/be4f39329c71752d895a792108d3b88864beed64d9f192aaf0b7e8cd843f05ba.emel",
+          "source_id": "source:be4f39329c71752d895a",
+          "sha256": "be4f39329c71752d895a792108d3b88864beed64d9f192aaf0b7e8cd843f05ba"
+        }
+      ],
+      "legacy_tests": [
+        "emit::fiber::cause::interruption_raised_by_cleanup_replaces_a_body_failure"
+      ],
+      "new_test": {
+        "kind": "source_test",
+        "path": "crates/emela-emb-compiler/src/backend/lower/p7_cause_source_seam_tests.rs",
+        "symbol": "interruption_raised_by_cleanup_replaces_a_body_failure"
+      },
+      "post_lowering_ir_seam": {
+        "name": "protect_cleanup_call",
+        "path": "crates/emela-emb-compiler/src/backend/lower/p7_source_seams.rs",
+        "fixed_old_path": "crates/emela-codegen-emb/tests/fiber/interrupt.rs",
+        "fixed_old_line": 251,
+        "algorithm": "Same exactcount1 transform: the finalcleanupCall moves into Protect cleanup. Required EvExtend/EvLookup dependency prefix is hoisted in original order, body Yield result is kept through a fresh typed destination.",
+        "adaptation": "Independent Program/arenas replace Module. Existing variable repr is copied; ConstInt result uses I32. Old letchain is nested if for MSRV1.85."
+      },
+      "source_adaptation": "Fixture original bytes preserved; explicit C exports only. Normal independent frontend pipeline completes before applying the explicit fixed-old IR test adaptation. Not pure-source-only runtime evidence.",
+      "options": {
+        "heap_bytes": 4096,
+        "fiber_capacity": 8,
+        "frame_capacity": 24,
+        "frame_bytes": 512,
+        "task_capacity": 3,
+        "event_capacity": 3,
+        "task_adapter": {
+          "host_wait": "board_wait_start"
+        }
+      },
+      "C_harness": "crates/emela-emb-compiler/tests/compat/p7/cause/interruption_raised_by_cleanup_replaces_a_body_failure.c",
+      "observations": {
+        "source_check": "passed",
+        "C_generation": "passed",
+        "C_runtime_O0": "passed",
+        "C_runtime_O2": "passed",
+        "iterations": 1000,
+        "heap_empty_after_each": true,
+        "pure_source_runtime": false
+      },
+      "runtime_assertions": [
+        "Interruption raised by cleanup replaces the bodyBoomfailure, skipsmark99 and errorhandler mark3, waits whenprotectedmode1 is asynchronous, still runs Resource release mark2, result42 or NULLoutput unchanged; Cause and frameheapfree."
+      ]
+    }
+  ],
+  "test_file_sha256": "7d6947cd47d03a477d320d3fd70985f350258b3bf8772d4fb7e2041dcb8461ae",
+  "seam_file_sha256": "4dff3bcded0d02bf5dff1b0642f80dcc9d9dec1bb2427be91e1559b3f850e6a8",
+  "run": {
+    "command": "CARGO_PROFILE_TEST_OPT_LEVEL=1 cargo test -p emela-emb-compiler --lib p7_cause_source_seams --locked --offline",
+    "passed": 2,
+    "program_variants": 4,
+    "failed": 0,
+    "ignored": 0,
+    "C_flags": [
+      "-std=c11",
+      "-Wall",
+      "-Wextra",
+      "-Werror"
+    ],
+    "C_optimizations": [
+      "-O0",
+      "-O2"
+    ],
+    "strict_clippy_all_targets": "passed",
+    "MSRV_1_85_all_targets": "passed",
+    "fmt_diff": "passed"
+  }
+}
