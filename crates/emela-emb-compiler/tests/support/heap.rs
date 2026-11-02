@@ -21,6 +21,15 @@ int test_heap_empty(void) {
   }
   return 1;
 }
+size_t test_heap_used(void) {
+  size_t used=0;
+  for (unsigned char *p=emela_heap_storage;emela_heap_initialized && p<emela_heap_end();) {
+    emela_heap_block *block=(emela_heap_block *)(void *)p;
+    if (!block->is_free) used+=block->size;
+    p+=block->size;
+  }
+  return used;
+}
 "#,
     );
     output.c_source = source.clone();
