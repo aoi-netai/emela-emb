@@ -489,3 +489,27 @@ child数と取消flagの観測、および弱child link・cycleの直接検査�
 固定旧generic constの8入力は`tests/compat/p7/generic-consts/`へ本文をhash一致のまま保存した。`tests/p7_legacy_generic_consts.rs`はpub関数の直前へ明示C exportだけを加え、全8入力をsourceから生成しC両最適化で各1000回実行する。initializer回数、関数参照、nested capture、高階callback、失敗キャッシュ、毎回再試行する自己参照とheap解放を観測する。`docs/reports/p7-generic-const-compat.json`には元program ID/source hash・source検査/C生成/strict C object/runtimeを別々に記録する。元corpusの凍結baselineの判定は書き換えない。
 
 P6 sourceとの交差は`tests/p7_const_fibers.rs`で確認する。同じAPPLY/IDENTITY const familyを、純粋なString callbackと中断するScope callbackへ具体化し、Read evidenceをfork子まで渡してjoin後に42を得る。純粋exportと中断exportを各1000回実行して全heap解放を確認し、Cの両最適化で検証する。canonical_constはFunction単位のmetadataであり、Evidence/Provide.baseを走査する既存normalization/specialize/lowerを変更しない。
+## P7 Embeddedの宣言とBoard handler
+
+固定revisionの次の6moduleを本文変更なしで独立供給する。Boardの予約external symbolはcompiler所有moduleの宣言名とsymbolが一致する場合だけ許可する。C service bridgeは採用済みbackendを使い、board package・HAL・本体checkoutを依存にしない。
+
+| 旧source | SHA-256 |
+| --- | --- |
+| `crates/emela-codegen-emb/lib/embedded/peripheral.emel` | `8f8c8587636a9cbbf8007e73b4e5306ffbfbf07630cfee84481805e1693278a8` |
+| `crates/emela-codegen-emb/lib/embedded/gpio.emel` | `b0628f656a4e25a67f10e4db89271a1e60cba3ee3c78f6bc0d45de3946ee4cda` |
+| `crates/emela-codegen-emb/lib/embedded/uart.emel` | `49679fa4b32535805c085c1434ed4dd0f99c50b39d83f6f79136277148dec2c5` |
+| `crates/emela-codegen-emb/lib/embedded/i2c.emel` | `89f38481c5f5513fa30007a0da8bbd28089b8d258888bf3a3a71f07b18291572` |
+| `crates/emela-codegen-emb/lib/embedded/spi.emel` | `c39a3023e9c2258ecdcb01378011355e961b4140aa2ad11eb616e4357e1c25bc` |
+| `crates/emela-codegen-emb/lib/embedded/board.emel` | `f86e8766b31c3611547428d7078b6c47cae44c7f924e4ee1aeba3c46774de2f5` |
+
+BoardのC型名は固定旧の `Embedded.<module>.<type>` 名義から決まるため、compiler所有のEmbedded dataもmodule名を保持する。基本型の既存名は変更しない。
+
+以下の固定旧試験を `tests/compat/p7/embedded.emel` / `embedded-harness.c`、`tests/p7_services.rs`、`src/backend/lower/service_tests.rs` へ適応する。sourceの公開4関数へ明示exportを追加し、Cのall呼出し名をstartへ対応付ける。旧64反復を1000へ増やし、23operation、エラーcode、転送要素/容量/受信長境界、所有List、Clock通知、ConsoleのNULを維持する。pure Clock.nowのtask runtime省略と不正service署名は独自IRで確認し、sourceのhandler全operation表とは分ける。
+
+| 旧fixture | SHA-256 |
+| --- | --- |
+| `crates/emela-codegen-emb/tests/embedded_peripherals/exercise.emel` | `14869b54f4f331b95ba83c9f2d286d5647ab3ef6e17fa4dbf07386165b7ea937` |
+| `crates/emela-codegen-emb/tests/embedded_peripherals/harness.c` | `c28513c23ed2e05622d2f66d321aa2ade2b46bb36695aeceb1ced40b62ac63ec` |
+| `crates/emela-codegen-emb/tests/embedded_peripherals/mod.rs` | `60a47949658c43d5115d41b636d0102aecaf255e862e84365dfe4084c72e60cb` |
+| `crates/emela-codegen-emb/tests/embedded_peripherals/clock.rs` | `57aafc360bf0de60b80041d0cedcd47ba351c64dcf324ba43be53e16136f2ad1` |
+| `crates/emela-codegen-emb/tests/embedded_peripherals/diagnostics.rs` | `df7be1d780bf86b769b39666f50c4ce60585105e87b3b8a46c1dc73874bcbb79` |

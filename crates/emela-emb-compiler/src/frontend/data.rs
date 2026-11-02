@@ -113,6 +113,7 @@ impl Catalog {
                     }
                     let id = catalog.core.enums.alloc(b::EnumDef {
                         name: if module.builtin
+                            && !module.name.starts_with("Embedded.")
                             && !matches!(
                                 module.name.as_str(),
                                 "Std.Fiber" | "Std.Deferred" | "Std.Cause"
