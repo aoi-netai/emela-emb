@@ -647,10 +647,41 @@ fn unused_growing_recursive_payloads_remain_opaque_without_expansion() {
     assert!(lowered.lowered.core.expanding_enums.contains(&id));
     assert!(lowered.lowered.core.types.len() < 32);
     let output =
-        crate::backend::compile_program(p, &Options::default().with_heap_bytes(1024)).unwrap();
+        crate::backend::compile_program(p.clone(), &Options::default().with_heap_bytes(1024))
+            .unwrap();
     execute_repeatedly(
         output,
         "for(int i=0;i<1000;++i) { assert(answer()==0); assert(test_heap_empty()); }",
+    );
+
+    // The legacy fixture also exports the aggregate itself, including its opaque Next field.
+    let ty = p.core.types.intern(Type::Enum(id, vec![TypeId::INT]));
+    p.functions = Default::default();
+    let mut f = simple();
+    f.ret = ty;
+    let mut statements = vec![];
+    let value = assign(
+        &mut f,
+        &mut statements,
+        ty,
+        Value::Make {
+            ctor: CtorRef {
+                enum_id: id,
+                variant: 0,
+            },
+            args: vec![],
+        },
+    );
+    f.seqs[f.body.unwrap()] = Seq {
+        stmts: statements,
+        term: Term::Return(Some(value.into())),
+    };
+    p.functions.alloc(f);
+    let output =
+        crate::backend::compile_program(p, &Options::default().with_heap_bytes(1024)).unwrap();
+    execute_repeatedly(
+        output,
+        "for(int i=0;i<1000;++i) { assert(answer().tag==0); assert(test_heap_empty()); }",
     );
 }
 
