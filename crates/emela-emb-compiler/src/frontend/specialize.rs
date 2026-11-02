@@ -531,11 +531,23 @@ impl Specializer {
             ir::ExprKind::OpCall {
                 handler,
                 effect,
+                errors,
                 args,
                 order,
                 ..
             } => {
                 *effect = self.effect(function, *effect, arguments, expression.span, 0)?;
+                for error in errors {
+                    *error = self.substitute(
+                        function,
+                        *error,
+                        arguments,
+                        expression.span,
+                        &mut HashMap::new(),
+                        &mut HashSet::new(),
+                        0,
+                    )?;
+                }
                 Self::order(function, expression.span, order, args.len())?;
                 self.expression(function, handler, arguments, depth)?;
                 for argument in args {

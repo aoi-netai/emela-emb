@@ -249,6 +249,7 @@ impl Context<'_> {
                 op,
                 args,
                 order,
+                ..
             } => self.operation_call(builder, handler, *effect, *op, args, order, expression.ty),
             E::Handler {
                 name,

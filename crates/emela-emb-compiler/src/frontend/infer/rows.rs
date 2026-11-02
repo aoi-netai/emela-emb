@@ -278,4 +278,49 @@ mod tests {
         };
         assert_eq!(row.params.len(), 2);
     }
+    #[test]
+    fn function_parameters_are_contravariant_and_named_type_arguments_invariant() {
+        let mut types = TypeTable::default();
+        let mut solver = Solver::new();
+        let empty = set(&mut types, vec![]);
+        let declaration = la_arena::Idx::from_raw(la_arena::RawIdx::from_u32(0));
+        let error = types.intern(Type::Enum(declaration, vec![]));
+        let errors = set(&mut types, vec![error]);
+        let function = |types: &mut TypeTable, params, errors| {
+            types.intern(Type::Fn(crate::contract::ir::FnType {
+                params,
+                ret: TypeId::INT,
+                fails: false,
+                suspends: false,
+                ev: false,
+                sets: Some(FnSets {
+                    errors,
+                    effects: empty,
+                }),
+            }))
+        };
+        let pure = function(&mut types, vec![], empty);
+        let fallible = function(&mut types, vec![], errors);
+        assert!(solver.unify(&mut types, pure, fallible).is_ok());
+        assert!(solver.unify(&mut types, fallible, pure).is_err());
+        let accepts_pure = function(&mut types, vec![pure], empty);
+        let accepts_fallible = function(&mut types, vec![fallible], empty);
+        assert!(
+            solver
+                .unify(&mut types, accepts_fallible, accepts_pure)
+                .is_ok()
+        );
+        assert!(
+            solver
+                .unify(&mut types, accepts_pure, accepts_fallible)
+                .is_err()
+        );
+        let holder_pure = types.intern(Type::Enum(declaration, vec![pure]));
+        let holder_fallible = types.intern(Type::Enum(declaration, vec![fallible]));
+        assert!(
+            solver
+                .unify(&mut types, holder_pure, holder_fallible)
+                .is_err()
+        );
+    }
 }

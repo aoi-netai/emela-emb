@@ -351,10 +351,20 @@ impl Context<'_> {
         let mut analysis = Analysis::default();
         match &expression.kind {
             E::Use { .. } => {}
-            E::OpCall { handler, args, .. } => {
+            E::OpCall {
+                handler,
+                args,
+                errors,
+                ..
+            } => {
                 analysis.merge(self.expression(handler, dynamic)?);
                 for argument in args {
                     analysis.merge(self.expression(argument, dynamic)?);
+                }
+                for &error in errors {
+                    let members = self.error_members(error, expression.span)?;
+                    analysis.errors.extend(members.iter().copied());
+                    analysis.constraints.extend(members);
                 }
             }
             E::Handler { operations, .. } => {

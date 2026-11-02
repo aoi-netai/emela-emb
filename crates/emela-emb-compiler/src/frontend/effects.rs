@@ -161,6 +161,19 @@ impl Context<'_> {
         let ty = solver
             .resolve(&mut self.catalog.core.types, ty)
             .map_err(|error| self.error(span, error.message))?;
+        if self.solver.as_ref().is_some_and(|solver| {
+            solver.row_kind(ty) == Some(super::sets::SetKind::Effect) && solver.is_meta(ty)
+        }) {
+            return self
+                .solver
+                .as_deref_mut()
+                .unwrap()
+                .resolve_row(&mut self.catalog.core.types, ty)
+                .map_err(|error| {
+                    Diagnostic::new(DiagnosticKind::Type, span, error.message)
+                        .in_source(self.source)
+                });
+        }
         if let Type::Handler(effect) = self.catalog.core.ty(ty) {
             let arguments = self.catalog.core.effects[*effect].args.clone();
             let mut replacements = HashMap::new();
@@ -221,11 +234,12 @@ impl Context<'_> {
         let mut pending = values.to_vec();
         let mut seen = HashSet::new();
         while let Some(ty) = pending.pop() {
+            let ty = self.resolve(ty, span)?;
             if !seen.insert(ty) {
                 continue;
             }
-            // A set parameter is an indivisible row here. In particular, providers
-            // must not subtract a tag that appears inside it only after inference.
+            // Rigid set parameters remain indivisible. Inferred rows expose their
+            // current lower bound so an outer provider can satisfy a known residual.
             match self.catalog.core.ty(ty).clone() {
                 Type::Set(summary) => pending.extend(summary.params),
                 Type::Param(_) => {

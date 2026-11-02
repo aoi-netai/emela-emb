@@ -709,6 +709,13 @@ impl Checker {
                         },
                     };
                     self.classify_parameter_kinds(module_index, function, &signature, &parameters)?;
+                    if external.is_some() {
+                        self.external_callbacks_immediate(
+                            module_index,
+                            &signature,
+                            function.name.span,
+                        )?;
+                    }
                     let effect_mode = super::effects::Mode {
                         allowed: effect_mode_explicit.then(|| signature.sets.effects.clone()),
                     };

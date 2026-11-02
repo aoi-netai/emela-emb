@@ -53,6 +53,7 @@ fn get(effect: EffectId, ty: TypeId) -> ir::Expr {
             handler: Box::new(expr(ir::ExprKind::Use { effect }, Ty::Compound(ty))),
             effect,
             op: 0,
+            errors: vec![],
             args: vec![],
             order: vec![],
         },
@@ -283,6 +284,84 @@ fn different_instances_are_not_removed_by_the_same_effect_declaration() {
 }
 
 #[test]
+fn a_known_inferred_residual_is_removed_by_an_outer_provider() {
+    let mut catalog = catalog();
+    let (read, ty) = effect(&mut catalog, "Read", vec![]);
+    let mut solver = super::super::infer::Solver::new();
+    let row = solver
+        .fresh_row(
+            &mut catalog.core.types,
+            super::super::sets::SetKind::Effect,
+            super::super::sets::Origin::Inferred,
+        )
+        .unwrap();
+    let actual = catalog.core.types.intern(Type::Set(SetSummary {
+        params: vec![ty],
+        ..Default::default()
+    }));
+    solver.register_effects(&catalog.core);
+    solver
+        .include_sets(
+            &mut catalog.core.types,
+            actual,
+            row,
+            super::super::sets::SetKind::Effect,
+        )
+        .unwrap();
+    let errors = catalog.core.types.intern(Type::Set(SetSummary::default()));
+    let effects = catalog.core.types.intern(Type::Set(SetSummary {
+        params: vec![row],
+        ..Default::default()
+    }));
+    let callback = catalog.core.types.intern(Type::Fn(b::FnType {
+        params: vec![],
+        ret: TypeId::INT,
+        fails: false,
+        suspends: false,
+        ev: true,
+        sets: Some(b::FnSets { errors, effects }),
+    }));
+    let call = expr(
+        ir::ExprKind::Apply {
+            callee: Box::new(expr(
+                ir::ExprKind::Local(ir::LocalId(0)),
+                Ty::Compound(callback),
+            )),
+            args: vec![],
+            order: vec![],
+        },
+        Ty::Int,
+    );
+    let pure = pure_type(&mut catalog);
+    let provided = handler(
+        read,
+        ty,
+        expr(ir::ExprKind::Literal(ir::Literal::Int(42)), Ty::Int),
+        pure,
+    );
+    let value = expr(
+        ir::ExprKind::Provide {
+            bindings: vec![(read, provided)],
+            body: block(call),
+        },
+        Ty::Int,
+    );
+    assert!(
+        incoming(
+            &value,
+            &[],
+            &Registry::default(),
+            &mut catalog,
+            &mut solver,
+            &[],
+            "test.emel"
+        )
+        .unwrap()
+        .is_empty()
+    );
+}
+
+#[test]
 fn a_provider_does_not_subtract_unknown_members_of_a_set_parameter() {
     let mut catalog = catalog();
     let (read, ty) = effect(&mut catalog, "Read", vec![]);
@@ -395,6 +474,7 @@ fn calls_instantiate_effect_arguments_from_a_scoped_signature_scheme() {
             )),
             effect: generic,
             op: 0,
+            errors: vec![],
             args: vec![],
             order: vec![],
         },

@@ -66,6 +66,7 @@ pub(crate) enum ExprKind {
         handler: Box<Expr>,
         effect: crate::contract::ir::EffectId,
         op: usize,
+        errors: Vec<crate::contract::ir::TypeId>,
         args: Vec<Expr>,
         order: Vec<usize>,
     },

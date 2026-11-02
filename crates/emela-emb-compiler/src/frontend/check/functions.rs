@@ -189,6 +189,41 @@ impl Checker {
         }
         Ok(())
     }
+    pub(super) fn external_callbacks_immediate(
+        &mut self,
+        module: usize,
+        signature: &Signature,
+        span: Span,
+    ) -> Result<(), Diagnostic> {
+        self.solver.register_effects(&self.catalog.core);
+        let mut pending = signature
+            .params
+            .iter()
+            .copied()
+            .map(data::backend_type)
+            .collect::<Vec<_>>();
+        let mut seen = HashSet::new();
+        while let Some(ty) = pending.pop() {
+            if !seen.insert(ty) {
+                continue;
+            }
+            match self.catalog.core.ty(ty).clone() {
+                Type::Tuple(fields) | Type::Enum(_, fields) => pending.extend(fields),
+                Type::List(ty) | Type::Cell(ty) => pending.push(ty),
+                Type::Fn(function) => {
+                    if let Some(sets) = function.sets {
+                        self.solver
+                            .require_immediate(&mut self.catalog.core.types, sets.effects)
+                            .map_err(|error| self.error(module, DK::Type, span, error.message))?;
+                    }
+                    pending.extend(function.params);
+                    pending.push(function.ret);
+                }
+                _ => {}
+            }
+        }
+        Ok(())
+    }
     pub(super) fn coerce_function(
         &mut self,
         module: usize,

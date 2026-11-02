@@ -222,6 +222,20 @@ impl Solver {
         expected: TypeId,
         kind: SetKind,
     ) -> Result<()> {
+        let previous = self.clone();
+        let result = self.include_sets_inner(types, actual, expected, kind);
+        if result.is_err() {
+            *self = previous;
+        }
+        result
+    }
+    fn include_sets_inner(
+        &mut self,
+        types: &mut TypeTable,
+        actual: TypeId,
+        expected: TypeId,
+        kind: SetKind,
+    ) -> Result<()> {
         self.resolve_effect_arguments(types)?;
         let actual = self.resolve(types, actual)?;
         let expected = self.resolve(types, expected)?;
@@ -501,10 +515,12 @@ impl Solver {
         match (Self::node(types, actual)?, Self::node(types, expected)?) {
             (Type::Tuple(a), Type::Tuple(b)) => self.unify_many(types, &a, &b, actual, expected),
             (Type::Enum(a, args_a), Type::Enum(b, args_b)) if a == b => {
-                self.unify_many(types, &args_a, &args_b, actual, expected)
+                self.unify_many(types, &args_a, &args_b, actual, expected)?;
+                self.unify_many(types, &args_b, &args_a, expected, actual)
             }
             (Type::List(a), Type::List(b)) | (Type::Cell(a), Type::Cell(b)) => {
-                self.unify(types, a, b)
+                self.unify(types, a, b)?;
+                self.unify(types, b, a)
             }
             (Type::Handler(a), Type::Handler(b)) => {
                 let a = self.rows.effects.get(&a).cloned();

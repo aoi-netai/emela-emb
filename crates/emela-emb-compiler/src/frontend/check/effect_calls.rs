@@ -134,6 +134,7 @@ impl Checker {
                 )
             })?
             .to_vec();
+        let mut errors = Vec::new();
         for failure in failures {
             let failure = self.catalog.effects.substitute_type(
                 &mut self.catalog.core,
@@ -150,6 +151,7 @@ impl Checker {
                     "effect arguments used in fails must be single error types",
                 ));
             }
+            errors.push(failure);
         }
         if let Some(expected) = expected {
             self.expect_type(module, data::frontend_type(ret), expected, span)?;
@@ -233,6 +235,7 @@ impl Checker {
                 handler: Box::new(receiver),
                 effect,
                 op,
+                errors,
                 args: checked,
                 order,
             },

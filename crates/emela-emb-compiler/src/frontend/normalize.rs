@@ -171,10 +171,16 @@ impl Context<'_> {
             E::OpCall {
                 handler,
                 effect,
+                errors,
                 args,
                 ..
             } => {
                 *effect = self.effect(*effect, expression.span)?;
+                for error in errors {
+                    let mut ty = frontend_type(*error);
+                    self.ty(&mut ty, expression.span)?;
+                    *error = backend_type(ty);
+                }
                 self.expression(handler)?;
                 for argument in args {
                     self.expression(argument)?;
