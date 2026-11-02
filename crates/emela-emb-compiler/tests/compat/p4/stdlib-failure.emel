@@ -1,0 +1,19 @@
+@external(c, "trace")
+fn trace(n: Int) -> Int
+
+error CallbackFailure(value: Int)
+fn crash(n: Int) -> Int fails CallbackFailure {
+  trace(n)
+  if n == 2 { fail CallbackFailure(n) } else { n * 10 }
+}
+fn failing() {
+  values = List.map([1, 2, 3], crash)
+  trace(99)
+  values
+}
+
+@export(c, "stdlib_failure")
+pub fn run() -> Int {
+  values = failing() escape { CallbackFailure(value) -> [value + 40] }
+  Option.or(List.head(values), 0)
+}

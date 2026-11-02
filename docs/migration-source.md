@@ -382,3 +382,11 @@ Handler/Evidence/operation call/RetireとCellの型・ID検証は独自lowerに�
 引数はnamed argumentを含めsource順で一度ずつ評価し、成功後にCellを作る。Stateはretireせず、返却closureによる共有状態の保持を許す。公開Cell型やStd.Cell APIは追加しない。独自IR/C試験で、引数の順序、返却closureによる連続更新、1000回のheap全回収と別moduleのState identity拒否を確認した。
 
 現時点ではStd.Stateの通常source供給は未登録。effect集合・source checkerの統合後に有効化し、source/C実行を別に確認する。
+
+## P4標準callback APIの復元
+
+上記と同じ固定revision・SHA-256のOption/List/String/Std.Bytes/Std.Map/Std.Setを再利用し、P3で直接再帰helperへ適応した内部callbackを元のbodyへ戻す。Option.map/and_then、Listのmap/filter/fold/partition/any/all/find/flat_map/filter_map/find_index/sort_by、Map.update/fold/map_values/filter、Set.fold/filterを含む。List.sortも旧bodyの `sort_by(xs, Ord.compare)` を維持し、trait methodの関数値を通常のfrontend経路で具体化する。
+
+Stringの`@deprecated`・`@internal`は従来と同じmetadata適応として省略し、既に供給していた`String.is_empty`は保持する。Preludeのprimitive Bool/trait適応を上書きせず、Std.Stateのnative effect接続は別の変更として扱う。
+
+`tests/p4_standard_callbacks.rs`と`tests/compat/p4/stdlib-*.emel`は、callbackの順序・短絡・安定sort、generic/constructor/trait function reference、captureした関数の返却、失敗途中のList解放を確認するための入力である。この復元のC実行結果はP4の統合報告で記録し、sourceを保存しただけでは対応完了にしない。

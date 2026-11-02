@@ -1,5 +1,19 @@
-# P2 Option functions. The Prelude owns the Option enum.
-# map/and_then require function values and are connected in P4.
+# Functions on Option. Option itself is the Prelude enum (prelude.emel).
+# The Option comes first as `opt`, so calls read as `opt |> Option.map(f)`.
+
+pub fn map[A, B](opt: Option[A], f: fn(A) -> B) -> Option[B] {
+  opt match {
+    Some(x) -> Some(f(x))
+    None    -> None
+  }
+}
+
+pub fn and_then[A, B](opt: Option[A], f: fn(A) -> Option[B]) -> Option[B] {
+  opt match {
+    Some(x) -> f(x)
+    None    -> None
+  }
+}
 
 ## The value, or `default` if `None`.
 pub fn or[A](opt: Option[A], default: A) -> A {

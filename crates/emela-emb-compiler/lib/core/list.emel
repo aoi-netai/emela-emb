@@ -1,5 +1,26 @@
-# Synchronous List API adapted from the fixed legacy fork.
-# Higher-order APIs are connected in P4; allocation uses the configured fixed heap.
+# Functions on List. Collections are immutable (spec 15.2).
+#
+# - The list comes first as `xs`, so calls read as `xs |> List.map(f)`.
+# - The initial value of a fold is `from` (spec 15.3): `List.fold(xs, from: 0, f: add)`.
+# - Loops are self tail calls (spec 6.8), so long lists do not use the stack. Functions that build
+#   a result from the front accumulate it in reverse and then `reverse` it.
+
+pub fn map[A, B](xs: List[A], f: fn(A) -> B) -> List[B] {
+  reverse(fold(xs, from: [], f: fn(acc, x) { [f(x), ..acc] }))
+}
+
+## Keeps the order.
+pub fn filter[A](xs: List[A], f: fn(A) -> Bool) -> List[A] {
+  reverse(fold(xs, from: [], f: fn(acc, x) { if f(x) { [x, ..acc] } else { acc } }))
+}
+
+## Folds from the front: `f(f(f(from, x0), x1), x2)`.
+pub fn fold[A, B](xs: List[A], from: B, f: fn(B, A) -> B) -> B {
+  xs match {
+    []          -> from
+    [x, ..rest] -> fold(rest, f(from, x), f)
+  }
+}
 
 pub fn length[A](xs: List[A]) -> Int {
   count_onto(xs, 0)
@@ -19,6 +40,7 @@ pub fn is_empty[A](xs: List[A]) -> Bool {
   }
 }
 
+## Zero-based. `None` if out of range or negative.
 pub fn get[A](xs: List[A], index: Int) -> Option[A] {
   xs match {
     _ if index < 0 -> None
@@ -27,6 +49,7 @@ pub fn get[A](xs: List[A], index: Int) -> Option[A] {
   }
 }
 
+## `None` if empty.
 pub fn head[A](xs: List[A]) -> Option[A] {
   xs match {
     []      -> None
@@ -34,6 +57,7 @@ pub fn head[A](xs: List[A]) -> Option[A] {
   }
 }
 
+## Empty if empty.
 pub fn tail[A](xs: List[A]) -> List[A] {
   xs match {
     []          -> []
@@ -45,6 +69,7 @@ pub fn reverse[A](xs: List[A]) -> List[A] {
   reverse_onto(xs, [])
 }
 
+## Prepends `xs` reversed to `acc`.
 fn reverse_onto[A](xs: List[A], acc: List[A]) -> List[A] {
   xs match {
     []          -> acc
@@ -56,18 +81,65 @@ pub fn append[A](xs: List[A], ys: List[A]) -> List[A] {
   reverse_onto(reverse(xs), ys)
 }
 
+## Joins the strings with `sep` in between: `["a", "b"].join(", ")` is `"a, b"`.
+## `String.split(s, sep).join(sep) == s` holds.
+@intrinsic
+pub fn join(xs: List[String], sep: String) -> String
+
+## Flattens a list of lists, keeping the order.
+pub fn flatten[A](xss: List[List[A]]) -> List[A] {
+  fold(reverse(xss), from: [], f: fn(acc, xs) { append(xs, acc) })
+}
+
+## Splits into the elements where `f` is True and those where it is False, both in order.
+## `(evens, odds) = List.partition(xs, is_even)`．
+pub fn partition[A](xs: List[A], f: fn(A) -> Bool) -> (List[A], List[A]) {
+  (yes, no) = fold(xs, from: ([], []), f: fn((ys, ns), x) {
+    if f(x) { ([x, ..ys], ns) } else { (ys, [x, ..ns]) }
+  })
+  (reverse(yes), reverse(no))
+}
+
+## Stops at the first match. False if empty.
+pub fn any[A](xs: List[A], f: fn(A) -> Bool) -> Bool {
+  xs match {
+    []          -> False
+    [x, ..rest] -> f(x) || any(rest, f)
+  }
+}
+
+## Stops at the first False. True if empty.
+pub fn all[A](xs: List[A], f: fn(A) -> Bool) -> Bool {
+  xs match {
+    []          -> True
+    [x, ..rest] -> f(x) && all(rest, f)
+  }
+}
+
+## The first element where `f` is True.
+pub fn find[A](xs: List[A], f: fn(A) -> Bool) -> Option[A] {
+  xs match {
+    []          -> None
+    [x, ..rest] -> if f(x) { Some(x) } else { find(rest, f) }
+  }
+}
+
+## The integers from `from` up to but excluding `to`, ascending. Empty if `to <= from`.
 pub fn range(from: Int, to: Int) -> List[Int] {
   range_onto(from, to, [])
 }
 
+## Builds from the back, so `to - 1` cannot overflow.
 fn range_onto(from: Int, to: Int, acc: List[Int]) -> List[Int] {
   if to <= from { acc } else { range_onto(from, to - 1, [to - 1, ..acc]) }
 }
 
+## Pairs elements at the same position. As long as the shorter list.
 pub fn zip[A, B](xs: List[A], ys: List[B]) -> List[(A, B)] {
   zip_onto(xs, ys, [])
 }
 
+## Prepends the pairs to `acc` in reverse, then reverses at the end.
 fn zip_onto[A, B](xs: List[A], ys: List[B], acc: List[(A, B)]) -> List[(A, B)] {
   (xs, ys) match {
     ([x, ..xs_rest], [y, ..ys_rest]) -> zip_onto(xs_rest, ys_rest, [(x, y), ..acc])
@@ -75,6 +147,7 @@ fn zip_onto[A, B](xs: List[A], ys: List[B], acc: List[(A, B)]) -> List[(A, B)] {
   }
 }
 
+## The first `n` elements, or all of them if there are fewer. Empty if `n` is not positive.
 pub fn take[A](xs: List[A], n: Int) -> List[A] {
   take_onto(xs, n, [])
 }
@@ -90,6 +163,7 @@ fn take_onto[A](xs: List[A], n: Int, acc: List[A]) -> List[A] {
   }
 }
 
+## The elements after the first `n`. All of them if `n` is not positive.
 pub fn drop[A](xs: List[A], n: Int) -> List[A] {
   if n <= 0 {
     xs
@@ -101,6 +175,7 @@ pub fn drop[A](xs: List[A], n: Int) -> List[A] {
   }
 }
 
+## The last element.
 pub fn last[A](xs: List[A]) -> Option[A] {
   xs match {
     []          -> None
@@ -109,75 +184,100 @@ pub fn last[A](xs: List[A]) -> Option[A] {
   }
 }
 
+## `f` on each element, with the lists it returns joined in order.
+pub fn flat_map[A, B](xs: List[A], f: fn(A) -> List[B]) -> List[B] {
+  xs |> map(f) |> flatten()
+}
+
+## The values of `f` that are `Some`, in order.
+pub fn filter_map[A, B](xs: List[A], f: fn(A) -> Option[B]) -> List[B] {
+  filter_map_onto(xs, f, [])
+}
+
+fn filter_map_onto[A, B](xs: List[A], f: fn(A) -> Option[B], acc: List[B]) -> List[B] {
+  xs match {
+    [] -> reverse(acc)
+    [x, ..rest] -> f(x) match {
+      Some(y) -> filter_map_onto(rest, f, [y, ..acc])
+      None    -> filter_map_onto(rest, f, acc)
+    }
+  }
+}
+
+## The index of the first element for which `f` is True.
+pub fn find_index[A](xs: List[A], f: fn(A) -> Bool) -> Option[Int] {
+  find_index_from(xs, f, 0)
+}
+
+fn find_index_from[A](xs: List[A], f: fn(A) -> Bool, index: Int) -> Option[Int] {
+  xs match {
+    []          -> None
+    [x, ..rest] -> if f(x) { Some(index) } else { find_index_from(rest, f, index + 1) }
+  }
+}
+
+## Each element paired with its index, from 0.
 pub fn enumerate[A](xs: List[A]) -> List[(Int, A)] {
   range(0, length(xs)) |> zip(xs)
 }
 
-@intrinsic
-pub fn join(xs: List[String], sep: String) -> String
-
-# The legacy flatten/unzip implementations use internal lambdas. These helpers preserve
-# traversal order while leaving public higher-order functions for P4.
-pub fn flatten[A](xss: List[List[A]]) -> List[A] {
-  flatten_onto(reverse(xss), [])
-}
-fn flatten_onto[A](xss: List[List[A]], acc: List[A]) -> List[A] {
-  xss match {
-    [] -> acc
-    [xs, ..rest] -> flatten_onto(rest, append(xs, acc))
-  }
-}
+## The first and second of each pair, as two lists.
 pub fn unzip[A, B](xys: List[(A, B)]) -> (List[A], List[B]) {
-  unzip_onto(reverse(xys), [], [])
-}
-fn unzip_onto[A, B](xys: List[(A, B)], xs: List[A], ys: List[B]) -> (List[A], List[B]) {
-  xys match {
-    [] -> (xs, ys)
-    [(x, y), ..rest] -> unzip_onto(rest, [x, ..xs], [y, ..ys])
-  }
+  fold(reverse(xys), from: ([], []), f: fn((xs, ys), (x, y)) {
+    ([x, ..xs], [y, ..ys])
+  })
 }
 
-
-# P3 keeps the legacy stable merge sort and substitutes its internal callback
-# with the resolved Ord method. Public sort_by remains in P4.
-pub fn sort[A: Ord](xs: List[A]) -> List[A] {
-  merge_all(singleton_runs(xs, []))
-}
-fn singleton_runs[A](xs: List[A], acc: List[List[A]]) -> List[List[A]] {
-  xs match {
-    [] -> reverse(acc)
-    [x, ..rest] -> singleton_runs(rest, [[x], ..acc])
-  }
+## Sorted by `f`, a merge sort. Stable: elements that `f` finds Equal keep their order.
+pub fn sort_by[A](xs: List[A], f: fn(A, A) -> Ordering) -> List[A] {
+  merge_all(map(xs, fn(x) { [x] }), f)
 }
 
-fn merge_all[A: Ord](runs: List[List[A]]) -> List[A] {
+fn merge_all[A](runs: List[List[A]], f: fn(A, A) -> Ordering) -> List[A] {
   runs match {
     []    -> []
     [run] -> run
-    _     -> merge_all(merge_pairs_onto(runs, []))
+    _     -> merge_all(merge_pairs_onto(runs, f, []), f)
   }
 }
 
-fn merge_pairs_onto[A: Ord](
+fn merge_pairs_onto[A](
   runs: List[List[A]],
+  f: fn(A, A) -> Ordering,
   acc: List[List[A]],
 ) -> List[List[A]] {
   runs match {
-    [a, b, ..rest] -> merge_pairs_onto(rest, [merge_onto(a, b, []), ..acc])
+    [a, b, ..rest] -> merge_pairs_onto(rest, f, [merge_onto(a, b, f, []), ..acc])
     [a]            -> reverse([a, ..acc])
     _              -> reverse(acc)
   }
 }
 
-fn merge_onto[A: Ord](xs: List[A], ys: List[A], acc: List[A]) -> List[A] {
+## Takes from `xs` unless its head is Greater, which keeps equal elements in order.
+fn merge_onto[A](xs: List[A], ys: List[A], f: fn(A, A) -> Ordering, acc: List[A]) -> List[A] {
   (xs, ys) match {
     ([], _) -> reverse_onto(acc, ys)
     (_, []) -> reverse_onto(acc, xs)
-    ([x, ..xs_rest], [y, ..ys_rest]) -> Ord.compare(x, y) match {
-      Greater -> merge_onto(xs, ys_rest, [y, ..acc])
-      _       -> merge_onto(xs_rest, ys, [x, ..acc])
+    ([x, ..xs_rest], [y, ..ys_rest]) -> f(x, y) match {
+      Greater -> merge_onto(xs, ys_rest, f, [y, ..acc])
+      _       -> merge_onto(xs_rest, ys, f, [x, ..acc])
     }
   }
+}
+
+## Sorted in the order of Ord (spec 10.6). Stable.
+pub fn sort[A: Ord](xs: List[A]) -> List[A] {
+  sort_by(xs, Ord.compare)
+}
+
+# The built-in impls (spec 10.6). Elements are compared and shown through their own impls. Ord
+# compares lexicographically: a list is less than any longer list that starts with it.
+# Eq and Ord recurse through `eq_lists` and `compare_lists`, not through `Eq.eq` and `Ord.compare`
+# on the rest: a call through a trait function is not a self tail call (loops are made before
+# monomorphization picks the impl), and long lists would use the stack.
+
+impl List[A: Eq]: Eq {
+  fn eq(self, other) { eq_lists(self, other) }
 }
 
 fn eq_lists[A: Eq](xs: List[A], ys: List[A]) -> Bool {
@@ -186,6 +286,10 @@ fn eq_lists[A: Eq](xs: List[A], ys: List[A]) -> Bool {
     ([x, ..xs_rest], [y, ..ys_rest]) -> Eq.eq(x, y) && eq_lists(xs_rest, ys_rest)
     _                                -> False
   }
+}
+
+impl List[A: Ord]: Ord {
+  fn compare(self, other) { compare_lists(self, other) }
 }
 
 fn compare_lists[A: Ord](xs: List[A], ys: List[A]) -> Ordering {
@@ -200,20 +304,9 @@ fn compare_lists[A: Ord](xs: List[A], ys: List[A]) -> Ordering {
   }
 }
 
-impl List[A: Eq]: Eq {
-  fn eq(self, other) { eq_lists(self, other) }
-}
-impl List[A: Ord]: Ord {
-  fn compare(self, other) { compare_lists(self, other) }
-}
-# The old Show body maps String.show_nested and joins. The tail-recursive
-# mapping helper keeps the same order and custom element dispatch without a closure.
+## `[1, 2, 3]`. A String element is quoted (`["a"]`).
 impl List[A: Show]: Show {
-  fn show(self) { "[#{join(show_parts(self, []), ", ")}]" }
-}
-fn show_parts[A: Show](xs: List[A], acc: List[String]) -> List[String] {
-  xs match {
-    [] -> reverse(acc)
-    [x, ..rest] -> show_parts(rest, [String.show_nested(x), ..acc])
+  fn show(self) {
+    "[#{join(map(self, fn(x) { String.show_nested(x) }), ", ")}]"
   }
 }

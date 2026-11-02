@@ -4,8 +4,8 @@
 # of a node is more than `DELTA` times the size of the other, so the depth stays O(log n).
 # Values are compared and shown by their pairs in key order, never by the shape of the tree.
 #
-# The tree is the Map itself (an opaque enum), supplied by the independent compiler.
-# From outside, an opaque type and an opaque enum look the same. Recursion goes as deep as the
+# The tree is the Map itself (an opaque enum). `[lib.layers]` declares `pub opaque type Map[K, V]`;
+# from outside, an opaque type and an opaque enum look the same. Recursion goes as deep as the
 # tree, O(log n), so it is not made a self tail call (nor are `to_list` and `fold`). Eq and Show
 # are written impls, so `==`, interpolation, `inspect` and `dbg` all go through them, never
 # through the structure.
@@ -36,7 +36,7 @@ pub fn empty[K, V]() -> Map[K, V] {
 
 ## The map of the pairs. A key given twice takes its later value.
 pub fn from_list[K: Ord, V](pairs: List[(K, V)]) -> Map[K, V] {
-  insert_pairs(pairs, empty())
+  List.fold(pairs, from: empty(), f: fn(m, (key, value)) { insert(m, key, value) })
 }
 
 ## `m` with `key` mapped to `value`, replacing its value if it is there.
@@ -63,6 +63,15 @@ pub fn remove[K: Ord, V](m: Map[K, V], key: K) -> Map[K, V] {
       Greater -> balance(node_key, node_value, left, remove(right, key))
       Equal   -> glue(left, right)
     }
+  }
+}
+
+## `f` gets the value of `key` (`None` if it is not there). `Some` sets the value, and `None`
+## removes the key.
+pub fn update[K: Ord, V](m: Map[K, V], key: K, f: fn(Option[V]) -> Option[V]) -> Map[K, V] {
+  f(get(m, key)) match {
+    Some(value) -> insert(m, key, value)
+    None        -> remove(m, key)
   }
 }
 
@@ -95,6 +104,14 @@ pub fn is_empty[K, V](m: Map[K, V]) -> Bool {
   size(m) == 0
 }
 
+## Folds the pairs in key order, starting from `from`.
+pub fn fold[K, V, B](m: Map[K, V], from: B, f: fn(B, K, V) -> B) -> B {
+  m match {
+    Empty                                 -> from
+    Node(key:, value:, left:, right:, ..) -> fold(right, f(fold(left, from, f), key, value), f)
+  }
+}
+
 ## The pairs in key order.
 pub fn to_list[K, V](m: Map[K, V]) -> List[(K, V)] {
   to_list_onto(m, [])
@@ -102,18 +119,37 @@ pub fn to_list[K, V](m: Map[K, V]) -> List[(K, V)] {
 
 ## The keys in order.
 pub fn keys[K, V](m: Map[K, V]) -> List[K] {
-  collect_keys(to_list(m), [])
+  to_list(m) |> List.map(fn((key, _)) { key })
 }
 
 ## The values in key order.
 pub fn values[K, V](m: Map[K, V]) -> List[V] {
-  collect_values(to_list(m), [])
+  to_list(m) |> List.map(fn((_, value)) { value })
+}
+
+## `f` on each value. The keys stay.
+pub fn map_values[K, V, W](m: Map[K, V], f: fn(V) -> W) -> Map[K, W] {
+  m match {
+    Empty -> Empty
+    Node(size:, key:, value:, left:, right:) -> Node(
+      size:,
+      key:,
+      value: f(value),
+      left: map_values(left, f),
+      right: map_values(right, f),
+    )
+  }
 }
 
 # `filter` and `union` go through the pairs in key order. Both keep that order, so `from_sorted`
 # builds a balanced tree from the result in linear time, without comparing the keys again.
 # Working on the trees directly would need joining two trees of any sizes, which nothing else
 # here needs.
+
+## The pairs for which `f` is True.
+pub fn filter[K, V](m: Map[K, V], f: fn(K, V) -> Bool) -> Map[K, V] {
+  to_list(m) |> List.filter(fn((key, value)) { f(key, value) }) |> from_sorted
+}
 
 ## The keys of both. A key in both takes its value in `a` (as in Haskell's `Data.Map.union`).
 pub fn union[K: Ord, V](a: Map[K, V], b: Map[K, V]) -> Map[K, V] {
@@ -315,27 +351,5 @@ fn union_onto[K: Ord, V](xs: List[(K, V)], ys: List[(K, V)], acc: List[(K, V)]) 
         Equal   -> union_onto(xs_rest, ys_rest, [x, ..acc])
       }
     }
-  }
-}
-
-# P3 uses direct recursive helpers until callback APIs are connected in P4.
-fn insert_pairs[K: Ord, V](pairs: List[(K, V)], acc: Map[K, V]) -> Map[K, V] {
-  pairs match {
-    [] -> acc
-    [(key, value), ..rest] -> insert_pairs(rest, insert(acc, key, value))
-  }
-}
-
-fn collect_keys[K, V](pairs: List[(K, V)], acc: List[K]) -> List[K] {
-  pairs match {
-    [] -> List.reverse(acc)
-    [(key, _), ..rest] -> collect_keys(rest, [key, ..acc])
-  }
-}
-
-fn collect_values[K, V](pairs: List[(K, V)], acc: List[V]) -> List[V] {
-  pairs match {
-    [] -> List.reverse(acc)
-    [(_, value), ..rest] -> collect_values(rest, [value, ..acc])
   }
 }
