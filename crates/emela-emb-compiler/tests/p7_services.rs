@@ -120,7 +120,14 @@ pub fn wait_then_return(ms:Int)->Int use Async {
         "main.emel",
         &Options::default()
             .with_heap_bytes(8192)
-            .with_frame_bytes(2048),
+            .with_string_capacity(96)
+            .with_peripheral_buffer_capacity(4)
+            .with_fiber_capacity(4)
+            .with_frame_capacity(12)
+            .with_frame_bytes(2048)
+            .with_task_capacity(2)
+            .with_event_capacity(2)
+            .with_deferred_capacity(1),
     )
     .unwrap_or_else(|errors| panic!("BoardClock source rejected: {errors:#?}"));
     support::compile_and_run(

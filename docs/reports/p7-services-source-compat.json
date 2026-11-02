@@ -1,0 +1,126 @@
+{
+  "schema_version": 1,
+  "baseline_revision": "c34c0aeefdd966d854371b3110db00a47798751d",
+  "entries": [
+    {
+      "program": "program:5290f0b664af9543cbf5",
+      "legacy_tests": [
+        "emit::embedded_peripherals::standard_handlers_preserve_values_errors_and_owned_receive_lists"
+      ],
+      "files": [
+        {
+          "name": "main.emel",
+          "fixture": "sources/14869b54f4f331b95ba83c9f2d286d5647ab3ef6e17fa4dbf07386165b7ea937.emel",
+          "source_id": "source:14869b54f4f331b95ba8",
+          "sha256": "14869b54f4f331b95ba83c9f2d286d5647ab3ef6e17fa4dbf07386165b7ea937"
+        }
+      ],
+      "route": "original-source",
+      "new_test": {
+        "kind": "source_test",
+        "path": "crates/emela-emb-compiler/tests/p7_services.rs",
+        "symbol": "embedded_handlers_preserve_all_services_errors_buffers_and_owned_receive_lists"
+      },
+      "observations": [
+        "Original complete source matches byte-for-byte after removing added C exports.",
+        "Old8192heap/String96/peripheral4/fiber4/frame12x2048/task2/event2/deferred1.",
+        "All7 service headers, all23 board operations, errors and bounded receive lists; exact oldC harness with C alias substitution."
+      ]
+    },
+    {
+      "program": "program:7d9575dd005593b562d8",
+      "legacy_tests": [
+        "emit::embedded_peripherals::clock::clock_sleep_notifies_then_resumes_through_the_main_scheduler"
+      ],
+      "files": [
+        {
+          "name": "main.emel",
+          "fixture": "sources/002dce909f94071306814613e479e9da3fe67775340cf5ddb78d417460c0d450.emel",
+          "source_id": "source:002dce909f9407130681",
+          "sha256": "002dce909f94071306814613e479e9da3fe67775340cf5ddb78d417460c0d450"
+        }
+      ],
+      "route": "existing-source-observation-replacement",
+      "new_test": {
+        "kind": "source_test",
+        "path": "crates/emela-emb-compiler/tests/p7_services.rs",
+        "symbol": "board_clock_sleep_clamps_boundaries_and_notifies_before_main_resumes"
+      },
+      "observations": [
+        "Same Clock.sleep body and every original C assertion; syntax whitespace/C alias differ only.",
+        "Full oldOptions8192heap/String96/peripheral4/fiber4/frame12x2048/task2/event2/deferred1 preserved.",
+        "Int32.MIN/-1/0/7/MAX clamps, task macro, main-thread resume after queued notification, duplicate/stale rejection and lock release across1000 iterations."
+      ]
+    },
+    {
+      "program": "program:b0b720ffc97055a938e9",
+      "legacy_tests": [
+        "platform::native_clock_console_and_timer_use_common_standard_service_glue"
+      ],
+      "files": [
+        {
+          "name": "main.emel",
+          "fixture": "sources/5549983f8aba12d57b0d789684cba2e5255b99a5874cbfa1674dbb16533483e2.emel",
+          "source_id": "source:5549983f8aba12d57b0d",
+          "sha256": "5549983f8aba12d57b0d789684cba2e5255b99a5874cbfa1674dbb16533483e2"
+        }
+      ],
+      "route": "original-source-with-fixed-native-C-fixture",
+      "new_test": {
+        "kind": "source_test",
+        "path": "crates/emela-emb-compiler/tests/p7_legacy_services.rs",
+        "symbol": "original_native_clock_console_and_timer_use_generated_common_services"
+      },
+      "observations": [
+        "Original main Clock.sleep2/Console.connected/42 uses generated common bridges and the exact old native C service provider.",
+        "Oldheap4096/frame2048; result42 and wholeheap reclamation asserted.",
+        "C fixture only; no platform Rust/package/build/dependency subsystem introduced."
+      ]
+    },
+    {
+      "program": "program:4ddb1b72860ac525d8f2",
+      "legacy_tests": [
+        "platform::native_timer_slots_survive_cancellation_and_repeated_reuse"
+      ],
+      "files": [
+        {
+          "name": "main.emel",
+          "fixture": "sources/d60b4137b5256577f8ab5618caf2ea81c9b88bdcd375988cc79f6ee071a7de12.emel",
+          "source_id": "source:d60b4137b5256577f8ab",
+          "sha256": "d60b4137b5256577f8ab5618caf2ea81c9b88bdcd375988cc79f6ee071a7de12"
+        }
+      ],
+      "route": "original-source-with-fixed-native-C-fixture",
+      "new_test": {
+        "kind": "source_test",
+        "path": "crates/emela-emb-compiler/tests/p7_legacy_services.rs",
+        "symbol": "original_native_timer_slots_survive_cancellation_and_repeated_reuse"
+      },
+      "observations": [
+        "Original source forks10000ms child, sleeps0, interrupts child and returns42.",
+        "Old native idle/timer polling and recycled task slot handling; scheduler not ready before idle and ready afterwards without synchronous Emela reentry.",
+        "Oldheap4096/frame2048 and original eight native timer slots; old100 rounds increased to1000 with heapempty after every release."
+      ]
+    }
+  ],
+  "native_fixture": {
+    "old_path": "crates/emela-codegen-emb/src/platform/native.c",
+    "new_path": "crates/emela-emb-compiler/tests/compat/p7/native-services.c",
+    "sha256": "6f1cbbbdf276995757d072c4cbc23ec6fd02f30f6b3f97d0e064f0ddd4fa0b74",
+    "adaptation": "Native C bytes unchanged. Test prefix supplies service macros matching generated headers and default task capacity8, as the old build planner did. Compiler output is linked directly; native package/build tooling remains outside compiler scope."
+  },
+  "validation": {
+    "status": "passed",
+    "C_optimizations": [
+      "-O0",
+      "-O2"
+    ],
+    "flags": [
+      "-std=c11",
+      "-Wall",
+      "-Werror"
+    ],
+    "new_target_tests": 2,
+    "existing_target_tests": 3
+  }
+}
