@@ -356,3 +356,80 @@ fn normalization_freezes_capabilities_inside_function_sets_and_composite_types()
     };
     assert!(matches!(value.kind, ir::ExprKind::Use { effect } if effect == *frozen));
 }
+
+#[test]
+fn failed_acquisition_releases_only_successful_bindings_in_reverse_order() {
+    let mut core = b::Definitions::default();
+    let (read, ht) = effect(&mut core, "Read");
+    let pure = fn_type(&mut core, false);
+    let (error, error_ty) = error_definition(&mut core, "FailedInit");
+    let mut bad = function(
+        0,
+        "bad_init",
+        vec![],
+        ht,
+        expression(
+            ir::ExprKind::Fail(Box::new(error_value(error, error_ty, 42))),
+            ValueType::Never,
+        ),
+    );
+    bad.signature.sets.errors.push(error_ty);
+    let mut mark = function(
+        1,
+        "mark",
+        vec![local(0, ValueType::Int)],
+        ValueType::Unit,
+        expression(ir::ExprKind::Literal(ir::Literal::Unit), ValueType::Unit),
+    );
+    mark.external = Some("mark".into());
+    mark.body = None;
+    let mut bindings = Vec::new();
+    for number in 1..=3 {
+        bindings.push(ir::WithBinding {
+            local: local(number, ht),
+            value: if number == 3 {
+                call(0, vec![], vec![], ht)
+            } else {
+                handler(read, ht, lambda(integer(7), pure))
+            },
+            effects: vec![read],
+            cleanup: Some(call(
+                1,
+                vec![integer(number as i32)],
+                vec![],
+                ValueType::Unit,
+            )),
+            retire: Some(format!("Reader{number}")),
+        });
+    }
+    let with = expression(
+        ir::ExprKind::With {
+            bindings,
+            body: block(integer(0)),
+        },
+        ValueType::Int,
+    );
+    let escaped = expression(
+        ir::ExprKind::Escape {
+            value: Box::new(with),
+            error: local(10, ValueType::Any),
+            arms: vec![error_arm(
+                error,
+                error_ty,
+                11,
+                expression(ir::ExprKind::Local(ir::LocalId(11)), ValueType::Int),
+            )],
+        },
+        ValueType::Int,
+    );
+    let answer = exported(function(2, "answer", vec![], ValueType::Int, escaped));
+    execute_with_options(
+        ir::Program {
+            core,
+            registry: Default::default(),
+            functions: vec![bad, mark, answer],
+        },
+        "#include <stdlib.h>\n#include \"emela_embedded.h\"\n#include \"emela_board.h\"\nint test_heap_empty(void);\nstatic int order;\nvoid mark(int32_t n){order=order*10+n;}\n_Noreturn void emela_board_defect(EmelaDefectKind k,const char*m,uint16_t n){(void)k;(void)m;(void)n;abort();}\nint main(void){for(int i=0;i<1000;i++){order=0;if(answer()!=42||order!=21||!test_heap_empty())return 1;}return 0;}\n",
+        &crate::Options::default().with_heap_bytes(4096),
+    );
+}
