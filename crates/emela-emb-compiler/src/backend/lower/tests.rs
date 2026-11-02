@@ -12,6 +12,8 @@ mod fibers;
 mod functions;
 #[path = "handler_tests.rs"]
 mod handlers;
+#[path = "isr_tests.rs"]
+mod isr;
 #[path = "memory_tests.rs"]
 mod memory;
 #[path = "service_tests.rs"]

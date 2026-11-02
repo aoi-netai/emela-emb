@@ -513,3 +513,16 @@ BoardのC型名は固定旧の `Embedded.<module>.<type>` 名義から決まる�
 | `crates/emela-codegen-emb/tests/embedded_peripherals/mod.rs` | `60a47949658c43d5115d41b636d0102aecaf255e862e84365dfe4084c72e60cb` |
 | `crates/emela-codegen-emb/tests/embedded_peripherals/clock.rs` | `57aafc360bf0de60b80041d0cedcd47ba351c64dcf324ba43be53e16136f2ad1` |
 | `crates/emela-codegen-emb/tests/embedded_peripherals/diagnostics.rs` | `df7be1d780bf86b769b39666f50c4ce60585105e87b3b8a46c1dc73874bcbb79` |
+## P7のISR境界の検証
+
+固定revision `c34c0aeefdd966d854371b3110db00a47798751d` の次の試験を参照し、入力を独立sourceまたは独自IRへ再構成する。旧crate・builder・frontendを試験依存に追加しない。
+
+| 旧試験 | SHA-256 | 新しい確認先 |
+| --- | --- | --- |
+| `crates/emela-codegen-emb/tests/flow.rs` | `8fcb504820e56fec12c7e3773c8ff0eb81a6a3b46b412183896eed2b918b9537` | `backend/lower/isr_tests.rs` |
+| `crates/emela-codegen-emb/tests/external_scalar/mod.rs` | `b5dd612258fa7c60532ec948c81728b3902a56cd72c3adf90ea778845089f2d4` | `tests/p7_isr.rs` |
+| `crates/emela-codegen-emb/tests/sync_external/boundary.rs` | `0a4af7d9cceda616973bf343880012afcc29d770ba86195bbc3ab996ecaf1079` | `tests/p7_isr.rs` |
+| `crates/emela-codegen-emb/tests/const_runtime/mod.rs` | `ff5b61e9ed98cabfc8bb2212d2b310dbac026de0d4c9e17ee0bfbbb296d751a4` | `tests/p7_isr.rs` |
+| `crates/emela-codegen-emb/tests/string_comparison/mod.rs` | `a3794bb28614f61ae828d2bce7a200649e102866e111700101926cbc646d737d` | `tests/p7_isr.rs` |
+
+ISR入口は明示exportされたEmela名で選び、C公開aliasと区別する。externalは実際のadapter C symbolを許可リストに要求する。到達する再帰・heap割当・所有aggregate・動的call・runtime constを拒否し、静的const・借用String比較・heapを触らないBytes.sizeは維持する。元のFloat全bitパターン（負ゼロ・NaN payload・無限大・subnormal）、Int端値と1000回反復をC両最適化で確認する。捨てたCellNewも独自IRから拒否する。
