@@ -87,6 +87,8 @@ const導入後にも実際のRust 1.85.0で `cargo check --workspace --all-targe
 
 `tests/p2_inference.rs` の4試験は、`None`を返す関数のInt/String別instance、forward wrapper、明示/暗黙型引数の併用、3関数の相互再帰、型引数の個数と順番が異なる相互再帰をsourceからCの両最適化で実行する。再帰先の戻り型がまだ不明な場合は、その型が判明した後に明示型引数を代入する。数値の既定型、rigidな宣言型、未使用の不正body、汎化関数のC公開拒否も検査した。
 
+`41d161b` は、量化されずbody内だけに残った未確定型をUnit表現へ確定する。固定旧forkの`emela-core/src/lower.rs::ty`も未使用`None`等の型変数をUnitへ下げる。`unused = None`と、要素型を観測しない`is_empty(empty())`を追加し、全145試験とClippyの成功を再確認した。
+
 P1時点の`fn f() { f() }`拒否は、戻り型の自動汎化に伴って更新した。固定旧forkの`emela-types/src/body.rs::finish`と`infer.rs::generalize_bounded`が未確定の戻り型も量化する設計に合わせ、Int/Stringの具体wrapperから生成・Cコンパイルする。停止しない関数自体は実行せず、同じ生成物の正常なexportを実行する。これを停止性の保証とは数えない。
 
 - `cargo test --workspace --locked --offline`: 145 pass、失敗/skip 0、終了0。
