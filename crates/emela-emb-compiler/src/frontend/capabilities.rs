@@ -660,6 +660,7 @@ mod tests {
         ir::Function {
             id: ir::DefinitionId(id),
             type_parameters: 0,
+            immediate: false,
             constant: false,
             origin: None,
             derivation: None,

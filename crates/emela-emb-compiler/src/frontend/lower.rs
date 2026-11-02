@@ -30,8 +30,9 @@ pub(crate) fn lower(input: &ir::Program) -> b::Program {
             let mut target = b::Function::new(&function.name);
             target.constant = function.constant;
             target.fails = !function.signature.sets.errors.is_empty();
-            target.suspends =
-                super::function_abi::effects_abi(&input.core, &function.signature.sets.effects).1;
+            target.suspends = !function.immediate
+                && super::function_abi::effects_abi(&input.core, &function.signature.sets.effects)
+                    .1;
             target.exported = function.exported;
             target.export_symbol = function
                 .exported
@@ -74,8 +75,9 @@ pub(crate) fn lower(input: &ir::Program) -> b::Program {
         .functions
         .iter()
         .filter_map(|function| {
-            super::function_abi::effects_abi(&input.core, &function.signature.sets.effects)
-                .1
+            (!function.immediate
+                && super::function_abi::effects_abi(&input.core, &function.signature.sets.effects)
+                    .1)
                 .then_some(function.id)
         })
         .collect();
@@ -280,6 +282,7 @@ impl Context<'_> {
                 name,
                 effect,
                 operations,
+                ..
             } => self.handler_value(builder, name, *effect, operations, expression.ty),
             E::Provide { bindings, body } => self.provide(builder, bindings, body, tail),
             E::With { bindings, body } => {

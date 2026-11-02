@@ -145,6 +145,7 @@ impl Specializer {
         let mut function = ir::Function {
             id,
             type_parameters: 0,
+            immediate: false,
             constant: false,
             origin: None,
             derivation: None,
@@ -264,6 +265,7 @@ impl Specializer {
         helper.name = format!("__list_show_{}", id.0);
         helper.derivation = None;
         helper.error_show = None;
+        helper.immediate = false;
         helper.type_parameters = 0;
         helper.constant = false;
         helper.origin = None;

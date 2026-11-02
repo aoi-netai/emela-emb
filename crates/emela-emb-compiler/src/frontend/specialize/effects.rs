@@ -2,6 +2,42 @@
 use super::*;
 
 impl Specializer {
+    /// Recursive handler construction can precede inference of the operation
+    /// implementation's requirements. Its wrapper uses the final concrete ABI.
+    pub(super) fn handler_operation_abi(&mut self, operation: &mut ir::Expr) {
+        let ir::ExprKind::Lambda { body, .. } = &operation.kind else {
+            return;
+        };
+        let Some(ir::Statement::Expr(ir::Expr {
+            kind: ir::ExprKind::Call { target, .. },
+            ..
+        })) = body.statements.last()
+        else {
+            return;
+        };
+        let Some(callee) = self
+            .functions
+            .iter()
+            .find(|function| function.id == *target)
+        else {
+            return;
+        };
+        let suspends = !callee.immediate
+            && super::super::function_abi::effects_abi(&self.core, &callee.signature.sets.effects)
+                .1;
+        let b::Type::Fn(mut signature) = self.core.types[backend_type(operation.ty)].clone() else {
+            return;
+        };
+        if let Some(sets) = &mut signature.sets {
+            sets.effects = self.core.types.intern(b::Type::Set(b::SetSummary {
+                suspends,
+                ..Default::default()
+            }));
+        }
+        signature.ev = false;
+        signature.suspends = suspends;
+        operation.ty = frontend_type(self.core.types.intern(b::Type::Fn(signature)));
+    }
     pub(super) fn effect(
         &mut self,
         function: &ir::Function,

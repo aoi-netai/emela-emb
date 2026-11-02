@@ -567,6 +567,7 @@ impl Specializer {
                 *effect = self.effect(function, *effect, arguments, expression.span, 0)?;
                 for operation in operations {
                     self.expression(function, operation, arguments, depth)?;
+                    self.handler_operation_abi(operation);
                 }
             }
             ir::ExprKind::Provide { bindings, body } => {

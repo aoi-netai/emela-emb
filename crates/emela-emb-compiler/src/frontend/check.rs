@@ -2,7 +2,7 @@ mod effect_calls;
 mod functions;
 mod methods;
 mod references;
-mod suspend;
+pub(super) mod suspend;
 mod trait_methods;
 mod with;
 use super::{
@@ -219,7 +219,10 @@ pub(crate) fn check(mut modules: Modules) -> Result<ir::Program, Vec<Diagnostic>
     let mut program = ir::Program {
         core: checker.catalog.core.clone(),
         registry: checker.traits.registry.clone(),
-        functions: checker.checked.into_iter().flatten().collect(),
+        functions: std::mem::take(&mut checker.checked)
+            .into_iter()
+            .flatten()
+            .collect(),
     };
     super::normalize::normalize(
         &mut program,
@@ -260,6 +263,7 @@ pub(crate) fn check(mut modules: Modules) -> Result<ir::Program, Vec<Diagnostic>
         .map(|(index, definition)| (DefinitionId(index), definition.effect_mode.clone()))
         .collect();
     super::effects::infer(&mut program, &effect_modes, &mut checker.catalog)?;
+    checker.validate_sync_operations(&program)?;
     for function in &program.functions {
         if function.exported
             && super::function_abi::effects_abi(&program.core, &function.signature.sets.effects).0
@@ -1161,6 +1165,7 @@ impl Checker {
         self.checked[id.0] = Some(ir::Function {
             id,
             type_parameters: definition.ast.type_params.len(),
+            immediate: matches!(definition.effect_method, Some(super::effect_collect::MethodKind::Operation { handler, operation }) if !self.catalog.core.effects[self.effects.handlers[handler].effect].ops[operation].suspend),
             constant: definition.ast.constant,
             origin: definition.ast.constant.then_some(id),
             derivation: definition.derivation,

@@ -76,6 +76,7 @@ impl Specializer {
         self.functions.push(ir::Function {
             id,
             type_parameters: 0,
+            immediate: false,
             constant: false,
             origin: None,
             derivation: None,

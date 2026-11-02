@@ -128,6 +128,7 @@ impl Specializer {
         let mut function = ir::Function {
             id,
             type_parameters: 0,
+            immediate: false,
             constant: false,
             origin: None,
             derivation: None,
