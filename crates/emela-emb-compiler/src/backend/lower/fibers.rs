@@ -1,9 +1,8 @@
 //! Validate the concrete structured-fiber ABI before entering the scheduler planner.
 use super::*;
 
-pub(super) fn runtime_metadata(program: &Program, emitted: &HashSet<FnId>) -> (bool, bool) {
+pub(super) fn runtime_metadata(program: &Program, emitted: &HashSet<FnId>) -> bool {
     let mut scopes = false;
-    let mut deferred = false;
     for (id, function) in program.functions.iter() {
         if !emitted.contains(&id) {
             continue;
@@ -31,13 +30,97 @@ pub(super) fn runtime_metadata(program: &Program, emitted: &HashSet<FnId>) -> (b
                     | FiberOp::Poll
                     | FiberOp::DeferredAwait
             );
-            deferred |= matches!(
-                op,
-                FiberOp::Deferred | FiberOp::Complete | FiberOp::Poll | FiberOp::DeferredAwait
-            );
         }
     }
-    (scopes, deferred)
+    scopes
+}
+
+/// Merely constructing Scope's capability includes its deferred operation closure.
+/// It needs storage only when a reachable operation actually calls that constructor.
+pub(super) fn needs_deferred_pool(
+    program: &Program,
+    closures: &crate::contract::lowered::ClosureMetadata,
+    options: &crate::Options,
+) -> bool {
+    let reachable = super::closure::runtime_reachable(program, options);
+    let mut constructors = HashSet::new();
+    for (id, function) in program.functions.iter() {
+        if !reachable.contains(&id) {
+            continue;
+        }
+        let (positions, _) = super::positions(function);
+        for (id, statement) in function.stmts.iter() {
+            if !positions.contains_key(&id) {
+                continue;
+            }
+            let Stmt::Let {
+                value: Value::Handler { effect, ops, .. },
+                ..
+            } = statement
+            else {
+                continue;
+            };
+            if !super::scope_abi::is_scope(&program.core.effects[*effect]) {
+                continue;
+            }
+            for (index, operation) in program.core.effects[*effect].ops.iter().enumerate() {
+                if operation.name != "deferred" {
+                    continue;
+                }
+                for (_, definition) in function.stmts.iter() {
+                    if let Stmt::Let {
+                        dst: Some(dst),
+                        value: Value::FnRef(target),
+                        ..
+                    } = definition
+                    {
+                        if *dst == ops[index] && closures.functions.contains_key(target) {
+                            constructors.insert(*target);
+                        }
+                    }
+                }
+            }
+        }
+    }
+    program.functions.iter().any(|(id, function)| {
+        if !reachable.contains(&id) {
+            return false;
+        }
+        let (positions, _) = super::positions(function);
+        function.stmts.iter().any(|(statement, value)| {
+            positions.contains_key(&statement)
+                && match value {
+                    Stmt::Let {
+                        value:
+                            Value::Fiber {
+                                op: FiberOp::Deferred,
+                                ..
+                            },
+                        ..
+                    } => !constructors.contains(&id),
+                    Stmt::Let {
+                        value:
+                            Value::Fiber {
+                                op: FiberOp::Complete | FiberOp::Poll | FiberOp::DeferredAwait,
+                                ..
+                            },
+                        ..
+                    } => true,
+                    Stmt::Let {
+                        value:
+                            Value::Call {
+                                callee: Callee::Op { effect, op, .. },
+                                ..
+                            },
+                        ..
+                    } => {
+                        super::scope_abi::is_scope(&program.core.effects[*effect])
+                            && program.core.effects[*effect].ops[*op].name == "deferred"
+                    }
+                    _ => false,
+                }
+        })
+    })
 }
 
 #[allow(clippy::too_many_arguments)]

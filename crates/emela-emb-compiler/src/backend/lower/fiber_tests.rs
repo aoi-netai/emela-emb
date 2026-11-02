@@ -559,7 +559,7 @@ fn attempts_preserve_success_and_typed_cause_failures_across_raise() {
                 dst: None,
                 on: SwitchOn::Tag(cause_kind),
                 cases: vec![Case {
-                    key: CaseKey::Variant(CAUSE_FAIL as usize),
+                    key: CaseKey::Variant(CAUSE_FAIL),
                     body: raised,
                 }],
                 default: Some(unexpected),

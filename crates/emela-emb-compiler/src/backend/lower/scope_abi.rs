@@ -1,5 +1,6 @@
 //! One fork-operation ABI for Scope instances with different error sets.
-use std::collections::HashMap;
+//! Adapted from the fixed upstream scope_abi/fiber_normalize passes.
+use std::collections::{HashMap, HashSet};
 
 use crate::contract::ir::{Callee, Function, OnFail, Program as Module, SeqId, Stmt, Term, Value};
 use crate::contract::ir::{Type, TypeId, TypeTable};
@@ -20,10 +21,33 @@ pub(super) fn normalize(module: &mut Module) -> Result<(), Vec<Error>> {
             else {
                 continue;
             };
-            if !is_scope(&module.core.effects[*effect]) {
+            let definition = module
+                .core
+                .effects
+                .iter()
+                .find_map(|(id, value)| (id == *effect).then_some(value))
+                .ok_or_else(|| super::invalid(&f.name, "handler effect ID is out of bounds"))?;
+            if !is_scope(definition) {
                 continue;
             }
-            let mut types: Vec<_> = ops.iter().map(|v| f.vars[*v].ty).collect();
+            for (_, variable) in f.vars.iter() {
+                super::types::validate_type(module, &f.name, variable.ty)?;
+            }
+            if ops.len() != definition.ops.len() {
+                return Err(super::invalid(
+                    &f.name,
+                    "Scope operation count differs from its declaration",
+                ));
+            }
+            let mut types = Vec::new();
+            for &operation in ops {
+                let ty = super::variable(f, operation)?;
+                super::types::validate_type(module, &f.name, ty)?;
+                if !matches!(module.core.ty(ty), Type::Fn(_)) {
+                    return Err(super::invalid(&f.name, "Scope operation is not a function"));
+                }
+                types.push(ty);
+            }
             if let Some(previous) = operations.get(effect) {
                 let previous: &Vec<TypeId> = previous;
                 for (ty, &other) in types.iter_mut().zip(previous) {
@@ -84,7 +108,14 @@ pub(super) fn normalize(module: &mut Module) -> Result<(), Vec<Error>> {
             let Type::Fn(ft) = module.core.types[ty].clone() else {
                 unreachable!()
             };
+            if closure.params.len() != ft.params.len() || ft.ev {
+                return Err(super::invalid(
+                    &f.name,
+                    "Scope operation closure parameters differ from its ABI",
+                ));
+            }
             for (&parameter, &expected) in closure.params.iter().zip(&ft.params) {
+                super::variable(f, parameter)?;
                 f.vars[parameter].ty = expected;
             }
             f.vars[operation].ty = ty;
@@ -131,15 +162,52 @@ fn merge_operation(types: &mut TypeTable, left: TypeId, right: TypeId) -> Option
 }
 
 fn adapt_body(types: &mut TypeTable, f: &mut Function, seq: SeqId) -> Result<bool, Vec<Error>> {
-    let mut fails = matches!(f.seqs[seq].term, Term::Fail(_));
-    for id in f.seqs[seq].stmts.clone() {
-        match f.stmts[id].clone() {
+    adapt_sequence(types, f, seq, &mut HashSet::new())
+}
+
+fn adapt_sequence(
+    types: &mut TypeTable,
+    f: &mut Function,
+    seq: SeqId,
+    active: &mut HashSet<SeqId>,
+) -> Result<bool, Vec<Error>> {
+    if !active.insert(seq) {
+        return Err(super::invalid(
+            &f.name,
+            "Scope operation contains a sequence cycle",
+        ));
+    }
+    let body = f
+        .seqs
+        .iter()
+        .find_map(|(id, value)| (id == seq).then_some(value.clone()))
+        .ok_or_else(|| super::invalid(&f.name, "Scope operation sequence ID is out of bounds"))?;
+    let mut fails = matches!(body.term, Term::Fail(_));
+    for id in body.stmts {
+        let statement = f
+            .stmts
+            .iter()
+            .find_map(|(key, value)| (key == id).then_some(value.clone()))
+            .ok_or_else(|| {
+                super::invalid(&f.name, "Scope operation statement ID is out of bounds")
+            })?;
+        let mut invalid_variable = false;
+        if let Stmt::Let { value, .. } = &statement {
+            value.for_each_var(|id| invalid_variable |= super::variable(f, id).is_err());
+        }
+        if invalid_variable {
+            return Err(super::invalid(
+                &f.name,
+                "Scope operation variable ID is out of bounds",
+            ));
+        }
+        match statement {
             Stmt::Let {
                 dst: Some(dst),
                 value: Value::Closure(c),
                 ..
             } => {
-                let nested = adapt_body(types, f, c.body)?;
+                let nested = adapt_sequence(types, f, c.body, active)?;
                 if nested {
                     let Type::Fn(mut ft) = types[f.vars[dst].ty].clone() else {
                         unreachable!()
@@ -190,29 +258,30 @@ fn adapt_body(types: &mut TypeTable, f: &mut Function, seq: SeqId) -> Result<boo
                 }
             }
             Stmt::If { then, else_, .. } => {
-                fails |= adapt_body(types, f, then)?;
-                fails |= adapt_body(types, f, else_)?;
+                fails |= adapt_sequence(types, f, then, active)?;
+                fails |= adapt_sequence(types, f, else_, active)?;
             }
             Stmt::Switch { cases, default, .. } => {
                 for case in cases {
-                    fails |= adapt_body(types, f, case.body)?;
+                    fails |= adapt_sequence(types, f, case.body, active)?;
                 }
                 if let Some(body) = default {
-                    fails |= adapt_body(types, f, body)?;
+                    fails |= adapt_sequence(types, f, body, active)?;
                 }
             }
             Stmt::Block { body, .. } | Stmt::Loop { body, .. } => {
-                fails |= adapt_body(types, f, body)?
+                fails |= adapt_sequence(types, f, body, active)?
             }
             Stmt::Protect { body, cleanup, .. } => {
-                fails |= adapt_body(types, f, body)?;
-                if adapt_body(types, f, cleanup)? {
+                fails |= adapt_sequence(types, f, body, active)?;
+                if adapt_sequence(types, f, cleanup, active)? {
                     return Err(unsupported(&f.name, "failing Scope operation cleanup"));
                 }
             }
             _ => {}
         }
     }
+    active.remove(&seq);
     Ok(fails)
 }
 
@@ -230,7 +299,16 @@ pub(super) fn is_scope(effect: &crate::contract::ir::EffectDef) -> bool {
     effect.decl == "Std.Fiber.Scope" || effect.name.starts_with("Std.Fiber.Scope[")
 }
 
-pub(super) fn normalize_calls(module: &mut Module) {
+pub(super) fn normalize_calls(module: &mut Module) -> Result<(), Vec<Error>> {
+    for (_, function) in module.functions.iter() {
+        if function.stmts.iter().any(|(_, statement)| matches!(statement,
+            Stmt::Let { value: Value::Call { callee: Callee::Op { effect, .. }, .. }, .. }
+                if module.core.effects.iter().any(|(id, definition)| id == *effect && is_scope(definition)))) {
+            for (_, variable) in function.vars.iter() {
+                super::types::validate_type(module, &function.name, variable.ty)?;
+            }
+        }
+    }
     let mut operations = HashMap::new();
     for (_, f) in module.functions.iter() {
         for (_, s) in f.stmts.iter() {
@@ -239,9 +317,19 @@ pub(super) fn normalize_calls(module: &mut Module) {
                 ..
             } = s
             {
+                if !module
+                    .core
+                    .effects
+                    .iter()
+                    .any(|(id, definition)| id == *effect && is_scope(definition))
+                {
+                    continue;
+                }
                 operations.insert(
                     *effect,
-                    ops.iter().map(|v| f.vars[*v].ty).collect::<Vec<_>>(),
+                    ops.iter()
+                        .map(|&v| super::variable(f, v))
+                        .collect::<Result<Vec<_>, _>>()?,
                 );
             }
         }
@@ -268,12 +356,17 @@ pub(super) fn normalize_calls(module: &mut Module) {
             else {
                 continue;
             };
-            if !is_scope(&module.core.effects[*effect])
-                || !matches!(
-                    module.core.effects[*effect].ops[*op].name.as_str(),
-                    "fork" | "deferred"
-                )
-            {
+            let definition = module
+                .core
+                .effects
+                .iter()
+                .find_map(|(id, value)| (id == *effect).then_some(value))
+                .ok_or_else(|| super::invalid(&f.name, "operation effect ID is out of bounds"))?;
+            let operation = definition
+                .ops
+                .get(*op)
+                .ok_or_else(|| super::invalid(&f.name, "operation index is out of bounds"))?;
+            if !is_scope(definition) || !matches!(operation.name.as_str(), "fork" | "deferred") {
                 continue;
             }
             if let Some(Type::Fn(ft)) = operations
@@ -285,7 +378,7 @@ pub(super) fn normalize_calls(module: &mut Module) {
                     let crate::contract::ir::Operand::Var(arg) = arg else {
                         continue;
                     };
-                    let actual = f.vars[*arg].ty;
+                    let actual = super::variable(f, *arg)?;
                     if actual == expected {
                         continue;
                     }
@@ -418,6 +511,7 @@ pub(super) fn normalize_calls(module: &mut Module) {
                 .collect();
         }
     }
+    Ok(())
 }
 
 fn repr_of(core: &crate::contract::ir::Definitions, ty: TypeId) -> crate::contract::ir::Repr {

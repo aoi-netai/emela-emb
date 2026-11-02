@@ -47,7 +47,7 @@ pub(crate) fn lower_program(
     types::normalize_catalog(&mut program)?;
     error_types::normalize(&mut program)?;
     scope_abi::normalize(&mut program)?;
-    scope_abi::normalize_calls(&mut program);
+    scope_abi::normalize_calls(&mut program)?;
     let mut symbols = HashSet::new();
     for (id, function) in program.functions.iter() {
         if function.exported {
@@ -79,6 +79,7 @@ pub(crate) fn lower_program(
     let (mut program, closures) = closure::lower(&program, options)?;
     suspend::normalize_handlers(&mut program);
     fibers::normalize_values(&mut program);
+    let deferred_pool = fibers::needs_deferred_pool(&program, &closures, options);
     handler::lower(&mut program, options);
     let mut const_outcomes = HashMap::new();
     let mut runtime_consts = HashSet::new();
@@ -198,7 +199,7 @@ pub(crate) fn lower_program(
         .collect();
     let emitted_functions =
         closure::runtime_reachable_without_initializers(&program, options, &resolved_constants);
-    let (has_scopes, deferred_pool) = fibers::runtime_metadata(&program, &emitted_functions);
+    let has_scopes = fibers::runtime_metadata(&program, &emitted_functions);
     program.has_scopes |= has_scopes;
     let suspensions = suspend::prepare(&program);
     Ok(LoweredModule {
