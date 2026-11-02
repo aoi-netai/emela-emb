@@ -2393,16 +2393,18 @@ impl Checker {
     ) -> Result<ir::Expr, Diagnostic> {
         use crate::contract::ir::{Type, TypeId};
         let declaration = self.catalog.declaration(ctor.enum_id).clone();
-        let state_type = self.catalog.core.types.enum_type(ctor.enum_id, vec![]);
-        if let Some(handler) = self.effects.handler_for_state(state_type) {
-            if !matches!(self.current_effect_method, Some(super::effect_collect::MethodKind::Init(id)) if id == handler.id)
-            {
-                return Err(self.error(
-                    module,
-                    DK::Type,
-                    span,
-                    "a handler state constructor is available only inside its initializer",
-                ));
+        if declaration.ast.params.is_empty() {
+            let state_type = self.catalog.core.types.enum_type(ctor.enum_id, vec![]);
+            if let Some(handler) = self.effects.handler_for_state(state_type) {
+                if !matches!(self.current_effect_method, Some(super::effect_collect::MethodKind::Init(id)) if id == handler.id)
+                {
+                    return Err(self.error(
+                        module,
+                        DK::Type,
+                        span,
+                        "a handler state constructor is available only inside its initializer",
+                    ));
+                }
             }
         }
         let fields = &declaration.ast.variants[ctor.variant].fields;
