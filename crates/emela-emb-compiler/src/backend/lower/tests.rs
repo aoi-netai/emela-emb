@@ -6,6 +6,8 @@ use std::sync::atomic::{AtomicU64, Ordering};
 
 #[path = "cell_tests.rs"]
 mod cells;
+#[path = "fiber_tests.rs"]
+mod fibers;
 #[path = "function_tests.rs"]
 mod functions;
 #[path = "handler_tests.rs"]

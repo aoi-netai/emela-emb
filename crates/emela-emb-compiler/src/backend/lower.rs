@@ -11,6 +11,7 @@ mod const_eval;
 mod effects;
 mod error_types;
 mod failures;
+mod fibers;
 mod handler;
 mod suspend;
 mod types;
@@ -74,6 +75,7 @@ pub(crate) fn lower_program(
     }
     let (mut program, closures) = closure::lower(&program, options)?;
     suspend::normalize_handlers(&mut program);
+    fibers::normalize_values(&mut program);
     handler::lower(&mut program, options);
     let mut const_outcomes = HashMap::new();
     let mut runtime_consts = HashSet::new();
@@ -193,6 +195,8 @@ pub(crate) fn lower_program(
         .collect();
     let emitted_functions =
         closure::runtime_reachable_without_initializers(&program, options, &resolved_constants);
+    let (has_scopes, deferred_pool) = fibers::runtime_metadata(&program, &emitted_functions);
+    program.has_scopes |= has_scopes;
     let suspensions = suspend::prepare(&program);
     Ok(LoweredModule {
         lowered: program,
@@ -200,7 +204,7 @@ pub(crate) fn lower_program(
         closures,
         const_groups: vec![],
         runtime_consts,
-        deferred_pool: false,
+        deferred_pool,
         emitted_functions,
         discarded_results,
         const_outcomes,
@@ -385,6 +389,10 @@ fn validate_sequence(
                     )?;
                 }
                 if let Value::Call {
+                    on_fail: Some(edge),
+                    ..
+                }
+                | Value::Fiber {
                     on_fail: Some(edge),
                     ..
                 } = value

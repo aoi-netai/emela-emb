@@ -529,6 +529,9 @@ pub(super) fn value_type(
             }
             Ok(ty)
         }
+        Value::Fiber { op, args, on_fail } => {
+            super::fibers::value_type(program, f, *op, args, *on_fail, available, expected)
+        }
         Value::Builtin { op, args } => builtin_type(program, f, *op, args, available, expected),
         Value::Runtime {
             op: RuntimeOp::ShowString,
