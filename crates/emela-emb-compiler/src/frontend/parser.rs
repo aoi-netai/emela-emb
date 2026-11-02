@@ -303,6 +303,18 @@ impl<'t, 's> Parser<'t, 's> {
             ));
         }
         let public = self.take_word("pub");
+        let suspends = self.take_word("suspend");
+        if suspends
+            && (mode != FunctionMode::Top
+                || !attributes
+                    .iter()
+                    .any(|a| matches!(a, Attribute::External { .. })))
+        {
+            return Err(self.error(
+                DiagnosticKind::Syntax,
+                "suspend function declarations require @external",
+            ));
+        }
         if !self.take_word("fn") {
             return Err(self.error(
                 DiagnosticKind::Unsupported,
@@ -351,50 +363,12 @@ impl<'t, 's> Parser<'t, 's> {
         } else {
             None
         };
-        self.continue_word("fails");
-        let fails = if self.take_word("fails") {
-            if self.take(K::LBrace) {
-                self.newlines();
-                self.expect(
-                    K::RBrace,
-                    "an explicit empty failure set is written 'fails {}'",
-                )?;
-                Some(Vec::new())
-            } else {
-                let mut errors = vec![self.type_name()?];
-                while self.take(K::Bar) {
-                    self.newlines();
-                    errors.push(self.type_name()?);
-                }
-                Some(errors)
-            }
-        } else {
-            None
-        };
-        self.continue_word("use");
-        if self.take_word("use") {
-            if !self.take(K::LBrace) {
-                return Err(self.error(
-                    DiagnosticKind::Unsupported,
-                    "nonempty effect signatures require a later phase",
-                ));
-            }
-            self.newlines();
-            if !matches!(self.current().kind, K::RBrace | K::Eof) {
-                return Err(self.error(
-                    DiagnosticKind::Unsupported,
-                    "only the pure effect signature 'use {}' is connected in P2",
-                ));
-            }
-            self.expect(
-                K::RBrace,
-                "only the pure effect signature 'use {}' is connected in P2",
-            )?;
-        }
-        if self.word("fails") || self.word("use") || self.word("suspend") {
+        let fails = self.failure_clause()?;
+        let effects = self.effect_clause()?;
+        if self.word("fails") || self.word("use") {
             return Err(self.error(
-                DiagnosticKind::Unsupported,
-                "error and effect signatures require a later phase",
+                DiagnosticKind::Syntax,
+                "signature clauses must appear once in the order 'fails', then 'use'",
             ));
         }
         let previous_context = self.method_context;
@@ -426,8 +400,102 @@ impl<'t, 's> Parser<'t, 's> {
             params,
             return_type,
             fails,
+            effects,
+            suspends,
             attributes,
             body,
+        })
+    }
+    fn failure_clause(&mut self) -> Result<Option<Vec<Text>>, Diagnostic> {
+        self.continue_word("fails");
+        if !self.take_word("fails") {
+            return Ok(None);
+        }
+        self.newlines();
+        if self.take(K::LBrace) {
+            self.newlines();
+            self.expect(K::RBrace, "an empty failure set is written 'fails {}'")?;
+            return Ok(Some(Vec::new()));
+        }
+        let mut errors = vec![self.type_name()?];
+        while self.take(K::Bar) {
+            self.newlines();
+            errors.push(self.type_name()?);
+        }
+        Ok(Some(errors))
+    }
+    fn effect_clause(&mut self) -> Result<Option<Vec<Text>>, Diagnostic> {
+        self.continue_word("use");
+        if !self.take_word("use") {
+            return Ok(None);
+        }
+        self.newlines();
+        if !self.take(K::LBrace) {
+            return Ok(Some(vec![self.type_name()?]));
+        }
+        self.newlines();
+        let mut effects = Vec::new();
+        while self.current().kind != K::RBrace {
+            effects.push(self.type_name()?);
+            self.newlines();
+            if !self.take(K::Comma) {
+                break;
+            }
+            self.newlines();
+        }
+        self.expect(K::RBrace, "expected '}' after effect set")?;
+        Ok(Some(effects))
+    }
+    fn lambda(&mut self) -> Result<Expr, Diagnostic> {
+        let start = self.current().span.start;
+        self.expect(K::Name("fn"), "expected anonymous function")?;
+        self.expect(
+            K::LParen,
+            "anonymous functions are written 'fn(parameters) { body }'",
+        )?;
+        self.newlines();
+        let mut params = Vec::new();
+        while self.current().kind != K::RParen {
+            let pattern = self.pattern()?;
+            self.newlines();
+            let ty = if self.take(K::Colon) {
+                self.newlines();
+                Some(self.type_name()?)
+            } else {
+                None
+            };
+            params.push(LambdaParameter { pattern, ty });
+            self.newlines();
+            if !self.take(K::Comma) {
+                break;
+            }
+            self.newlines();
+        }
+        self.expect(K::RParen, "expected ')' after anonymous parameters")?;
+        self.continue_before(K::Arrow);
+        let return_type = if self.take(K::Arrow) {
+            Some(self.type_name()?)
+        } else {
+            None
+        };
+        let fails = self.failure_clause()?;
+        let effects = self.effect_clause()?;
+        if self.word("fails") || self.word("use") {
+            return Err(self.error(
+                DiagnosticKind::Syntax,
+                "duplicate or misplaced anonymous function signature clause",
+            ));
+        }
+        let body = self.block()?;
+        Ok(Expr {
+            kind: ExprKind::Lambda {
+                params,
+                return_type,
+                fails,
+                effects,
+                body,
+            },
+            span: Span::new(start, self.previous_end()),
         })
     }
     fn type_parameters(&mut self) -> Result<Vec<TypeParameter>, Diagnostic> {
@@ -468,9 +536,58 @@ impl<'t, 's> Parser<'t, 's> {
         Ok(params)
     }
     fn type_name(&mut self) -> Result<Text, Diagnostic> {
+        if self.depth >= 64 {
+            return Err(self.error(DiagnosticKind::Syntax, "type nesting limit exceeded"));
+        }
+        self.depth += 1;
+        let result = self.type_name_inner();
+        self.depth -= 1;
+        result
+    }
+    fn type_name_inner(&mut self) -> Result<Text, Diagnostic> {
+        self.newlines();
         let start = self.current().span.start;
         let mut value;
-        if self.take(K::LParen) {
+        if self.take_word("fn") {
+            self.expect(K::LParen, "expected '(' after fn in function type")?;
+            self.newlines();
+            let mut params = Vec::new();
+            while self.current().kind != K::RParen {
+                params.push(self.type_name()?.value);
+                self.newlines();
+                if !self.take(K::Comma) {
+                    break;
+                }
+                self.newlines();
+            }
+            self.expect(K::RParen, "expected ')' after function parameter types")?;
+            self.expect(K::Arrow, "function types require '->' and a return type")?;
+            let ret = self.type_name()?.value;
+            value = format!("fn({})->{ret}", params.join(","));
+            if let Some(errors) = self.failure_clause()? {
+                value.push_str(" fails ");
+                value.push_str(&if errors.is_empty() {
+                    "{}".into()
+                } else {
+                    errors
+                        .iter()
+                        .map(|e| e.value.as_str())
+                        .collect::<Vec<_>>()
+                        .join("|")
+                });
+            }
+            if let Some(effects) = self.effect_clause()? {
+                value.push_str(" use{");
+                value.push_str(
+                    &effects
+                        .iter()
+                        .map(|e| e.value.as_str())
+                        .collect::<Vec<_>>()
+                        .join(","),
+                );
+                value.push('}');
+            }
+        } else if self.take(K::LParen) {
             self.newlines();
             let mut elements = Vec::new();
             while self.current().kind != K::RParen {
@@ -485,7 +602,12 @@ impl<'t, 's> Parser<'t, 's> {
             value = if elements.is_empty() {
                 "Unit".into()
             } else if elements.len() == 1 {
-                elements.remove(0)
+                let element = elements.remove(0);
+                if element.starts_with("fn(") {
+                    format!("({element})")
+                } else {
+                    element
+                }
             } else {
                 format!("({})", elements.join(","))
             };
@@ -499,7 +621,7 @@ impl<'t, 's> Parser<'t, 's> {
                 self.newlines();
                 let mut args = Vec::new();
                 while self.current().kind != K::RBracket {
-                    args.push(self.type_name()?.value);
+                    args.push(self.type_argument()?.value);
                     self.newlines();
                     if !self.take(K::Comma) {
                         break;
@@ -513,6 +635,36 @@ impl<'t, 's> Parser<'t, 's> {
             }
         }
         Ok(Text::new(value, Span::new(start, self.previous_end())))
+    }
+    fn type_argument(&mut self) -> Result<Text, Diagnostic> {
+        let start = self.current().span.start;
+        if self.take(K::LBrace) {
+            self.newlines();
+            let mut items = Vec::new();
+            while self.current().kind != K::RBrace {
+                items.push(self.type_name()?.value);
+                self.newlines();
+                if !self.take(K::Comma) {
+                    break;
+                }
+                self.newlines();
+            }
+            self.expect(K::RBrace, "expected '}' after set type argument")?;
+            return Ok(Text::new(
+                format!("{{{}}}", items.join(",")),
+                Span::new(start, self.previous_end()),
+            ));
+        }
+        let first = self.type_name()?;
+        let mut items = vec![first.value];
+        while self.take(K::Bar) {
+            self.newlines();
+            items.push(self.type_name()?.value);
+        }
+        Ok(Text::new(
+            items.join("|"),
+            Span::new(start, self.previous_end()),
+        ))
     }
     fn fields(&mut self) -> Result<Vec<Field>, Diagnostic> {
         let mut fields = Vec::new();
@@ -701,6 +853,7 @@ impl<'t, 's> Parser<'t, 's> {
                 }
             }
             K::Name("if") => self.if_expr(multiline)?,
+            K::Name("fn") => self.lambda()?,
             K::Name("assert") => {
                 self.advance();
                 let value = self.expr(0, multiline)?;
@@ -1581,5 +1734,107 @@ mod tests {
                 "{source}: {error:?}"
             );
         }
+    }
+    #[test]
+    fn function_and_lambda_signatures_keep_absent_and_empty_sets_distinct() {
+        let source = "fn absent(n: Int) { n }\nfn pure(n: Int) -> Int fails {} use {} { n }\nfn effects(n: Int) -> Int fails Missing | Other use {Logger, State[Int]} { n }\n@external(c, \"board_wait\")\nsuspend fn wait(n: Int) -> Int use Async";
+        let module = parse(&lex(source).unwrap()).unwrap();
+        assert!(module.functions[0].fails.is_none());
+        assert!(module.functions[0].effects.is_none());
+        assert!(module.functions[1].fails.as_ref().unwrap().is_empty());
+        assert!(module.functions[1].effects.as_ref().unwrap().is_empty());
+        assert_eq!(
+            module.functions[2].effects.as_ref().unwrap()[1].value,
+            "State[Int]"
+        );
+        assert!(module.functions[3].suspends);
+        let module =
+            parse(&lex("fn main() { fn(x) -> Int fails {} use Logger { x } }").unwrap()).unwrap();
+        let Statement::Expr(Expr {
+            kind:
+                ExprKind::Lambda {
+                    params,
+                    return_type,
+                    fails,
+                    effects,
+                    ..
+                },
+            ..
+        }) = &module.functions[0].body.as_ref().unwrap().statements[0]
+        else {
+            panic!("expected lambda")
+        };
+        assert!(params[0].ty.is_none());
+        assert_eq!(return_type.as_ref().unwrap().value, "Int");
+        assert!(fails.as_ref().unwrap().is_empty());
+        assert_eq!(effects.as_ref().unwrap()[0].value, "Logger");
+    }
+    #[test]
+    fn nested_function_types_and_set_arguments_preserve_canonical_boundaries() {
+        let source = "fn apply(f: fn(Int)->String, pure: fn(Int)->String fails {} use {}, nested: fn()->(fn(Int)->String fails Missing) use {Logger}, data: Holder[Missing|Other,{State[Int],R}]) { 0 }";
+        let module = parse(&lex(source).unwrap()).unwrap();
+        let params = &module.functions[0].params;
+        assert_eq!(params[0].ty.value, "fn(Int)->String");
+        assert_eq!(params[1].ty.value, "fn(Int)->String fails {} use{}");
+        assert_eq!(
+            params[2].ty.value,
+            "fn()->(fn(Int)->String fails Missing) use{Logger}"
+        );
+        assert_eq!(params[3].ty.value, "Holder[Missing|Other,{State[Int],R}]");
+    }
+    #[test]
+    fn anonymous_parameters_keep_patterns_annotations_and_callee_evaluation_shape() {
+        let source =
+            "fn main() { fn((a,b):(Int,Int), Request(url:,..), _) { a }((1,2),request,()) }";
+        let module = parse(&lex(source).unwrap()).unwrap();
+        let Statement::Expr(Expr {
+            kind: ExprKind::Call { callee, args },
+            ..
+        }) = &module.functions[0].body.as_ref().unwrap().statements[0]
+        else {
+            panic!("expected call")
+        };
+        assert_eq!(args.len(), 3);
+        let ExprKind::Lambda { params, .. } = &callee.kind else {
+            panic!("expected lambda callee")
+        };
+        assert!(matches!(params[0].pattern.kind, PatternKind::Tuple(_)));
+        assert_eq!(params[0].ty.as_ref().unwrap().value, "(Int,Int)");
+        assert!(matches!(
+            params[1].pattern.kind,
+            PatternKind::Constructor { rest: true, .. }
+        ));
+        assert!(matches!(params[2].pattern.kind, PatternKind::Any));
+    }
+    #[test]
+    fn malformed_function_types_lambdas_and_clause_order_are_positioned_errors() {
+        for source in [
+            "fn main(f:fn(Int)) { 0 }",
+            "fn main(f:fn(Int)->Int use{} fails{}) { 0 }",
+            "fn main() { fn named(x) { x } }",
+            "fn main() { fn[A](x) { x } }",
+            "fn main() { fn(x) use{} use{} { x } }",
+            "fn main() { fn(x) x }",
+            "suspend fn main() { () }",
+            "trait Read { suspend fn read(self)->Int }",
+            "fn top(x) { x }",
+        ] {
+            let error = parse(&lex(source).unwrap()).unwrap_err();
+            assert!(
+                error.span.start <= error.span.end && error.span.end <= source.len(),
+                "{source}: {error:?}"
+            );
+        }
+        let source = format!(
+            "fn f(value:{}Int{}) {{ 0 }}",
+            "List[".repeat(300),
+            "]".repeat(300)
+        );
+        assert!(
+            parse(&lex(&source).unwrap())
+                .unwrap_err()
+                .message
+                .contains("nesting")
+        );
     }
 }

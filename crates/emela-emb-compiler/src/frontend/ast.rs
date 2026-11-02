@@ -60,6 +60,9 @@ pub(crate) struct Function {
     pub return_type: Option<Text>,
     /// None infers the failure set; Some(empty) explicitly excludes failures.
     pub fails: Option<Vec<Text>>,
+    /// None infers the effect set; Some(empty) explicitly excludes effects.
+    pub effects: Option<Vec<Text>>,
+    pub suspends: bool,
     pub attributes: Vec<Attribute>,
     pub body: Option<Block>,
 }
@@ -67,6 +70,11 @@ pub(crate) struct Function {
 pub(crate) struct Parameter {
     pub name: Text,
     pub ty: Text,
+}
+#[derive(Clone, Debug)]
+pub(crate) struct LambdaParameter {
+    pub pattern: Pattern,
+    pub ty: Option<Text>,
 }
 #[derive(Clone, Debug)]
 pub(crate) enum Attribute {
@@ -103,6 +111,13 @@ pub(crate) enum ExprKind {
     List {
         elements: Vec<Expr>,
         tail: Option<Box<Expr>>,
+    },
+    Lambda {
+        params: Vec<LambdaParameter>,
+        return_type: Option<Text>,
+        fails: Option<Vec<Text>>,
+        effects: Option<Vec<Text>>,
+        body: Block,
     },
     Match {
         value: Box<Expr>,
