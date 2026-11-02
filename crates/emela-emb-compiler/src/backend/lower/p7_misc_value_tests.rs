@@ -357,17 +357,36 @@ int main(void){for(int i=0;i<1000;i++){uint8_t a[]={0,128,255},b[]={0,128,254};E
 
 #[test]
 fn dynamic_defect_preserves_an_offset_string_view_and_embedded_nul() {
-    let mut f = simple();
-    f.ret = TypeId::NEVER;
-    let text = aggregate_variable(&mut f, TypeId::STRING);
-    f.params.push(text);
-    f.seqs[f.body.unwrap()].term = Term::Defect(text.into());
-    let output = crate::backend::compile_program(program(vec![f]), &Options::default()).unwrap();
-    execute(
-        &output,
-        "#include <stdlib.h>\n#include <string.h>\n#include \"emela_embedded.h\"\n#include \"emela_board.h\"\n_Noreturn void emela_board_defect(EmelaDefectKind k,const char*m,uint16_t n){const char expected[]={'a',0,'b'};exit(k==EMELA_DEFECT_PANIC&&n==3&&!memcmp(m,expected,3)?0:2);}\nint main(void){const char data[]={'x','a',0,'b','y'};answer((EmelaString){data+1,3,NULL});return 1;}\n",
-        0,
-    );
+    for suspends in [false, true] {
+        let mut f = simple();
+        f.ret = TypeId::NEVER;
+        f.suspends = suspends;
+        let text = aggregate_variable(&mut f, TypeId::STRING);
+        f.params.push(text);
+        f.seqs[f.body.unwrap()].term = Term::Defect(text.into());
+        let options = if suspends {
+            Options::default().with_heap_bytes(2048)
+        } else {
+            Options::default()
+        };
+        let output = crate::backend::compile_program(program(vec![f]), &options).unwrap();
+        let call = if suspends {
+            "(void)answer_start((EmelaString){data+1,3,NULL});while(emela_scheduler_run(1)){}"
+        } else {
+            "answer((EmelaString){data+1,3,NULL});"
+        };
+        let harness = r#"
+#include <stdlib.h>
+#include <string.h>
+#include "emela_embedded.h"
+#include "emela_board.h"
+uint32_t emela_board_event_lock(void){return 0;}
+void emela_board_event_unlock(uint32_t n){(void)n;}
+_Noreturn void emela_board_defect(EmelaDefectKind k,const char*m,uint16_t n){const char expected[]={'a',0,'b'};exit(k==EMELA_DEFECT_PANIC&&n==3&&!memcmp(m,expected,3)?0:2);}
+int main(void){const char data[]={'x','a',0,'b','y'};{call}return 1;}
+"#.replace("{call}",call);
+        execute(&output, &harness, 0);
+    }
 }
 
 #[test]

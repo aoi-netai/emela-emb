@@ -1690,6 +1690,16 @@
         "lifting_a_closure_remaps_fiber_failure_break_labels_and_their_result_locals"
       ],
       "observation": "Parent Var/Seq/Label arenas have11 padding entries. Lifted closure recovers captured typed error42 from CauseRaise through local Handle or enclosing Break; heap4096, each1000 calls, all free."
+    },
+    {
+      "id": "emela_lir::Term::Defect",
+      "modes": [
+        "sync",
+        "suspend"
+      ],
+      "path": "crates/emela-emb-compiler/src/backend/lower/p7_misc_value_tests.rs",
+      "symbol": "dynamic_defect_preserves_an_offset_string_view_and_embedded_nul",
+      "observation": "Both direct native and scheduler-frame defect preserve offset view bytes a,NUL,b and exact Panic kind/length3. Suspending input uses heap2048 to preserve its String argument. Fatal hook executes once per mode/optimization; no post-defect heap-free claim."
     }
   ],
   "remaining_work": [

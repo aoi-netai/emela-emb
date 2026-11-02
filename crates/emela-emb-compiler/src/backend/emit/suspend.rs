@@ -294,6 +294,8 @@ pub(super) fn emit_function(
     writer.begin_block(&format!(
         "static void {name}_step(emela_fiber *fiber, emela_frame *base)"
     ));
+    // A frame that only raises a defect has no scheduler operation using fiber.
+    writer.line("(void)fiber;");
     writer.line(&format!("{name}_frame *frame = ({name}_frame *)base;"));
     if has_failure {
         writer.line(&format!(

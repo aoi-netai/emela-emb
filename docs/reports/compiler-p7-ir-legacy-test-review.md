@@ -10,13 +10,13 @@
 | --- | --- |
 | `p7_misc_value_tests.rs::float_primitive_cases_keep_the_fixed_old_arithmetic_comparison_and_nan_results` | 旧Float Primのcase table全件。算術、比較、NaNのEq/Ne |
 | `derived_bytes_equality_and_display_keep_unsigned_values_at_the_c_boundary` | unsigned byte 128/255のEqと `Bytes.hex("0080ff")`。1000回 |
-| `dynamic_defect_preserves_an_offset_string_view_and_embedded_nul` | offset viewの長さとNULをPanic hookまで保持 |
+| `dynamic_defect_preserves_an_offset_string_view_and_embedded_nul` | offset viewの長さとNULをnative/suspend両方のPanic hookまで保持 |
 | `debug_print_passes_the_original_string_view_to_the_board_hook` | `abc` の3byte viewをdebug hookへ1000回渡す。不要なdefect APIは要求しない |
 | `discarded_integer_division_and_remainder_keep_defects_in_native_and_suspend_callers` | I32/I64 × Div/Rem × native/suspendの8経路。結果なしでもDivisionByZero |
 | `unreachable_terms_raise_the_native_or_scheduler_defect_when_reached` | 実際にnodeへ到達するnative/suspend経路。ASSERTのkindと `unreachable code` / `invalid scheduler state` の全byte |
 | `p7_evidence_tests.rs::discarded_handler_and_evidence_constructors_release_before_the_next_statement` のchars分岐 | discarded StringCharsを一つの関数内で1000回繰り返し、各discard直後にlive block0を検査。関数も1000回 |
 
-直接Unreachableだけを含む最小suspend programでは、生成Cの `fiber` 引数と共通 `emela_frame_return` が未使用となりstrict Cで失敗した。Unreachable stateで引数を明示消費し、return helperは既存のscheduler helperと同じ `static inline EMELA_UNUSED` とした。node到達時のdefect動作は変更しない。helper削除や戻り経路の捏造で警告を避けない。
+直接Unreachableだけを含む最小suspend programでは、生成Cの `fiber` 引数と共通 `emela_frame_return` が未使用となりstrict Cで失敗した。Defectのみのframeでも同じ未使用引数を確認したため、全frame stepのprologueで引数を明示消費し、return helperは既存のscheduler helperと同じ `static inline EMELA_UNUSED` とした。node到達時のdefect動作は変更しない。helper削除や戻り経路の捏造で警告を避けない。
 
 fatal hookは各C実行で一度観測して終了する。これらを1000回の正常反復と表記しない。所有値を返す正常試験は既存のheap空検査を併用し、StringCharsの長寿命loopでは次のstatementより前の解放も検査する。
 
