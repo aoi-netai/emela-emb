@@ -53,9 +53,19 @@ String引数を持つ自己tail recurで、loop cleanupが未宣言の所有flag
 
 この照合は宣言・依存の調査であり、未接続APIの完了証拠ではない。古いIRのBuiltin IntParse/FloatParseがOptionを返すことと、公開source APIの`fails ParseError`を混同しない。top-level fnのparam型省略は旧specの拒否対象で、正常な汎化sourceは `fn identity[A](value:A)->A` を使う。未呼出generic宣言の不正bodyも検査対象に保つ。
 
+## データ型・pattern・generic関数のsource接続
+
+`tests/p2_data.rs` でtuple、type/enum/error/opaque、constructorの型引数推論、名前付きfield、irrefutableな束縛、後置match、guardと網羅性検査を実行する。opaqueのmodule外構築・fieldアクセス、不正なpatternと網羅性不足を拒否する。
+
+`2a6ec0e` では明示型パラメーターを持つgeneric関数と、相互参照する関数の戻り型推論を接続した。同じidentityのInt/String呼出し、generic Boxの構築・destructure、Int64の文脈によるliteral型推論、tupleの型別具体化、Stringを保持する10万回のgeneric自己末尾再帰、even/oddとforward参照をsourceからCの両最適化で確認した。無制約型パラメーターの数値演算・不一致body・generic C exportは拒否する。
+
+- `cargo test --workspace --locked --offline`: 120 pass、失敗/skip 0、終了0（`2a6ec0e` のcode tree）。
+- `cargo fmt --all --check` と `cargo clippy --workspace --all-targets --locked --offline -- -D warnings`: 終了0。
+- trait registryと独立型solverの単体試験も含むが、traitのsource接続完了とは数えない。未確定戻り型の自動汎化は引き続き実装対象。
+
 ## P2の残りの確認
 
-データ型/pattern/match、型推論・具体化・trait、fails/fail/escape、mono const、数値parseを後続の機能別検証へ接続する。旧`release_0_24/traits.emel`は同期部分を独立fixtureへ抽出し、List/closure/Fiber/Causeを含む元fixture全体の実行はP6以降に残す。先行String成功だけで旧混在fixture・旧115関連試験・横断要件全体をverifiedにしない。
+未確定戻り型の汎化、trait/default/supertrait/derive、fails/fail/escape、mono const、数値parseを後続の機能別検証へ接続する。旧`release_0_24/traits.emel`は同期部分を独立fixtureへ抽出し、List/closure/Fiber/Causeを含む元fixture全体の実行はP6以降に残す。先行String成功だけで旧混在fixture・旧115関連試験・横断要件全体をverifiedにしない。
 
 ## 最終統合の追記欄
 
