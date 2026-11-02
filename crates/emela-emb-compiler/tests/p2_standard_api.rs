@@ -81,3 +81,54 @@ fn standard_private_intrinsics_and_unknown_parameter_labels_are_rejected() {
         );
     }
 }
+
+#[test]
+fn code_point_capacity_defects_are_preserved_when_only_the_tag_or_no_value_is_used() {
+    let source = r#"
+@export(c,"code_point_tag")
+pub fn code_point_tag(n: Int) -> Int {
+  String.from_code_point(n) match { Some(_) -> 0
+    None -> 1 }
+}
+@export(c,"discarded_code_point")
+pub fn discarded_code_point(n: Int) -> Int {
+  String.from_code_point(n)
+  42
+}
+"#;
+    let output = compile_sources(
+        &[Source::new("main.emel", source)],
+        "main.emel",
+        &Options::default()
+            .with_heap_bytes(4096)
+            .with_string_capacity(2),
+    )
+    .unwrap();
+    support::compile_and_run(
+        &output,
+        r#"
+#include <assert.h>
+#include <setjmp.h>
+#include <stdlib.h>
+#include <string.h>
+#include "emela_embedded.h"
+#include "emela_board.h"
+static jmp_buf jump;
+static int defects;
+_Noreturn void emela_board_defect(EmelaDefectKind kind,const char*message,uint16_t length) {
+  assert(kind==EMELA_DEFECT_STRING_CAPACITY);
+  assert(length==24&&!memcmp(message,"string capacity exceeded",length));
+  defects++;
+  longjmp(jump,1);
+}
+int main(void) {
+  assert(code_point_tag(-1)==1&&code_point_tag(0xd800)==1);
+  for(int i=0;i<1000;i++)assert(code_point_tag(0x7ff)==0&&discarded_code_point(0x7ff)==42);
+  if(!setjmp(jump)){(void)code_point_tag(0x20ac);abort();}
+  if(!setjmp(jump)){(void)discarded_code_point(0x20ac);abort();}
+  assert(defects==2);
+  return 0;
+}
+"#,
+    );
+}
