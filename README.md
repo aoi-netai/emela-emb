@@ -22,7 +22,11 @@ cargo build --workspace --locked
 cargo run --locked -p emela-emb-cli -- build examples/minimal/main.emel --out-dir generated
 ```
 
-生成コマンドは実装中です。完成時には `generated/emela_embedded.c` と `generated/emela_embedded.h` を保存します。今回の実験の到達点はCとヘッダーの生成です。Cのコンパイル・リンク・実行は後続の実験で扱います。
+`generated/emela_embedded.c` と `generated/emela_embedded.h` を保存します。出力先には新規または空のディレクトリを指定してください。既存の生成物がある場合も上書きせずエラーにするため、再生成時は別の出力先を指定します。2ファイルを一時ディレクトリで完成させてから出力先へ公開します。
+
+診断は `入力ファイル:行:列: error[種別]: 理由` の形式で標準エラーへ表示します。入力・生成・保存の失敗時は非ゼロ終了し、既存の成果物を保持します。
+
+今回の実験の到達点はCとヘッダーの生成です。Cのコンパイル・リンク・実行は後続の実験で扱います。
 
 ## 開発
 
