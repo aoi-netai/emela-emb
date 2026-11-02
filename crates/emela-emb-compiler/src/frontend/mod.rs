@@ -8,3 +8,5 @@ pub(crate) mod modules;
 pub(crate) mod parser;
 pub(crate) mod strings;
 pub(crate) mod types;
+
+pub(crate) mod infer;
