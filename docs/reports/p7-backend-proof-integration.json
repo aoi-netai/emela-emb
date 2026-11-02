@@ -39,9 +39,9 @@
     "compiler_absent_skip": false
   },
   "limits": [
-    "Workspace execution is an explicitly recorded prefix/fix/remaining/followup aggregate, not a single fresh final archive run.",
+    "The final 607 test command succeeds at source snapshot d67dd4a. It runs in an isolated integration worktree; it is not the final standalone archive of the root-owned canonical ledger and final documentation.",
     "Canonical record/context/test/requirement ledger promotion and final standalone archive remain root-owned.",
-    "Separate source177/corpus completion proposals are delivered by the corpus agent; this backend artifact does not edit that crosswalk."
+    "The source177 crosswalk was adopted from the owning corpus agent and its reproducibility check passed; no raw reach snapshot was promoted to runtime evidence."
   ],
   "followup_source_checkpoint": "20c409e",
   "followup_commits": [
@@ -117,5 +117,32 @@
     "proposal_pending": 0,
     "canonical_ledger_modified": false
   },
-  "official_tracked_source_modified": false
+  "official_tracked_source_modified": false,
+  "fresh_workspace_validation": {
+    "source_checkpoint": "d67dd4a",
+    "command": "CARGO_PROFILE_TEST_OPT_LEVEL=1 cargo test --workspace --locked --offline",
+    "single_uninterrupted_workspace_success": true,
+    "successful_target_batches_including_doc": 80,
+    "tests_passed": 607,
+    "tests_failed": 0,
+    "tests_ignored": 0,
+    "doc_tests": 0,
+    "C_optimizations": [
+      "-O0",
+      "-O2"
+    ],
+    "compiler_absent_skip": false,
+    "strict_clippy_workspace_all_targets": "passed",
+    "actual_rust_1_85_workspace_all_targets": "passed",
+    "actual_rustc_version": "rustc 1.85.0 (4d91de4e4 2025-02-17)",
+    "fmt_and_diff": "passed",
+    "additional_focused_corpus_tests_passed": 8,
+    "source_crosswalk_check": {
+      "normal_legacy_tests": 174,
+      "additional_cases": 3,
+      "programs": 169,
+      "open_observations": 0
+    },
+    "notes": "Includes 3c3d650 compound-discard fix, 81a4ef6 minimal defect-frame fix, 769241b literal-switch suspension probe, corpus 6409b64/8a6a585 small-budget strengthening, and all current P7 integration source features."
+  }
 }
