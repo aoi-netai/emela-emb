@@ -13,6 +13,7 @@ mod error_types;
 mod failures;
 mod fibers;
 mod handler;
+mod scope_abi;
 mod suspend;
 mod types;
 mod values;
@@ -45,6 +46,8 @@ pub(crate) fn lower_program(
     effects::normalize(&mut program)?;
     types::normalize_catalog(&mut program)?;
     error_types::normalize(&mut program)?;
+    scope_abi::normalize(&mut program)?;
+    scope_abi::normalize_calls(&mut program);
     let mut symbols = HashSet::new();
     for (id, function) in program.functions.iter() {
         if function.exported {

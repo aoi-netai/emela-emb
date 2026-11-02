@@ -2,6 +2,8 @@ use super::*;
 
 #[path = "fiber_deferred_tests.rs"]
 mod deferred;
+#[path = "fiber_scope_tests.rs"]
+mod scope_abi;
 
 fn function_type(p: &mut Program, params: Vec<TypeId>, ret: TypeId, fails: bool) -> TypeId {
     p.core.types.intern(Type::Fn(FnType {
