@@ -124,12 +124,16 @@ pub(in crate::backend::emit) fn emit_coerce(
             &format!("{box_name}->type"),
             &format!("UINT32_C({box_type})"),
         );
-        layouts.emit_owned_value_store(
-            source_ty,
-            &source_name,
-            &format!("{box_name}->payload.v{box_type}"),
-            writer,
-        );
+        if source_ty == TypeId::UNIT {
+            writer.assign(&format!("{box_name}->payload._empty"), "UINT8_C(0)");
+        } else {
+            layouts.emit_owned_value_store(
+                source_ty,
+                &source_name,
+                &format!("{box_name}->payload.v{box_type}"),
+                writer,
+            );
+        }
         writer.assign(&format!("{destination_name}.tag"), "UINT32_C(0)");
         writer.assign(&format!("{destination_name}.payload.any_box"), &box_name);
         return Ok(());
@@ -150,10 +154,12 @@ pub(in crate::backend::emit) fn emit_coerce(
         writer.begin_block(&format!("if ({box_name}->type != UINT32_C({box_type}))"));
         writer.line("emela_board_defect(EMELA_DEFECT_PANIC, \"Any type mismatch\", UINT16_C(17));");
         writer.end_block();
-        writer.assign(
-            &destination_name,
-            &format!("{box_name}->payload.v{box_type}"),
-        );
+        if destination_ty != TypeId::UNIT {
+            writer.assign(
+                &destination_name,
+                &format!("{box_name}->payload.v{box_type}"),
+            );
+        }
         if layouts.is_managed_value(destination_ty) {
             layouts.emit_retain_value_expression(destination_ty, &destination_name, writer);
         }
@@ -161,6 +167,9 @@ pub(in crate::backend::emit) fn emit_coerce(
     }
 
     if layouts.c_type(source_ty) == layouts.c_type(destination_ty) {
+        if destination_ty == TypeId::UNIT {
+            return Ok(());
+        }
         writer.assign(&destination_name, &source_name);
         if layouts.is_managed_value(destination_ty) {
             layouts.emit_retain_value_expression(destination_ty, &destination_name, writer);

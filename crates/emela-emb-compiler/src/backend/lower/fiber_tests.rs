@@ -4,6 +4,8 @@ use super::*;
 mod deferred;
 #[path = "fiber_scope_tests.rs"]
 mod scope_abi;
+#[path = "fiber_unit_tests.rs"]
+mod unit;
 
 #[test]
 fn raw_interrupt_masks_are_unit_operations_and_are_rejected_from_isr_entries() {

@@ -15,6 +15,9 @@ pub(in crate::backend::emit) fn emit_local_declarations(
     writer: &mut Writer,
 ) {
     for (id, variable) in function.vars.iter() {
+        if layouts.type_repr(variable.ty) == Repr::Void {
+            continue;
+        }
         if function.params.contains(&id)
             && parameter_is_loop_variable(function, id)
             && layouts.is_managed_value(variable.ty)
@@ -46,7 +49,10 @@ pub(in crate::backend::emit) fn emit_local_declarations(
     for (name, capacity) in &string_buffers.declarations {
         writer.line(&format!("char {name}[{capacity}];"));
     }
-    for (variable, _) in function.vars.iter() {
+    for (variable, data) in function.vars.iter() {
+        if layouts.type_repr(data.ty) == Repr::Void {
+            continue;
+        }
         writer.line(&format!("(void)&{};", variable_name(variable)));
     }
 }
