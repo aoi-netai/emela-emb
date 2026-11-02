@@ -1670,3 +1670,234 @@ fn nested_string_show_uses_quoting_even_when_a_builtin_method_stub_is_registered
         functions: vec![stub, answer],
     });
 }
+
+#[test]
+fn dbg_uses_custom_show_and_recursive_fallback_and_returns_the_original_value_once() {
+    use crate::frontend::traits::{BuiltinTrait, Impl, Method, Registry, Trait, TypeHead};
+    let mut core = b::Definitions::default();
+    let self_ty = core.types.intern(b::Type::Param(0));
+    let signature = core.types.intern(b::Type::Fn(b::FnType {
+        params: vec![self_ty],
+        ret: b::TypeId::STRING,
+        fails: false,
+        suspends: false,
+        ev: false,
+        sets: None,
+    }));
+    let mut registry = Registry::new();
+    let show = registry
+        .add_trait(Trait {
+            name: "Show".into(),
+            owner_module: 0,
+            supers: vec![],
+            methods: vec![Method {
+                name: "show".into(),
+                signature,
+                default_function: None,
+            }],
+        })
+        .unwrap();
+    registry.set_builtin(show, BuiltinTrait::Show).unwrap();
+    let (key, key_ty) = error_definition(&mut core, "Key");
+    core.enums[key].error = false;
+    let inner = core.enums.alloc(b::EnumDef {
+        name: "Inner".into(),
+        params: 0,
+        variants: vec![b::VariantDef {
+            name: "Inner".into(),
+            fields: b::VariantFields::Named(vec!["text".into()]),
+            tys: vec![b::TypeId::STRING],
+        }],
+        error: false,
+        external: false,
+    });
+    let inner_ty = core.types.intern(b::Type::Enum(inner, vec![]));
+    let outer = core.enums.alloc(b::EnumDef {
+        name: "Outer".into(),
+        params: 0,
+        variants: vec![b::VariantDef {
+            name: "Outer".into(),
+            fields: b::VariantFields::Named(vec!["key".into(), "inner".into()]),
+            tys: vec![key_ty, inner_ty],
+        }],
+        error: false,
+        external: false,
+    });
+    let outer_ty = core.types.intern(b::Type::Enum(outer, vec![]));
+    let mut read = function(0, "read_once", vec![], ValueType::Int, integer(0));
+    read.body = None;
+    read.external = Some("read_once".into());
+    let show_key = function(
+        1,
+        "key_show",
+        vec![local(0, frontend_type(key_ty))],
+        ValueType::String,
+        expression(
+            ir::ExprKind::Literal(ir::Literal::String("custom".into())),
+            ValueType::String,
+        ),
+    );
+    registry.register_type_owner(key, 1).unwrap();
+    registry
+        .add_impl(
+            &core,
+            Impl {
+                head: TypeHead::Enum(key),
+                trait_id: show,
+                owner_module: 1,
+                type_parameters: vec![],
+                methods: HashMap::from([("show".into(), ir::DefinitionId(1))]),
+            },
+        )
+        .unwrap();
+    let key_value = expression(
+        ir::ExprKind::Make {
+            ctor: b::CtorRef {
+                enum_id: key,
+                variant: 0,
+            },
+            args: vec![call(0, vec![], vec![], ValueType::Int)],
+            order: vec![0],
+        },
+        frontend_type(key_ty),
+    );
+    let inner_value = expression(
+        ir::ExprKind::Make {
+            ctor: b::CtorRef {
+                enum_id: inner,
+                variant: 0,
+            },
+            args: vec![expression(
+                ir::ExprKind::Literal(ir::Literal::String("x".into())),
+                ValueType::String,
+            )],
+            order: vec![0],
+        },
+        frontend_type(inner_ty),
+    );
+    let outer_value = expression(
+        ir::ExprKind::Make {
+            ctor: b::CtorRef {
+                enum_id: outer,
+                variant: 0,
+            },
+            args: vec![key_value, inner_value],
+            order: vec![0, 1],
+        },
+        frontend_type(outer_ty),
+    );
+    let marker = local(100, ValueType::Int);
+    let result = local(101, frontend_type(outer_ty));
+    let dbg = expression(
+        ir::ExprKind::Builtin {
+            op: b::Builtin::Dbg,
+            args: vec![outer_value.clone()],
+        },
+        frontend_type(outer_ty),
+    );
+    let projected_key = expression(
+        ir::ExprKind::Field {
+            base: Box::new(expression(ir::ExprKind::Local(result.id), result.ty)),
+            ctor: b::CtorRef {
+                enum_id: outer,
+                variant: 0,
+            },
+            index: 0,
+        },
+        frontend_type(key_ty),
+    );
+    let projected_value = expression(
+        ir::ExprKind::Field {
+            base: Box::new(projected_key),
+            ctor: b::CtorRef {
+                enum_id: key,
+                variant: 0,
+            },
+            index: 0,
+        },
+        ValueType::Int,
+    );
+    let mut answer = exported(function(
+        2,
+        "answer",
+        vec![],
+        ValueType::Int,
+        projected_value,
+    ));
+    answer.body.as_mut().unwrap().statements.splice(
+        0..0,
+        [
+            ir::Statement::Pattern {
+                pattern: ir::Pattern {
+                    ty: marker.ty,
+                    span: span(),
+                    kind: ir::PatternKind::Bind(marker),
+                },
+                value: integer(0),
+            },
+            ir::Statement::Pattern {
+                pattern: ir::Pattern {
+                    ty: result.ty,
+                    span: span(),
+                    kind: ir::PatternKind::Bind(result),
+                },
+                value: dbg,
+            },
+        ],
+    );
+    let input = ir::Program {
+        core,
+        registry,
+        functions: vec![read, show_key, answer],
+    };
+    execute_with_harness(
+        input.clone(),
+        "#include <stdlib.h>\n#include <string.h>\n#include \"emela_embedded.h\"\n#include \"emela_board.h\"\nstatic int reads,logs;\nint32_t read_once(void){++reads;return 42;}\nvoid emela_board_debug(const char*text,uint16_t length){const char expected[]=\"Outer(key: custom, inner: Inner(text: \\\"x\\\"))\";if(length!=sizeof expected-1||memcmp(text,expected,length))exit(8);++logs;}\n_Noreturn void emela_board_defect(EmelaDefectKind k,const char*m,uint16_t n){(void)k;(void)m;(void)n;exit(9);}\nint main(void){return answer()==42 && reads==1 && logs==1 ? 0:1;}\n",
+    );
+    let mut invalid = input;
+    invalid.functions.push(function(
+        3,
+        "requires_show",
+        vec![],
+        ValueType::String,
+        expression(
+            ir::ExprKind::TraitCall {
+                trait_id: show,
+                method: "show".into(),
+                self_type: outer_ty,
+                args: vec![outer_value],
+                order: vec![0],
+                nested_show: false,
+            },
+            ValueType::String,
+        ),
+    ));
+    assert!(
+        specialize(invalid).unwrap_err()[0]
+            .message
+            .contains("does not implement")
+    );
+}
+#[test]
+fn dbg_of_a_diverging_expression_does_not_require_or_evaluate_show() {
+    let core = b::Definitions::default();
+    let mut stop = function(0, "stop", vec![], ValueType::Never, integer(0));
+    stop.body = None;
+    stop.external = Some("stop".into());
+    let dbg = expression(
+        ir::ExprKind::Builtin {
+            op: b::Builtin::Dbg,
+            args: vec![call(0, vec![], vec![], ValueType::Never)],
+        },
+        ValueType::Never,
+    );
+    let answer = exported(function(1, "answer", vec![], ValueType::Int, dbg));
+    execute_with_harness(
+        ir::Program {
+            core,
+            registry: Default::default(),
+            functions: vec![stop, answer],
+        },
+        "#include <stdlib.h>\n#include \"emela_embedded.h\"\n#include \"emela_board.h\"\n_Noreturn void stop(void){exit(0);}\n_Noreturn void emela_board_defect(EmelaDefectKind k,const char*m,uint16_t n){(void)k;(void)m;(void)n;exit(9);}\nint main(void){(void)answer();return 1;}\n",
+    );
+}

@@ -26,10 +26,22 @@ impl Specializer {
         {
             return self.builtin_helper(caller, BuiltinTrait::Show, ty, true, span, depth);
         }
-        let resolved = self
-            .registry
-            .resolve(&self.core, ty, trait_id, method, &ParamBounds::new())
-            .map_err(|error| diagnostic(caller, span, error.message))?;
+        let resolved =
+            match self
+                .registry
+                .resolve(&self.core, ty, trait_id, method, &ParamBounds::new())
+            {
+                Ok(resolved) => resolved,
+                Err(error)
+                    if error.kind == crate::frontend::traits::TraitErrorKind::UnsatisfiedBound
+                        && method == "show"
+                        && self.registry.builtin_id(BuiltinTrait::Show) == Some(trait_id)
+                        && self.debug_fallback.contains(&caller.id) =>
+                {
+                    return self.debug_show_helper(caller, ty, nested, span, depth);
+                }
+                Err(error) => return Err(diagnostic(caller, span, error.message)),
+            };
         if resolved.deferred {
             return Err(diagnostic(
                 caller,
@@ -204,6 +216,7 @@ impl Specializer {
             | b::Type::Bool
             | b::Type::String
             | b::Type::Unit => builder.primitive(kind, ty, left, right, nested)?,
+            b::Type::Fn(_) if kind == BuiltinTrait::Show => builder.literal("<fn>"),
             _ => {
                 return Err(diagnostic(
                     function,

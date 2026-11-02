@@ -63,6 +63,9 @@ fn specialize_with_limits(input: ir::Program, limits: Limits) -> Result<ir::Prog
         functions,
         cache: HashMap::new(),
         builtin_helpers: HashMap::new(),
+        debug_show_helpers: HashMap::new(),
+        debug_fallback: HashSet::new(),
+        debug_locals: HashMap::new(),
         next_id,
         instances: 0,
         limits,
@@ -86,6 +89,9 @@ struct Specializer {
     functions: Vec<ir::Function>,
     cache: HashMap<(ir::DefinitionId, Vec<b::TypeId>), ir::DefinitionId>,
     builtin_helpers: HashMap<(super::traits::BuiltinTrait, b::TypeId, bool), ir::DefinitionId>,
+    debug_show_helpers: HashMap<(b::TypeId, bool), ir::DefinitionId>,
+    debug_fallback: HashSet<ir::DefinitionId>,
+    debug_locals: HashMap<ir::DefinitionId, usize>,
     next_id: Option<usize>,
     instances: usize,
     limits: Limits,
@@ -498,6 +504,21 @@ impl Specializer {
                     type_arguments: vec![],
                 };
             }
+            ir::ExprKind::Builtin {
+                op: b::Builtin::Dbg,
+                args,
+            } => {
+                if args.len() != 1 {
+                    return Err(diagnostic(
+                        function,
+                        expression.span,
+                        "dbg requires one argument",
+                    ));
+                }
+                self.expression(function, &mut args[0], arguments, depth)?;
+                let value = args.pop().expect("checked dbg argument count");
+                *expression = self.debug_expression(function, value, expression.span, depth)?;
+            }
             ir::ExprKind::Concat(values)
             | ir::ExprKind::Tuple(values)
             | ir::ExprKind::Builtin { args: values, .. } => {
@@ -592,3 +613,6 @@ mod derive;
 
 #[path = "specialize/constant_patterns.rs"]
 mod constant_patterns;
+
+#[path = "specialize/debug.rs"]
+mod debug;
