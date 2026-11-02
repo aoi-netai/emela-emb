@@ -630,7 +630,7 @@ fn invalid_flow_ir(function: &str, message: &str) -> Vec<Error> {
     }]
 }
 
-fn runtime_reachable(program: &Module, options: &crate::Options) -> HashSet<FnId> {
+pub(super) fn runtime_reachable(program: &Module, options: &crate::Options) -> HashSet<FnId> {
     let mut pending: Vec<_> = program
         .functions
         .iter()

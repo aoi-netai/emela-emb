@@ -362,3 +362,11 @@ Map.from_list/keys/valuesとSet.from_listの内部callbackを、評価順と結�
 - frontendのFnRef/Lambda/Apply、具体化、評価順とUnit消去は独自実装。IR/C試験では返却関数値、generic関数参照、返却closureのString所有・解放と不正IR拒否を確認する。source接続とeffect/handler対応は別の証拠で判定する。
 
 現段階ではconst内closureを明示的に拒否する。通常の関数値成功でこの範囲を完了扱いせず、P7の汎化constと型別bridgeへ残件として引き継ぐ。
+
+## P4の静的handler解決と動的境界
+
+同じ固定revisionの `crates/emela-codegen-emb/src/compiler/lower/handler.rs`（元SHA-256: `524fc40bcc16877e4b403d1e00d0034a1a537c9a879c94f07085835ae90c98c2`）を `src/backend/lower/handler.rs` へ適応した。Core/LIR crate依存を独自contractへ置換し、MSRV 1.85向けの同値なnested if、選択entryからの到達性、loop/parameterの可変値を静的解決しない検査を加えた。
+
+Handler/Evidence/operation call/RetireとCellの型・ID検証は独自lowerに接続する。静的evidenceは不要なhandler割当を消去できる一方、別関数やAny aliasからretireできるeffectは動的active検査を保つ。Unitを返すCellSetには所有用の仮destinationを追加しない。
+
+`backend/lower/handler_tests.rs` の独自IR/C試験は、heap不要の静的解決、別関数へ渡す動的evidenceとProtect cleanup、Any経由のretire後のdefect、Cell/closure/Any循環の1000回反復と全heap回収を両最適化で確認する。これはsourceのhandler/layer/init/release接続とは別の証拠とする。

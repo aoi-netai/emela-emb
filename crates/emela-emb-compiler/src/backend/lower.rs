@@ -10,6 +10,7 @@ mod closure;
 mod const_eval;
 mod error_types;
 mod failures;
+mod handler;
 mod types;
 mod values;
 use values::value_type;
@@ -69,6 +70,7 @@ pub(crate) fn lower_program(
         validate_function(&program, function)?;
     }
     let (mut program, closures) = closure::lower(&program, options)?;
+    handler::lower(&mut program, options);
     let mut const_outcomes = HashMap::new();
     let mut runtime_consts = HashSet::new();
     for (id, function) in program.functions.iter() {
@@ -125,11 +127,10 @@ pub(crate) fn lower_program(
                 let Stmt::Let { value, .. } = stmt else {
                     unreachable!()
                 };
-                discarded.push((
-                    function_id,
-                    statement,
-                    value_type(&program, function, value, &available, None)?,
-                ));
+                let ty = value_type(&program, function, value, &available, None)?;
+                if !matches!(ty, TypeId::UNIT | TypeId::NEVER) {
+                    discarded.push((function_id, statement, ty));
+                }
             }
         }
     }

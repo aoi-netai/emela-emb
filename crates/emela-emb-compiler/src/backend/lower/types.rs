@@ -184,6 +184,20 @@ pub(super) fn normalize_catalog(program: &mut Program) -> Result<()> {
             }
             Type::List(element) | Type::Cell(element) => pending.push(element),
             Type::Fn(ft) => pending.extend(ft.params.into_iter().chain([ft.ret])),
+            Type::Handler(effect) => {
+                let definition = program
+                    .core
+                    .effects
+                    .iter()
+                    .find_map(|(id, definition)| (id == effect).then_some(definition))
+                    .ok_or_else(|| invalid("<module>", "handler effect ID is out of bounds"))?;
+                pending.extend(definition.args.iter().copied());
+                for operation in &definition.ops {
+                    if operation.type_params == 0 {
+                        pending.extend(operation.params.iter().copied().chain([operation.ret]));
+                    }
+                }
+            }
             _ => {}
         }
     }
@@ -259,8 +273,26 @@ pub(super) fn validate_type(program: &Program, function: &str, ty: TypeId) -> Re
                     }
                 }
             }
-            Type::List(element) => {
+            Type::List(element) | Type::Cell(element) => {
                 visit(program, function, *element, seen, active, indirections + 1)?
+            }
+            Type::Handler(effect) => {
+                let definition = program
+                    .core
+                    .effects
+                    .iter()
+                    .find_map(|(id, definition)| (id == *effect).then_some(definition))
+                    .ok_or_else(|| invalid(function, "handler effect ID is out of bounds"))?;
+                for &arg in &definition.args {
+                    visit(program, function, arg, seen, active, indirections + 1)?;
+                }
+                for operation in &definition.ops {
+                    if operation.type_params == 0 {
+                        for &child in operation.params.iter().chain([&operation.ret]) {
+                            visit(program, function, child, seen, active, indirections + 1)?;
+                        }
+                    }
+                }
             }
             Type::Fn(ft) => {
                 if ft.suspends || ft.sets.is_some() {

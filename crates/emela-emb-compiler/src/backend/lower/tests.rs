@@ -6,6 +6,8 @@ use std::sync::atomic::{AtomicU64, Ordering};
 
 #[path = "function_tests.rs"]
 mod functions;
+#[path = "handler_tests.rs"]
+mod handlers;
 #[path = "memory_tests.rs"]
 mod memory;
 
