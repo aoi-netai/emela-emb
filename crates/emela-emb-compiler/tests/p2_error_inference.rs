@@ -96,7 +96,7 @@ fn inferred_error_payload_types_and_joint_guarded_coverage_remain_checked() {
             errors
                 .iter()
                 .all(|error| error.source.as_deref() == Some("main.emel")),
-            "{source}"
+            "{source}\n{errors:#?}"
         );
     }
 }

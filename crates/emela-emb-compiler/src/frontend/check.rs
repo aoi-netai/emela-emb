@@ -177,14 +177,13 @@ pub(crate) fn check(mut modules: Modules) -> Result<ir::Program, Vec<Diagnostic>
             .map(|definition| definition.parameters.clone())
             .collect(),
     );
-    let mut errors = Vec::new();
+    // Function inference shares type and row constraints across recursive components.
+    // A failed constraint invalidates that state; continuing would report the same
+    // failure again at unrelated declarations, including compiler-owned modules.
     for index in 0..checker.definitions.len() {
-        if let Err(error) = checker.function(DefinitionId(index)) {
-            errors.push(error);
-        }
-    }
-    if !errors.is_empty() {
-        return Err(errors);
+        checker
+            .function(DefinitionId(index))
+            .map_err(|error| vec![error])?;
     }
     checker.validate_trait_obligations()?;
     let mut modes: HashMap<_, _> = checker
