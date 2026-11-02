@@ -154,7 +154,8 @@
         "C_generation": "passed",
         "C_runtime_O0": "passed",
         "C_runtime_O2": "passed",
-        "heap_empty_after_each_fully_released_route": true
+        "terminal_defect_observed": true,
+        "heap_observation": "Old terminal HeapExhausted observation; no successful return or reclamation claim for this route."
       },
       "runtime_assertions": [
         "Equivalent Bytes.encode_utf8 source allocation rejects heap0 before emission.",
