@@ -11,7 +11,7 @@ pub fn answer() -> Int {
 }
 ```
 
-P1のscalar経路が完了し、P2の同期データ・型システムを拡張中です。P1の確定した範囲は [対応仕様](docs/language-subset.md)、追加したデータ型・String・汎化・失敗・constの実行結果は [P2検証報告](docs/reports/compiler-p2.md) を参照してください。[7段階の計画](docs/compiler-parity-plan.md) に沿って、固定した旧fork相当の独立コンパイラーを実現します。
+P1の基盤とP2の同期データ・型システムが完了しました。対応するデータ型・String・汎化・trait・失敗・constは [対応仕様](docs/language-subset.md)、201試験と独立環境での実行結果は [P2検証報告](docs/reports/compiler-p2.md) を参照してください。[7段階の計画](docs/compiler-parity-plan.md) に沿って、固定した旧fork相当の独立コンパイラーを実現します。
 
 ## ビルドと生成
 

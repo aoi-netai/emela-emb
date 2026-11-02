@@ -1,6 +1,6 @@
 # 独立コンパイラーが対応するEmelaの範囲（同期機能）
 
-P1の基盤とP2の同期機能を記録する。P2は最終統合を確認中。字句解析、構文解析、module・名前解決、型検査、独自IR、C生成をこのrepoが所有し、Emela本体のcrate・CLI・checkout・core/std・Pomeを要求しない。[実装計画](compiler-parity-plan.md) と [終了条件](compiler-coverage.md) に従い、後続段階の機能を追加する。
+P1の基盤とP2の同期機能を記録する。P2は201試験・独立環境での検証を完了。字句解析、構文解析、module・名前解決、型検査、独自IR、C生成をこのrepoが所有し、Emela本体のcrate・CLI・checkout・core/std・Pomeを要求しない。[実装計画](compiler-parity-plan.md) と [終了条件](compiler-coverage.md) に従い、後続段階の機能を追加する。
 
 基準仕様は旧forkの `c34c0aeefdd966d854371b3110db00a47798751d`。`spec/language/02-lexical.md`、`03-keywords.md`、`12-external.md`、`spec/grammar.md`、`spec/targets/16-targets.md`、`spec/targets/c.md` を参照する。これは仕様・採用コードの出自であり、取得する依存ではない。全Emela仕様・全target契約への適合を表明しない。
 
@@ -65,7 +65,7 @@ compilerが所有する `lib/core/` の宣言と型registryで、基本型・数
 
 ## 失敗・String・const
 
-`error` の値を `fail` し、`fails` の集合を検査・推論する。`escape` のpatternが共同で網羅したerrorを集合から除き、部分回復は残りの失敗を伝播する。明示した戻り型でfailsを省略した関数は、未回復の失敗を許可しない。失敗するtrait methodとgenericなerror型も扱う。effect集合とhandlerの接続はP4以降。
+`error` の値を `fail` し、`fails` の集合を検査・推論する。`escape` のpatternが共同で網羅したerrorを集合から除き、部分回復は残りの失敗を伝播する。明示した戻り型でfailsを省略した関数は、未回復の失敗を許可しない。失敗するtrait methodとgenericなerror型も扱う。戻り型・fails省略時は、error payloadの型変数も相互再帰群の汎化へ含め、呼出しごとに具体化する。escapeの最外patternにはerror constructorを使い、単独の `_`・変数・constは許可しない。effect集合とhandlerの接続はP4以降。
 
 String literal、補間、view比較、append、検索・trim、byte数・Unicode18の書記素数、code pointからの生成を扱う。NULを含む値は長さで渡す。Int/Int64/Float/Boolの変換と表記、Int.checked_add、Int/Float/Bool.parse、Optionの同期APIを供給する。parseの失敗は元のinputを持つParseErrorを返す。固定旧版にはInt64.parseはない。Listを返すString APIはP3で接続する。
 

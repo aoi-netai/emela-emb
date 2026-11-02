@@ -138,10 +138,22 @@ generic trait methodのIR具体化は `ccd0615`、source収集・型検査への
 - `cargo fmt --all --check`、`cargo clippy --workspace --all-targets --locked --offline -- -D warnings`、実Rust 1.85.0での`cargo check --workspace --all-targets --locked --offline`: すべて終了0。
 - 独立環境では当該revisionをgit archiveし、lock済みの第三者依存だけをvendor化した一時snapshotを使用。Linux Landlockで元workspaceの読取りを禁止し、clean CARGO_HOMEでworkspace build/test、CLI生成、生成Cの両最適化実行が成功。metadataの全packageはsnapshot内にあり、Emela packageはこのrepoの2 crateだけである。元workspaceへのアクセス拒否も実際に確認した。
 
-最後の旧正常入力照合で、failsを省略したgeneric関数からerror payloadの型引数をescapeへ推論する経路に未対応を発見した。明示fails版は通るが、省略版も対象であるためP2の残件として修正中。独立環境の成功だけではP2完了としない。
+最後の旧正常入力照合で発見した、fails省略時のgeneric error payload推論と具体型ごとのC表現は、以下の最終統合で修正・検証した。
 
 旧`release_0_24/traits.emel`のList/closure/Fiber/Causeを含む元fixture全体の実行はP6以降に残す。同期部分の成功だけで旧混在fixture・旧115関連試験・横断要件全体をverifiedにしない。
 
-## 最終統合の追記欄
+## P2最終統合の結果
 
-P2完了時にsource revision、OS/Rust/C compiler実体、全command/結果、各最適化、拒否試験、台帳対応、独立環境の結果を追記する。
+検証したsource revisionは `88eb3da2ed78282ab669e85ce46acf64b6d7a977`。WSL2 `x86_64-unknown-linux-gnu`、Rust 1.99.1、`cc`（GCC 11.4.0）。MSRVは通常toolchain設定を変更せず、実際のRust 1.85.0のcargo/rustc/rustdocを指定した。
+
+`ba11308` はerror payloadの制約を値型solverへ共有し、相互再帰群の汎化前に解決する。error集合だけに現れる型変数も汎化し、呼出しごとのInt/String等の具体化へ渡す。`tests/p2_error_inference.rs` の3件で直接呼出し・SCC内のescape・If/trait経由・Bool patternの共同網羅、Option[Int]/Option[String]の別instance、所有Stringの1000回再利用を確認した。payload不一致・pureへの失敗漏れ・guard付き部分回復を拒否する。固定spec 7.3と旧 `emela-types::body::infer_escape` に合わせ、escape最外のwildcard/変数/constも拒否する。
+
+`643da4d` はIsError/AsErrorへ具体error型を保持し、同じgeneric宣言のInt版・Bool版等を別のAny payload slotへ正規化する。`88eb3da` はさらにOuterのOption fieldからNest・Innerを通るgenericな入れ子と未構築payloadの型を確認する。`tests/p2_failures.rs` の6件は明示fails・省略failsの両経路でC両最適化を通り、動的Stringを持つpayloadの寿命と1000回の全heap解放を確認した。既存のAny/tag/所有権rendererを維持し、P4以降の機能をP2へ混入させていない。
+
+- `cargo test --workspace --locked --offline`: **201 pass、失敗/skip 0、終了0**。全C実行試験は `cc -std=c11 -Wall -Werror -O0` / `-O2` とも成功。
+- `cargo fmt --all --check`: 終了0。
+- `cargo clippy --workspace --all-targets --locked --offline -- -D warnings`: 終了0。
+- 実Rust 1.85.0の `cargo check --workspace --all-targets --locked --offline`: 終了0。
+- 上記revisionのgit archiveとlock済み第三者依存だけのsnapshotで、元Emela workspaceの読取りをLinux Landlockにより禁止。アクセス拒否を確認し、clean CARGO_HOMEで `cargo build --workspace --locked --offline`、全201試験、CLIのminimal source生成、生成Cの `-O0` / `-O2` 実行がすべて終了0。metadataはrepoの2 crateと通常第三者依存だけを含む。
+
+P2の同期範囲を完了と判定する。直接依存はla-arena・serde・serde_jsonだけで、本体依存や新crateを追加していない。P3のList/Bytes/再帰値、P4の関数値/effect、P5以降のsuspend/取消、汎化const等の残件は計画と台帳で継続する。旧115関連試験と全source corpusの最終状態はP7まで個別に照合する。

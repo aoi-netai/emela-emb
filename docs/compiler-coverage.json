@@ -4606,9 +4606,13 @@
         {
           "kind": "run_report",
           "path": "docs/reports/compiler-p2.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p2_error_inference.rs"
         }
       ],
-      "reason": "error集合の推論・generic制約・escape回復を接続。effect/capability集合は後段。"
+      "reason": "error集合の推論・generic制約・escape回復を接続。effect/capability集合は後段。 P2最終統合で、error-only型変数のSCC汎化と具体error型ごとのAny payload・IsError/AsErrorを検証済み。"
     },
     {
       "id": "emela_core::Type::Set.0",
@@ -9991,9 +9995,13 @@
         {
           "kind": "run_report",
           "path": "docs/reports/compiler-p2.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p2_error_inference.rs"
         }
       ],
-      "reason": "fail/escape・error payload・失敗集合の同期source/C経路を接続。cleanup・中断経路はP6で照合する。"
+      "reason": "fail/escape・error payload・失敗集合の同期source/C経路を接続。cleanup・中断経路はP6で照合する。 P2最終統合で、error-only型変数のSCC汎化と具体error型ごとのAny payload・IsError/AsErrorを検証済み。"
     },
     {
       "id": "emela_lir::Term::Fail.0",
@@ -10425,9 +10433,13 @@
         {
           "kind": "run_report",
           "path": "docs/reports/compiler-p2.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p2_error_inference.rs"
         }
       ],
-      "reason": "fail/escape・error payload・失敗集合の同期source/C経路を接続。cleanup・中断経路はP6で照合する。"
+      "reason": "fail/escape・error payload・失敗集合の同期source/C経路を接続。cleanup・中断経路はP6で照合する。 P2最終統合で、error-only型変数のSCC汎化と具体error型ごとのAny payload・IsError/AsErrorを検証済み。"
     },
     {
       "id": "emela_lir::Value::AsError.enum_id",
@@ -11606,9 +11618,13 @@
         {
           "kind": "run_report",
           "path": "docs/reports/compiler-p2.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p2_error_inference.rs"
         }
       ],
-      "reason": "fail/escape・error payload・失敗集合の同期source/C経路を接続。cleanup・中断経路はP6で照合する。"
+      "reason": "fail/escape・error payload・失敗集合の同期source/C経路を接続。cleanup・中断経路はP6で照合する。 P2最終統合で、error-only型変数のSCC汎化と具体error型ごとのAny payload・IsError/AsErrorを検証済み。"
     },
     {
       "id": "emela_lir::Value::IsError.enum_id",
