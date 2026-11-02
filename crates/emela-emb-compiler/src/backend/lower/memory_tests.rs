@@ -339,3 +339,251 @@ fn rejects_mismatched_list_elements_and_unrelated_data_coercions() {
             .contains("coercion")
     );
 }
+
+fn assert_int(f: &mut Function, statements: &mut Vec<StmtId>, value: VarId, expected: i32) {
+    let condition = assign(
+        f,
+        statements,
+        TypeId::BOOL,
+        Value::Prim {
+            op: PrimOp::Eq,
+            ty: PrimTy::I32,
+            args: vec![value.into(), Const::Int(expected).into()],
+        },
+    );
+    let yes = f.seqs.alloc(Seq {
+        stmts: vec![],
+        term: Term::Yield(None),
+    });
+    let no = f.seqs.alloc(Seq {
+        stmts: vec![],
+        term: Term::Defect(Const::String("memory result mismatch".into()).into()),
+    });
+    statements.push(f.stmts.alloc(Stmt::If {
+        dst: None,
+        cond: condition.into(),
+        then: yes,
+        else_: no,
+    }));
+}
+
+#[test]
+fn bytes_optional_results_concat_and_unicode_lists_preserve_contents() {
+    let mut p = program(vec![]);
+    let parameter = p.core.types.intern(Type::Param(0));
+    let option = p.core.enums.alloc(EnumDef {
+        name: "Option".into(),
+        params: 1,
+        error: false,
+        external: false,
+        variants: vec![
+            VariantDef {
+                name: "Some".into(),
+                fields: VariantFields::Positional(1),
+                tys: vec![parameter],
+            },
+            VariantDef {
+                name: "None".into(),
+                fields: VariantFields::Unit,
+                tys: vec![],
+            },
+        ],
+    });
+    let optional_bytes = p.core.types.intern(Type::Enum(option, vec![TypeId::BYTES]));
+    let optional_int = p.core.types.intern(Type::Enum(option, vec![TypeId::INT]));
+    let integers = p.core.types.intern(Type::List(TypeId::INT));
+    let strings = p.core.types.intern(Type::List(TypeId::STRING));
+    let byte_lists = p.core.types.intern(Type::List(TypeId::BYTES));
+    let some = CtorRef {
+        enum_id: option,
+        variant: 0,
+    };
+    let mut f = simple();
+    let mut statements = vec![];
+    let input = assign(
+        &mut f,
+        &mut statements,
+        integers,
+        Value::List {
+            elems: vec![
+                Const::Int(0).into(),
+                Const::Int(255).into(),
+                Const::Int(65).into(),
+            ],
+            tail: None,
+        },
+    );
+    let wrapped = builtin(
+        &mut f,
+        &mut statements,
+        optional_bytes,
+        Builtin::BytesFromList,
+        vec![input.into()],
+    );
+    let bytes = assign(
+        &mut f,
+        &mut statements,
+        TypeId::BYTES,
+        Value::Field {
+            base: wrapped,
+            ctor: some,
+            index: 0,
+        },
+    );
+    let length = builtin(
+        &mut f,
+        &mut statements,
+        TypeId::INT,
+        Builtin::BytesSize,
+        vec![bytes.into()],
+    );
+    assert_int(&mut f, &mut statements, length, 3);
+    let wrapped = builtin(
+        &mut f,
+        &mut statements,
+        optional_int,
+        Builtin::BytesGet,
+        vec![bytes.into(), Const::Int(1).into()],
+    );
+    let byte = assign(
+        &mut f,
+        &mut statements,
+        TypeId::INT,
+        Value::Field {
+            base: wrapped,
+            ctor: some,
+            index: 0,
+        },
+    );
+    assert_int(&mut f, &mut statements, byte, 255);
+    let pair = assign(
+        &mut f,
+        &mut statements,
+        byte_lists,
+        Value::List {
+            elems: vec![bytes.into(), bytes.into()],
+            tail: None,
+        },
+    );
+    let concat = builtin(
+        &mut f,
+        &mut statements,
+        TypeId::BYTES,
+        Builtin::BytesConcat,
+        vec![pair.into()],
+    );
+    let size = builtin(
+        &mut f,
+        &mut statements,
+        TypeId::INT,
+        Builtin::BytesSize,
+        vec![concat.into()],
+    );
+    assert_int(&mut f, &mut statements, size, 6);
+    let input = assign(
+        &mut f,
+        &mut statements,
+        integers,
+        Value::List {
+            elems: vec![Const::Int(-1).into()],
+            tail: None,
+        },
+    );
+    let invalid = builtin(
+        &mut f,
+        &mut statements,
+        optional_bytes,
+        Builtin::BytesFromList,
+        vec![input.into()],
+    );
+    let tag = assign(&mut f, &mut statements, TypeId::INT, Value::Tag(invalid));
+    assert_int(&mut f, &mut statements, tag, 1);
+    let invalid = builtin(
+        &mut f,
+        &mut statements,
+        optional_int,
+        Builtin::BytesGet,
+        vec![bytes.into(), Const::Int(3).into()],
+    );
+    let tag = assign(&mut f, &mut statements, TypeId::INT, Value::Tag(invalid));
+    assert_int(&mut f, &mut statements, tag, 1);
+    let parts = builtin(
+        &mut f,
+        &mut statements,
+        strings,
+        Builtin::StringSplit,
+        vec![
+            Const::String("a::b".into()).into(),
+            Const::String("::".into()).into(),
+        ],
+    );
+    let joined = builtin(
+        &mut f,
+        &mut statements,
+        TypeId::STRING,
+        Builtin::StringJoin,
+        vec![parts.into(), Const::String(":".into()).into()],
+    );
+    let size = builtin(
+        &mut f,
+        &mut statements,
+        TypeId::INT,
+        Builtin::StringByteSize,
+        vec![joined.into()],
+    );
+    assert_int(&mut f, &mut statements, size, 3);
+    let points = builtin(
+        &mut f,
+        &mut statements,
+        integers,
+        Builtin::StringCodePoints,
+        vec![Const::String("é".into()).into()],
+    );
+    let first = assign(
+        &mut f,
+        &mut statements,
+        TypeId::INT,
+        Value::ListHead(points),
+    );
+    assert_int(&mut f, &mut statements, first, 233);
+    f.seqs[f.body.unwrap()].stmts = statements;
+    p.functions.alloc(f);
+    let output =
+        crate::backend::compile_program(p, &Options::default().with_heap_bytes(4096)).unwrap();
+    execute_repeatedly(
+        output,
+        "for(int i=0;i<1000;++i) { assert(answer()==42); assert(test_heap_empty()); }",
+    );
+}
+
+#[test]
+fn discarded_list_construction_keeps_fixed_heap_exhaustion() {
+    let mut p = program(vec![]);
+    p.core.types.intern(Type::List(TypeId::INT));
+    let mut f = simple();
+    let allocation = binding(
+        &mut f,
+        None,
+        Value::List {
+            elems: (0..256).map(|n| Const::Int(n).into()).collect(),
+            tail: None,
+        },
+    );
+    f.seqs[f.body.unwrap()].stmts.push(allocation);
+    p.functions.alloc(f);
+    let output =
+        crate::backend::compile_program(p, &Options::default().with_heap_bytes(4096)).unwrap();
+    execute(
+        &output,
+        r#"
+#include <stdlib.h>
+#include "emela_embedded.h"
+#include "emela_board.h"
+_Noreturn void emela_board_defect(EmelaDefectKind k, const char *m, uint16_t n) {
+  (void)m; (void)n; exit(k==EMELA_DEFECT_HEAP_EXHAUSTED ? 0 : 1);
+}
+int main(void) { answer(); return 2; }
+"#,
+        0,
+    );
+}
