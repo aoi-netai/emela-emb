@@ -87,6 +87,14 @@ impl<'t, 's> Parser<'t, 's> {
                     let K::String(value) = token.kind else {
                         return Err(self.error(DiagnosticKind::Syntax, "expected C symbol string"));
                     };
+                    let decoded = parse_string(value, token.span, false)?;
+                    let ExprKind::String(value) = decoded.kind else {
+                        return Err(Diagnostic::new(
+                            DiagnosticKind::Syntax,
+                            token.span,
+                            "C boundary symbols cannot contain interpolation",
+                        ));
+                    };
                     let symbol = Text::new(value, token.span);
                     self.advance();
                     self.newlines();
@@ -268,12 +276,9 @@ impl<'t, 's> Parser<'t, 's> {
                     span: token.span,
                 }
             }
-            K::String(_) => {
+            K::String(raw) | K::MultilineString(raw) => {
                 self.advance();
-                Expr {
-                    kind: ExprKind::String,
-                    span: token.span,
-                }
+                parse_string(raw, token.span, matches!(token.kind, K::MultilineString(_)))?
             }
             K::Minus | K::Bang => {
                 self.advance();
@@ -621,5 +626,73 @@ mod tests {
         }
         assert!(parse(&lex("fn f() { (1 +\n2) }").unwrap()).is_ok());
         assert!(parse(&lex("fn f() { 1\n-2 }").unwrap()).is_ok());
+    }
+}
+
+fn parse_string(raw: &str, span: Span, multiline: bool) -> Result<Expr, Diagnostic> {
+    let (text, positions) = super::strings::content(raw, span, multiline)?;
+    let mut cursor = 0;
+    let mut literal = String::new();
+    let mut parts = Vec::new();
+    while cursor < text.len() {
+        if text[cursor..].starts_with("#{") {
+            if !literal.is_empty() {
+                parts.push(Expr {
+                    kind: ExprKind::String(std::mem::take(&mut literal)),
+                    span,
+                });
+            }
+            let start = cursor + 2;
+            let end = super::strings::interpolation_end(&text, start).map_err(|mut e| {
+                e.span = Span::new(positions[e.span.start], positions[e.span.end]);
+                e
+            })?;
+            let mut tokens = super::lexer::lex(&text[start..end]).map_err(|mut e| {
+                e.span = Span::new(
+                    positions[start + e.span.start],
+                    positions[start + e.span.end],
+                );
+                e
+            })?;
+            for token in &mut tokens {
+                token.span = Span::new(
+                    positions[start + token.span.start],
+                    positions[start + token.span.end],
+                );
+            }
+            let mut parser = Parser {
+                tokens: &tokens,
+                cursor: 0,
+                depth: 0,
+            };
+            let value = parser.expr(0, true)?;
+            parser.newlines();
+            parser.expect(K::Eof, "expected end of interpolation expression")?;
+            parts.push(value);
+            cursor = end + 1;
+        } else if text[cursor..].starts_with('\\') {
+            literal.push(super::strings::escape(&text, &mut cursor, &positions)?);
+        } else {
+            let ch = text[cursor..].chars().next().unwrap();
+            literal.push(ch);
+            cursor += ch.len_utf8();
+        }
+    }
+    if parts.is_empty() {
+        Ok(Expr {
+            kind: ExprKind::String(literal),
+            span,
+        })
+    } else {
+        if !literal.is_empty() {
+            parts.push(Expr {
+                kind: ExprKind::String(literal),
+                span,
+            });
+        }
+        Ok(Expr {
+            kind: ExprKind::Interpolate(parts),
+            span,
+        })
     }
 }

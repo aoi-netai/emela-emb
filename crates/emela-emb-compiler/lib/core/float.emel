@@ -2,3 +2,13 @@
 pub fn from_int(n: Int) -> Float
 pub fn is_nan(n: Float) -> Bool { n != n }
 pub fn abs(n: Float) -> Float { if n == 0.0 { 0.0 } else if n < 0.0 { -n } else { n } }
+@intrinsic
+pub fn to_string(n: Float) -> String
+@intrinsic
+pub fn floor(n: Float) -> Int
+@intrinsic
+pub fn ceil(n: Float) -> Int
+@intrinsic
+pub fn round(n: Float) -> Int
+@intrinsic
+pub fn truncate(n: Float) -> Int

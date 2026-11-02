@@ -1,0 +1,15 @@
+@intrinsic
+pub fn length(text: String) -> Int
+@intrinsic
+pub fn byte_size(text: String) -> Int
+@intrinsic
+pub fn append(left: String, right: String) -> String
+@intrinsic
+pub fn contains(text: String, needle: String) -> Bool
+@intrinsic
+pub fn starts_with(text: String, prefix: String) -> Bool
+@intrinsic
+pub fn ends_with(text: String, suffix: String) -> Bool
+@intrinsic
+pub fn trim(text: String) -> String
+pub fn is_empty(text: String) -> Bool { byte_size(text) == 0 }

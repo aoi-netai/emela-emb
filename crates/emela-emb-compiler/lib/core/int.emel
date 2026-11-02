@@ -16,3 +16,5 @@ pub fn shift_right_unsigned(n: Int, by: Int) -> Int
 pub fn min(a: Int, b: Int) -> Int { if a < b { a } else { b } }
 pub fn max(a: Int, b: Int) -> Int { if a > b { a } else { b } }
 pub fn abs(n: Int) -> Int { if n < 0 { -n } else { n } }
+@intrinsic
+pub fn to_string(n: Int) -> String

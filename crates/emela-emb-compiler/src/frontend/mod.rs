@@ -5,4 +5,5 @@ pub(crate) mod lexer;
 pub(crate) mod lower;
 pub(crate) mod modules;
 pub(crate) mod parser;
+pub(crate) mod strings;
 pub(crate) mod types;

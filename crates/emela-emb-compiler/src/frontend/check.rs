@@ -562,8 +562,44 @@ impl Checker {
             }
             A::Bool(value) => (ir::ExprKind::Literal(ir::Literal::Bool(*value)), Ty::Bool),
             A::Unit => (ir::ExprKind::Literal(ir::Literal::Unit), Ty::Unit),
-            A::String => {
-                return Err(self.error(module, DK::Unsupported, span, "String values require P2"));
+            A::String(value) => (
+                ir::ExprKind::Literal(ir::Literal::String(value.clone())),
+                Ty::String,
+            ),
+            A::Interpolate(parts) => {
+                let mut checked = Vec::new();
+                for part in parts {
+                    let value = self.expr(module, part, locals, None)?;
+                    if value.ty == Ty::String {
+                        checked.push(value);
+                    } else {
+                        let name = match value.ty {
+                            Ty::Int => "Int",
+                            Ty::Int64 => "Int64",
+                            Ty::Float => "Float",
+                            Ty::Bool => "Bool",
+                            Ty::Unit => "Unit",
+                            Ty::Never => "Unit",
+                            Ty::String => unreachable!(),
+                        };
+                        let target_module = self
+                            .modules
+                            .modules
+                            .iter()
+                            .position(|m| m.builtin && m.name == name)
+                            .expect("core scalar module");
+                        let target = self.module_definitions[target_module]["to_string"];
+                        checked.push(ir::Expr {
+                            kind: ir::ExprKind::Call {
+                                target,
+                                args: vec![value],
+                            },
+                            ty: Ty::String,
+                            span: part.span,
+                        });
+                    }
+                }
+                (ir::ExprKind::Concat(checked), Ty::String)
             }
             A::Name(path) => {
                 if let Some(local) = (path.len() == 1)
@@ -668,13 +704,13 @@ impl Checker {
                 if op.comparison()
                     && !matches!(op, ast::Binary::Eq | ast::Binary::Ne)
                     && !left.ty.numeric()
-                    && left.ty != Ty::Never
+                    && !matches!(left.ty, Ty::String | Ty::Bool | Ty::Never)
                 {
                     return Err(self.error(
                         module,
                         DK::Type,
                         span,
-                        "ordering comparison requires numeric operands in P1",
+                        "ordering comparison requires ordered operands",
                     ));
                 }
                 let ty = if logical || op.comparison() {
@@ -882,6 +918,7 @@ impl Checker {
     fn hint(&self, module: usize, expression: &ast::Expr, locals: &Locals) -> Option<Ty> {
         match &expression.kind {
             ast::ExprKind::Float(_) => Some(Ty::Float),
+            ast::ExprKind::String(_) | ast::ExprKind::Interpolate(_) => Some(Ty::String),
             ast::ExprKind::Bool(_) => Some(Ty::Bool),
             ast::ExprKind::Name(path) => {
                 if let Some(local) = (path.len() == 1)
@@ -928,6 +965,7 @@ fn value_type(text: &ast::Text) -> Result<Ty, Diagnostic> {
         "Int64" => Ok(Ty::Int64),
         "Float" => Ok(Ty::Float),
         "Bool" => Ok(Ty::Bool),
+        "String" => Ok(Ty::String),
         "Unit" => Ok(Ty::Unit),
         "Never" => Ok(Ty::Never),
         _ => Err(Diagnostic::new(

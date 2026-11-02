@@ -67,7 +67,8 @@ pub(crate) struct Expr {
 pub(crate) enum ExprKind {
     Integer(String),
     Float(String),
-    String,
+    String(String),
+    Interpolate(Vec<Expr>),
     Bool(bool),
     Unit,
     Name(Vec<Text>),

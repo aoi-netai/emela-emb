@@ -6,6 +6,7 @@ pub(crate) enum ValueType {
     Int64,
     Float,
     Bool,
+    String,
     Unit,
     Never,
 }
@@ -24,6 +25,7 @@ impl fmt::Display for ValueType {
             Self::Int64 => "Int64",
             Self::Float => "Float",
             Self::Bool => "Bool",
+            Self::String => "String",
             Self::Unit => "()",
             Self::Never => "Never",
         })

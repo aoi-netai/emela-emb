@@ -52,6 +52,7 @@ pub(crate) struct Expr {
 #[derive(Clone, Debug)]
 pub(crate) enum ExprKind {
     Literal(Literal),
+    Concat(Vec<Expr>),
     Local(LocalId),
     Unary {
         op: Unary,
@@ -79,6 +80,7 @@ pub(crate) enum Literal {
     Int(i32),
     Int64(i64),
     Float(f64),
+    String(String),
     Bool(bool),
     Unit,
 }

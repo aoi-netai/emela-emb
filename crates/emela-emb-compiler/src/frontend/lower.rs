@@ -180,6 +180,23 @@ impl Context<'_> {
     ) -> Option<b::Operand> {
         use ir::ExprKind as E;
         match &expression.kind {
+            E::Concat(parts) => {
+                let mut combined = b::Operand::Const(b::Const::String(String::new()));
+                for part in parts {
+                    let value = self.expression(builder, part, false)?;
+                    combined = self
+                        .value(
+                            builder,
+                            b::Value::Builtin {
+                                op: b::Builtin::StringAppend,
+                                args: vec![combined, value],
+                            },
+                            Ty::String,
+                        )
+                        .expect("String result");
+                }
+                Some(combined)
+            }
             E::Literal(value) => {
                 if expression.ty == Ty::Unit {
                     None
@@ -370,6 +387,7 @@ fn ty(value: Ty) -> b::TypeId {
         Ty::Int => b::TypeId::INT,
         Ty::Int64 => b::TypeId::INT64,
         Ty::Float => b::TypeId::FLOAT,
+        Ty::String => b::TypeId::STRING,
         Ty::Bool => b::TypeId::BOOL,
         Ty::Unit => b::TypeId::UNIT,
         Ty::Never => b::TypeId::NEVER,
@@ -380,6 +398,7 @@ fn repr(value: Ty) -> b::Repr {
         Ty::Int | Ty::Bool => b::Repr::I32,
         Ty::Int64 => b::Repr::I64,
         Ty::Float => b::Repr::F64,
+        Ty::String => b::Repr::Ref,
         Ty::Unit | Ty::Never => b::Repr::Void,
     }
 }
@@ -388,6 +407,7 @@ fn prim_ty(value: Ty) -> b::PrimTy {
         Ty::Int | Ty::Bool => b::PrimTy::I32,
         Ty::Int64 => b::PrimTy::I64,
         Ty::Float => b::PrimTy::F64,
+        Ty::String => b::PrimTy::String,
         _ => unreachable!("non-numeric primitive in checked IR"),
     }
 }
@@ -412,6 +432,7 @@ fn literal(value: &ir::Literal) -> b::Const {
         ir::Literal::Int(n) => b::Const::Int(*n),
         ir::Literal::Int64(n) => b::Const::Int64(*n),
         ir::Literal::Float(n) => b::Const::Float(*n),
+        ir::Literal::String(text) => b::Const::String(text.clone()),
         ir::Literal::Bool(n) => b::Const::Bool(*n),
         ir::Literal::Unit => b::Const::Unit,
     }
@@ -435,5 +456,19 @@ fn builtin(op: Intrinsic) -> b::Builtin {
         Intrinsic::Int64ShiftRight => b::Builtin::Int64ShiftRight,
         Intrinsic::Int64ShiftRightUnsigned => b::Builtin::Int64ShiftRightUnsigned,
         Intrinsic::FloatFromInt => b::Builtin::FloatFromInt,
+        Intrinsic::IntToString => b::Builtin::IntToString,
+        Intrinsic::Int64ToString => b::Builtin::Int64ToString,
+        Intrinsic::FloatToString => b::Builtin::FloatToString,
+        Intrinsic::FloatFloor => b::Builtin::FloatFloor,
+        Intrinsic::FloatCeil => b::Builtin::FloatCeil,
+        Intrinsic::FloatRound => b::Builtin::FloatRound,
+        Intrinsic::FloatTruncate => b::Builtin::FloatTruncate,
+        Intrinsic::StringLength => b::Builtin::StringLength,
+        Intrinsic::StringByteSize => b::Builtin::StringByteSize,
+        Intrinsic::StringAppend => b::Builtin::StringAppend,
+        Intrinsic::StringContains => b::Builtin::StringContains,
+        Intrinsic::StringStartsWith => b::Builtin::StringStartsWith,
+        Intrinsic::StringEndsWith => b::Builtin::StringEndsWith,
+        Intrinsic::StringTrim => b::Builtin::StringTrim,
     }
 }

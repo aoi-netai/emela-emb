@@ -20,3 +20,5 @@ pub fn shift_right_unsigned(n: Int64, by: Int) -> Int64
 pub fn min(a: Int64, b: Int64) -> Int64 { if a < b { a } else { b } }
 pub fn max(a: Int64, b: Int64) -> Int64 { if a > b { a } else { b } }
 pub fn abs(n: Int64) -> Int64 { if n < 0 { -n } else { n } }
+@intrinsic
+pub fn to_string(n: Int64) -> String
