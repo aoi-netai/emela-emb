@@ -244,10 +244,12 @@ pub(crate) enum Value {
     IsError {
         error: VarId,
         enum_id: EnumId,
+        error_type: TypeId,
     },
     AsError {
         error: VarId,
         enum_id: EnumId,
+        error_type: TypeId,
     },
     Runtime {
         op: RuntimeOp,

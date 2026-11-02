@@ -167,7 +167,16 @@ pub(super) fn value_type(
             Ok(TypeId::INT)
         }
         Value::Coerce(base) => operand(f, &Operand::Var(*base), available),
-        Value::IsError { error, enum_id } | Value::AsError { error, enum_id } => {
+        Value::IsError {
+            error,
+            enum_id,
+            error_type,
+        }
+        | Value::AsError {
+            error,
+            enum_id,
+            error_type,
+        } => {
             expect_type(
                 f,
                 operand(f, &Operand::Var(*error), available)?,
@@ -184,24 +193,18 @@ pub(super) fn value_type(
                     "error operation refers to a non-error enum",
                 ));
             }
+            if !matches!(program.core.types.types.get(error_type.index()), Some(Type::Enum(id, _)) if id == enum_id)
+            {
+                return Err(invalid(
+                    &f.name,
+                    "error operation type differs from its error enum",
+                ));
+            }
+            types::validate_type(program, &f.name, *error_type)?;
             if matches!(value, Value::IsError { .. }) {
                 return Ok(TypeId::BOOL);
             }
-            let ty = expected
-                .or_else(|| {
-                    program
-                        .core
-                        .types
-                        .ids
-                        .get(&Type::Enum(*enum_id, vec![]))
-                        .copied()
-                })
-                .ok_or_else(|| {
-                    invalid(
-                        &f.name,
-                        "error projection needs a concrete destination type",
-                    )
-                })?;
+            let ty = *error_type;
             if !matches!(program.core.ty(ty),Type::Enum(id,_) if *id == *enum_id) {
                 return Err(invalid(
                     &f.name,

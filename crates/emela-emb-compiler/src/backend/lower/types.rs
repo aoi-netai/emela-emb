@@ -109,7 +109,21 @@ pub(super) fn normalize_catalog(program: &mut Program) -> Result<()> {
     let mut pending: Vec<_> = program
         .functions
         .iter()
-        .flat_map(|(_, f)| std::iter::once(f.ret).chain(f.vars.iter().map(|(_, var)| var.ty)))
+        .flat_map(|(_, f)| {
+            std::iter::once(f.ret)
+                    .chain(f.vars.iter().map(|(_, var)| var.ty))
+                    .chain(
+                        f.stmts.iter().filter_map(|(_, statement)| match statement {
+                            Stmt::Let {
+                                value:
+                                    Value::IsError { error_type, .. }
+                                    | Value::AsError { error_type, .. },
+                                ..
+                            } => Some(*error_type),
+                            _ => None,
+                        }),
+                    )
+        })
         .collect();
     let mut seen = HashSet::new();
     while let Some(ty) = pending.pop() {

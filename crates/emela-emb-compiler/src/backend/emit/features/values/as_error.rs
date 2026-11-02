@@ -9,7 +9,7 @@ pub(in crate::backend::emit) fn emit(
     let function = context.function;
     let writer = &mut *context.writer;
     match value {
-        Value::AsError { error, enum_id } => {
+        Value::AsError { error, enum_id, .. } => {
             if !matches!(layouts.shapes.types[function.vars[*error].ty], Type::Any) {
                 return Err(invalid_flow_ir(
                     &function.name,

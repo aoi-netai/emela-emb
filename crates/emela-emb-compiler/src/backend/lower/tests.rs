@@ -856,6 +856,7 @@ fn failure_payload_recovery_runs_cleanup_once() {
         Value::AsError {
             error: caught,
             enum_id: error_id,
+            error_type: error_ty,
         },
     );
     let field = binding(
@@ -891,7 +892,20 @@ fn failure_payload_recovery_runs_cleanup_once() {
         stmts: vec![call],
         term: Term::Return(Some(result.into())),
     };
-    p.functions.alloc(answer);
+    let answer_id = p.functions.alloc(answer);
+    let mut malformed = p.clone();
+    if let Stmt::Let {
+        value: Value::AsError { error_type, .. },
+        ..
+    } = &mut malformed.functions[answer_id].stmts[unpack]
+    {
+        *error_type = TypeId::INT;
+    }
+    assert!(
+        lower_program(malformed).unwrap_err()[0]
+            .message
+            .contains("error operation type")
+    );
     let output = crate::backend::compile_program(p, &Options::default()).unwrap();
     execute(
         &output,

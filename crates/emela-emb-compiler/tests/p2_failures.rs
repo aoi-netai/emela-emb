@@ -99,3 +99,63 @@ fn rejects_pure_signature_failures_partial_escape_and_non_error_parameters() {
         assert!(compile(source).is_err(), "{source}");
     }
 }
+
+#[test]
+fn concrete_generic_error_payloads_keep_distinct_slots_and_owned_nested_strings() {
+    let source = r#"
+error Payload[A](value: A)
+fn integer() -> Int fails Payload[Int] { fail Payload(42) }
+fn boolean(value: Bool) -> Int fails Payload[Bool] { fail Payload(value) }
+fn option_int() -> Int fails Payload[Option[Int]] { fail Payload(Some(42)) }
+fn option_text(n: Int) -> String fails Payload[Option[String]] { fail Payload(Some(Int.to_string(n))) }
+@external(c, "smash")
+fn smash() -> Unit
+@export(c, "generic_error_payloads")
+pub fn values(value: Bool) -> Int {
+  a = integer() escape { Payload(n) -> n }
+  b = boolean(value) escape { Payload(True) -> 1
+    Payload(False) -> 2 }
+  c = option_int() escape { Payload(Some(n)) -> n
+    Payload(None) -> 0 }
+  text = option_text(42) escape { Payload(Some(text)) -> { smash()
+    text }
+    Payload(None) -> "none" }
+  assert text == "42" && c == a
+  a + b
+}
+"#;
+    let mut output = compile_sources(
+        &[Source::new("main.emel", source)],
+        "main.emel",
+        &Options::default().with_heap_bytes(4096),
+    )
+    .unwrap();
+    output
+        .files
+        .iter_mut()
+        .find(|file| file.path == "emela_embedded.c")
+        .unwrap()
+        .contents
+        .push_str(
+            r#"
+int test_heap_empty(void) {
+  for(unsigned char *p=emela_heap_storage;emela_heap_initialized && p<emela_heap_end();) {
+    emela_heap_block *block=(emela_heap_block *)(void *)p;
+    if(!block->is_free)return 0;
+    p+=block->size;
+  }
+  return 1;
+}
+"#,
+        );
+    support::compile_and_run(
+        &output,
+        &format!(
+            r#"{BOARD}
+int test_heap_empty(void);
+void smash(void) {{ volatile char memory[4096]; for(int i=0;i<4096;i++)memory[i]='x'; (void)memory; }}
+int main(void) {{ for(int i=0;i<1000;i++) {{ assert(generic_error_payloads(1)==43); assert(generic_error_payloads(0)==44); assert(test_heap_empty()); }} return 0; }}
+"#
+        ),
+    );
+}

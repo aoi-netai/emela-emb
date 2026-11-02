@@ -637,6 +637,7 @@ impl Context<'_> {
                             b::Value::IsError {
                                 error,
                                 enum_id: ctor.enum_id,
+                                error_type: ty(pattern.ty),
                             },
                             Ty::Bool,
                         );
@@ -646,6 +647,7 @@ impl Context<'_> {
                             b::Value::AsError {
                                 error,
                                 enum_id: ctor.enum_id,
+                                error_type: ty(pattern.ty),
                             },
                             pattern.ty,
                         )

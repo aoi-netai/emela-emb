@@ -7,6 +7,7 @@ use crate::{Error, ErrorKind};
 use std::collections::{HashMap, HashSet};
 
 mod const_eval;
+mod error_types;
 mod failures;
 mod types;
 mod values;
@@ -37,6 +38,7 @@ pub(crate) fn lower_program(
 ) -> Result<LoweredModule> {
     types::validate_catalog(&program)?;
     types::normalize_catalog(&mut program)?;
+    error_types::normalize(&mut program)?;
     let mut symbols = HashSet::new();
     for (id, function) in program.functions.iter() {
         if function.exported {
