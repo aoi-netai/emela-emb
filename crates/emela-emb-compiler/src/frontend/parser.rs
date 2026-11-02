@@ -2345,4 +2345,14 @@ fn main(){ with App, Hits by State[Int], Audit by Worker(url:"audit"), Empty() {
             );
         }
     }
+
+    #[test]
+    fn prepared_closure_and_handler_corpus_has_valid_fixed_grammar() {
+        for source in [
+            include_str!("../../tests/compat/p4/closures.emel"),
+            include_str!("../../tests/compat/p4/handlers.emel"),
+        ] {
+            parse(&lex(source).unwrap()).unwrap();
+        }
+    }
 }

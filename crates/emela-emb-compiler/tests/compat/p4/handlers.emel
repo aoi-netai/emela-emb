@@ -1,0 +1,71 @@
+@external(c, "board_mark")
+fn mark(n: Int) -> Int
+effect Config { fn seed() -> Int }
+effect Read { fn read() -> Int }
+handler Configured: Config {
+  init { mark(1)
+    Configured }
+  release { mark(9) }
+  fn seed() { 40 }
+}
+handler Reader(value: Int): Read {
+  init(delta: Int) { config = use Config
+    mark(2)
+    Reader(value: config.seed() + delta) }
+  release { mark(8) }
+  fn read() { self.value }
+}
+layer App {
+  Reader(delta: 2)
+  Configured
+}
+handler One: Read { fn read() { 1 } }
+handler Two: Read { fn read() { 2 } }
+effect Audit of Read
+effect Debug of Read default
+@export(c, "layer_lifecycle")
+pub fn lifecycle() -> Int { with App { mark(3)
+  (use Read).read() } }
+@export(c, "overridden_arguments")
+pub fn overridden() -> Int {
+  with Reader(delta: mark(4)), Reader(delta: mark(5)), Configured { (use Read).read() }
+}
+@export(c, "capability_shadow")
+pub fn shadow() -> Int {
+  with One { outer = use Read
+    with Two { inner = use Read
+      outer.read() * 10 + inner.read() }
+  }
+}
+@export(c, "label_providers")
+pub fn label_providers() -> Int {
+  with One, Audit by Two {
+    direct = (use Read).read()
+    audit = (use Audit).read()
+    debug = (use Debug).read()
+    inherited = with Audit { (use Read).read() }
+    direct * 100 + audit * 10 + debug + inherited
+  }
+}
+@export(c, "explicit_default")
+pub fn explicit_default() -> Int { with Debug by Two, One { (use Debug).read() } }
+@export(c, "label_merge")
+pub fn label_merge() -> Int { with One { with Audit by Read { (use Audit).read() } } }
+error Gone(code: Int)
+@export(c, "handler_failure")
+pub fn handler_failure() -> Int {
+  { with App { mark(3)
+    fail Gone(code: 7) } } escape { Gone(code) -> { mark(4)
+      code } }
+}
+handler Broken: Read {
+  init { mark(2)
+    fail Gone(code: 7) }
+  release { mark(8) }
+  fn read() { 0 }
+}
+@export(c, "initializer_failure")
+pub fn initializer_failure() -> Int {
+  { with Configured, Broken { (use Read).read() } } escape { Gone(code) -> { mark(4)
+    code } }
+}
