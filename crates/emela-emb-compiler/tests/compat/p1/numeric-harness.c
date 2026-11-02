@@ -61,5 +61,12 @@ int main(void) {
   assert(band64(-1, INT64_C(0x123456789)) == INT64_C(0x123456789));
   assert(bor64(INT64_C(0x4000000000000000), 1) == INT64_C(0x4000000000000001));
   assert(bxor64(-1, -1) == 0 && bnot64(0) == -1);
+  assert(float_from_int(INT32_MIN) == -2147483648.0);
+  assert(float_from_int(INT32_MAX) == 2147483647.0 && float_from_int(-1) == -1.0);
+  assert(wide_from_int(INT32_MIN) == INT64_C(-2147483648));
+  assert(wide_from_int(INT32_MAX) == INT64_C(2147483647));
+  assert(narrow_to_int(INT64_C(0x123456789)) == INT32_C(0x23456789));
+  assert(narrow_to_int(-1) == -1 && narrow_to_int(INT64_MIN) == 0);
+  assert(narrow_to_int(INT64_MAX) == -1 && narrow_to_int(INT64_C(0x80000000)) == INT32_MIN);
   return 0;
 }

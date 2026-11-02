@@ -283,3 +283,30 @@ fn private_imports_unknown_modules_and_unknown_entry_sources_are_rejected() {
         .is_err()
     );
 }
+
+#[test]
+fn never_returning_external_preserves_the_unreachable_contract() {
+    let output = source_output(
+        r#"
+@external(c, "board_stop")
+fn stop() -> Never
+@export(c, "never_probe")
+pub fn never_probe() -> Never { stop() }
+@export(c, "never_as_int")
+pub fn never_as_int() -> Int { stop() }
+"#,
+    );
+    for symbol in ["never_probe", "never_as_int"] {
+        let harness = format!(
+            r#"
+#include <stdlib.h>
+#include "emela_embedded.h"
+#include "emela_board.h"
+_Noreturn void emela_board_defect(EmelaDefectKind k, const char *m, uint16_t n) {{ (void)k; (void)m; (void)n; exit(3); }}
+_Noreturn void board_stop(void) {{ exit(0); }}
+int main(void) {{ {symbol}(); return 2; }}
+"#
+        );
+        compile_and_run(&output, &harness);
+    }
+}
