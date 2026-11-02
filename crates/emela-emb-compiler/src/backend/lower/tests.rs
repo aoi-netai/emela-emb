@@ -34,6 +34,8 @@ mod p7_evidence;
 mod p7_input;
 #[path = "p7_integration_tests.rs"]
 mod p7_integration;
+#[path = "p7_recursive_source_tests.rs"]
+mod p7_recursive_source;
 #[path = "p7_string_frame_tests.rs"]
 mod p7_string_frames;
 #[path = "service_tests.rs"]
