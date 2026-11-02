@@ -6,6 +6,10 @@ use crate::contract::lowered::LoweredModule;
 use crate::{Error, ErrorKind};
 use std::collections::{HashMap, HashSet};
 
+mod types;
+mod values;
+use values::value_type;
+
 type Result<T> = std::result::Result<T, Vec<Error>>;
 fn invalid(name: &str, message: impl Into<String>) -> Vec<Error> {
     vec![Error {
@@ -29,6 +33,7 @@ pub(crate) fn lower_program(
     mut program: Program,
     options: &crate::Options,
 ) -> Result<LoweredModule> {
+    types::validate_catalog(&program)?;
     let mut symbols = HashSet::new();
     for (id, function) in program.functions.iter() {
         if function.exported {
@@ -76,19 +81,20 @@ pub(crate) fn lower_program(
                 discarded.push((
                     function_id,
                     statement,
-                    value_type(&program, function, value, &available)?,
+                    value_type(&program, function, value, &available, None)?,
                 ));
             }
         }
     }
     for (function_id, statement, ty) in discarded {
-        let function = &mut program.functions[function_id];
-        let repr = match ty {
-            TypeId::INT | TypeId::BOOL => Repr::I32,
-            TypeId::INT64 => Repr::I64,
-            TypeId::FLOAT => Repr::F64,
-            _ => unreachable!("validated scalar builtin result"),
+        let repr = match program.core.ty(ty) {
+            Type::Int | Type::Bool => Repr::I32,
+            Type::Int64 => Repr::I64,
+            Type::Float => Repr::F64,
+            Type::Unit | Type::Never => Repr::Void,
+            _ => Repr::Ref,
         };
+        let function = &mut program.functions[function_id];
         let variable = function.vars.alloc(VarData {
             hint: "discarded_result".into(),
             repr,
@@ -172,33 +178,13 @@ pub(crate) fn lower_program(
 }
 
 fn validate_function(program: &Program, f: &Function) -> Result<()> {
-    if f.constant
-        || f.suspends
-        || f.fails
-        || f.env.is_some()
-        || f.derivation.is_some()
-        || f.infallible_cause_fail
-    {
+    if f.constant || f.fails || f.suspends || f.env.is_some() || f.infallible_cause_fail {
         return Err(unsupported(
             &f.name,
             "const, failure, suspension, closure or derived function",
         ));
     }
-    let check_type = |ty: TypeId| -> Result<()> {
-        if ty.index() >= program.core.types.len() {
-            return Err(invalid(&f.name, "type ID is out of bounds"));
-        }
-        match program.core.ty(ty) {
-            Type::Int
-            | Type::Int64
-            | Type::Float
-            | Type::Bool
-            | Type::String
-            | Type::Unit
-            | Type::Never => Ok(()),
-            _ => Err(unsupported(&f.name, "non-scalar value type")),
-        }
-    };
+    let check_type = |ty| types::validate_type(program, &f.name, ty);
     check_type(f.ret)?;
     for (_, var) in f.vars.iter() {
         check_type(var.ty)?;
@@ -305,7 +291,7 @@ fn validate_sequence(
                 on_suspend: None,
                 ..
             } => {
-                let result = value_type(program, f, value, &available)?;
+                let result = value_type(program, f, value, &available, dst_type)?;
                 if let Some(ty) = dst_type {
                     expect_type(f, result, ty)?;
                 }
@@ -444,123 +430,6 @@ fn validate_sequence(
     }
     visiting.remove(&id);
     Ok(())
-}
-
-fn value_type(
-    program: &Program,
-    f: &Function,
-    value: &Value,
-    available: &HashSet<VarId>,
-) -> Result<TypeId> {
-    match value {
-        Value::Const(value) => operand(f, &Operand::Const(value.clone()), available),
-        Value::Call {
-            callee: Callee::Direct(id),
-            args,
-            suspends: false,
-            on_fail: None,
-        } => {
-            let target = program
-                .functions
-                .iter()
-                .find_map(|(key, value)| (key == *id).then_some(value))
-                .ok_or_else(|| invalid(&f.name, "callee ID is out of bounds"))?;
-            if args.len() != target.params.len() {
-                return Err(invalid(
-                    &f.name,
-                    "call argument count does not match callee parameters",
-                ));
-            }
-            for (arg, &param) in args.iter().zip(&target.params) {
-                expect_type(f, operand(f, arg, available)?, variable(target, param)?)?;
-            }
-            Ok(target.ret)
-        }
-        Value::Prim { op, ty, args } => {
-            let ty = match ty {
-                PrimTy::I32 => TypeId::INT,
-                PrimTy::I64 => TypeId::INT64,
-                PrimTy::F64 => TypeId::FLOAT,
-                PrimTy::String => return Err(unsupported(&f.name, "String primitive")),
-            };
-            let unary = matches!(op, PrimOp::Neg | PrimOp::Not);
-            if args.len() != if unary { 1 } else { 2 } {
-                return Err(invalid(&f.name, "primitive argument count is invalid"));
-            }
-            let mut first_type = None;
-            for arg in args {
-                let actual = operand(f, arg, available)?;
-                if first_type.is_some_and(|first| first != actual) {
-                    return Err(invalid(&f.name, "primitive operands have different types"));
-                }
-                first_type = Some(actual);
-                // Bool comparisons use the I32 primitive representation.
-                if !(ty == TypeId::INT
-                    && actual == TypeId::BOOL
-                    && matches!(op, PrimOp::Not | PrimOp::Eq | PrimOp::Ne))
-                {
-                    expect_type(f, actual, ty)?;
-                }
-            }
-            Ok(
-                if matches!(
-                    op,
-                    PrimOp::Not
-                        | PrimOp::Eq
-                        | PrimOp::Ne
-                        | PrimOp::Lt
-                        | PrimOp::Le
-                        | PrimOp::Gt
-                        | PrimOp::Ge
-                ) {
-                    TypeId::BOOL
-                } else {
-                    ty
-                },
-            )
-        }
-        Value::Builtin { op, args } => {
-            let (input, result, arity) = match op {
-                Builtin::IntBitNot => (TypeId::INT, TypeId::INT, 1),
-                Builtin::IntBitAnd
-                | Builtin::IntBitOr
-                | Builtin::IntBitXor
-                | Builtin::IntShiftLeft
-                | Builtin::IntShiftRight
-                | Builtin::IntShiftRightUnsigned => (TypeId::INT, TypeId::INT, 2),
-                Builtin::Int64BitNot => (TypeId::INT64, TypeId::INT64, 1),
-                Builtin::Int64BitAnd | Builtin::Int64BitOr | Builtin::Int64BitXor => {
-                    (TypeId::INT64, TypeId::INT64, 2)
-                }
-                Builtin::Int64ShiftLeft
-                | Builtin::Int64ShiftRight
-                | Builtin::Int64ShiftRightUnsigned => {
-                    if args.len() != 2 {
-                        return Err(invalid(&f.name, "shift argument count is invalid"));
-                    }
-                    expect_type(f, operand(f, &args[0], available)?, TypeId::INT64)?;
-                    expect_type(f, operand(f, &args[1], available)?, TypeId::INT)?;
-                    return Ok(TypeId::INT64);
-                }
-                Builtin::Int64FromInt => (TypeId::INT, TypeId::INT64, 1),
-                Builtin::Int64ToInt => (TypeId::INT64, TypeId::INT, 1),
-                Builtin::FloatFromInt => (TypeId::INT, TypeId::FLOAT, 1),
-                Builtin::FloatFloor
-                | Builtin::FloatCeil
-                | Builtin::FloatRound
-                | Builtin::FloatTruncate => (TypeId::FLOAT, TypeId::FLOAT, 1),
-                _ => return Err(unsupported(&f.name, "builtin")),
-            };
-            if args.len() != arity {
-                return Err(invalid(&f.name, "builtin argument count is invalid"));
-            }
-            for arg in args {
-                expect_type(f, operand(f, arg, available)?, input)?;
-            }
-            Ok(result)
-        }
-        _ => Err(unsupported(&f.name, "value variant")),
-    }
 }
 
 fn has_function_recur(f: &Function) -> bool {

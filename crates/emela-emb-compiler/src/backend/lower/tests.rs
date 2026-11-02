@@ -561,3 +561,113 @@ fn float_constant_bits_and_non_finite_values_execute() {
         0,
     );
 }
+
+#[test]
+fn strings_unicode_comparisons_and_float_rounding_execute() {
+    let mut f = simple();
+    let joined = f.vars.alloc(VarData {
+        hint: "joined".into(),
+        ty: TypeId::STRING,
+        repr: Repr::Ref,
+    });
+    let count = variable(&mut f, TypeId::INT);
+    let rounded = variable(&mut f, TypeId::INT);
+    let result = variable(&mut f, TypeId::INT);
+    let text = binding(
+        &mut f,
+        Some(joined),
+        Value::Builtin {
+            op: Builtin::StringAppend,
+            args: vec![
+                Const::String("a\u{0301}".into()).into(),
+                Const::String("Z".into()).into(),
+            ],
+        },
+    );
+    let length = binding(
+        &mut f,
+        Some(count),
+        Value::Builtin {
+            op: Builtin::StringLength,
+            args: vec![joined.into()],
+        },
+    );
+    let floor = binding(
+        &mut f,
+        Some(rounded),
+        Value::Builtin {
+            op: Builtin::FloatFloor,
+            args: vec![Const::Float(40.9).into()],
+        },
+    );
+    let add = binding(
+        &mut f,
+        Some(result),
+        Value::Prim {
+            op: PrimOp::Add,
+            ty: PrimTy::I32,
+            args: vec![count.into(), rounded.into()],
+        },
+    );
+    f.seqs[f.body.unwrap()] = Seq {
+        stmts: vec![text, length, floor, add],
+        term: Term::Return(Some(result.into())),
+    };
+    let output = crate::backend::compile_program(program(vec![f]), &Options::default()).unwrap();
+    execute(&output, DEFECT_HARNESS, 0);
+    let mut f = simple();
+    f.ret = TypeId::BOOL;
+    let result = variable(&mut f, TypeId::BOOL);
+    let compare = binding(
+        &mut f,
+        Some(result),
+        Value::Prim {
+            op: PrimOp::Lt,
+            ty: PrimTy::String,
+            args: vec![
+                Const::String("a\0x".into()).into(),
+                Const::String("a\0y".into()).into(),
+            ],
+        },
+    );
+    f.seqs[f.body.unwrap()] = Seq {
+        stmts: vec![compare],
+        term: Term::Return(Some(result.into())),
+    };
+    let output = crate::backend::compile_program(program(vec![f]), &Options::default()).unwrap();
+    execute(
+        &output,
+        &DEFECT_HARNESS.replace("INT32_C(42)", "INT32_C(1)"),
+        0,
+    );
+}
+
+#[test]
+fn discarded_string_results_keep_capacity_checks() {
+    let mut f = simple();
+    let input = f.vars.alloc(VarData {
+        hint: "input".into(),
+        ty: TypeId::STRING,
+        repr: Repr::Ref,
+    });
+    f.params.push(input);
+    let append = binding(
+        &mut f,
+        None,
+        Value::Builtin {
+            op: Builtin::StringAppend,
+            args: vec![input.into(), Const::String("bb".into()).into()],
+        },
+    );
+    f.seqs[f.body.unwrap()].stmts.push(append);
+    let output = crate::backend::compile_program(
+        program(vec![f]),
+        &Options::default().with_string_capacity(3),
+    )
+    .unwrap();
+    execute(
+        &output,
+        "#include <stdlib.h>\n#include \"emela_embedded.h\"\n#include \"emela_board.h\"\n_Noreturn void emela_board_defect(EmelaDefectKind k, const char *m, uint16_t n) { (void)m; (void)n; exit(k == EMELA_DEFECT_STRING_CAPACITY ? 7 : 8); }\nint main(void) { return answer((EmelaString){ \"aa\", UINT16_C(2), NULL }); }\n",
+        7,
+    );
+}
