@@ -234,6 +234,22 @@ impl Context<'_> {
     fn pattern(&mut self, pattern: &mut ir::Pattern) -> Result<(), Diagnostic> {
         self.ty(&mut pattern.ty, pattern.span)?;
         match &mut pattern.kind {
+            ir::PatternKind::Constant {
+                value,
+                coverage,
+                comparison,
+            } => {
+                self.expression(value)?;
+                if let Some(coverage) = coverage {
+                    self.pattern(coverage)?;
+                }
+                if let Some(ir::ConstantEquality::Structural(raw_type)) = comparison {
+                    let mut ty = frontend_type(*raw_type);
+                    self.ty(&mut ty, pattern.span)?;
+                    *raw_type = backend_type(ty);
+                }
+            }
+
             ir::PatternKind::Bind(local) => self.ty(&mut local.ty, pattern.span)?,
             ir::PatternKind::Tuple(fields) | ir::PatternKind::Constructor { fields, .. } => {
                 for field in fields {

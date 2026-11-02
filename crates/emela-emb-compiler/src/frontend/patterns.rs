@@ -21,10 +21,20 @@ pub(crate) fn exhaustive(patterns: &[Pattern], ty: Ty, catalog: &mut Catalog) ->
     )
 }
 fn any(pattern: &Pattern) -> bool {
-    matches!(pattern.kind, P::Any | P::Bind(_))
+    match &pattern.kind {
+        P::Constant {
+            coverage: Some(coverage),
+            ..
+        } => any(coverage),
+        _ => matches!(pattern.kind, P::Any | P::Bind(_)),
+    }
 }
 fn head(pattern: &Pattern) -> Option<(Head, Vec<Pattern>)> {
     match &pattern.kind {
+        P::Constant {
+            coverage: Some(coverage),
+            ..
+        } => head(coverage),
         P::Literal(Literal::Bool(value)) => Some((Head::Bool(*value), Vec::new())),
         P::Literal(Literal::Unit) => Some((Head::Unit, Vec::new())),
         P::Tuple(fields) => Some((Head::Tuple, fields.clone())),

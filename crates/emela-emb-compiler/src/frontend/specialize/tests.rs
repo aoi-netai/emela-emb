@@ -87,6 +87,12 @@ fn exported(mut function: ir::Function) -> ir::Function {
     function
 }
 fn execute(input: ir::Program) {
+    execute_with_harness(
+        input,
+        "#include <stdlib.h>\n#include \"emela_embedded.h\"\n#include \"emela_board.h\"\n_Noreturn void emela_board_defect(EmelaDefectKind k,const char*m,uint16_t n) {(void)k;(void)m;(void)n;exit(9);}\nint main(void) {return answer()==42 ? 0 : 1;}\n",
+    );
+}
+fn execute_with_harness(input: ir::Program, harness: &str) {
     let program = specialize(input).unwrap();
     let lowered = crate::frontend::lower::lower(&program);
     let output = crate::backend::compile_program(lowered, &crate::Options::default()).unwrap();
@@ -100,7 +106,7 @@ fn execute(input: ir::Program) {
     for file in output.files {
         std::fs::write(path.join(file.path), file.contents).unwrap();
     }
-    std::fs::write(path.join("harness.c"),"#include <stdlib.h>\n#include \"emela_embedded.h\"\n#include \"emela_board.h\"\n_Noreturn void emela_board_defect(EmelaDefectKind k,const char*m,uint16_t n) {(void)k;(void)m;(void)n;exit(9);}\nint main(void) {return answer()==42 ? 0 : 1;}\n").unwrap();
+    std::fs::write(path.join("harness.c"), harness).unwrap();
     for optimization in ["-O0", "-O2"] {
         let result = Command::new("cc")
             .args([
@@ -717,7 +723,55 @@ fn structural_trait_helpers_call_custom_fields_inside_tuple_option_and_enum() {
     let record = |value| make(envelope_ty, envelope, 0, vec![key_value(value), text()]);
     let some = |value| make(option_ty, option, 1, vec![key_value(value)]);
     let present = |value| make(signal_ty, signal, 1, vec![key_value(value), text()]);
-    let mut statements = Vec::new();
+    let constant_id = functions.len();
+    let mut constant = function(constant_id, "KEY_CONST", vec![], key_front, key_value(7));
+    constant.constant = true;
+    constant.origin = Some(constant.id);
+    functions.push(constant);
+    let constant_value = call(constant_id, vec![], vec![], key_front);
+    let constant_pattern = ir::Pattern {
+        kind: ir::PatternKind::Constant {
+            value: Box::new(constant_value),
+            coverage: None,
+            comparison: None,
+        },
+        ty: key_front,
+        span: span(),
+    };
+    let constant_match = expression(
+        ir::ExprKind::Match {
+            value: Box::new(key_value(17)),
+            arms: vec![
+                ir::Arm {
+                    pattern: constant_pattern,
+                    guard: None,
+                    value: integer(42),
+                },
+                ir::Arm {
+                    pattern: ir::Pattern {
+                        kind: ir::PatternKind::Any,
+                        ty: key_front,
+                        span: span(),
+                    },
+                    guard: None,
+                    value: integer(0),
+                },
+            ],
+        },
+        ValueType::Int,
+    );
+    let constant_ok = expression(
+        ir::ExprKind::Binary {
+            op: Binary::Eq,
+            left: Box::new(constant_match),
+            right: Box::new(integer(42)),
+        },
+        ValueType::Bool,
+    );
+    let mut statements = vec![ir::Statement::Expr(expression(
+        ir::ExprKind::Assert(Box::new(constant_ok)),
+        ValueType::Unit,
+    ))];
     for (ty, left, right) in [
         (envelope_ty, record(7), record(17)),
         (signal_ty, present(7), present(17)),
@@ -1260,4 +1314,274 @@ fn unmatched_guarded_errors_propagate_without_reentering_the_same_escape() {
         registry: Default::default(),
         functions: vec![partial, answer],
     });
+}
+
+fn constant_pattern(value: ir::Expr, ty: ValueType) -> ir::Pattern {
+    ir::Pattern {
+        kind: ir::PatternKind::Constant {
+            value: Box::new(value),
+            coverage: None,
+            comparison: None,
+        },
+        ty,
+        span: span(),
+    }
+}
+fn constant_match(
+    subject: ir::Expr,
+    pattern: ir::Pattern,
+    matched: ir::Expr,
+    fallback: ir::Expr,
+) -> ir::Expr {
+    let ty = matched.ty;
+    let subject_ty = subject.ty;
+    expression(
+        ir::ExprKind::Match {
+            value: Box::new(subject),
+            arms: vec![
+                ir::Arm {
+                    pattern,
+                    guard: None,
+                    value: matched,
+                },
+                ir::Arm {
+                    pattern: ir::Pattern {
+                        kind: ir::PatternKind::Any,
+                        ty: subject_ty,
+                        span: span(),
+                    },
+                    guard: None,
+                    value: fallback,
+                },
+            ],
+        },
+        ty,
+    )
+}
+#[test]
+fn constant_pattern_getters_run_on_mismatch_and_keep_their_single_runtime_cache() {
+    let core = b::Definitions::default();
+    let mut read = function(0, "read_once", vec![], ValueType::Int, integer(0));
+    read.body = None;
+    read.external = Some("read_once".into());
+    let mut constant = function(
+        1,
+        "MEMO",
+        vec![],
+        ValueType::Int,
+        call(0, vec![], vec![], ValueType::Int),
+    );
+    constant.constant = true;
+    constant.origin = Some(constant.id);
+    let pattern = constant_pattern(call(1, vec![], vec![], ValueType::Int), ValueType::Int);
+    let answer = exported(function(
+        2,
+        "answer",
+        vec![],
+        ValueType::Int,
+        constant_match(integer(0), pattern, integer(0), integer(42)),
+    ));
+    execute_with_harness(
+        ir::Program {
+            core,
+            registry: Default::default(),
+            functions: vec![read, constant, answer],
+        },
+        "#include <stdlib.h>\n#include \"emela_embedded.h\"\n#include \"emela_board.h\"\nstatic int reads;\nint32_t read_once(void){++reads;return 7;}\n_Noreturn void emela_board_defect(EmelaDefectKind k,const char*m,uint16_t n){(void)k;(void)m;(void)n;exit(9);}\nint main(void){return answer()==42 && answer()==42 && reads==1 ? 0:1;}\n",
+    );
+}
+#[test]
+fn plain_data_constant_patterns_use_recursive_raw_structural_equality_without_eq() {
+    let mut core = b::Definitions::default();
+    let (inner, inner_ty) = error_definition(&mut core, "Inner");
+    core.enums[inner].error = false;
+    let outer = core.enums.alloc(b::EnumDef {
+        name: "Outer".into(),
+        params: 0,
+        variants: vec![b::VariantDef {
+            name: "Outer".into(),
+            fields: b::VariantFields::Positional(1),
+            tys: vec![inner_ty],
+        }],
+        error: false,
+        external: false,
+    });
+    let outer_ty = core.types.intern(b::Type::Enum(outer, vec![]));
+    let make = |number| {
+        expression(
+            ir::ExprKind::Make {
+                ctor: b::CtorRef {
+                    enum_id: outer,
+                    variant: 0,
+                },
+                args: vec![error_value(inner, inner_ty, number)],
+                order: vec![0],
+            },
+            frontend_type(outer_ty),
+        )
+    };
+    let mut constant = function(0, "ORIGIN", vec![], frontend_type(outer_ty), make(42));
+    constant.constant = true;
+    constant.origin = Some(constant.id);
+    let test = constant_match(
+        make(43),
+        constant_pattern(
+            call(0, vec![], vec![], frontend_type(outer_ty)),
+            frontend_type(outer_ty),
+        ),
+        integer(0),
+        integer(42),
+    );
+    let matches = constant_match(
+        make(42),
+        constant_pattern(
+            call(0, vec![], vec![], frontend_type(outer_ty)),
+            frontend_type(outer_ty),
+        ),
+        integer(42),
+        integer(0),
+    );
+    let condition = expression(
+        ir::ExprKind::Binary {
+            op: Binary::Eq,
+            left: Box::new(test),
+            right: Box::new(integer(42)),
+        },
+        ValueType::Bool,
+    );
+    let body = expression(
+        ir::ExprKind::If {
+            condition: Box::new(condition),
+            then: block(matches),
+            else_: block(integer(0)),
+        },
+        ValueType::Int,
+    );
+    let answer = exported(function(1, "answer", vec![], ValueType::Int, body));
+    execute(ir::Program {
+        core,
+        registry: Default::default(),
+        functions: vec![constant, answer],
+    });
+}
+#[test]
+fn constant_pattern_coverage_only_expands_literal_constructor_tuple_and_alias_syntax() {
+    use crate::frontend::constant_patterns::coverage;
+    let mut original = function(
+        0,
+        "FLAG",
+        vec![],
+        ValueType::Bool,
+        expression(
+            ir::ExprKind::Literal(ir::Literal::Bool(false)),
+            ValueType::Bool,
+        ),
+    );
+    original.constant = true;
+    let mut alias = function(
+        1,
+        "ALIAS",
+        vec![],
+        ValueType::Bool,
+        call(0, vec![], vec![], ValueType::Bool),
+    );
+    alias.constant = true;
+    let mut functions = vec![Some(original), Some(alias)];
+    let flag = call(1, vec![], vec![], ValueType::Bool);
+    assert!(matches!(
+        coverage(&flag, &functions).unwrap().kind,
+        ir::PatternKind::Literal(ir::Literal::Bool(false))
+    ));
+    functions[0].as_mut().unwrap().body = Some(block(call(1, vec![], vec![], ValueType::Bool)));
+    assert!(coverage(&flag, &functions).is_none());
+    let computed = expression(
+        ir::ExprKind::Binary {
+            op: Binary::Add,
+            left: Box::new(integer(1)),
+            right: Box::new(integer(2)),
+        },
+        ValueType::Int,
+    );
+    assert!(coverage(&computed, &[]).is_none());
+    let negative = expression(
+        ir::ExprKind::Unary {
+            op: crate::frontend::ast::Unary::Neg,
+            value: Box::new(integer(7)),
+        },
+        ValueType::Int,
+    );
+    assert!(matches!(
+        coverage(&negative, &[]).unwrap().kind,
+        ir::PatternKind::Literal(ir::Literal::Int(-7))
+    ));
+    let mut catalog = crate::frontend::data::Catalog::collect(&crate::frontend::modules::Modules {
+        modules: vec![],
+        entry: 0,
+    })
+    .unwrap();
+    let false_value = expression(
+        ir::ExprKind::Literal(ir::Literal::Bool(false)),
+        ValueType::Bool,
+    );
+    let true_value = expression(
+        ir::ExprKind::Literal(ir::Literal::Bool(true)),
+        ValueType::Bool,
+    );
+    let mut false_pattern = constant_pattern(false_value.clone(), ValueType::Bool);
+    let mut true_pattern = constant_pattern(true_value.clone(), ValueType::Bool);
+    if let ir::PatternKind::Constant {
+        coverage: covered, ..
+    } = &mut false_pattern.kind
+    {
+        *covered = coverage(&false_value, &[]).map(Box::new);
+    }
+    if let ir::PatternKind::Constant {
+        coverage: covered, ..
+    } = &mut true_pattern.kind
+    {
+        *covered = coverage(&true_value, &[]).map(Box::new);
+    }
+    assert!(crate::frontend::patterns::exhaustive(
+        &[false_pattern, true_pattern],
+        ValueType::Bool,
+        &mut catalog
+    ));
+    assert!(!crate::frontend::patterns::exhaustive(
+        &[constant_pattern(true_value, ValueType::Bool)],
+        ValueType::Bool,
+        &mut catalog
+    ));
+}
+
+#[test]
+fn never_returning_constant_getters_terminate_before_pattern_comparison() {
+    let core = b::Definitions::default();
+    let mut stop = function(0, "stop", vec![], ValueType::Never, integer(0));
+    stop.body = None;
+    stop.external = Some("stop".into());
+    let mut constant = function(
+        1,
+        "DEAD",
+        vec![],
+        ValueType::Never,
+        call(0, vec![], vec![], ValueType::Never),
+    );
+    constant.constant = true;
+    constant.origin = Some(constant.id);
+    let pattern = constant_pattern(call(1, vec![], vec![], ValueType::Never), ValueType::Int);
+    let answer = exported(function(
+        2,
+        "answer",
+        vec![],
+        ValueType::Int,
+        constant_match(integer(0), pattern, integer(42), integer(0)),
+    ));
+    execute_with_harness(
+        ir::Program {
+            core,
+            registry: Default::default(),
+            functions: vec![stop, constant, answer],
+        },
+        "#include <stdlib.h>\n#include \"emela_embedded.h\"\n#include \"emela_board.h\"\n_Noreturn void stop(void){exit(0);}\n_Noreturn void emela_board_defect(EmelaDefectKind k,const char*m,uint16_t n){(void)k;(void)m;(void)n;exit(9);}\nint main(void){(void)answer();return 1;}\n",
+    );
 }

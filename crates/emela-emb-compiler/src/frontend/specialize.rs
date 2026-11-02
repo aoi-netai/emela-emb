@@ -390,7 +390,7 @@ impl Specializer {
         for statement in &mut block.statements {
             match statement {
                 ir::Statement::Pattern { pattern, value } => {
-                    self.pattern(function, pattern, args)?;
+                    self.pattern(function, pattern, args, depth)?;
                     self.expression(function, value, args, depth)?;
                 }
                 ir::Statement::Expr(expression) => {
@@ -405,15 +405,33 @@ impl Specializer {
         function: &ir::Function,
         pattern: &mut ir::Pattern,
         args: &[b::TypeId],
+        depth: usize,
     ) -> Result<()> {
         pattern.ty = self.ty(function, pattern.ty, args, pattern.span)?;
         match &mut pattern.kind {
+            ir::PatternKind::Constant {
+                value,
+                coverage,
+                comparison,
+            } => {
+                self.expression(function, value, args, depth)?;
+                if let Some(coverage) = coverage {
+                    self.pattern(function, coverage, args, depth)?;
+                }
+                *comparison = Some(self.constant_equality(
+                    function,
+                    backend_type(pattern.ty),
+                    pattern.span,
+                    0,
+                )?);
+            }
+
             ir::PatternKind::Bind(local) => {
                 local.ty = self.ty(function, local.ty, args, pattern.span)?;
             }
             ir::PatternKind::Tuple(fields) | ir::PatternKind::Constructor { fields, .. } => {
                 for field in fields {
-                    self.pattern(function, field, args)?;
+                    self.pattern(function, field, args, depth)?;
                 }
             }
             ir::PatternKind::Any | ir::PatternKind::Literal(_) => {}
@@ -516,7 +534,7 @@ impl Specializer {
                 self.expression(function, value, arguments, depth)?;
                 error.ty = self.ty(function, error.ty, arguments, expression.span)?;
                 for arm in arms {
-                    self.pattern(function, &mut arm.pattern, arguments)?;
+                    self.pattern(function, &mut arm.pattern, arguments, depth)?;
                     if let Some(guard) = &mut arm.guard {
                         self.expression(function, guard, arguments, depth)?;
                     }
@@ -526,7 +544,7 @@ impl Specializer {
             ir::ExprKind::Match { value, arms } => {
                 self.expression(function, value, arguments, depth)?;
                 for arm in arms {
-                    self.pattern(function, &mut arm.pattern, arguments)?;
+                    self.pattern(function, &mut arm.pattern, arguments, depth)?;
                     if let Some(guard) = &mut arm.guard {
                         self.expression(function, guard, arguments, depth)?;
                     }
@@ -571,3 +589,6 @@ mod tests;
 
 #[path = "specialize/derive.rs"]
 mod derive;
+
+#[path = "specialize/constant_patterns.rs"]
+mod constant_patterns;

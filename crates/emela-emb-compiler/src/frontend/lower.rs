@@ -7,6 +7,8 @@ use super::{
 use crate::{contract::ir as b, sources::Intrinsic};
 use std::collections::{HashMap, HashSet};
 
+#[path = "lower/constant_patterns.rs"]
+mod constant_patterns;
 #[path = "lower/failures.rs"]
 mod failures;
 
@@ -45,6 +47,7 @@ pub(crate) fn lower(input: &ir::Program) -> b::Program {
         }
     }
     let raises = failures::allocate_raises(input, &mut program);
+    let structural_equality = constant_patterns::allocate_structural_equality(input, &mut program);
     let failing: HashSet<_> = input
         .functions
         .iter()
@@ -70,6 +73,7 @@ pub(crate) fn lower(input: &ir::Program) -> b::Program {
             core: &program.core,
             failing: &failing,
             raises: &raises,
+            structural_equality: &structural_equality,
             escape: None,
         };
         for param in &function.params {
@@ -92,6 +96,7 @@ pub(crate) fn lower(input: &ir::Program) -> b::Program {
 enum PatternStep {
     Statement(b::StmtId),
     Test(b::Operand),
+    Terminal(b::Term),
 }
 struct Builder {
     statements: Vec<b::StmtId>,
@@ -106,6 +111,7 @@ struct Context<'a> {
     core: &'a b::Definitions,
     failing: &'a HashSet<DefinitionId>,
     raises: &'a HashMap<b::TypeId, b::FnId>,
+    structural_equality: &'a HashMap<b::TypeId, b::FnId>,
     escape: Option<(b::VarId, b::SeqId)>,
 }
 impl Context<'_> {
@@ -192,6 +198,10 @@ impl Context<'_> {
                         match step {
                             PatternStep::Statement(id) => builder.statements.push(id),
                             PatternStep::Test(_) => unreachable!("irrefutable binding pattern"),
+                            PatternStep::Terminal(term) => {
+                                builder.term = Some(term);
+                                break;
+                            }
                         }
                     }
                     result = None;
@@ -566,6 +576,11 @@ impl Context<'_> {
     ) {
         use ir::PatternKind as P;
         match &pattern.kind {
+            P::Constant {
+                value: expected,
+                comparison,
+                ..
+            } => self.constant_pattern(pattern, expected, comparison, value, steps),
             P::Any => {}
             P::Bind(local) => {
                 self.locals.insert(local.id, value);
@@ -724,6 +739,13 @@ impl Context<'_> {
         for step in steps.into_iter().rev() {
             match step {
                 PatternStep::Statement(id) => statements.push(id),
+                PatternStep::Terminal(term) => {
+                    statements.clear();
+                    result = self.function.seqs.alloc(b::Seq {
+                        stmts: vec![],
+                        term,
+                    });
+                }
                 PatternStep::Test(condition) => {
                     result = self.prepend(&mut statements, result);
                     result = self.choose(condition, result, failure, value_type, tail);

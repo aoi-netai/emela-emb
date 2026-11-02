@@ -135,6 +135,11 @@ pub(crate) struct Pattern {
 }
 #[derive(Clone, Debug)]
 pub(crate) enum PatternKind {
+    Constant {
+        value: Box<Expr>,
+        coverage: Option<Box<Pattern>>,
+        comparison: Option<ConstantEquality>,
+    },
     Any,
     Bind(Local),
     Literal(Literal),
@@ -149,4 +154,10 @@ pub(crate) struct Arm {
     pub pattern: Pattern,
     pub guard: Option<Expr>,
     pub value: Expr,
+}
+
+#[derive(Clone, Debug)]
+pub(crate) enum ConstantEquality {
+    Function(DefinitionId),
+    Structural(crate::contract::ir::TypeId),
 }
