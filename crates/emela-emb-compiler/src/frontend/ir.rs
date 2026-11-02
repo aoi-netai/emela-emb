@@ -17,6 +17,7 @@ pub(crate) struct Local {
 #[derive(Clone, Debug)]
 pub(crate) struct Function {
     pub id: DefinitionId,
+    pub type_parameters: usize,
     pub name: String,
     pub source_name: String,
     pub span: Span,
@@ -81,6 +82,7 @@ pub(crate) enum ExprKind {
     },
     Call {
         target: DefinitionId,
+        type_arguments: Vec<crate::contract::ir::TypeId>,
         args: Vec<Expr>,
         order: Vec<usize>,
     },

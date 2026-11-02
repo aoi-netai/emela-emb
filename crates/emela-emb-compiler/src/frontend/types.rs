@@ -15,9 +15,6 @@ impl ValueType {
     pub fn numeric(self) -> bool {
         matches!(self, Self::Int | Self::Int64 | Self::Float)
     }
-    pub fn compatible(self, expected: Self) -> bool {
-        self == expected || self == Self::Never
-    }
 }
 impl fmt::Display for ValueType {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {

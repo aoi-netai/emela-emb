@@ -159,3 +159,46 @@ fn rejects_refutable_bindings_non_exhaustive_matches_and_wrong_patterns() {
         assert!(compile(source).is_err(), "{source}");
     }
 }
+
+#[test]
+fn generic_functions_data_and_scc_return_inference_execute_from_source() {
+    let source = r#"
+type Box[A](value: A)
+fn identity[A](value: A) -> A { value }
+fn boxed[A](value: A) -> Box[A] { Box(value:) }
+fn unbox[A](value: Box[A]) -> A { Box(value:) = value
+ value }
+fn swap[A, B](a: A, b: B) -> (B, A) { (b, a) }
+fn repeat[A](value: A, count: Int) -> A { if count == 0 { value } else { repeat(value, count - 1) } }
+fn first(n: Int) { second(n) }
+fn second(n: Int) { if n == 0 { 42 } else { first(n - 1) } }
+fn even(n: Int) { if n == 0 { True } else { odd(n - 1) } }
+fn odd(n: Int) { if n == 0 { False } else { even(n - 1) } }
+@export(c, "generics")
+pub fn generics() -> Int {
+  assert identity(42) == 42
+  assert identity("text") == "text"
+  assert unbox(boxed(42)) == 42
+  wide: Int64 = identity(2147483648)
+  assert wide == 2147483648
+  (text, number) = swap(7, "seven")
+  assert text == "seven" && number == 7
+  assert repeat("value", 100000) == "value"
+  assert even(1000) && !odd(1000)
+  first(100)
+}
+"#;
+    let output = compile(source).unwrap();
+    support::compile_and_run(
+        &output,
+        &format!("{BOARD}\nint main(void) {{ assert(generics() == 42); return 0; }}"),
+    );
+    for source in [
+        "fn wrong[A](value: A) -> Int { value }",
+        "fn wrong[A](value: A) -> A { 42 }",
+        "fn wrong[A](a: A) -> A { a + a }",
+        "@export(c, \"identity\")\npub fn identity[A](value: A) -> A { value }",
+    ] {
+        assert!(compile(source).is_err(), "{source}");
+    }
+}

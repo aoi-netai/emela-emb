@@ -12,3 +12,6 @@ pub(crate) mod types;
 pub(crate) mod infer;
 pub(crate) mod patterns;
 pub(crate) mod traits;
+
+pub(crate) mod normalize;
+pub(crate) mod specialize;

@@ -59,6 +59,8 @@ struct Scope {
 struct Checker {
     modules: Modules,
     catalog: Catalog,
+    solver: super::infer::Solver,
+    current_parameters: HashMap<String, usize>,
     definitions: Vec<Definition>,
     module_definitions: Vec<HashMap<String, DefinitionId>>,
     scopes: Vec<Scope>,
@@ -88,6 +90,8 @@ pub(crate) fn check(modules: Modules) -> Result<ir::Program, Vec<Diagnostic>> {
     let catalog = Catalog::collect(&modules)?;
     let mut checker = Checker {
         catalog,
+        solver: super::infer::Solver::new(),
+        current_parameters: HashMap::new(),
         module_definitions: vec![HashMap::new(); modules.modules.len()],
         scopes: (0..modules.modules.len())
             .map(|_| Scope::default())
@@ -110,10 +114,12 @@ pub(crate) fn check(modules: Modules) -> Result<ir::Program, Vec<Diagnostic>> {
     if !errors.is_empty() {
         return Err(errors);
     }
-    Ok(ir::Program {
+    let mut program = ir::Program {
         core: checker.catalog.core,
         functions: checker.checked.into_iter().flatten().collect(),
-    })
+    };
+    super::normalize::normalize(&mut program, &mut checker.solver)?;
+    Ok(program)
 }
 impl Checker {
     fn collect(&mut self) -> Result<(), Vec<Diagnostic>> {
@@ -137,12 +143,31 @@ impl Checker {
             let module = self.modules.modules[module_index].clone();
             for function in &module.ast.functions {
                 let result = (|| -> Result<(), Diagnostic> {
-                    if !function.type_params.is_empty() {
-                        return Err(Diagnostic::new(
-                            DK::Unsupported,
-                            function.name.span,
-                            "generic function schemes are connected in the inference phase",
-                        ));
+                    let mut type_parameters = HashMap::new();
+                    for (index, parameter) in function.type_params.iter().enumerate() {
+                        if !parameter.bounds.is_empty() {
+                            return Err(Diagnostic::new(
+                                DK::Unsupported,
+                                parameter.name.span,
+                                "generic trait bounds are connected with trait checking",
+                            ));
+                        }
+                        if !parameter.name.value.as_bytes()[0].is_ascii_uppercase()
+                            || type_parameters
+                                .insert(parameter.name.value.clone(), index)
+                                .is_some()
+                        {
+                            return Err(Diagnostic::new(
+                                DK::Name,
+                                parameter.name.span,
+                                "invalid or duplicate type parameter",
+                            ));
+                        }
+                        self.solver
+                            .register_rigid_parameter(&mut self.catalog.core.types, index)
+                            .map_err(|e| {
+                                Diagnostic::new(DK::Type, parameter.name.span, e.message)
+                            })?;
                     }
                     if function.name.value == "_" {
                         return Err(Diagnostic::new(
@@ -165,7 +190,7 @@ impl Checker {
                             &self.modules,
                             module_index,
                             &param.ty,
-                            &HashMap::new(),
+                            &type_parameters,
                         )?);
                     }
                     let ret = function
@@ -176,7 +201,7 @@ impl Checker {
                                 &self.modules,
                                 module_index,
                                 ty,
-                                &HashMap::new(),
+                                &type_parameters,
                             )
                         })
                         .transpose()?;
@@ -266,6 +291,28 @@ impl Checker {
                             ));
                         }
                     }
+                    if !type_parameters.is_empty()
+                        && (export_symbol.is_some() || external.is_some())
+                    {
+                        return Err(Diagnostic::new(
+                            DK::Export,
+                            function.name.span,
+                            "generic functions require a concrete wrapper at the C boundary",
+                        ));
+                    }
+                    let ret = match ret {
+                        Some(ret) => Some(ret),
+                        None => Some(Ty::Compound(
+                            self.solver
+                                .try_fresh(
+                                    &mut self.catalog.core.types,
+                                    super::infer::Constraint::Any,
+                                )
+                                .map_err(|e| {
+                                    Diagnostic::new(DK::Type, function.name.span, e.message)
+                                })?,
+                        )),
+                    };
                     let id = DefinitionId(self.definitions.len());
                     if self.module_definitions[module_index]
                         .insert(function.name.value.clone(), id)
@@ -466,6 +513,16 @@ impl Checker {
             .zip(&definition.signature.params)
             .map(|(p, ty)| locals.bind(p.name.value.clone(), *ty))
             .collect();
+        let saved_parameters = std::mem::replace(
+            &mut self.current_parameters,
+            definition
+                .ast
+                .type_params
+                .iter()
+                .enumerate()
+                .map(|(i, p)| (p.name.value.clone(), i))
+                .collect(),
+        );
         let body = definition
             .ast
             .body
@@ -478,7 +535,9 @@ impl Checker {
                     definition.signature.ret,
                 )
             })
-            .transpose()?;
+            .transpose();
+        self.current_parameters = saved_parameters;
+        let body = body?;
         let ret = definition
             .signature
             .ret
@@ -487,6 +546,7 @@ impl Checker {
         self.definitions[id.0].signature.ret = Some(ret);
         self.checked[id.0] = Some(ir::Function {
             id,
+            type_parameters: definition.ast.type_params.len(),
             name: definition.name,
             source_name: self.modules.modules[definition.module].source_name.clone(),
             span: definition.ast.name.span,
@@ -526,8 +586,12 @@ impl Checker {
                     let annotation = annotation
                         .as_ref()
                         .map(|ty| {
-                            self.catalog
-                                .resolve_type(&self.modules, module, ty, &HashMap::new())
+                            self.catalog.resolve_type(
+                                &self.modules,
+                                module,
+                                ty,
+                                &self.current_parameters,
+                            )
                         })
                         .transpose()
                         .map_err(|e| e.in_source(&self.modules.modules[module].source_name))?;
@@ -571,14 +635,7 @@ impl Checker {
             ty = Ty::Never;
         }
         if let Some(expected) = expected {
-            if !ty.compatible(expected) {
-                return Err(self.error(
-                    module,
-                    DK::Type,
-                    block.span,
-                    format!("expected {expected}, found {ty}"),
-                ));
-            }
+            self.expect_type(module, ty, expected, block.span)?;
         }
         locals.names = saved;
         Ok(ir::Block {
@@ -596,6 +653,9 @@ impl Checker {
     ) -> Result<ir::Expr, Diagnostic> {
         use ast::ExprKind as A;
         let span = expression.span;
+        let expected = expected
+            .map(|ty| self.resolve_type(module, ty, span))
+            .transpose()?;
         let (kind, ty) = match &expression.kind {
             A::Integer(raw) => {
                 let target = expected.filter(|t| *t == Ty::Int64).unwrap_or(Ty::Int);
@@ -672,6 +732,7 @@ impl Checker {
                         checked.push(ir::Expr {
                             kind: ir::ExprKind::Call {
                                 target,
+                                type_arguments: Vec::new(),
                                 args: vec![value],
                                 order: vec![0],
                             },
@@ -683,7 +744,8 @@ impl Checker {
                 (ir::ExprKind::Concat(checked), Ty::String)
             }
             A::Match { value, arms } => {
-                let value = self.expr(module, value, locals, None)?;
+                let mut value = self.expr(module, value, locals, None)?;
+                value.ty = self.resolve_type(module, value.ty, span)?;
                 let mut checked = Vec::new();
                 let mut coverage = Vec::new();
                 let mut result = expected;
@@ -757,7 +819,8 @@ impl Checker {
                 (ir::ExprKind::Tuple(checked), ty)
             }
             A::Field { base, name } => {
-                let base = self.expr(module, base, locals, None)?;
+                let mut base = self.expr(module, base, locals, None)?;
+                base.ty = self.resolve_type(module, base.ty, span)?;
                 let crate::contract::ir::Type::Enum(id, _) =
                     self.catalog.core.ty(data::backend_type(base.ty))
                 else {
@@ -846,13 +909,8 @@ impl Checker {
                         expected.filter(|t| t.numeric())
                     },
                 )?;
-                if *op == ast::Unary::Neg && !value.ty.numeric() && value.ty != Ty::Never {
-                    return Err(self.error(
-                        module,
-                        DK::Type,
-                        span,
-                        "unary '-' requires Int, Int64 or Float",
-                    ));
+                if *op == ast::Unary::Neg {
+                    self.numeric(module, value.ty, span)?;
                 }
                 let ty = value.ty;
                 (
@@ -913,27 +971,41 @@ impl Checker {
                         Some(left.ty)
                     },
                 )?;
-                if !logical && !op.comparison() && !left.ty.numeric() && left.ty != Ty::Never {
-                    return Err(self.error(
-                        module,
-                        DK::Type,
-                        span,
-                        "arithmetic requires Int, Int64 or Float operands",
-                    ));
-                }
+                let left_ty = self.resolve_type(module, left.ty, span)?;
                 if op.comparison()
-                    && !matches!(op, ast::Binary::Eq | ast::Binary::Ne)
-                    && !left.ty.numeric()
-                    && !matches!(left.ty, Ty::String | Ty::Bool | Ty::Never)
+                    && matches!(
+                        self.catalog.core.ty(data::backend_type(left_ty)),
+                        crate::contract::ir::Type::Param(_)
+                    )
+                    && self
+                        .solver
+                        .free_metas(&mut self.catalog.core.types, data::backend_type(left_ty))
+                        .map_err(|e| self.error(module, DK::Type, span, e.message))?
+                        .is_empty()
                 {
                     return Err(self.error(
                         module,
                         DK::Type,
                         span,
-                        "ordering comparison requires ordered operands",
+                        "generic comparisons require an Eq or Ord bound",
                     ));
                 }
-                if op.comparison() && matches!(left.ty, Ty::Compound(_)) {
+
+                if !logical && !op.comparison() {
+                    self.numeric(module, left_ty, span)?;
+                }
+                if op.comparison()
+                    && !matches!(op, ast::Binary::Eq | ast::Binary::Ne)
+                    && !matches!(left_ty, Ty::String | Ty::Bool | Ty::Never)
+                {
+                    self.numeric(module, left_ty, span)?;
+                }
+                if op.comparison()
+                    && matches!(
+                        self.catalog.core.ty(data::backend_type(left_ty)),
+                        crate::contract::ir::Type::Tuple(_) | crate::contract::ir::Type::Enum(_, _)
+                    )
+                {
                     return Err(self.error(
                         module,
                         DK::Unsupported,
@@ -991,7 +1063,39 @@ impl Checker {
                         ));
                     }
                 };
-                let signature = self.definitions[id.0].signature.clone();
+                if self.states[id.0] == 0 {
+                    self.function(id)?;
+                }
+                let mut signature = self.definitions[id.0].signature.clone();
+                let type_arguments = (0..self.definitions[id.0].ast.type_params.len())
+                    .map(|_| {
+                        self.solver
+                            .try_fresh(&mut self.catalog.core.types, super::infer::Constraint::Any)
+                    })
+                    .collect::<Result<Vec<_>, _>>()
+                    .map_err(|e| self.error(module, DK::Type, span, e.message))?;
+                for parameter in &mut signature.params {
+                    let resolved = self
+                        .solver
+                        .resolve(&mut self.catalog.core.types, data::backend_type(*parameter))
+                        .map_err(|e| self.error(module, DK::Type, span, e.message))?;
+                    *parameter = data::frontend_type(
+                        self.catalog.core.types.subst(resolved, &type_arguments),
+                    );
+                }
+                if let Some(ret) = &mut signature.ret {
+                    let resolved = self
+                        .solver
+                        .resolve(&mut self.catalog.core.types, data::backend_type(*ret))
+                        .map_err(|e| self.error(module, DK::Type, span, e.message))?;
+                    *ret = data::frontend_type(
+                        self.catalog.core.types.subst(resolved, &type_arguments),
+                    );
+                    if let Some(expected) = expected {
+                        self.expect_type(module, *ret, expected, span)?;
+                    }
+                }
+
                 let params = self.definitions[id.0].ast.params.clone();
                 let mut order = vec![usize::MAX; params.len()];
                 let mut named = false;
@@ -1073,6 +1177,7 @@ impl Checker {
                 (
                     ir::ExprKind::Call {
                         target: id,
+                        type_arguments,
                         args: checked,
                         order,
                     },
@@ -1113,17 +1218,7 @@ impl Checker {
                 } else {
                     then.ty
                 };
-                if !else_.ty.compatible(ty) {
-                    return Err(self.error(
-                        module,
-                        DK::Type,
-                        span,
-                        format!(
-                            "if branches have different types: {} and {}",
-                            then.ty, else_.ty
-                        ),
-                    ));
-                }
+                self.expect_type(module, else_.ty, ty, span)?;
                 (
                     ir::ExprKind::If {
                         condition: Box::new(condition),
@@ -1144,17 +1239,49 @@ impl Checker {
             }
         };
         if let Some(expected) = expected {
-            if !ty.compatible(expected) {
-                return Err(self.error(
-                    module,
-                    DK::Type,
-                    span,
-                    format!("expected {expected}, found {ty}"),
-                ));
-            }
+            self.expect_type(module, ty, expected, span)?;
         }
+        let ty = self.resolve_type(module, ty, span)?;
         Ok(ir::Expr { kind, ty, span })
     }
+    fn resolve_type(&mut self, module: usize, ty: Ty, span: Span) -> Result<Ty, Diagnostic> {
+        self.solver
+            .resolve(&mut self.catalog.core.types, data::backend_type(ty))
+            .map(data::frontend_type)
+            .map_err(|e| self.error(module, DK::Type, span, e.message))
+    }
+    fn expect_type(
+        &mut self,
+        module: usize,
+        actual: Ty,
+        expected: Ty,
+        span: Span,
+    ) -> Result<(), Diagnostic> {
+        self.solver
+            .unify(
+                &mut self.catalog.core.types,
+                data::backend_type(actual),
+                data::backend_type(expected),
+            )
+            .map_err(|e| self.error(module, DK::Type, span, e.message))
+    }
+    fn numeric(&mut self, module: usize, ty: Ty, span: Span) -> Result<(), Diagnostic> {
+        let numeric = self
+            .solver
+            .try_fresh(
+                &mut self.catalog.core.types,
+                super::infer::Constraint::Numeric,
+            )
+            .map_err(|e| self.error(module, DK::Type, span, e.message))?;
+        self.solver
+            .unify(
+                &mut self.catalog.core.types,
+                data::backend_type(ty),
+                numeric,
+            )
+            .map_err(|e| self.error(module, DK::Type, span, e.message))
+    }
+
     fn pattern(
         &mut self,
         module: usize,
@@ -1525,16 +1652,8 @@ impl Checker {
                 .types
                 .enum_type(ctor.enum_id, substitutions),
         );
-        if expected.is_some_and(|expected| !value_type.compatible(expected)) {
-            return Err(self.error(
-                module,
-                DK::Type,
-                span,
-                format!(
-                    "constructor has type {value_type}, expected {}",
-                    expected.unwrap()
-                ),
-            ));
+        if let Some(expected) = expected {
+            self.expect_type(module, value_type, expected, span)?;
         }
         Ok(ir::Expr {
             kind: ir::ExprKind::Make {
@@ -1547,7 +1666,7 @@ impl Checker {
         })
     }
     fn infer_constructor(
-        &self,
+        &mut self,
         module: usize,
         template: crate::contract::ir::TypeId,
         actual: crate::contract::ir::TypeId,
@@ -1558,30 +1677,31 @@ impl Checker {
         if actual == TypeId::NEVER {
             return Ok(());
         }
-        match (self.catalog.core.ty(template), self.catalog.core.ty(actual)) {
+        match (
+            self.catalog.core.ty(template).clone(),
+            self.catalog.core.ty(actual).clone(),
+        ) {
             (Type::Param(parameter), _) => {
-                if let Some(previous) = bindings[*parameter] {
-                    if previous != actual {
-                        return Err(self.error(
-                            module,
-                            DK::Type,
-                            span,
-                            "constructor fields infer different types for the same type parameter",
-                        ));
-                    }
+                if let Some(previous) = bindings[parameter] {
+                    self.expect_type(
+                        module,
+                        data::frontend_type(actual),
+                        data::frontend_type(previous),
+                        span,
+                    )?;
                 } else {
-                    bindings[*parameter] = Some(actual);
+                    bindings[parameter] = Some(actual);
                 }
                 Ok(())
             }
             (Type::Tuple(left), Type::Tuple(right)) if left.len() == right.len() => {
-                for (&left, &right) in left.iter().zip(right) {
+                for (&left, right) in left.iter().zip(right) {
                     self.infer_constructor(module, left, right, bindings, span)?;
                 }
                 Ok(())
             }
             (Type::Enum(left, a), Type::Enum(right, b)) if left == right && a.len() == b.len() => {
-                for (&left, &right) in a.iter().zip(b) {
+                for (&left, right) in a.iter().zip(b) {
                     self.infer_constructor(module, left, right, bindings, span)?;
                 }
                 Ok(())
@@ -1683,7 +1803,10 @@ impl Checker {
             }
             ast::ExprKind::Call { callee, .. } => match &callee.kind {
                 ast::ExprKind::Name(path) => match self.resolve(module, path).ok()? {
-                    Symbol::Function(id) => self.definitions[id.0].signature.ret,
+                    Symbol::Function(id) => self.definitions[id.0]
+                        .signature
+                        .ret
+                        .filter(|ty| !self.catalog.core.types.has_param(data::backend_type(*ty))),
                     Symbol::Constant(_) | Symbol::Constructor(_) => None,
                 },
                 _ => None,

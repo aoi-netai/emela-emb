@@ -409,6 +409,7 @@ impl Context<'_> {
                 target,
                 args,
                 order,
+                ..
             } => {
                 let mut evaluated = Vec::new();
                 for argument in args {

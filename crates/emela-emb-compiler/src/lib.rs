@@ -37,6 +37,7 @@ pub fn compile_sources(
 ) -> Result<Output, Vec<Diagnostic>> {
     let modules = frontend::modules::collect(sources, entry)?;
     let checked = frontend::check::check(modules)?;
+    let checked = frontend::specialize::specialize(checked)?;
     let lowered = frontend::lower::lower(&checked);
     backend::compile_program(lowered, options).map_err(|errors| {
         errors
