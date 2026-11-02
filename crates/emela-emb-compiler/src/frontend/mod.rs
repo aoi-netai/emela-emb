@@ -11,3 +11,4 @@ pub(crate) mod types;
 
 pub(crate) mod infer;
 pub(crate) mod patterns;
+pub(crate) mod traits;
