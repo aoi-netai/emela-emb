@@ -1,0 +1,589 @@
+{
+  "schema_version": 1,
+  "legacy_revision": "c34c0aeefdd966d854371b3110db00a47798751d",
+  "policy": "Pending records are not execution evidence. Source API and post-source IR seams are separated.",
+  "cases": [
+    {
+      "legacy_test": "emit::fiber::failure::masked_cleanup_can_await_the_failed_child_before_scope_error_propagates",
+      "legacy_path": "crates/emela-codegen-emb/tests/fiber/failure.rs",
+      "legacy_line": 338,
+      "legacy_rust_sha256": "6fd6d260c7f39e5b9e558551fc348498f4951a2fd21d57b2b33b03d0bd848ce3",
+      "source_files": [
+        {
+          "program": "program:334221286a172894b8cb",
+          "name": "main.emel",
+          "fixture": "sources/2c24795089adb02c47248169a3fdbfe3c644f3a7243f1f5525cb0da9ef6a9a06.emel",
+          "source_id": "source:2c24795089adb02c4724",
+          "sha256": "2c24795089adb02c47248169a3fdbfe3c644f3a7243f1f5525cb0da9ef6a9a06"
+        }
+      ],
+      "source_adaptation": "original corpus source bytes + explicit C exports only",
+      "harness": "crates/emela-emb-compiler/tests/compat/p7/cleanup/masked_cleanup_can_await_the_failed_child_before_scope_error_propagates.c",
+      "old_options": {
+        "heap_bytes": 8192,
+        "fiber_capacity": 8,
+        "frame_capacity": 24,
+        "frame_bytes": 512,
+        "task_capacity": 2,
+        "event_capacity": 2,
+        "task_adapters": {
+          "host_wait": "board_wait_start"
+        }
+      },
+      "legacy_C_assertions": [
+        "n>=1 && n<=2",
+        "!joined && marks++==0",
+        "n==2 && marks++==!joined",
+        "waits==2",
+        "emela_task_complete_int(tasks[0],0)",
+        "emela_scheduler_run(1)",
+        "result==42 && marks==2-joined && !emela_task_complete_int(tasks[1],0)"
+      ],
+      "status": "pending-runtime",
+      "recommended_ledger_status": "pending",
+      "seams": [
+        "protect_cleanup_call"
+      ],
+      "seam_steps": [
+        "Copy fixed interrupt.rs::protect_cleanup_call: move the final source call to cleanup into a Protect cleanup, preserving required trailing evidence construction/lookup statements and capture operands. No source-body edits."
+      ]
+    },
+    {
+      "legacy_test": "emit::fiber::interrupt::interrupted_cleanup_can_close_a_nested_scope_and_wait_for_its_child_release",
+      "legacy_path": "crates/emela-codegen-emb/tests/fiber/interrupt.rs",
+      "legacy_line": 756,
+      "legacy_rust_sha256": "d1a4986536dc16b5fad6e2b5d67f1a81f2a3b059ec30cea3b43808ab38e152d7",
+      "source_files": [
+        {
+          "program": "program:8730c7e21e8995b3ae3d",
+          "name": "main.emel",
+          "fixture": "sources/2befbd0806bf5306b0e09ebeeda14219f57d886a5fe31c051a65be7d4443aa13.emel",
+          "source_id": "source:2befbd0806bf5306b0e0",
+          "sha256": "2befbd0806bf5306b0e09ebeeda14219f57d886a5fe31c051a65be7d4443aa13"
+        }
+      ],
+      "source_adaptation": "original corpus source bytes + explicit C exports only",
+      "harness": "crates/emela-emb-compiler/tests/compat/p7/cleanup/interrupted_cleanup_can_close_a_nested_scope_and_wait_for_its_child_release.c",
+      "old_options": {
+        "heap_bytes": 8192,
+        "fiber_capacity": 8,
+        "frame_capacity": 48,
+        "frame_bytes": 512,
+        "task_capacity": 2,
+        "event_capacity": 2,
+        "task_adapters": {
+          "host_wait": "board_wait_start"
+        },
+        "deferred_capacity": 1
+      },
+      "legacy_C_assertions": [
+        "n == ++order",
+        "n >= 1 && n <= 3",
+        "count == 2 && order == 2 && !emela_fiber_done(f)",
+        "emela_task_complete_int(tasks[1], 2)",
+        "count == 3 && order == 2 && !emela_task_complete_int(tasks[0], 0)",
+        "emela_task_complete_int(tasks[2], 3)",
+        "emela_scheduler_run(1)",
+        "value == 42 && order == 5"
+      ],
+      "status": "pending-runtime",
+      "recommended_ledger_status": "pending",
+      "seams": [
+        "protect_cleanup_call"
+      ],
+      "seam_steps": [
+        "Copy fixed interrupt.rs::protect_cleanup_call: move the final source call to cleanup into a Protect cleanup, preserving required trailing evidence construction/lookup statements and capture operands. No source-body edits."
+      ]
+    },
+    {
+      "legacy_test": "emit::fiber::interrupt::interrupted_cleanup_can_wait_on_a_deferred_completed_by_a_sibling",
+      "legacy_path": "crates/emela-codegen-emb/tests/fiber/interrupt.rs",
+      "legacy_line": 418,
+      "legacy_rust_sha256": "d1a4986536dc16b5fad6e2b5d67f1a81f2a3b059ec30cea3b43808ab38e152d7",
+      "source_files": [
+        {
+          "program": "program:4c249f507854486bc050",
+          "name": "main.emel",
+          "fixture": "sources/c9588516a250ea0ab6c1082b0d2525bb227ccf79c4a3b5b93cb448972eaa510a.emel",
+          "source_id": "source:c9588516a250ea0ab6c1",
+          "sha256": "c9588516a250ea0ab6c1082b0d2525bb227ccf79c4a3b5b93cb448972eaa510a"
+        }
+      ],
+      "source_adaptation": "original corpus source bytes + explicit C exports only",
+      "harness": "crates/emela-emb-compiler/tests/compat/p7/cleanup/interrupted_cleanup_can_wait_on_a_deferred_completed_by_a_sibling.c",
+      "old_options": {
+        "heap_bytes": 8192,
+        "fiber_capacity": 8,
+        "frame_capacity": 48,
+        "frame_bytes": 512,
+        "task_capacity": 2,
+        "event_capacity": 2,
+        "task_adapters": {
+          "host_wait": "board_wait_start"
+        },
+        "deferred_capacity": 3
+      },
+      "legacy_C_assertions": [
+        "n == ++order",
+        "emela_scheduler_run(1)",
+        "value == 42 && order == 4"
+      ],
+      "status": "pending-runtime",
+      "recommended_ledger_status": "pending",
+      "seams": [
+        "protect_cleanup_call"
+      ],
+      "seam_steps": [
+        "Copy fixed interrupt.rs::protect_cleanup_call: move the final source call to cleanup into a Protect cleanup, preserving required trailing evidence construction/lookup statements and capture operands. No source-body edits."
+      ]
+    },
+    {
+      "legacy_test": "emit::fiber::interrupt::self_interrupt_unwinds_the_body_and_is_deferred_inside_cleanup",
+      "legacy_path": "crates/emela-codegen-emb/tests/fiber/interrupt.rs",
+      "legacy_line": 343,
+      "legacy_rust_sha256": "d1a4986536dc16b5fad6e2b5d67f1a81f2a3b059ec30cea3b43808ab38e152d7",
+      "source_files": [
+        {
+          "program": "program:831d3a7aac5dd763cddb",
+          "name": "main.emel",
+          "fixture": "sources/454bfd87a42e740e6b26864f747ad6e9611467f5cd39a08a02645bde395fdaf6.emel",
+          "source_id": "source:454bfd87a42e740e6b26",
+          "sha256": "454bfd87a42e740e6b26864f747ad6e9611467f5cd39a08a02645bde395fdaf6"
+        }
+      ],
+      "source_adaptation": "original corpus source bytes + explicit C exports only",
+      "harness": "crates/emela-emb-compiler/tests/compat/p7/cleanup/self_interrupt_unwinds_the_body_and_is_deferred_inside_cleanup.c",
+      "old_options": {
+        "heap_bytes": 8192,
+        "fiber_capacity": 8,
+        "frame_capacity": 24,
+        "frame_bytes": 512,
+        "task_capacity": 2,
+        "event_capacity": 2,
+        "task_adapters": {
+          "host_wait": "board_wait_start"
+        },
+        "deferred_capacity": 2
+      },
+      "legacy_C_assertions": [
+        "n == ++order",
+        "emela_scheduler_run(1)",
+        "value == 42 && order == 4"
+      ],
+      "status": "pending-runtime",
+      "recommended_ledger_status": "pending",
+      "seams": [
+        "protect_cleanup_call"
+      ],
+      "seam_steps": [
+        "Copy fixed interrupt.rs::protect_cleanup_call: move the final source call to cleanup into a Protect cleanup, preserving required trailing evidence construction/lookup statements and capture operands. No source-body edits."
+      ]
+    },
+    {
+      "legacy_test": "emit::fiber::notes::later_failures_are_ordered_owned_notes_shared_by_rethrown_causes",
+      "legacy_path": "crates/emela-codegen-emb/tests/fiber/notes.rs",
+      "legacy_line": 29,
+      "legacy_rust_sha256": "3ba5ada8159c56c0dd4261eb042d461e4e279e82ec4a0b0fe23fc9fdb8ee3f41",
+      "source_files": [
+        {
+          "program": "program:1e5e03e21947542798b3",
+          "name": "main.emel",
+          "fixture": "sources/725fa13e508a2eaa0936c1215dab14af612d1010d9eadd6bb4654e3de81b9ab1.emel",
+          "source_id": "source:725fa13e508a2eaa0936",
+          "sha256": "725fa13e508a2eaa0936c1215dab14af612d1010d9eadd6bb4654e3de81b9ab1"
+        }
+      ],
+      "source_adaptation": "original corpus source bytes + explicit C exports only",
+      "harness": "crates/emela-emb-compiler/tests/compat/p7/cleanup/later_failures_are_ordered_owned_notes_shared_by_rethrown_causes.c",
+      "old_options": {
+        "heap_bytes": 4096,
+        "fiber_capacity": 8,
+        "frame_capacity": 48,
+        "frame_bytes": 512,
+        "task_capacity": 4,
+        "event_capacity": 4,
+        "task_adapters": {
+          "host_wait": "board_wait_start"
+        }
+      },
+      "legacy_C_assertions": [
+        "n>=1 && n<=4",
+        "count==4",
+        "emela_task_complete_int(tasks[order[n]-1],0)",
+        "n==2 ? emela_fiber_done(f) : !emela_fiber_done(f)",
+        "!emela_task_complete_int(tasks[3],0)",
+        "emela_scheduler_run(1)",
+        "text.data==buffer && text.length==length && memcmp(text.data,expected,length)==0",
+        "emela_export_caught_4(again)==order[0]",
+        "test_heap_empty()"
+      ],
+      "status": "pending-runtime",
+      "recommended_ledger_status": "pending",
+      "seams": [
+        "hold_late"
+      ],
+      "seam_steps": [
+        "Prepend Let dstNone Value::Runtime Hold args[] to source function late body, as fixed notes.rs::masked_notes_flow and overlap/payload helpers."
+      ]
+    },
+    {
+      "legacy_test": "emit::fiber::notes::note_display_checks_the_callers_remaining_capacity",
+      "legacy_path": "crates/emela-codegen-emb/tests/fiber/notes.rs",
+      "legacy_line": 90,
+      "legacy_rust_sha256": "3ba5ada8159c56c0dd4261eb042d461e4e279e82ec4a0b0fe23fc9fdb8ee3f41",
+      "source_files": [
+        {
+          "program": "program:1e5e03e21947542798b3",
+          "name": "main.emel",
+          "fixture": "sources/725fa13e508a2eaa0936c1215dab14af612d1010d9eadd6bb4654e3de81b9ab1.emel",
+          "source_id": "source:725fa13e508a2eaa0936",
+          "sha256": "725fa13e508a2eaa0936c1215dab14af612d1010d9eadd6bb4654e3de81b9ab1"
+        }
+      ],
+      "source_adaptation": "original corpus source bytes + explicit C exports only",
+      "harness": "crates/emela-emb-compiler/tests/compat/p7/cleanup/note_display_checks_the_callers_remaining_capacity.c",
+      "old_options": {
+        "heap_bytes": 8192,
+        "fiber_capacity": 8,
+        "frame_capacity": 48,
+        "frame_bytes": 512,
+        "task_capacity": 4,
+        "event_capacity": 4,
+        "task_adapters": {
+          "host_wait": "board_wait_start"
+        }
+      },
+      "legacy_C_assertions": [
+        "n>=1 && n<=4",
+        "expected_defect && k==EMELA_DEFECT_STRING_CAPACITY && n==24 && memcmp(m,\"string capacity exceeded\",24)==0",
+        "emela_task_complete_int(tasks[i],0)",
+        "emela_fiber_done(f) && cause"
+      ],
+      "status": "pending-runtime",
+      "recommended_ledger_status": "pending",
+      "seams": [
+        "hold_late"
+      ],
+      "seam_steps": [
+        "Prepend Let dstNone Value::Runtime Hold args[] to source function late body, as fixed notes.rs::masked_notes_flow and overlap/payload helpers."
+      ]
+    },
+    {
+      "legacy_test": "emit::fiber::overlap::failures_from_cancelled_nested_scopes_become_notes_of_the_outer_first_failure",
+      "legacy_path": "crates/emela-codegen-emb/tests/fiber/overlap.rs",
+      "legacy_line": 104,
+      "legacy_rust_sha256": "c4c33f6b0244100c7ec37cb48cb4067b8571fd00d9a1fe1aa2cceda7e7d05118",
+      "source_files": [
+        {
+          "program": "program:b351d40891e80eb8b8ec",
+          "name": "main.emel",
+          "fixture": "sources/6e6c14d15b01141c28b3b111af84d602b3fe7ca1aa1abcdb32a4254f249e2574.emel",
+          "source_id": "source:6e6c14d15b01141c28b3",
+          "sha256": "6e6c14d15b01141c28b3b111af84d602b3fe7ca1aa1abcdb32a4254f249e2574"
+        }
+      ],
+      "source_adaptation": "original corpus source bytes + explicit C exports only",
+      "harness": "crates/emela-emb-compiler/tests/compat/p7/cleanup/failures_from_cancelled_nested_scopes_become_notes_of_the_outer_first_failure.c",
+      "old_options": {
+        "heap_bytes": 8192,
+        "fiber_capacity": 10,
+        "frame_capacity": 48,
+        "frame_bytes": 512,
+        "task_capacity": 4,
+        "event_capacity": 4,
+        "task_adapters": {
+          "host_wait": "board_wait_start"
+        }
+      },
+      "legacy_C_assertions": [
+        "n>=1 && n<=4",
+        "count==4",
+        "emela_task_complete_int(tasks[first-1],0)",
+        "!emela_fiber_done(f)",
+        "emela_task_complete_int(tasks[second-1],0)",
+        "emela_scheduler_run(1)",
+        "cause && !emela_task_complete_int(tasks[1],0) && !emela_task_complete_int(tasks[3],0)",
+        "text.length==length && memcmp(text.data,expected,length)==0",
+        "test_heap_empty()"
+      ],
+      "status": "pending-runtime",
+      "recommended_ledger_status": "pending",
+      "seams": [
+        "hold_late"
+      ],
+      "seam_steps": [
+        "Prepend Let dstNone Value::Runtime Hold args[] to source function late body, as fixed notes.rs::masked_notes_flow and overlap/payload helpers."
+      ]
+    },
+    {
+      "legacy_test": "emit::fiber::overlap::nested_scope_failure_survives_external_interruption_before_and_after_failure",
+      "legacy_path": "crates/emela-codegen-emb/tests/fiber/overlap.rs",
+      "legacy_line": 5,
+      "legacy_rust_sha256": "c4c33f6b0244100c7ec37cb48cb4067b8571fd00d9a1fe1aa2cceda7e7d05118",
+      "source_files": [
+        {
+          "program": "program:2cd74addf09373c7f082",
+          "name": "main.emel",
+          "fixture": "sources/7fc3ef6ca513d4f89d01795c0c3d5012f2789f16569251147cad2fe7721df2a9.emel",
+          "source_id": "source:7fc3ef6ca513d4f89d01",
+          "sha256": "7fc3ef6ca513d4f89d01795c0c3d5012f2789f16569251147cad2fe7721df2a9"
+        }
+      ],
+      "source_adaptation": "original corpus source bytes + explicit C exports only",
+      "harness": "crates/emela-emb-compiler/tests/compat/p7/cleanup/nested_scope_failure_survives_external_interruption_before_and_after_failure.c",
+      "old_options": {
+        "heap_bytes": 4096,
+        "fiber_capacity": 10,
+        "frame_capacity": 48,
+        "frame_bytes": 512,
+        "task_capacity": 4,
+        "event_capacity": 4,
+        "task_adapters": {
+          "host_wait": "board_wait_start"
+        }
+      },
+      "legacy_C_assertions": [
+        "n>=1 && n<=4",
+        "n==++order",
+        "count==3",
+        "emela_task_complete_int(tasks[first-1],0)",
+        "emela_task_complete_int(tasks[second-1],0)",
+        "count==4 && order==1 && !emela_fiber_done(f)",
+        "emela_task_complete_int(tasks[3],0)",
+        "emela_scheduler_run(1)",
+        "result==42 && order==3 && !emela_task_complete_int(tasks[1],0)",
+        "test_heap_empty()"
+      ],
+      "status": "pending-runtime",
+      "recommended_ledger_status": "pending",
+      "seams": [
+        "hold_late"
+      ],
+      "seam_steps": [
+        "Prepend Let dstNone Value::Runtime Hold args[] to source function late body, as fixed notes.rs::masked_notes_flow and overlap/payload helpers."
+      ]
+    },
+    {
+      "legacy_test": "emit::fiber::overlap::settled_nested_scope_failures_keep_their_notes_when_cleanup_raises_interrupt",
+      "legacy_path": "crates/emela-codegen-emb/tests/fiber/overlap.rs",
+      "legacy_line": 196,
+      "legacy_rust_sha256": "c4c33f6b0244100c7ec37cb48cb4067b8571fd00d9a1fe1aa2cceda7e7d05118",
+      "source_files": [
+        {
+          "program": "program:cb40e719f5376662f92f",
+          "name": "main.emel",
+          "fixture": "sources/aea3643aa96302f947090b9591b3266196a7d14191556bc32e922bdfa2ce2a76.emel",
+          "source_id": "source:aea3643aa96302f94709",
+          "sha256": "aea3643aa96302f947090b9591b3266196a7d14191556bc32e922bdfa2ce2a76"
+        }
+      ],
+      "source_adaptation": "original corpus source bytes + explicit C exports only",
+      "harness": "crates/emela-emb-compiler/tests/compat/p7/cleanup/settled_nested_scope_failures_keep_their_notes_when_cleanup_raises_interrupt.c",
+      "old_options": {
+        "heap_bytes": 8192,
+        "fiber_capacity": 10,
+        "frame_capacity": 48,
+        "frame_bytes": 512,
+        "task_capacity": 3,
+        "event_capacity": 3,
+        "task_adapters": {
+          "host_wait": "board_wait_start"
+        }
+      },
+      "legacy_C_assertions": [
+        "n>=1 && n<=5",
+        "n==++order",
+        "count==2",
+        "emela_task_complete_int(tasks[4],0)",
+        "emela_scheduler_run(1)",
+        "count==3",
+        "emela_task_complete_int(tasks[first-1],0)",
+        "!emela_fiber_done(f) && order==2",
+        "emela_task_complete_int(tasks[second-1],0)",
+        "emela_scheduler_run(1)",
+        "!emela_task_complete_int(tasks[2],0)",
+        "text.length==length && memcmp(text.data,expected,length)==0",
+        "test_heap_empty()"
+      ],
+      "status": "pending-runtime",
+      "recommended_ledger_status": "pending",
+      "seams": [
+        "protect_cleanup_call",
+        "hold_late"
+      ],
+      "seam_steps": [
+        "Copy fixed interrupt.rs::protect_cleanup_call: move the final source call to cleanup into a Protect cleanup, preserving required trailing evidence construction/lookup statements and capture operands. No source-body edits.",
+        "Prepend Let dstNone Value::Runtime Hold args[] to source function late body, as fixed notes.rs::masked_notes_flow and overlap/payload helpers."
+      ]
+    },
+    {
+      "legacy_test": "emit::fiber::payload::scope_causes_and_notes_keep_string_payloads_after_frames_and_scopes_end",
+      "legacy_path": "crates/emela-codegen-emb/tests/fiber/payload.rs",
+      "legacy_line": 85,
+      "legacy_rust_sha256": "6c6a40d71ae5c02f8fae9fb15139d82abec44cdde923e34536ebd61f51cac769",
+      "source_files": [
+        {
+          "program": "program:49e9df0f81ebe9dcca13",
+          "name": "main.emel",
+          "fixture": "sources/fe93293c01aee5bed6411ac6b8c42ab08ef816aee792fe3d249cb02782ed303f.emel",
+          "source_id": "source:fe93293c01aee5bed641",
+          "sha256": "fe93293c01aee5bed6411ac6b8c42ab08ef816aee792fe3d249cb02782ed303f"
+        }
+      ],
+      "source_adaptation": "original corpus source bytes + explicit C exports only",
+      "harness": "crates/emela-emb-compiler/tests/compat/p7/cleanup/scope_causes_and_notes_keep_string_payloads_after_frames_and_scopes_end.c",
+      "old_options": {
+        "heap_bytes": 4096,
+        "fiber_capacity": 8,
+        "frame_capacity": 48,
+        "frame_bytes": 768,
+        "task_capacity": 4,
+        "event_capacity": 4,
+        "task_adapters": {
+          "host_wait": "board_wait_start"
+        }
+      },
+      "legacy_C_assertions": [
+        "n >= 1 && n <= 4",
+        "count == 4",
+        "emela_task_complete_int(tasks[order[n]-1], 0)",
+        "emela_fiber_done(f) && !emela_task_complete_int(tasks[3], 0)",
+        "emela_scheduler_run(1)",
+        "shown.length == length && memcmp(shown.data, expected, length) == 0",
+        "payload.owner && payload.length == 1 && payload.data[0] == '0' + order[0]",
+        "test_heap_empty()"
+      ],
+      "status": "pending-runtime",
+      "recommended_ledger_status": "pending",
+      "seams": [
+        "hold_late"
+      ],
+      "seam_steps": [
+        "Prepend Let dstNone Value::Runtime Hold args[] to source function late body, as fixed notes.rs::masked_notes_flow and overlap/payload helpers."
+      ]
+    },
+    {
+      "legacy_test": "emit::fiber::task_failure::external_failure_payload_survives_suspending_cleanup_and_later_interruption",
+      "legacy_path": "crates/emela-codegen-emb/tests/fiber/task_failure.rs",
+      "legacy_line": 333,
+      "legacy_rust_sha256": "f674441cc569c575be04781f26b030a2e4a615277ffdc43dbaa4c54210565ee1",
+      "source_files": [
+        {
+          "program": "program:2ac6f38771693a3b32e2",
+          "name": "main.emel",
+          "fixture": "sources/eb0c2cac3a117558bf3564475ed61f667cbe44dcd7ef3821895e3edb69422f64.emel",
+          "source_id": "source:eb0c2cac3a117558bf35",
+          "sha256": "eb0c2cac3a117558bf3564475ed61f667cbe44dcd7ef3821895e3edb69422f64"
+        }
+      ],
+      "source_adaptation": "original corpus source bytes + explicit C exports only",
+      "harness": "crates/emela-emb-compiler/tests/compat/p7/cleanup/external_failure_payload_survives_suspending_cleanup_and_later_interruption.c",
+      "old_options": {
+        "heap_bytes": 4096,
+        "fiber_capacity": 8,
+        "frame_capacity": 24,
+        "frame_bytes": 1536,
+        "task_capacity": 2,
+        "event_capacity": 2,
+        "task_adapters": {
+          "host_wait": "board_wait_start",
+          "host_request": "board_request_start"
+        },
+        "string_capacity": 256
+      },
+      "legacy_C_assertions": [
+        "n==99",
+        "n==2",
+        "emela_task_fail(request,produce,&c,release)",
+        "produced==1&&released==1&&!marks&&!emela_fiber_done(f)&&!test_heap_empty()",
+        "!emela_fiber_done(f)",
+        "emela_task_complete_int(cleanup,0)",
+        "emela_fiber_done(f)&&marks==1",
+        "result==((i%3&&!(i%2))?5:-1)&&test_heap_empty()"
+      ],
+      "status": "pending-runtime",
+      "recommended_ledger_status": "pending",
+      "seams": [
+        "external_request",
+        "private_C_cancel"
+      ],
+      "seam_steps": [
+        "As examples/support/external_task_failure_flow.rs: source request wrapper must already fails+suspends; remove body and set external C HostRef::Global(host_request). Preserve params/ret/flags.",
+        "Append test_cancel(EmelaFiber h){emela_fiber_get(h)->cancelled=1;} to generated C, as old output() helper."
+      ]
+    },
+    {
+      "legacy_test": "emit::fiber::task_failure::external_failures_own_borrowed_strings_and_lists_across_escape_attempt_scope_and_cancel",
+      "legacy_path": "crates/emela-codegen-emb/tests/fiber/task_failure.rs",
+      "legacy_line": 256,
+      "legacy_rust_sha256": "f674441cc569c575be04781f26b030a2e4a615277ffdc43dbaa4c54210565ee1",
+      "source_files": [
+        {
+          "program": "program:2ac6f38771693a3b32e2",
+          "name": "main.emel",
+          "fixture": "sources/eb0c2cac3a117558bf3564475ed61f667cbe44dcd7ef3821895e3edb69422f64.emel",
+          "source_id": "source:eb0c2cac3a117558bf35",
+          "sha256": "eb0c2cac3a117558bf3564475ed61f667cbe44dcd7ef3821895e3edb69422f64"
+        }
+      ],
+      "source_adaptation": "original corpus source bytes + explicit C exports only",
+      "harness": "crates/emela-emb-compiler/tests/compat/p7/cleanup/external_failures_own_borrowed_strings_and_lists_across_escape_attempt_scope_and_cancel.c",
+      "old_options": {
+        "heap_bytes": 4096,
+        "fiber_capacity": 8,
+        "frame_capacity": 24,
+        "frame_bytes": 1536,
+        "task_capacity": 2,
+        "event_capacity": 2,
+        "task_adapters": {
+          "host_wait": "board_wait_start",
+          "host_request": "board_request_start"
+        },
+        "string_capacity": 256
+      },
+      "legacy_C_assertions": [
+        "locked",
+        "n==1 && !isr && !locked",
+        "!isr && !locked",
+        "!isr && !locked",
+        "emela_task_fail(request,produce,c,release)",
+        "!emela_task_fail(request,produce,c,release)",
+        "!emela_task_complete_int(request,99)",
+        "!produced && !released",
+        "emela_fiber_done(f)&&result==5&&produced==1&&released==1&&marks==1",
+        "test_heap_empty()",
+        "emela_fiber_done(f)&&produced==1&&released==1",
+        "text.length==strlen(expected)&&!memcmp(text.data,expected,text.length)",
+        "test_heap_empty()",
+        "emela_fiber_done(f)&&result==3&&produced==1&&released==1",
+        "test_heap_empty()",
+        "!produced&&!released",
+        "!test_heap_empty()",
+        "emela_fiber_done(f)&&!produced&&released==1&&marks==1&&result==-1",
+        "test_heap_empty()",
+        "!emela_task_fail(request,produce,&c,release)",
+        "emela_fiber_done(f)&&!emela_task_fail(request,produce,&c,release)",
+        "test_heap_empty()",
+        "emela_task_complete_int(request,42)",
+        "emela_fiber_done(f)&&result==42&&marks==1",
+        "test_heap_empty()",
+        "!emela_task_fail(plain,produce,&c,release)",
+        "emela_task_complete_int(plain,42)",
+        "result==42",
+        "!emela_task_fail((EmelaTask){{UINT32_MAX,0}},produce,&c,release)",
+        "!emela_task_fail(request,NULL,&c,release)",
+        "!produced&&!released&&test_heap_empty()"
+      ],
+      "status": "pending-runtime",
+      "recommended_ledger_status": "pending",
+      "seams": [
+        "external_request",
+        "private_C_cancel"
+      ],
+      "seam_steps": [
+        "As examples/support/external_task_failure_flow.rs: source request wrapper must already fails+suspends; remove body and set external C HostRef::Global(host_request). Preserve params/ret/flags.",
+        "Append test_cancel(EmelaFiber h){emela_fiber_get(h)->cancelled=1;} to generated C, as old output() helper."
+      ]
+    }
+  ]
+}
