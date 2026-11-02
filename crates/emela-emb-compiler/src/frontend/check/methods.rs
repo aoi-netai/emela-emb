@@ -51,6 +51,9 @@ impl Checker {
         let mut receiver = self.expr(module, base, locals, None)?;
         receiver.ty = self.resolve_type(module, receiver.ty, base.span)?;
         let receiver_type = data::backend_type(receiver.ty);
+        if matches!(self.catalog.core.ty(receiver_type), Type::Handler(_)) {
+            return self.operation_call(module, receiver, name, args, locals, expected, span);
+        }
         if self.solver.is_meta(receiver_type) {
             return Err(self.error(
                 module,
@@ -62,7 +65,8 @@ impl Checker {
         let mut candidates = Vec::new();
         if let Some(owner) = self.receiver_module(receiver_type) {
             if let Type::Enum(id, _) = self.catalog.core.ty(receiver_type) {
-                let declaration = self.catalog.declaration(*id);
+                let id = *id;
+                let declaration = self.catalog.declaration(id);
                 if declaration.ast.variants.len() == 1
                     && declaration.ast.variants[0].fields.iter().any(|field| {
                         field
@@ -72,12 +76,31 @@ impl Checker {
                     })
                     && (!declaration.ast.opaque || owner == module)
                 {
-                    return Err(self.error(
-                        module,
-                        DK::Type,
-                        name.span,
-                        "calling a record field requires a function value",
-                    ));
+                    let index = declaration.ast.variants[0]
+                        .fields
+                        .iter()
+                        .position(|field| {
+                            field
+                                .name
+                                .as_ref()
+                                .is_some_and(|field| field.value == name.value)
+                        })
+                        .unwrap();
+                    let ctor = crate::contract::ir::CtorRef {
+                        enum_id: id,
+                        variant: 0,
+                    };
+                    let ty = self.catalog.fields(ctor, receiver.ty)[index];
+                    let callee = ir::Expr {
+                        kind: ir::ExprKind::Field {
+                            base: Box::new(receiver),
+                            ctor,
+                            index,
+                        },
+                        ty,
+                        span: base.span,
+                    };
+                    return self.apply_value(module, callee, args, locals, expected, span);
                 }
             }
             if let Some(&id) = self.module_definitions[owner].get(&name.value) {

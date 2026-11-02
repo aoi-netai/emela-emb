@@ -93,9 +93,17 @@ fn execute(input: ir::Program) {
     );
 }
 fn execute_with_harness(input: ir::Program, harness: &str) {
-    let program = specialize(input).unwrap();
+    execute_with_options(input, harness, &crate::Options::default());
+}
+fn execute_with_options(input: ir::Program, harness: &str, options: &crate::Options) {
+    let mut program = specialize(input).unwrap();
+    crate::frontend::function_abi::project(&mut program).unwrap();
     let lowered = crate::frontend::lower::lower(&program);
-    let output = crate::backend::compile_program(lowered, &crate::Options::default()).unwrap();
+    let mut output = crate::backend::compile_program(lowered, options).unwrap();
+    if options.heap_bytes() != 0 {
+        output.files.iter_mut().find(|file| file.path == "emela_embedded.c").unwrap().contents.push_str(
+            "\nint test_heap_empty(void){for(unsigned char*p=emela_heap_storage;emela_heap_initialized&&p<emela_heap_end();){emela_heap_block*b=(emela_heap_block*)(void*)p;if(!b->is_free)return 0;p+=b->size;}return 1;}\n");
+    }
     static NEXT: AtomicU64 = AtomicU64::new(0);
     let path = std::env::temp_dir().join(format!(
         "emela-specialize-{}-{}",
@@ -1913,3 +1921,82 @@ fn dbg_of_a_diverging_expression_does_not_require_or_evaluate_show() {
 
 #[path = "tests_generic_methods.rs"]
 mod generic_methods;
+
+#[test]
+fn generic_function_references_inside_a_lambda_lower_to_indirect_calls() {
+    let mut core = b::Definitions::default();
+    let parameter = core.types.intern(b::Type::Param(0));
+    let function_type = core.types.intern(b::Type::Fn(b::FnType {
+        params: vec![b::TypeId::INT],
+        ret: b::TypeId::INT,
+        fails: false,
+        suspends: false,
+        ev: false,
+        sets: None,
+    }));
+    let lambda_type = core.types.intern(b::Type::Fn(b::FnType {
+        params: vec![],
+        ret: b::TypeId::INT,
+        fails: false,
+        suspends: false,
+        ev: false,
+        sets: None,
+    }));
+    let value = local(0, frontend_type(parameter));
+    let mut identity = function(
+        0,
+        "identity",
+        vec![value.clone()],
+        value.ty,
+        expression(ir::ExprKind::Local(value.id), value.ty),
+    );
+    identity.type_parameters = 1;
+    let reference = expression(
+        ir::ExprKind::FnRef {
+            target: identity.id,
+            type_arguments: vec![b::TypeId::INT],
+        },
+        frontend_type(function_type),
+    );
+    let apply = expression(
+        ir::ExprKind::Apply {
+            callee: Box::new(reference),
+            args: vec![integer(42)],
+            order: vec![0],
+        },
+        ValueType::Int,
+    );
+    let lambda = expression(
+        ir::ExprKind::Lambda {
+            params: vec![],
+            captures: vec![],
+            body: block(apply),
+        },
+        frontend_type(lambda_type),
+    );
+    let answer = exported(function(
+        1,
+        "answer",
+        vec![],
+        ValueType::Int,
+        expression(
+            ir::ExprKind::Apply {
+                callee: Box::new(lambda),
+                args: vec![],
+                order: vec![],
+            },
+            ValueType::Int,
+        ),
+    ));
+    execute(ir::Program {
+        core,
+        registry: Default::default(),
+        functions: vec![identity, answer],
+    });
+}
+
+#[path = "tests_effects.rs"]
+mod effects;
+
+#[path = "tests_state.rs"]
+mod state;

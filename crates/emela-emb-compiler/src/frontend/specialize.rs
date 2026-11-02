@@ -62,6 +62,7 @@ fn specialize_with_limits(input: ir::Program, limits: Limits) -> Result<ir::Prog
         templates,
         functions,
         cache: HashMap::new(),
+        effect_instances: HashMap::new(),
         builtin_helpers: HashMap::new(),
         debug_show_helpers: HashMap::new(),
         debug_fallback: HashSet::new(),
@@ -88,6 +89,7 @@ struct Specializer {
     templates: HashMap<ir::DefinitionId, ir::Function>,
     functions: Vec<ir::Function>,
     cache: HashMap<(ir::DefinitionId, Vec<b::TypeId>), ir::DefinitionId>,
+    effect_instances: HashMap<(b::EffectId, Vec<b::TypeId>), b::EffectId>,
     builtin_helpers: HashMap<(super::traits::BuiltinTrait, b::TypeId, bool), ir::DefinitionId>,
     debug_show_helpers: HashMap<(b::TypeId, bool), ir::DefinitionId>,
     debug_fallback: HashSet<ir::DefinitionId>,
@@ -268,6 +270,10 @@ impl Specializer {
                     self.substitute(function, element, args, span, memo, active, depth + 1)?;
                 self.core.types.intern(b::Type::Cell(element))
             }
+            b::Type::Handler(effect) => {
+                let effect = self.effect(function, effect, args, span, depth + 1)?;
+                self.core.types.intern(b::Type::Handler(effect))
+            }
             b::Type::Fn(mut signature) => {
                 signature.params = signature
                     .params
@@ -301,13 +307,22 @@ impl Specializer {
                 self.core.types.intern(b::Type::Fn(signature))
             }
             b::Type::Set(mut summary) => {
-                summary.params = summary
+                let members = summary
                     .params
                     .into_iter()
                     .map(|param| {
                         self.substitute(function, param, args, span, memo, active, depth + 1)
                     })
-                    .collect::<Result<_>>()?;
+                    .collect::<Result<Vec<_>>>()?;
+                summary.params = Vec::new();
+                for member in members {
+                    match &self.core.types[member] {
+                        b::Type::Set(nested) => summary.merge(nested),
+                        _ => summary.params.push(member),
+                    }
+                }
+                summary.params.sort();
+                summary.params.dedup();
                 self.core.types.intern(b::Type::Set(summary))
             }
             _ => ty,
@@ -350,12 +365,19 @@ impl Specializer {
                 &mut HashSet::new(),
                 0,
             )?;
+        }
+        function.signature.sets.errors = self.flatten_set_members(&function.signature.sets.errors);
+        function.signature.sets.error_constraints =
+            self.flatten_set_members(&function.signature.sets.error_constraints);
+        for &error_type in function
+            .signature
+            .sets
+            .errors
+            .iter()
+            .chain(&function.signature.sets.error_constraints)
+        {
             let valid = match self.core.types.types.get(error_type.index()) {
-                Some(b::Type::Enum(id, _)) => self
-                    .core
-                    .enums
-                    .iter()
-                    .any(|(key, definition)| key == *id && definition.error),
+                Some(b::Type::Enum(id, _)) => self.core.enums[*id].error,
                 _ => false,
             };
             if !valid {
@@ -366,6 +388,21 @@ impl Specializer {
                 ));
             }
         }
+        for effect_type in &mut function.signature.sets.effects {
+            *effect_type = self.substitute(
+                &source,
+                *effect_type,
+                args,
+                source.span,
+                &mut HashMap::new(),
+                &mut HashSet::new(),
+                0,
+            )?;
+        }
+        function.signature.sets.effects =
+            self.flatten_set_members(&function.signature.sets.effects);
+        function.signature.sets.effects.sort_by_key(|ty| ty.index());
+        function.signature.sets.effects.dedup();
         function.signature.sets.errors.sort_by_key(|ty| ty.index());
         function.signature.sets.errors.dedup();
         function
@@ -384,6 +421,24 @@ impl Specializer {
             self.block(&source, body, args, depth)?;
         }
         Ok(())
+    }
+    fn flatten_set_members(&self, members: &[b::TypeId]) -> Vec<b::TypeId> {
+        let mut pending = members.to_vec();
+        let mut seen = HashSet::new();
+        let mut result = Vec::new();
+        while let Some(member) = pending.pop() {
+            if !seen.insert(member) {
+                continue;
+            }
+            if let b::Type::Set(row) = self.core.ty(member) {
+                pending.extend(&row.params);
+            } else {
+                result.push(member);
+            }
+        }
+        result.sort();
+        result.dedup();
+        result
     }
     fn block(
         &mut self,
@@ -470,7 +525,103 @@ impl Specializer {
     ) -> Result<()> {
         expression.ty = self.ty(function, expression.ty, arguments, expression.span)?;
         match &mut expression.kind {
+            ir::ExprKind::Use { effect } => {
+                *effect = self.effect(function, *effect, arguments, expression.span, 0)?;
+            }
+            ir::ExprKind::OpCall {
+                handler,
+                effect,
+                errors,
+                args,
+                order,
+                ..
+            } => {
+                *effect = self.effect(function, *effect, arguments, expression.span, 0)?;
+                for error in errors {
+                    *error = self.substitute(
+                        function,
+                        *error,
+                        arguments,
+                        expression.span,
+                        &mut HashMap::new(),
+                        &mut HashSet::new(),
+                        0,
+                    )?;
+                }
+                Self::order(function, expression.span, order, args.len())?;
+                self.expression(function, handler, arguments, depth)?;
+                for argument in args {
+                    self.expression(function, argument, arguments, depth)?;
+                }
+            }
+            ir::ExprKind::Handler {
+                effect, operations, ..
+            } => {
+                *effect = self.effect(function, *effect, arguments, expression.span, 0)?;
+                for operation in operations {
+                    self.expression(function, operation, arguments, depth)?;
+                }
+            }
+            ir::ExprKind::Provide { bindings, body } => {
+                for (effect, value) in bindings {
+                    *effect = self.effect(function, *effect, arguments, expression.span, 0)?;
+                    self.expression(function, value, arguments, depth)?;
+                }
+                self.block(function, body, arguments, depth)?;
+            }
+            ir::ExprKind::With { bindings, body } => {
+                for binding in bindings {
+                    binding.local.ty =
+                        self.ty(function, binding.local.ty, arguments, expression.span)?;
+                    for effect in &mut binding.effects {
+                        *effect = self.effect(function, *effect, arguments, expression.span, 0)?;
+                    }
+                    self.expression(function, &mut binding.value, arguments, depth)?;
+                    if let Some(cleanup) = &mut binding.cleanup {
+                        self.expression(function, cleanup, arguments, depth)?;
+                    }
+                }
+                self.block(function, body, arguments, depth)?;
+            }
             ir::ExprKind::Literal(_) | ir::ExprKind::Local(_) => {}
+            ir::ExprKind::FnRef {
+                target,
+                type_arguments,
+            } => {
+                let concrete = type_arguments
+                    .iter()
+                    .map(|&ty| {
+                        self.substitute(
+                            function,
+                            ty,
+                            arguments,
+                            expression.span,
+                            &mut HashMap::new(),
+                            &mut HashSet::new(),
+                            0,
+                        )
+                    })
+                    .collect::<Result<Vec<_>>>()?;
+                *target = self.instantiate(function, *target, concrete, expression.span, depth)?;
+                type_arguments.clear();
+            }
+            ir::ExprKind::Lambda { params, body, .. } => {
+                for parameter in params {
+                    parameter.ty = self.ty(function, parameter.ty, arguments, expression.span)?;
+                }
+                self.block(function, body, arguments, depth)?;
+            }
+            ir::ExprKind::Apply {
+                callee,
+                args,
+                order,
+            } => {
+                Self::order(function, expression.span, order, args.len())?;
+                self.expression(function, callee, arguments, depth)?;
+                for argument in args {
+                    self.expression(function, argument, arguments, depth)?;
+                }
+            }
             ir::ExprKind::List { elements, tail } => {
                 for value in elements {
                     self.expression(function, value, arguments, depth)?;
@@ -561,6 +712,7 @@ impl Specializer {
                 }
             }
             ir::ExprKind::Fail(base)
+            | ir::ExprKind::Coerce(base)
             | ir::ExprKind::Field { base, .. }
             | ir::ExprKind::Unary { value: base, .. }
             | ir::ExprKind::Assert(base)
@@ -607,7 +759,7 @@ impl Specializer {
                 type_arguments,
             } => {
                 Self::order(function, expression.span, order, args.len())?;
-                for value in args {
+                for value in args.iter_mut() {
                     self.expression(function, value, arguments, depth)?;
                 }
                 let concrete = type_arguments
@@ -626,6 +778,24 @@ impl Specializer {
                     .collect::<Result<Vec<_>>>()?;
                 *target = self.instantiate(function, *target, concrete, expression.span, depth)?;
                 type_arguments.clear();
+                if let Some(runtime) = self
+                    .functions
+                    .iter()
+                    .find(|candidate| {
+                        candidate.id == *target
+                            && candidate.intrinsic == Some(crate::sources::Intrinsic::StateRun)
+                    })
+                    .cloned()
+                {
+                    *expression = self.state_run_expression(
+                        function,
+                        &runtime,
+                        std::mem::take(args),
+                        order,
+                        expression.ty,
+                        expression.span,
+                    )?;
+                }
             }
         }
         Ok(())
@@ -644,3 +814,9 @@ mod constant_patterns;
 
 #[path = "specialize/debug.rs"]
 mod debug;
+
+#[path = "specialize/effects.rs"]
+mod effects;
+
+#[path = "specialize/state.rs"]
+mod state;

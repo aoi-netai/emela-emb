@@ -31,7 +31,11 @@ pub(in crate::backend::emit) fn emit_evidence_lookup(
             "EvLookup has no destination",
         ));
     };
-    if layouts.shapes.types[function.vars[dst].ty] != Type::Handler(effect)
+    let base_effect =
+        crate::semantics::effect_base(layouts.shapes.core, effect).ok_or_else(|| {
+            invalid_flow_ir(&function.name, "EvLookup effect has an invalid label base")
+        })?;
+    if layouts.shapes.types[function.vars[dst].ty] != Type::Handler(base_effect)
         || !matches!(
             layouts.shapes.types[function.vars[evidence].ty],
             Type::Evidence

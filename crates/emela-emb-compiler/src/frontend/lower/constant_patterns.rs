@@ -29,6 +29,41 @@ pub(super) fn allocate_structural_equality(
     fn expression(value: &ir::Expr, types: &mut HashSet<b::TypeId>) {
         use ir::ExprKind as E;
         match &value.kind {
+            E::Use { .. } => {}
+            E::OpCall { handler, args, .. } => {
+                expression(handler, types);
+                for argument in args {
+                    expression(argument, types);
+                }
+            }
+            E::Handler { operations, .. } => {
+                for operation in operations {
+                    expression(operation, types);
+                }
+            }
+            E::Provide { bindings, body } => {
+                for (_, value) in bindings {
+                    expression(value, types);
+                }
+                block(body, types);
+            }
+            E::With { bindings, body } => {
+                for binding in bindings {
+                    expression(&binding.value, types);
+                    if let Some(cleanup) = &binding.cleanup {
+                        expression(cleanup, types);
+                    }
+                }
+                block(body, types);
+            }
+            E::FnRef { .. } => {}
+            E::Lambda { body, .. } => block(body, types),
+            E::Apply { callee, args, .. } => {
+                expression(callee, types);
+                for argument in args {
+                    expression(argument, types);
+                }
+            }
             E::List { elements, tail } => {
                 for element in elements {
                     expression(element, types);
@@ -48,6 +83,7 @@ pub(super) fn allocate_structural_equality(
                 }
             }
             E::Field { base, .. }
+            | E::Coerce(base)
             | E::Tag(base)
             | E::Fail(base)
             | E::Unary { value: base, .. }

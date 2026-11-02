@@ -82,7 +82,6 @@ fn trait_name(kind: BuiltinTrait) -> &'static str {
 }
 fn function_type(core: &mut b::Definitions, signature: &Signature) -> b::TypeId {
     let errors = core.types.intern(b::Type::Set(b::SetSummary {
-        fails: !signature.sets.errors.is_empty(),
         params: signature.sets.errors.clone(),
         ..b::SetSummary::default()
     }));
@@ -116,22 +115,32 @@ fn substitute_signature_arguments(
     let params = original
         .params
         .iter()
-        .map(|ty| data::frontend_type(core.types.subst(data::backend_type(*ty), arguments)))
+        .map(|ty| {
+            data::frontend_type(data::substitute(
+                &mut core.types,
+                data::backend_type(*ty),
+                arguments,
+            ))
+        })
         .collect();
-    let ret = original
-        .ret
-        .map(|ty| data::frontend_type(core.types.subst(data::backend_type(ty), arguments)));
+    let ret = original.ret.map(|ty| {
+        data::frontend_type(data::substitute(
+            &mut core.types,
+            data::backend_type(ty),
+            arguments,
+        ))
+    });
     let errors = original
         .sets
         .errors
         .iter()
-        .map(|ty| core.types.subst(*ty, arguments))
+        .map(|ty| data::substitute(&mut core.types, *ty, arguments))
         .collect::<Vec<_>>();
     let constraints = original
         .sets
         .error_constraints
         .iter()
-        .map(|ty| core.types.subst(*ty, arguments))
+        .map(|ty| data::substitute(&mut core.types, *ty, arguments))
         .collect();
     Signature {
         params,
@@ -168,6 +177,8 @@ fn synthetic_function(
             .collect(),
         return_type: None,
         fails: None,
+        effects: None,
+        suspends: false,
         attributes: vec![],
         body: None,
     }
@@ -1563,7 +1574,8 @@ mod tests {
         let b::Type::Set(errors) = catalog.core.ty(sets.errors) else {
             panic!("error set")
         };
-        assert!(errors.fails && errors.params.len() == 1);
+        // Source rows retain identities; ABI flags are computed after instantiation.
+        assert!(!errors.fails && errors.params.len() == 1);
         let b::Type::Enum(error, _) = catalog.core.ty(errors.params[0]) else {
             panic!("error identity")
         };

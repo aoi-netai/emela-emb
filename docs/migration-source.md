@@ -7,7 +7,7 @@
 ## 採用範囲と変更
 
 - `contract/`・`semantics/`・`compiler/plan/`・`compiler/emit/`・`writer.rs` とartifact manifestの純粋処理を採用。`compiler/`を`backend/`へ移動し内部pathを変更した。
-- upstream adapter、Core/Flowのcrate・入力API、boards・platform製品・CLI・BSPは採用しない。lowerはこのrepoが所有する型付きProgramを検証し、位置・到達性・自己末尾再帰のmetadataを構築する新実装。
+- upstream adapter、Core/Flowのcrate・入力API、boards・platform製品・CLI・BSPは採用しない。lowerはこのrepoが所有する型付きProgramを検証し、位置・到達性・自己末尾再帰のmetadataを構築する。P4のclosure変換は旧変換を独自contract IR上へ適応して採用する。
 - 明示的なC export名をFunctionに追加し、既存の公開symbolを維持する。Outputには既存API用の`c_source`/`header`を保持し、複数ファイルとexportsも返す。
 - Rust 1.85を維持するため、旧backendのlet-chainを同じpatternとguardを持つmatchへ置き換えた。Unicodeの`is_multiple_of`は剰余比較へ置き換えた。
 - 後続段階用のcontract variantが未使用のため、contract/semanticsでdead_codeを許容。未接続構造をlowerで拒否し、後段コードの採用をsource機能の完成として扱わない。
@@ -351,3 +351,48 @@
 | `crates/emela-core/lib/std/set.emel` | `535f00a6ad55adf2f5d619b6b116aa3d15e56b8102eba66d15c3d5093dc2298d` | `crates/emela-emb-compiler/lib/std/set.emel` |
 
 Map.from_list/keys/valuesとSet.from_listの内部callbackを、評価順と結果の順序を保つ直接再帰helperへ置き換える。公開update/fold/map_values/filterはcallback対応のP4で供給する。回転・削除・unionの木構造アルゴリズム、Eq/Showの順序、opaque境界は保持する。
+
+## P4のclosure変換基盤
+
+固定revision `c34c0aeefdd966d854371b3110db00a47798751d` の `crates/emela-codegen-emb/src/compiler/lower/closure.rs`（元SHA-256: `2a21204cc6929cffecc3800fd3663d1d6d25e42c6891a35463dcebb7110c3dda`）を `src/backend/lower/closure.rs` へ適応した。ライセンスは上記のApache-2.0に従う。
+
+- upstreamのModule/Core/Flow依存を独自contractのProgram・Function・Arenaへ置換し、bodyの変数・label・sequence再配置とcapture metadata構築をlower内で行う。
+- 到達性は明示exportと選択entryから計算し、rootが空の場合の全関数fallbackは持ち込まない。関数値とnested closureも到達辺として追跡する。
+- parameter・loop variable・複数定義のcaptureを静的定数へ置き換えず、実際の値を環境に保存する。動的String captureはowner付きsnapshotを維持する。
+- frontendのFnRef/Lambda/Apply、具体化、評価順とUnit消去は独自実装。IR/C試験では返却関数値、generic関数参照、返却closureのString所有・解放と不正IR拒否を確認する。source接続とeffect/handler対応は別の証拠で判定する。
+
+現段階ではconst内closureを明示的に拒否する。通常の関数値成功でこの範囲を完了扱いせず、P7の汎化constと型別bridgeへ残件として引き継ぐ。
+
+## P4の静的handler解決と動的境界
+
+同じ固定revisionの `crates/emela-codegen-emb/src/compiler/lower/handler.rs`（元SHA-256: `524fc40bcc16877e4b403d1e00d0034a1a537c9a879c94f07085835ae90c98c2`）を `src/backend/lower/handler.rs` へ適応した。Core/LIR crate依存を独自contractへ置換し、MSRV 1.85向けの同値なnested if、選択entryからの到達性、loop/parameterの可変値を静的解決しない検査を加えた。
+
+Handler/Evidence/operation call/RetireとCellの型・ID検証は独自lowerに接続する。静的evidenceは不要なhandler割当を消去できる一方、別関数やAny aliasからretireできるeffectは動的active検査を保つ。Unitを返すCellSetには所有用の仮destinationを追加しない。
+
+`backend/lower/handler_tests.rs` の独自IR/C試験は、heap不要の静的解決、別関数へ渡す動的evidenceとProtect cleanup、Any経由のretire後のdefect、Cell/closure/Any循環の1000回反復と全heap回収を両最適化で確認する。これはsourceのhandler/layer/init/release接続とは別の証拠とする。
+
+関数型間のCoerceは、既存plan/emitのadapter互換条件に沿って独自validatorへ接続する。引数の変更、Never以外の戻り型変更、evidenceの消去は拒否し、Unit消去を伴うpure関数からfailure/evidence ABIへの変換をIR/C両最適化・1000回の全heap回収で確認する。
+
+戻り型Neverの関数値は任意の具体戻り型へ拡大できる。failure ABIだけで戻る経路には初期化済みの仮結果を返し、通常経路でNever関数が戻った場合はassert defectにする。IR/C試験ではIntへの拡大後も元のdefectと捕捉可能なfailureがそれぞれ保たれることを両最適化で確認する。
+
+## P4のState.run合成
+
+固定revisionの `crates/emela-core/lib/std/state.emel`（SHA-256: `44b9437ac0aab7c892574deb918eabff2f13d6f61db19623b80f28f133e80856`）をcompiler所有sourceとして保存する。契約は旧 `crates/emela-core/src/lower.rs` の `StateRun::apply` / `state_run` を参照した（同file SHA-256: `1b625dd7d1dd64036d2ec2ec2886312415a5c088b014622b353072de7f454d86`）。旧frontendを依存・同梱せず、独自の具体化処理 `frontend/specialize/state.rs` でCell、capture付きoperation、handler、evidence供給とcallback呼出しを合成する。
+
+引数はnamed argumentを含めsource順で一度ずつ評価し、成功後にCellを作る。Stateはretireせず、返却closureによる共有状態の保持を許す。公開Cell型やStd.Cell APIは追加しない。独自IR/C試験で、引数の順序、返却closureによる連続更新、1000回のheap全回収と別moduleのState identity拒否を確認した。
+
+Std.Stateを通常sourceへ登録し、`tests/p4_state.rs`で返却closure、借用Stringのsnapshot、失敗payload、named argument順、異なる型のStateの入れ子、State.runの関数値をC両最適化・各1000回の全heap回収で確認する。公開Cell型やeffect付き・失敗するupdate callbackは拒否する。
+
+## P4標準callback APIの復元
+
+上記と同じ固定revision・SHA-256のOption/List/String/Std.Bytes/Std.Map/Std.Setを再利用し、P3で直接再帰helperへ適応した内部callbackを元のbodyへ戻す。Option.map/and_then、Listのmap/filter/fold/partition/any/all/find/flat_map/filter_map/find_index/sort_by、Map.update/fold/map_values/filter、Set.fold/filterを含む。List.sortも旧bodyの `sort_by(xs, Ord.compare)` を維持し、trait methodの関数値を通常のfrontend経路で具体化する。
+
+Stringの`@deprecated`・`@internal`は従来と同じmetadata適応として省略し、既に供給していた`String.is_empty`は保持する。Preludeのprimitive Bool/trait適応を上書きせず、Std.Stateのnative effect接続は別の変更として扱う。
+
+`tests/p4_standard_callbacks.rs`と`tests/compat/p4/stdlib-*.emel`は、callbackの順序・短絡・安定sort、generic/constructor/trait function reference、captureした関数の返却、失敗途中のList解放を確認するための入力である。この復元のC実行結果はP4の統合報告で記録し、sourceを保存しただけでは対応完了にしない。
+
+## P4のConsole標準handler
+
+固定revisionの `crates/emela-core/lib/std/console.emel`（SHA-256: `35e8a9bafad0db2c285fe6bd44627b7eb4fd41bbf2e1238a4b3d519c0a1d2d0e`）を `lib/std/console.emel` へ採用する。Console・SystemConsole・TestConsoleのbodyを保持し、他targetのexternal metadataを省略、C相対pathは呼出し元が接続するsymbolへ適応した。予約済みC名はcompiler所有module・宣言名・固定symbolが一致する場合だけ許可し、user宣言には開放しない。
+
+`tests/p4_console.rs` はStateへ記録するTestConsoleと、既存の明示external adapterを使うSystemConsoleのC mockを接続する。List.mapのeffect多相、lineの順序・stderrの処理差、埋込みNULのString、1000回のheap全回収を両最適化で確認する。物理boardやplatformのservice接続はP7で扱う。

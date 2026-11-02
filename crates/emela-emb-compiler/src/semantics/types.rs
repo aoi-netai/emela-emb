@@ -1,6 +1,21 @@
 //! Canonical type interning and substitution over the independent backend catalog.
 use crate::contract::ir::*;
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
+
+/// Runtime capability layout shared by an effect and its labels. Evidence keys
+/// still use the original effect ID so labeled providers remain distinct.
+pub(crate) fn effect_base(core: &Definitions, mut effect: EffectId) -> Option<EffectId> {
+    let mut seen = HashSet::new();
+    loop {
+        if !seen.insert(effect) || u32::from(effect.into_raw()) as usize >= core.effects.len() {
+            return None;
+        }
+        match core.effects[effect].label_of {
+            Some(base) => effect = base,
+            None => return Some(effect),
+        }
+    }
+}
 
 impl Default for TypeTable {
     fn default() -> Self {

@@ -9,6 +9,8 @@ use std::collections::{HashMap, HashSet};
 
 #[path = "lower/constant_patterns.rs"]
 mod constant_patterns;
+#[path = "lower/effects.rs"]
+mod effects;
 #[path = "lower/failures.rs"]
 mod failures;
 
@@ -23,7 +25,6 @@ pub(crate) fn lower(input: &ir::Program) -> b::Program {
     let mut ids = HashMap::new();
     for function in &input.functions {
         if function.intrinsic.is_none() {
-            debug_assert!(function.signature.sets.effects.is_empty());
             debug_assert!(function.derivation.is_none());
             debug_assert!(function.origin.is_none() || function.constant);
             let mut target = b::Function::new(&function.name);
@@ -53,6 +54,11 @@ pub(crate) fn lower(input: &ir::Program) -> b::Program {
         .iter()
         .filter_map(|function| (!function.signature.sets.errors.is_empty()).then_some(function.id))
         .collect();
+    let effectful: HashSet<_> = input
+        .functions
+        .iter()
+        .filter_map(|function| (!function.signature.sets.effects.is_empty()).then_some(function.id))
+        .collect();
     let intrinsics = input
         .functions
         .iter()
@@ -72,9 +78,12 @@ pub(crate) fn lower(input: &ir::Program) -> b::Program {
             locals: HashMap::new(),
             core: &program.core,
             failing: &failing,
+            effectful: &effectful,
+            evidence: None,
             raises: &raises,
             structural_equality: &structural_equality,
             escape: None,
+            closure_depth: 0,
         };
         for param in &function.params {
             if param.ty == Ty::Unit {
@@ -86,6 +95,11 @@ pub(crate) fn lower(input: &ir::Program) -> b::Program {
             let var = context.var(&param.name, param.ty);
             context.function.params.push(var);
             context.locals.insert(param.id, b::Operand::Var(var));
+        }
+        if effectful.contains(&function.id) {
+            let evidence = context.var("evidence", Ty::Compound(b::TypeId::EVIDENCE));
+            context.function.params.push(evidence);
+            context.evidence = Some(evidence);
         }
         if let Some(body) = &function.body {
             context.function.body = Some(context.block(body, true));
@@ -110,9 +124,12 @@ struct Context<'a> {
     locals: HashMap<LocalId, b::Operand>,
     core: &'a b::Definitions,
     failing: &'a HashSet<DefinitionId>,
+    effectful: &'a HashSet<DefinitionId>,
+    evidence: Option<b::VarId>,
     raises: &'a HashMap<b::TypeId, b::FnId>,
     structural_equality: &'a HashMap<b::TypeId, b::FnId>,
     escape: Option<(b::VarId, b::SeqId)>,
+    closure_depth: usize,
 }
 impl Context<'_> {
     fn var(&mut self, name: &str, value_type: Ty) -> b::VarId {
@@ -225,6 +242,150 @@ impl Context<'_> {
     ) -> Option<b::Operand> {
         use ir::ExprKind as E;
         match &expression.kind {
+            E::Use { effect } => self.use_effect(builder, *effect, expression.ty),
+            E::OpCall {
+                handler,
+                effect,
+                op,
+                args,
+                order,
+                ..
+            } => self.operation_call(builder, handler, *effect, *op, args, order, expression.ty),
+            E::Handler {
+                name,
+                effect,
+                operations,
+            } => self.handler_value(builder, name, *effect, operations, expression.ty),
+            E::Provide { bindings, body } => self.provide(builder, bindings, body, tail),
+            E::With { bindings, body } => {
+                self.with_expression(builder, bindings, body, expression.ty)
+            }
+            E::Coerce(value) => {
+                let operand = self.expression(builder, value, false)?;
+                if expression.ty == value.ty {
+                    return Some(operand);
+                }
+                let source = match operand {
+                    b::Operand::Var(var) => var,
+                    b::Operand::Const(constant) => {
+                        let var = self.var("coercion_source", value.ty);
+                        self.statement(
+                            builder,
+                            b::Stmt::Let {
+                                dst: Some(var),
+                                value: b::Value::Const(constant),
+                                on_defect: None,
+                                on_suspend: None,
+                            },
+                        );
+                        var
+                    }
+                };
+                self.value(builder, b::Value::Coerce(source), expression.ty)
+            }
+            E::FnRef { target, .. } => {
+                self.value(builder, b::Value::FnRef(self.ids[target]), expression.ty)
+            }
+            E::Lambda {
+                params,
+                captures,
+                body,
+            } => {
+                let mut captured: Vec<_> = captures
+                    .iter()
+                    .filter_map(|id| match self.locals.get(id).expect("checked capture") {
+                        b::Operand::Var(var) => Some(*var),
+                        b::Operand::Const(_) => None,
+                    })
+                    .collect();
+                let saved_locals = self.locals.clone();
+                let saved_escape = self.escape.take();
+                let saved_evidence = self.evidence;
+                let b::Type::Fn(ft) = self.core.ty(ty(expression.ty)) else {
+                    unreachable!("checked lambda type")
+                };
+                let ft = ft.clone();
+                // Ordinary effectful closures receive the caller's table. Handler operation
+                // closures keep the table of the surrounding acquisition instead.
+                if !ft.ev {
+                    if let Some(evidence) = saved_evidence {
+                        if !captured.contains(&evidence) {
+                            captured.push(evidence);
+                        }
+                    }
+                }
+                self.closure_depth += 1;
+                let mut parameters = Vec::new();
+                for parameter in params {
+                    let value = if parameter.ty == Ty::Unit {
+                        b::Operand::Const(b::Const::Unit)
+                    } else {
+                        let var = self.var(&parameter.name, parameter.ty);
+                        parameters.push(var);
+                        b::Operand::Var(var)
+                    };
+                    self.locals.insert(parameter.id, value);
+                }
+                if ft.ev {
+                    let evidence = self.var("lambda_evidence", Ty::Compound(b::TypeId::EVIDENCE));
+                    parameters.push(evidence);
+                    self.evidence = Some(evidence);
+                }
+                let body = self.block(body, true);
+                self.evidence = saved_evidence;
+                self.closure_depth -= 1;
+                self.locals = saved_locals;
+                self.escape = saved_escape;
+                self.value(
+                    builder,
+                    b::Value::Closure(Box::new(b::Closure {
+                        params: parameters,
+                        captures: captured,
+                        body,
+                        suspends: ft.suspends,
+                    })),
+                    expression.ty,
+                )
+            }
+            E::Apply {
+                callee,
+                args,
+                order,
+            } => {
+                let b::Operand::Var(target) = self.expression(builder, callee, false)? else {
+                    unreachable!("function value is a variable")
+                };
+                let mut evaluated = Vec::new();
+                for argument in args {
+                    let value = self.expression(builder, argument, false);
+                    if builder.term.is_some() {
+                        return None;
+                    }
+                    evaluated.push(value.unwrap_or(b::Operand::Const(b::Const::Unit)));
+                }
+                let b::Type::Fn(ft) = self.core.ty(ty(callee.ty)) else {
+                    unreachable!("checked callable type")
+                };
+                let (ev, suspends, fails) = (ft.ev, ft.suspends, ft.fails);
+                let mut operands: Vec<_> = order
+                    .iter()
+                    .filter(|&&index| args[index].ty != Ty::Unit)
+                    .map(|&index| evaluated[index].clone())
+                    .collect();
+                if ev {
+                    operands.push(self.current_evidence(builder).into());
+                }
+                self.value(
+                    builder,
+                    b::Value::Call {
+                        callee: b::Callee::Indirect(target),
+                        args: operands,
+                        suspends,
+                        on_fail: fails.then(|| self.failure_edge()),
+                    },
+                    expression.ty,
+                )
+            }
             E::Fail(value) => {
                 let error = self.expression(builder, value, false);
                 if builder.term.is_some() {
@@ -521,14 +682,18 @@ impl Context<'_> {
                     // Evaluate even Unit arguments before omitting their C values.
                     evaluated.push(value);
                 }
-                let operands = order
+                let mut operands: Vec<_> = order
                     .iter()
                     .filter_map(|&index| evaluated[index].clone())
                     .collect();
+                if self.effectful.contains(target) {
+                    operands.push(self.current_evidence(builder).into());
+                }
                 if tail
                     && *target == self.current
                     && !self.function.constant
                     && self.escape.is_none()
+                    && self.closure_depth == 0
                 {
                     builder.term = Some(b::Term::Recur(operands));
                     return None;
@@ -918,6 +1083,7 @@ fn literal(value: &ir::Literal) -> b::Const {
 }
 fn builtin(op: Intrinsic) -> b::Builtin {
     match op {
+        Intrinsic::StateRun => unreachable!("State.run is expanded before backend lowering"),
         Intrinsic::Panic => b::Builtin::Panic,
         Intrinsic::Todo => b::Builtin::Todo,
         Intrinsic::Dbg => b::Builtin::Dbg,

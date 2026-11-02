@@ -115,14 +115,7 @@ fn continues(b: Bytes, i: Int, low: Int, high: Int) -> Bool {
 
 ## Two lowercase hexadecimal digits per byte, with no separator (`"89504e47"`).
 pub fn to_hex(b: Bytes) -> String {
-  String.concat(List.reverse(hex_parts(to_list(b), [])))
-}
-# Preserve the old map order without a function value before P4.
-fn hex_parts(xs: List[Int], acc: List[String]) -> List[String] {
-  xs match {
-    [] -> acc
-    [x, ..rest] -> hex_parts(rest, ["#{hex_digit(x / 16)}#{hex_digit(x % 16)}", ..acc])
-  }
+  String.concat(List.map(to_list(b), fn(x) { "#{hex_digit(x / 16)}#{hex_digit(x % 16)}" }))
 }
 
 fn hex_digit(n: Int) -> String {

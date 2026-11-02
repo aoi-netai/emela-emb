@@ -9,6 +9,163 @@ pub(super) fn value_type(
 ) -> Result<TypeId> {
     match value {
         Value::Const(value) => operand(f, &Operand::Const(value.clone()), available),
+        Value::Closure(closure) => {
+            let ty = expected
+                .ok_or_else(|| invalid(&f.name, "closure needs a concrete function destination"))?;
+            let Type::Fn(ft) = program.core.ty(ty) else {
+                return Err(invalid(
+                    &f.name,
+                    "closure destination is not a function value",
+                ));
+            };
+            let mut params = function_parameters(ft);
+            if ft.ev {
+                params.push(TypeId::EVIDENCE);
+            }
+            if closure
+                .params
+                .iter()
+                .map(|&p| variable(f, p))
+                .collect::<Result<Vec<_>>>()?
+                != params
+                || closure.suspends != ft.suspends
+            {
+                return Err(invalid(
+                    &f.name,
+                    "closure parameters differ from its function type",
+                ));
+            }
+            let mut bindings = HashSet::new();
+            for &param in &closure.params {
+                if !bindings.insert(param) {
+                    return Err(invalid(&f.name, "closure has a duplicate parameter"));
+                }
+            }
+            for &capture in &closure.captures {
+                operand(f, &Operand::Var(capture), available)?;
+                if !bindings.insert(capture) {
+                    return Err(invalid(
+                        &f.name,
+                        "closure has a duplicate or parameter capture",
+                    ));
+                }
+            }
+            Ok(ty)
+        }
+        Value::FnRef(id) => {
+            let target = program
+                .functions
+                .iter()
+                .find_map(|(key, value)| (key == *id).then_some(value))
+                .ok_or_else(|| invalid(&f.name, "function reference ID is out of bounds"))?;
+            let Some(expected) = expected else {
+                return Ok(TypeId::UNIT);
+            };
+            let Type::Fn(ft) = program.core.ty(expected) else {
+                return Err(invalid(
+                    &f.name,
+                    "function reference destination is not a function value",
+                ));
+            };
+            let mut params = function_parameters(ft);
+            if ft.ev {
+                params.push(TypeId::EVIDENCE);
+            }
+            if target
+                .params
+                .iter()
+                .map(|&p| variable(target, p))
+                .collect::<Result<Vec<_>>>()?
+                != params
+                || target.ret != ft.ret
+                || target.fails != ft.fails
+                || target.suspends != ft.suspends
+            {
+                return Err(invalid(
+                    &f.name,
+                    "function reference type differs from its target ABI",
+                ));
+            }
+            Ok(expected)
+        }
+        Value::Call {
+            callee: Callee::Indirect(callee),
+            args,
+            suspends,
+            on_fail,
+        } => {
+            let ty = operand(f, &Operand::Var(*callee), available)?;
+            let Type::Fn(ft) = program.core.ty(ty) else {
+                return Err(invalid(
+                    &f.name,
+                    "indirect call target is not a function value",
+                ));
+            };
+            if ft.fails != on_fail.is_some() || ft.suspends != *suspends {
+                return Err(invalid(
+                    &f.name,
+                    "indirect call channels differ from its function type",
+                ));
+            }
+            let mut params = function_parameters(ft);
+            if ft.ev {
+                params.push(TypeId::EVIDENCE);
+            }
+            if args.len() != params.len() {
+                return Err(invalid(
+                    &f.name,
+                    "indirect call argument count differs from its function type",
+                ));
+            }
+            for (argument, expected) in args.iter().zip(params) {
+                expect_type(f, operand(f, argument, available)?, expected)?;
+            }
+            Ok(ft.ret)
+        }
+        Value::Call {
+            callee:
+                Callee::Op {
+                    handler,
+                    effect,
+                    op,
+                },
+            args,
+            suspends,
+            on_fail,
+        } => {
+            expect_type(
+                f,
+                operand(f, &Operand::Var(*handler), available)?,
+                handler_type(program, f, *effect)?,
+            )?;
+            let operation = effect_definition(program, f, *effect)?
+                .ops
+                .get(*op)
+                .ok_or_else(|| invalid(&f.name, "effect operation index is out of bounds"))?;
+            if operation.type_params != 0 {
+                return Err(unsupported(
+                    &f.name,
+                    "unspecialized generic effect operation",
+                ));
+            }
+            if operation.fails != on_fail.is_some() || operation.suspend != *suspends {
+                return Err(invalid(
+                    &f.name,
+                    "operation call channels differ from its declaration",
+                ));
+            }
+            if *suspends {
+                return Err(unsupported(&f.name, "suspending operation call"));
+            }
+            let parameters: Vec<_> = operation
+                .params
+                .iter()
+                .copied()
+                .filter(|ty| !matches!(*ty, TypeId::UNIT | TypeId::NEVER))
+                .collect();
+            arguments(f, args, &parameters, available)?;
+            Ok(operation.ret)
+        }
         Value::Call {
             callee: Callee::Direct(id),
             args,
@@ -36,6 +193,74 @@ pub(super) fn value_type(
                 expect_type(f, operand(f, arg, available)?, variable(target, param)?)?;
             }
             Ok(target.ret)
+        }
+        Value::Handler { effect, ops, .. } => {
+            let definition = effect_definition(program, f, *effect)?;
+            if definition.ops.len() != ops.len() {
+                return Err(invalid(
+                    &f.name,
+                    "handler operation count differs from its declaration",
+                ));
+            }
+            for (&operation, declared) in ops.iter().zip(&definition.ops) {
+                let ty = operand(f, &Operand::Var(operation), available)?;
+                let Type::Fn(ft) = program.core.ty(ty) else {
+                    return Err(invalid(
+                        &f.name,
+                        "handler operation is not a function value",
+                    ));
+                };
+                if declared.type_params != 0 || declared.suspend {
+                    return Err(unsupported(
+                        &f.name,
+                        "generic or suspending handler operation",
+                    ));
+                }
+                let parameters: Vec<_> = declared
+                    .params
+                    .iter()
+                    .copied()
+                    .filter(|ty| !matches!(*ty, TypeId::UNIT | TypeId::NEVER))
+                    .collect();
+                if function_parameters(ft) != parameters
+                    || ft.ret != declared.ret
+                    || ft.fails != declared.fails
+                    || ft.suspends
+                    || ft.ev
+                    || ft.sets.is_some()
+                {
+                    return Err(invalid(
+                        &f.name,
+                        "handler operation type differs from its declaration",
+                    ));
+                }
+            }
+            handler_type(program, f, *effect)
+        }
+        Value::EvExtend { base, bindings } => {
+            if let Some(base) = base {
+                expect_type(
+                    f,
+                    operand(f, &Operand::Var(*base), available)?,
+                    TypeId::EVIDENCE,
+                )?;
+            }
+            for &(effect, handler) in bindings {
+                expect_type(
+                    f,
+                    operand(f, &Operand::Var(handler), available)?,
+                    handler_type(program, f, effect)?,
+                )?;
+            }
+            Ok(TypeId::EVIDENCE)
+        }
+        Value::EvLookup { ev, effect } => {
+            expect_type(
+                f,
+                operand(f, &Operand::Var(*ev), available)?,
+                TypeId::EVIDENCE,
+            )?;
+            handler_type(program, f, *effect)
         }
         Value::Prim { op, ty, args } => {
             let ty = match ty {
@@ -200,6 +425,23 @@ pub(super) fn value_type(
         Value::Coerce(base) => {
             let source = operand(f, &Operand::Var(*base), available)?;
             let destination = expected.unwrap_or(source);
+            if let (Type::Fn(from), Type::Fn(to)) =
+                (program.core.ty(source), program.core.ty(destination))
+            {
+                if from.params != to.params
+                    || (from.ret != to.ret && from.ret != TypeId::NEVER)
+                    || (from.suspends && !to.suspends)
+                    || (from.ev && !to.ev)
+                    || from.sets.is_some()
+                    || to.sets.is_some()
+                {
+                    return Err(invalid(
+                        &f.name,
+                        "function coercion has incompatible parameters, result, or effect flags",
+                    ));
+                }
+                return Ok(destination);
+            }
             if source != destination && source != TypeId::ANY && destination != TypeId::ANY {
                 return Err(invalid(
                     &f.name,
@@ -269,8 +511,62 @@ pub(super) fn value_type(
             arguments(f, args, &[TypeId::STRING], available)?;
             Ok(TypeId::UNIT)
         }
+        Value::Runtime {
+            op: RuntimeOp::Retire,
+            args,
+        } => {
+            if args.len() != 2 || expected.is_some() {
+                return Err(invalid(
+                    &f.name,
+                    "Retire needs a handler and name with no destination",
+                ));
+            }
+            let Operand::Var(handler) = args[0] else {
+                return Err(invalid(&f.name, "Retire handler is not a variable"));
+            };
+            let ty = operand(f, &Operand::Var(handler), available)?;
+            if !matches!(program.core.ty(ty), Type::Handler(_)) {
+                return Err(invalid(&f.name, "Retire value is not a handler"));
+            }
+            expect_type(f, operand(f, &args[1], available)?, TypeId::STRING)?;
+            Ok(TypeId::UNIT)
+        }
         _ => Err(unsupported(&f.name, "value variant")),
     }
+}
+
+fn function_parameters(ft: &FnType) -> Vec<TypeId> {
+    ft.params
+        .iter()
+        .copied()
+        .filter(|ty| !matches!(*ty, TypeId::UNIT | TypeId::NEVER))
+        .collect()
+}
+
+fn effect_definition<'a>(
+    program: &'a Program,
+    f: &Function,
+    effect: EffectId,
+) -> Result<&'a EffectDef> {
+    program
+        .core
+        .effects
+        .iter()
+        .find_map(|(id, definition)| (id == effect).then_some(definition))
+        .ok_or_else(|| invalid(&f.name, "effect ID is out of bounds"))
+}
+
+fn handler_type(program: &Program, f: &Function, effect: EffectId) -> Result<TypeId> {
+    effect_definition(program, f, effect)?;
+    let effect = crate::semantics::effect_base(&program.core, effect)
+        .ok_or_else(|| invalid(&f.name, "handler effect label has an invalid base"))?;
+    program
+        .core
+        .types
+        .ids
+        .get(&Type::Handler(effect))
+        .copied()
+        .ok_or_else(|| invalid(&f.name, "handler type is missing from the type catalog"))
 }
 
 fn arguments(
@@ -297,6 +593,34 @@ fn builtin_type(
 ) -> Result<TypeId> {
     use Builtin::*;
     let (inputs, result) = match op {
+        CellNew => {
+            if args.len() != 1 {
+                return Err(invalid(&f.name, "CellNew needs one initial value"));
+            }
+            let content = operand(f, &args[0], available)?;
+            let result = program
+                .core
+                .types
+                .ids
+                .get(&Type::Cell(content))
+                .copied()
+                .ok_or_else(|| invalid(&f.name, "Cell type is missing from the type catalog"))?;
+            (vec![content], result)
+        }
+        CellGet | CellSet => {
+            let Some(cell) = args.first() else {
+                return Err(invalid(&f.name, "Cell operation needs a cell argument"));
+            };
+            let cell_type = operand(f, cell, available)?;
+            let Type::Cell(content) = program.core.ty(cell_type) else {
+                return Err(invalid(&f.name, "Cell operation base is not a Cell"));
+            };
+            if op == CellGet {
+                (vec![cell_type], *content)
+            } else {
+                (vec![cell_type, *content], TypeId::UNIT)
+            }
+        }
         IntBitNot => (vec![TypeId::INT], TypeId::INT),
         IntBitAnd | IntBitOr | IntBitXor | IntShiftLeft | IntShiftRight | IntShiftRightUnsigned => {
             (vec![TypeId::INT; 2], TypeId::INT)

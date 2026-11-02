@@ -1,7 +1,23 @@
 //! Source-owned declaration and visibility metadata over the independent concrete type catalog.
-use super::{ast, modules::Modules, types::ValueType as Ty};
+mod function_types;
+mod substitution;
+use super::{ast, effect_collect::EffectRegistry, modules::Modules, types::ValueType as Ty};
 use crate::{Diagnostic, DiagnosticKind as DK, Span, contract::ir as b};
 use std::collections::{HashMap, HashSet};
+#[derive(Clone, Copy, Default)]
+pub(crate) enum OmittedRows {
+    #[default]
+    Empty,
+    Hidden,
+    Inferred,
+}
+pub(crate) struct RowRequest {
+    pub proxy: b::TypeId,
+    pub kind: super::sets::SetKind,
+    pub origin: super::sets::Origin,
+    pub positive: bool,
+}
+pub(crate) use substitution::substitute;
 #[derive(Clone)]
 pub(crate) struct Declaration {
     pub module: usize,
@@ -10,16 +26,26 @@ pub(crate) struct Declaration {
 }
 pub(crate) struct Catalog {
     pub core: b::Definitions,
+    pub effects: EffectRegistry,
     pub declarations: Vec<Declaration>,
+    pub omitted_rows: OmittedRows,
+    pub row_positive: bool,
+    pub row_requests: Vec<RowRequest>,
     types: Vec<HashMap<String, b::EnumId>>,
     native_types: Vec<HashMap<String, b::TypeId>>,
     constructors: Vec<HashMap<String, b::CtorRef>>,
 }
 impl Catalog {
     pub fn collect(modules: &Modules) -> Result<Self, Vec<Diagnostic>> {
+        let mut core = b::Definitions::default();
+        let effects = EffectRegistry::declare(modules, &mut core)?;
         let mut catalog = Self {
-            core: b::Definitions::default(),
+            core,
+            effects,
             declarations: Vec::new(),
+            omitted_rows: OmittedRows::Empty,
+            row_positive: true,
+            row_requests: Vec::new(),
             types: vec![HashMap::new(); modules.modules.len()],
             native_types: vec![HashMap::new(); modules.modules.len()],
             constructors: vec![HashMap::new(); modules.modules.len()],
@@ -208,6 +234,54 @@ impl Catalog {
     ) -> Result<Ty, Diagnostic> {
         self.type_text(modules, module, &text.value, text.span, params, None)
     }
+    pub fn resolve_effect(
+        &mut self,
+        modules: &Modules,
+        module: usize,
+        text: &ast::Text,
+        params: &HashMap<String, usize>,
+    ) -> Result<b::EffectId, Diagnostic> {
+        let (head, arguments) = match text.value.find('[') {
+            Some(index) if text.value.ends_with(']') => (
+                &text.value[..index],
+                split(&text.value[index + 1..text.value.len() - 1]),
+            ),
+            Some(_) => {
+                return Err(Diagnostic::new(
+                    DK::Type,
+                    text.span,
+                    "invalid effect type arguments",
+                ));
+            }
+            None => (text.value.as_str(), Vec::new()),
+        };
+        let mut args = Vec::new();
+        for argument in arguments {
+            args.push(backend_type(
+                self.type_text(modules, module, argument, text.span, params, None)?,
+            ));
+        }
+        self.effects.resolve_instance(
+            modules,
+            &mut self.core,
+            module,
+            &ast::Text::new(head, text.span),
+            args,
+        )
+    }
+    pub fn effect_member(
+        &mut self,
+        modules: &Modules,
+        module: usize,
+        text: &ast::Text,
+        parameters: &HashMap<String, usize>,
+    ) -> Result<b::TypeId, Diagnostic> {
+        if let Some(&index) = parameters.get(text.value.trim()) {
+            return Ok(self.core.types.intern(b::Type::Param(index)));
+        }
+        let effect = self.resolve_effect(modules, module, text, parameters)?;
+        Ok(self.core.types.intern(b::Type::Handler(effect)))
+    }
     pub fn resolve_type_with_self(
         &mut self,
         modules: &Modules,
@@ -228,6 +302,9 @@ impl Catalog {
         params: &HashMap<String, usize>,
         self_type: Option<Ty>,
     ) -> Result<Ty, Diagnostic> {
+        if text.starts_with("fn(") {
+            return self.function_type(modules, module, text, span, params, self_type);
+        }
         if text == "Self" {
             if let Some(ty) = self_type {
                 return Ok(ty);
@@ -244,7 +321,7 @@ impl Catalog {
             "Float" => Some(Ty::Float),
             "Bool" => Some(Ty::Bool),
             "String" => Some(Ty::String),
-            "Unit" => Some(Ty::Unit),
+            "Unit" | "()" => Some(Ty::Unit),
             "Never" => Some(Ty::Never),
             _ => None,
         };
@@ -252,6 +329,10 @@ impl Catalog {
             return Ok(scalar);
         }
         if text.starts_with('(') && text.ends_with(')') {
+            let inner = &text[1..text.len() - 1];
+            if inner.starts_with("fn(") && split(inner).len() == 1 {
+                return self.type_text(modules, module, inner, span, params, self_type);
+            }
             let mut fields = Vec::new();
             for element in split(&text[1..text.len() - 1]) {
                 fields.push(backend_type(
@@ -293,9 +374,23 @@ impl Catalog {
             }
             return Ok(frontend_type(ty));
         }
-        let id = self
-            .lookup_type(modules, module, head)
-            .ok_or_else(|| Diagnostic::new(DK::Name, span, format!("undefined type '{head}'")))?;
+        let Some(id) = self.lookup_type(modules, module, head) else {
+            return Err(
+                if self
+                    .effects
+                    .named_declaration(modules, module, &ast::Text::new(head, span))
+                    .is_ok()
+                {
+                    Diagnostic::new(
+                        DK::Type,
+                        span,
+                        "an effect cannot be written as a value type; obtain its capability with use",
+                    )
+                } else {
+                    Diagnostic::new(DK::Name, span, format!("undefined type '{head}'"))
+                },
+            );
+        };
         let declaration = self.declaration(id);
         if declaration.module != module && !declaration.ast.public {
             return Err(Diagnostic::new(
@@ -417,7 +512,7 @@ impl Catalog {
             .tys
             .clone()
             .into_iter()
-            .map(|ty| frontend_type(self.core.types.subst(ty, &args)))
+            .map(|ty| frontend_type(self.effects.substitute_type(&mut self.core, ty, &args)))
             .collect()
     }
 }
@@ -453,8 +548,8 @@ fn split(text: &str) -> Vec<&str> {
     let mut result = Vec::new();
     for (index, ch) in text.char_indices() {
         match ch {
-            '[' | '(' => depth += 1,
-            ']' | ')' => depth -= 1,
+            '[' | '(' | '{' => depth += 1,
+            ']' | ')' | '}' => depth -= 1,
             ',' if depth == 0 => {
                 result.push(&text[start..index]);
                 start = index + 1;

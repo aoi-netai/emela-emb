@@ -5,7 +5,9 @@
 //! Source declarations must create rigid parameters through `register_rigid_parameter`;
 //! a late rigid declaration cannot silently reuse an inference parameter's identity.
 
+mod rows;
 use crate::contract::ir::{FnSets, Type, TypeId, TypeTable};
+use crate::frontend::sets::{Origin, SetKind};
 use std::collections::{HashMap, HashSet};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -82,12 +84,15 @@ pub(crate) struct Scheme {
     pub(crate) params: Vec<TypeId>,
     pub(crate) constraints: Vec<Constraint>,
 }
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub(crate) struct Solver {
     metas: HashMap<TypeId, Meta>,
     quantified: HashSet<TypeId>,
     allocated_parameters: HashSet<usize>,
     next_parameter: Option<usize>,
+    rows: rows::Rows,
+    row_parameters: HashSet<TypeId>,
+    immediate_rows: HashSet<TypeId>,
 }
 impl Default for Solver {
     fn default() -> Self {
@@ -96,12 +101,225 @@ impl Default for Solver {
             quantified: HashSet::new(),
             allocated_parameters: HashSet::new(),
             next_parameter: Some(usize::MAX),
+            rows: rows::Rows::default(),
+            row_parameters: HashSet::new(),
+            immediate_rows: HashSet::new(),
         }
     }
 }
 impl Solver {
     pub(crate) fn new() -> Self {
         Self::default()
+    }
+    pub(crate) fn fresh_rigid_parameter(&mut self, types: &mut TypeTable) -> Result<TypeId> {
+        self.parameter(types)
+    }
+    pub(crate) fn fresh_row(
+        &mut self,
+        types: &mut TypeTable,
+        kind: SetKind,
+        origin: Origin,
+    ) -> Result<TypeId> {
+        let proxy = if origin == Origin::Inferred {
+            self.try_fresh(types, Constraint::Any)?
+        } else {
+            self.parameter(types)?
+        };
+        self.rows.variable(proxy, kind, origin)?;
+        self.row_parameters.insert(proxy);
+        Ok(proxy)
+    }
+    pub(crate) fn register_row(
+        &mut self,
+        proxy: TypeId,
+        kind: SetKind,
+        origin: Origin,
+    ) -> Result<()> {
+        if origin == Origin::Inferred {
+            self.metas.entry(proxy).or_insert(Meta {
+                constraint: Constraint::Any,
+                binding: None,
+            });
+        }
+        self.row_parameters.insert(proxy);
+        self.rows.variable(proxy, kind, origin).map(|_| ())
+    }
+    pub(crate) fn row_kind(&self, proxy: TypeId) -> Option<SetKind> {
+        self.row_parameters
+            .contains(&proxy)
+            .then(|| self.rows.variables.get(&proxy).map(|&(kind, _)| kind))
+            .flatten()
+    }
+    pub(crate) fn copy_row_kind(&mut self, source: TypeId, destination: TypeId) -> Result<()> {
+        if let Some(kind) = self.row_kind(source) {
+            self.register_row(destination, kind, Origin::Inferred)?;
+            if self.immediate_rows.contains(&source) {
+                let variable = self.rows.variables[&destination].1;
+                self.rows
+                    .solver
+                    .require_immediate(crate::frontend::sets::Row::variable(kind, variable))
+                    .map_err(rows::set_error)?;
+            }
+        }
+        Ok(())
+    }
+    pub(crate) fn declare_row_immediate(&mut self, proxy: TypeId) -> Result<()> {
+        let Some(&(kind, variable)) = self.rows.variables.get(&proxy) else {
+            return Err(error(
+                TypeErrorKind::Constraint,
+                proxy,
+                proxy,
+                "Immediate requires an effect-set parameter",
+            ));
+        };
+        if kind != SetKind::Effect {
+            return Err(error(
+                TypeErrorKind::Constraint,
+                proxy,
+                proxy,
+                "Immediate requires an effect-set parameter",
+            ));
+        }
+        self.rows
+            .solver
+            .declare_immediate(variable)
+            .map_err(rows::set_error)?;
+        self.immediate_rows.insert(proxy);
+        Ok(())
+    }
+    pub(crate) fn require_immediate(&mut self, types: &mut TypeTable, ty: TypeId) -> Result<()> {
+        let row = self.rows.row(types, ty, SetKind::Effect, &self.metas)?;
+        self.rows
+            .solver
+            .require_immediate(row)
+            .map_err(rows::set_error)?;
+        self.solve_rows(types)
+    }
+    pub(crate) fn register_effects(&mut self, core: &crate::contract::ir::Definitions) {
+        let mut declarations = HashMap::new();
+        for (id, effect) in core.effects.iter() {
+            let nominal = *declarations
+                .entry(effect.decl.clone())
+                .or_insert(id.into_raw().into_u32() as usize);
+            self.rows.effects.insert(
+                id,
+                (
+                    nominal,
+                    effect.args.clone(),
+                    effect.ops.iter().all(|operation| !operation.suspend),
+                ),
+            );
+        }
+    }
+    pub(crate) fn resolve_row(&mut self, types: &mut TypeTable, proxy: TypeId) -> Result<TypeId> {
+        self.solve_rows(types)?;
+        self.rows.resolved_type(types, proxy)
+    }
+    pub(crate) fn include_sets(
+        &mut self,
+        types: &mut TypeTable,
+        actual: TypeId,
+        expected: TypeId,
+        kind: SetKind,
+    ) -> Result<()> {
+        let previous = self.clone();
+        let result = self.include_sets_inner(types, actual, expected, kind);
+        if result.is_err() {
+            *self = previous;
+        }
+        result
+    }
+    fn include_sets_inner(
+        &mut self,
+        types: &mut TypeTable,
+        actual: TypeId,
+        expected: TypeId,
+        kind: SetKind,
+    ) -> Result<()> {
+        self.resolve_effect_arguments(types)?;
+        let actual = self.resolve(types, actual)?;
+        let expected = self.resolve(types, expected)?;
+        if actual == expected {
+            return Ok(());
+        }
+        let actual_tags = self.rows.row(types, actual, kind, &self.metas)?.tags;
+        let expected_tags = self.rows.row(types, expected, kind, &self.metas)?.tags;
+        for actual_tag in actual_tags {
+            let nominal = self.rows.tags[actual_tag.head].nominal;
+            for expected_tag in &expected_tags {
+                if nominal != self.rows.tags[expected_tag.head].nominal
+                    || actual_tag.args.len() != expected_tag.args.len()
+                {
+                    continue;
+                }
+                let has_meta = actual_tag.args.iter().chain(&expected_tag.args).any(|&ty| {
+                    self.free_metas(types, ty)
+                        .is_ok_and(|metas| !metas.is_empty())
+                });
+                if !has_meta {
+                    continue;
+                }
+                let mut trial = self.clone();
+                let mut trial_types = types.clone();
+                if trial
+                    .unify_many(
+                        &mut trial_types,
+                        &actual_tag.args,
+                        &expected_tag.args,
+                        actual,
+                        expected,
+                    )
+                    .is_ok()
+                {
+                    *self = trial;
+                    *types = trial_types;
+                    break;
+                }
+            }
+        }
+        let actual = self.resolve(types, actual)?;
+        let expected = self.resolve(types, expected)?;
+        let actual = self.rows.row(types, actual, kind, &self.metas)?;
+        let expected = self.rows.row(types, expected, kind, &self.metas)?;
+        self.rows
+            .solver
+            .includes(actual, expected)
+            .map_err(rows::set_error)?;
+        self.solve_rows(types)
+    }
+    fn solve_rows(&mut self, types: &mut TypeTable) -> Result<()> {
+        let mut updates = HashMap::new();
+        for (index, source) in self.rows.tags.clone().into_iter().enumerate() {
+            let args = source
+                .args
+                .into_iter()
+                .map(|ty| self.resolve(types, ty))
+                .collect::<Result<Vec<_>>>()?;
+            let tag = self.rows.tag(source.kind, source.nominal, args);
+            updates.insert(index, tag);
+        }
+        self.rows.solver.map_tags(&mut |tag| {
+            updates
+                .get(&tag.head)
+                .cloned()
+                .unwrap_or_else(|| tag.clone())
+        });
+        let pairs = self.rows.solve()?;
+        for (left, right) in pairs {
+            self.unify(types, left, right)?;
+            self.unify(types, right, left)?;
+        }
+        Ok(())
+    }
+    fn resolve_effect_arguments(&mut self, types: &mut TypeTable) -> Result<()> {
+        for (id, (head, args, immediate)) in self.rows.effects.clone() {
+            let args = args
+                .into_iter()
+                .map(|ty| self.resolve(types, ty))
+                .collect::<Result<Vec<_>>>()?;
+            self.rows.effects.insert(id, (head, args, immediate));
+        }
+        Ok(())
     }
     fn parameter(&mut self, types: &mut TypeTable) -> Result<TypeId> {
         self.allocated_parameters
@@ -242,7 +460,7 @@ impl Solver {
                     .params
                     .into_iter()
                     .map(|ty| map(self, types, ty))
-                    .collect::<Result<_>>()?;
+                    .collect::<Result<Vec<_>>>()?;
                 signature.ret = map(self, types, signature.ret)?;
                 signature.sets = signature
                     .sets
@@ -256,11 +474,20 @@ impl Solver {
                 Type::Fn(signature)
             }
             Type::Set(mut summary) => {
-                summary.params = summary
+                let members: Vec<TypeId> = summary
                     .params
                     .into_iter()
                     .map(|ty| map(self, types, ty))
                     .collect::<Result<_>>()?;
+                summary.params = Vec::new();
+                for member in members {
+                    match Self::node(types, member)? {
+                        Type::Set(other) => summary.merge(&other),
+                        _ => summary.params.push(member),
+                    }
+                }
+                summary.params.sort();
+                summary.params.dedup();
                 Type::Set(summary)
             }
             scalar => scalar,
@@ -288,27 +515,48 @@ impl Solver {
         match (Self::node(types, actual)?, Self::node(types, expected)?) {
             (Type::Tuple(a), Type::Tuple(b)) => self.unify_many(types, &a, &b, actual, expected),
             (Type::Enum(a, args_a), Type::Enum(b, args_b)) if a == b => {
-                self.unify_many(types, &args_a, &args_b, actual, expected)
+                self.unify_many(types, &args_a, &args_b, actual, expected)?;
+                self.unify_many(types, &args_b, &args_a, expected, actual)
             }
             (Type::List(a), Type::List(b)) | (Type::Cell(a), Type::Cell(b)) => {
-                self.unify(types, a, b)
+                self.unify(types, a, b)?;
+                self.unify(types, b, a)
             }
-            (Type::Fn(a), Type::Fn(b))
-                if a.fails == b.fails && a.suspends == b.suspends && a.ev == b.ev =>
-            {
-                self.unify_many(types, &a.params, &b.params, actual, expected)?;
-                self.unify(types, a.ret, b.ret)?;
-                match (a.sets, b.sets) {
-                    (Some(a), Some(b)) => {
-                        self.unify(types, a.errors, b.errors)?;
-                        self.unify(types, a.effects, b.effects)
+            (Type::Handler(a), Type::Handler(b)) => {
+                let a = self.rows.effects.get(&a).cloned();
+                let b = self.rows.effects.get(&b).cloned();
+                match (a, b) {
+                    (Some((head_a, args_a, _)), Some((head_b, args_b, _))) if head_a == head_b => {
+                        self.unify_many(types, &args_a, &args_b, actual, expected)
                     }
-                    (None, None) => Ok(()),
                     _ => Err(error(
                         TypeErrorKind::Mismatch,
                         actual,
                         expected,
-                        "function set metadata differs",
+                        "capabilities have different effect types",
+                    )),
+                }
+            }
+            (Type::Fn(a), Type::Fn(b)) => {
+                self.unify_many(types, &b.params, &a.params, expected, actual)?;
+                self.unify(types, a.ret, b.ret)?;
+                match (a.sets, b.sets) {
+                    (Some(a), Some(b)) => {
+                        self.include_sets(types, a.errors, b.errors, SetKind::Error)?;
+                        self.include_sets(types, a.effects, b.effects, SetKind::Effect)
+                    }
+                    (None, None)
+                        if (!a.fails || b.fails)
+                            && (!a.suspends || b.suspends)
+                            && (!a.ev || b.ev) =>
+                    {
+                        Ok(())
+                    }
+                    _ => Err(error(
+                        TypeErrorKind::Mismatch,
+                        actual,
+                        expected,
+                        format!("function set metadata differs: {a:?} versus {b:?}"),
                     )),
                 }
             }
@@ -440,6 +688,13 @@ impl Solver {
     /// After top-level generalization, an unconstrained variable used only inside
     /// a body has no observable representation requirement (for example discarded None).
     pub(crate) fn finish_unused(&mut self, types: &mut TypeTable) -> Result<()> {
+        self.solve_rows(types)?;
+        for variable in self.metas.keys().copied().collect::<Vec<_>>() {
+            if self.row_parameters.contains(&variable) && self.metas[&variable].binding.is_none() {
+                let resolved = self.rows.resolved_type(types, variable)?;
+                self.bind(types, variable, resolved)?;
+            }
+        }
         for variable in self.metas.keys().copied().collect::<Vec<_>>() {
             let resolved = self.resolve(types, variable)?;
             if self
@@ -476,6 +731,62 @@ impl Solver {
         ty: TypeId,
         environment: &HashSet<TypeId>,
     ) -> Result<Scheme> {
+        self.generalize_with_rows(types, ty, environment, &[ty])
+    }
+    pub(crate) fn generalize_with_rows(
+        &mut self,
+        types: &mut TypeTable,
+        ty: TypeId,
+        environment: &HashSet<TypeId>,
+        row_candidates: &[TypeId],
+    ) -> Result<Scheme> {
+        self.solve_rows(types)?;
+        let variables = self.free_metas(types, ty)?;
+        let mut candidate_proxies = HashSet::new();
+        for &candidate in row_candidates {
+            candidate_proxies.extend(self.free_metas(types, candidate)?);
+        }
+        let candidates = candidate_proxies
+            .iter()
+            .filter_map(|proxy| {
+                self.row_parameters
+                    .contains(proxy)
+                    .then(|| {
+                        self.rows
+                            .variables
+                            .get(proxy)
+                            .map(|&(_, variable)| variable)
+                    })
+                    .flatten()
+            })
+            .collect::<Vec<_>>();
+        let mut excluded_rows = Vec::new();
+        for &ty in environment {
+            for proxy in self.free_metas(types, ty)? {
+                if let Some(&(_, variable)) = self.rows.variables.get(&proxy) {
+                    excluded_rows.push(variable);
+                }
+            }
+        }
+        let quantified_rows = self
+            .rows
+            .solver
+            .generalize_from(&candidates, &excluded_rows)
+            .map_err(rows::set_error)?;
+        let quantified_rows = quantified_rows
+            .into_iter()
+            .map(|row| row.variable)
+            .collect::<HashSet<_>>();
+        for variable in variables.iter().copied() {
+            if self.row_parameters.contains(&variable) {
+                if let Some(&(_, row)) = self.rows.variables.get(&variable) {
+                    if !quantified_rows.contains(&row) {
+                        let resolved = self.rows.resolved_type(types, variable)?;
+                        self.bind(types, variable, resolved)?;
+                    }
+                }
+            }
+        }
         let variables = self.free_metas(types, ty)?;
         self.default_metas(types, variables)?;
         let mut excluded = HashSet::new();
@@ -493,6 +804,16 @@ impl Solver {
         let mut constraints = Vec::new();
         for variable in variables {
             let rigid = self.parameter(types)?;
+            if let Some(&(kind, row)) = self.rows.variables.get(&variable) {
+                self.rows.variables.insert(rigid, (kind, row));
+                self.rows.proxies.insert(row, rigid);
+                if self.row_parameters.contains(&variable) {
+                    self.row_parameters.insert(rigid);
+                }
+                if self.immediate_rows.contains(&variable) {
+                    self.immediate_rows.insert(rigid);
+                }
+            }
             self.quantified.insert(rigid);
             substitutions.insert(variable, rigid);
             params.push(rigid);
@@ -535,7 +856,9 @@ impl Solver {
                     "quantified scheme parameter is not rigid",
                 ));
             }
-            substitutions.insert(parameter, self.try_fresh(types, constraint)?);
+            let instance = self.try_fresh(types, constraint)?;
+            self.copy_row_kind(parameter, instance)?;
+            substitutions.insert(parameter, instance);
         }
         self.substitute(types, scheme.ty, &substitutions)
     }
@@ -687,8 +1010,12 @@ mod tests {
         let mut types = TypeTable::default();
         let mut solver = Solver::new();
         let value = solver.fresh(&mut types, Constraint::Any);
-        let error = solver.fresh(&mut types, Constraint::Any);
-        let effect = solver.fresh(&mut types, Constraint::Any);
+        let error = solver
+            .fresh_row(&mut types, SetKind::Error, Origin::Inferred)
+            .unwrap();
+        let effect = solver
+            .fresh_row(&mut types, SetKind::Effect, Origin::Inferred)
+            .unwrap();
         let empty = types.intern(Type::Set(SetSummary::default()));
         let signature = types.intern(Type::Fn(FnType {
             params: vec![value],
@@ -718,6 +1045,7 @@ mod tests {
             }),
         }));
         solver.unify(&mut types, instance, concrete).unwrap();
+        solver.finish_unused(&mut types).unwrap();
         assert_eq!(solver.resolve(&mut types, instance).unwrap(), concrete);
     }
     #[test]

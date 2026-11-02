@@ -16,6 +16,8 @@ pub(crate) const CORE_MODULES: &[(&str, &str)] = &[
     ("Prelude", include_str!("../lib/core/prelude.emel")),
     ("Option", include_str!("../lib/core/option.emel")),
     ("List", include_str!("../lib/core/list.emel")),
+    ("Std.Console", include_str!("../lib/std/console.emel")),
+    ("Std.State", include_str!("../lib/std/state.emel")),
     ("Std.Map", include_str!("../lib/std/map.emel")),
     ("Std.Set", include_str!("../lib/std/set.emel")),
     ("Int", include_str!("../lib/core/int.emel")),
@@ -31,6 +33,8 @@ pub(crate) const CORE_MODULES: &[(&str, &str)] = &[
 /// source modules above. User function spellings never select an intrinsic implementation.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub(crate) enum Intrinsic {
+    /// Expands to a Cell, a handler, and a callback invocation during specialization.
+    StateRun,
     Panic,
     Todo,
     Dbg,
@@ -86,6 +90,7 @@ pub(crate) enum Intrinsic {
 }
 pub(crate) fn intrinsic(module: &str, name: &str) -> Option<Intrinsic> {
     Some(match (module, name) {
+        ("Std.State", "run") => Intrinsic::StateRun,
         ("Prelude", "panic") => Intrinsic::Panic,
         ("Prelude", "todo") => Intrinsic::Todo,
         ("Prelude", "dbg") => Intrinsic::Dbg,
@@ -140,4 +145,14 @@ pub(crate) fn intrinsic(module: &str, name: &str) -> Option<Intrinsic> {
         ("Std.Bytes", "decode_valid_utf8") => Intrinsic::BytesDecodeValidUtf8,
         _ => return None,
     })
+}
+
+/// Reserved C names owned by this compiler's standard declarations.
+/// A user module or a different declaration cannot select these bindings.
+pub(crate) fn external_symbol(module: &str, name: &str) -> Option<&'static str> {
+    match (module, name) {
+        ("Std.Console", "console_log") => Some("emela_console_print_line"),
+        ("Std.Console", "console_error") => Some("emela_console_print_error_line"),
+        _ => None,
+    }
 }

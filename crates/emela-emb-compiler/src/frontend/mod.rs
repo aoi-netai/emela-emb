@@ -1,9 +1,12 @@
 pub(crate) mod ast;
+pub(crate) mod capabilities;
 pub(crate) mod check;
 pub(crate) mod constant_patterns;
 pub(crate) mod consts;
 pub(crate) mod data;
+pub(crate) mod effect_collect;
 pub(crate) mod errors;
+pub(crate) mod function_abi;
 pub(crate) mod infer;
 pub(crate) mod ir;
 pub(crate) mod lexer;
@@ -13,8 +16,11 @@ pub(crate) mod normalize;
 pub(crate) mod parser;
 pub(crate) mod patterns;
 pub(crate) mod schemes;
+pub(crate) mod sets;
 pub(crate) mod specialize;
 pub(crate) mod strings;
 pub(crate) mod trait_collect;
 pub(crate) mod traits;
 pub(crate) mod types;
+
+pub(crate) mod effects;

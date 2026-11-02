@@ -1,6 +1,6 @@
 # 独立コンパイラーが対応するEmelaの範囲（同期機能）
 
-P1〜P3の基盤・同期型システム・固定heapとコレクションを記録する。P3は231試験・独立環境での検証を完了。字句解析、構文解析、module・名前解決、型検査、独自IR、C生成をこのrepoが所有し、Emela本体のcrate・CLI・checkout・core/std・Pomeを要求しない。[実装計画](compiler-parity-plan.md) と [終了条件](compiler-coverage.md) に従い、後続段階の機能を追加する。
+P1〜P4の基盤・同期型システム・固定heap・関数値・effectと共有状態を記録する。P4は335試験・独立環境での検証を完了。字句解析、構文解析、module・名前解決、型検査、独自IR、C生成をこのrepoが所有し、Emela本体のcrate・CLI・checkout・core/std・Pomeを要求しない。[実装計画](compiler-parity-plan.md) と [終了条件](compiler-coverage.md) に従い、後続段階の機能を追加する。
 
 基準仕様は旧forkの `c34c0aeefdd966d854371b3110db00a47798751d`。`spec/language/02-lexical.md`、`03-keywords.md`、`12-external.md`、`spec/grammar.md`、`spec/targets/16-targets.md`、`spec/targets/c.md` を参照する。これは仕様・採用コードの出自であり、取得する依存ではない。全Emela仕様・全target契約への適合を表明しない。
 
@@ -65,7 +65,7 @@ compilerが所有する `lib/core/` の宣言と型registryで、基本型・数
 
 ## 失敗・String・const
 
-`error` の値を `fail` し、`fails` の集合を検査・推論する。`escape` のpatternが共同で網羅したerrorを集合から除き、部分回復は残りの失敗を伝播する。明示した戻り型でfailsを省略した関数は、未回復の失敗を許可しない。失敗するtrait methodとgenericなerror型も扱う。戻り型・fails省略時は、error payloadの型変数も相互再帰群の汎化へ含め、呼出しごとに具体化する。escapeの最外patternにはerror constructorを使い、単独の `_`・変数・constは許可しない。effect集合とhandlerの接続はP4以降。
+`error` の値を `fail` し、`fails` の集合を検査・推論する。`escape` のpatternが共同で網羅したerrorを集合から除き、部分回復は残りの失敗を伝播する。明示した戻り型でfailsを省略した関数は、未回復の失敗を許可しない。失敗するtrait methodとgenericなerror型も扱う。戻り型・fails省略時は、error payloadの型変数も相互再帰群の汎化へ含め、呼出しごとに具体化する。escapeの最外patternにはerror constructorを使い、単独の `_`・変数・constは許可しない。error/effect集合はhidden/opaque row・具体instance・包含・汎化とImmediate制約を扱う。
 
 String literal、補間、view比較、append、検索・trim、byte数・Unicode18の書記素数、code pointからの生成を扱う。NULを含む値は長さで渡す。Int/Int64/Float/Boolの変換と表記、Int.checked_add、Int/Float/Bool.parse、Optionの同期APIを供給する。parseの失敗は元のinputを持つParseErrorを返す。固定旧版にはInt64.parseはない。Stringのchars/code_points/split/concat/joinとASCII case変換も扱う。
 
@@ -79,15 +79,25 @@ String literal、補間、view比較、append、検索・trim、byte数・Unicod
 
 - Listの構築・spread・空/非空pattern、要素型の推論、Eq/Ord/Show、同期の検索・連結・反転・range・zip・take/drop・安定sortを扱う。要素のcustom traitを通常の呼出しとして利用する。
 - Std.Bytesは所有者付きbufferと借用viewを扱う。List変換、slice/concat、UTF-8 encode/decode、hex、unsignedな比較・表示を供給する。長さはu32で、String容量から独立する。
-- Std.Map/Std.Setは固定版の平衡木とopaque境界を維持し、構築・検索・更新・削除・列挙・unionとcustom keyを扱う。callbackを受け取るAPIはP4で接続する。
+- Std.Map/Std.Setは固定版の平衡木とopaque境界を維持し、構築・検索・更新・削除・列挙・unionとcustom keyを扱う。callbackを受け取るAPIも扱い、順序・短絡・安定sort・失敗途中の解放を維持する。
 
 所有String・List・Bytes・再帰値には `--heap-bytes` / `Options::with_heap_bytes` で固定容量を指定する。借用値が返却や保存により元の寿命を超える場合は所有化し、公開Cへ渡った所有値は生成headerのrelease契約に従う。深い再帰値の解放は反復処理を使う。容量不足はdefectとなり、結果を使わない場合も必要な容量検査・解放を残す。
 
 Unicode18の全853vectorについて、書記素のbyte境界・code point列・join再構成を確認した。Anyの箱化は失敗集合の内部表現と独自IRで扱い、公開sourceの動的型構文は追加しない。
 
+## 関数値・effect・共有状態
+
+関数・constructor・trait method・intrinsicの参照、lambda、間接呼出し、高階関数を扱う。lambda引数はconstructor patternも使える。関数型のfailure/effect集合を検査し、Never戻り型や失敗・evidence ABIの拡大を具体化へ反映する。返却closureはcaptureしたString/Bytes等を所有化し、生成元の呼出し終了後も使用できる。
+
+`effect`・`use`・`handler`・`with`・`layer`、label/default、init/releaseを扱う。operationはhandler構築時のevidenceを保持する。withは取得に成功したhandlerを逆順にretire・releaseし、必要なcleanupを終えてから外側のescapeへ失敗を渡す。未使用layerの不正も検査する。
+
+capabilityの直接返却・引数・data格納・値型注釈や、withの寿命を越える保持closureを拒否する。その場で実行するcallbackは許可する。`Std.State.run` は共有Cellを持つhandlerへ展開し、返却closureから共有状態を更新できる。公開Cell型は設けない。Cell/closure/Anyの循環は最後の外部rootを解放してから回収する。
+
+`Std.Console` のSystemConsole/TestConsoleを供給する。SystemConsoleのString境界には `Options::with_external_adapter` の明示設定を使う。同期callbackを持つOption/List/Map/Setも標準sourceから同じfrontendを通す。Clockはsuspend operationを持つためP5で接続する。
+
 ## C公開境界と生成物
 
-**`pub` はEmela内の可視性、`@export(c, "名前")` はC公開を指定する。** `pub` だけでCの公開関数にはならない。内部関数にはexport属性を付ける必要はない。到達したimport先の明示exportも保持する。exportとexternalの衝突、重複export、不正なC公開名を拒否する。
+**`pub` はEmela内の可視性、`@export(c, "名前")` はC公開を指定する。** `pub` だけでCの公開関数にはならない。内部関数にはexport属性を付ける必要はない。到達したimport先の明示exportも保持する。exportとexternalの衝突、重複export、不正なC公開名を拒否する。C公開関数と起動entryへ未供給のeffectを持ち出すことも拒否する。
 
 `Options::with_entry` / CLIの `--entry-function` は起動用関数を選ぶ。これはC公開属性とは別の指定で、非公開関数も通常の起動経路から呼べる。`@export` はISR安全性を保証せず、割り込みvectorへの接続も行わない。ISR制約のsource側接続はP7で確認する。
 
@@ -105,10 +115,10 @@ emela-emb build main.emel math.emel --entry main.emel --out-dir generated
 
 `--entry-function`、`--heap-bytes`、`--string-capacity` で明示した設定を渡せる。設定の存在は後続機能のsource対応を意味しない。新規または空の出力先に全生成物を一時ディレクトリから公開し、既存の非空ディレクトリ・ファイル・symlinkを保護する。終了コードは成功/helpが0、入力・生成・保存失敗が1、引数エラーが2。
 
-[P1検証報告](reports/compiler-p1.md)、[P2検証報告](reports/compiler-p2.md)、[P3検証報告](reports/compiler-p3.md) にsource/C・CLI・独立環境の確認を記録する。生成Cは `-O0` / `-O2` の両方でコンパイル・リンク・実行する。試験環境のC compiler不在を成功として扱わない。
+[P1検証報告](reports/compiler-p1.md)、[P2検証報告](reports/compiler-p2.md)、[P3検証報告](reports/compiler-p3.md)、[P4検証報告](reports/compiler-p4.md) にsource/C・CLI・独立環境の確認を記録する。生成Cは `-O0` / `-O2` の両方でコンパイル・リンク・実行する。試験環境のC compiler不在を成功として扱わない。
 
 ## 後続段階
 
-P4のclosure/effect/handler・Cell/Stateとcycle、P5のsuspend、P6の構造化並行処理、P7の残るABI・ISR・標準bridgeは、ここで記録した同期source対応には含めない。backendのコードが採用済みでも、sourceからの接続・拒否試験・C実行を確認するまでは未完了として台帳へ記録する。
+P5のsuspend、P6の構造化並行処理、P7の残るABI・ISR・標準bridgeは、ここで記録した同期source対応には含めない。backendのコードが採用済みでも、sourceからの接続・拒否試験・C実行を確認するまでは未完了として台帳へ記録する。
 
 Pomeによる取得、物理BSP、firmware build/flash、実機確認、LSP・formatterは今回のcompiler移行の範囲外。

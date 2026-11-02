@@ -11,6 +11,7 @@ pub(crate) mod representations;
 pub(crate) mod strings;
 pub(crate) mod type_representations;
 mod types;
+pub(crate) use types::effect_base;
 pub(crate) mod variants;
 
 pub(crate) mod diagnostics;

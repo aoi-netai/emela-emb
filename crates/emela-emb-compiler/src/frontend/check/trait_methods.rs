@@ -5,10 +5,18 @@ pub(super) struct Obligation {
     module: usize,
     self_type: b::TypeId,
     trait_id: TraitId,
-    method: String,
-    method_type_arguments: Vec<b::TypeId>,
+    kind: ObligationKind,
     bounds: super::super::traits::ParamBounds,
     span: Span,
+}
+enum ObligationKind {
+    Method {
+        name: String,
+        arguments: Vec<b::TypeId>,
+    },
+    Bound {
+        message: &'static str,
+    },
 }
 impl Checker {
     pub(super) fn validate_trait_obligations(&mut self) -> Result<(), Vec<Diagnostic>> {
@@ -24,27 +32,52 @@ impl Checker {
                     .map_err(|e| {
                         self.error(obligation.module, DK::Type, obligation.span, e.message)
                     })?;
-                let arguments = obligation
-                    .method_type_arguments
-                    .iter()
-                    .map(|&ty| self.solver.resolve(&mut self.catalog.core.types, ty))
-                    .collect::<Result<Vec<_>, _>>()
-                    .map_err(|e| {
-                        self.error(obligation.module, DK::Type, obligation.span, e.message)
-                    })?;
-                self.traits
-                    .registry
-                    .resolve_generic(
-                        &self.catalog.core,
-                        receiver,
-                        obligation.trait_id,
-                        &obligation.method,
-                        &arguments,
-                        &obligation.bounds,
-                    )
-                    .map_err(|e| {
-                        self.error(obligation.module, DK::Type, obligation.span, e.message)
-                    })?;
+                match obligation.kind {
+                    ObligationKind::Method { name, arguments } => {
+                        let arguments = arguments
+                            .iter()
+                            .map(|&ty| self.solver.resolve(&mut self.catalog.core.types, ty))
+                            .collect::<Result<Vec<_>, _>>()
+                            .map_err(|e| {
+                                self.error(obligation.module, DK::Type, obligation.span, e.message)
+                            })?;
+                        self.traits
+                            .registry
+                            .resolve_generic(
+                                &self.catalog.core,
+                                receiver,
+                                obligation.trait_id,
+                                &name,
+                                &arguments,
+                                &obligation.bounds,
+                            )
+                            .map_err(|e| {
+                                self.error(obligation.module, DK::Type, obligation.span, e.message)
+                            })?;
+                    }
+                    ObligationKind::Bound { message } => {
+                        if !self
+                            .traits
+                            .registry
+                            .satisfies(
+                                &self.catalog.core,
+                                receiver,
+                                obligation.trait_id,
+                                &obligation.bounds,
+                            )
+                            .map_err(|e| {
+                                self.error(obligation.module, DK::Type, obligation.span, e.message)
+                            })?
+                        {
+                            return Err(self.error(
+                                obligation.module,
+                                DK::Type,
+                                obligation.span,
+                                message,
+                            ));
+                        }
+                    }
+                }
                 Ok(())
             })();
             if let Err(error) = result {
@@ -89,7 +122,7 @@ impl Checker {
         Ok(())
     }
     pub(super) fn validate_type_bounds(
-        &self,
+        &mut self,
         module: usize,
         ty: b::TypeId,
         bounds: &crate::frontend::traits::ParamBounds,
@@ -101,11 +134,23 @@ impl Checker {
             if !seen.insert(ty) {
                 continue;
             }
-            match self.catalog.core.ty(ty) {
+            let ty = self
+                .solver
+                .resolve(&mut self.catalog.core.types, ty)
+                .map_err(|e| self.error(module, DK::Type, span, e.message))?;
+            match self.catalog.core.ty(ty).clone() {
                 Type::Tuple(fields) => pending.extend(fields),
-                Type::List(element) => pending.push(*element),
+                Type::List(element) | Type::Cell(element) => pending.push(element),
+                Type::Fn(signature) => {
+                    pending.extend(signature.params);
+                    pending.push(signature.ret);
+                    if let Some(sets) = signature.sets {
+                        pending.extend([sets.errors, sets.effects]);
+                    }
+                }
+                Type::Set(summary) => pending.extend(summary.params),
                 Type::Enum(id, args) => {
-                    let declaration = self.catalog.declaration(*id);
+                    let declaration = self.catalog.declaration(id).clone();
                     for (argument, parameter) in args.iter().zip(&declaration.ast.params) {
                         for bound in &parameter.bounds {
                             let trait_id = self
@@ -119,19 +164,14 @@ impl Checker {
                                         "undefined data type trait bound",
                                     )
                                 })?;
-                            if !self
-                                .traits
-                                .registry
-                                .satisfies(&self.catalog.core, *argument, trait_id, bounds)
-                                .map_err(|e| self.error(module, DK::Type, span, e.message))?
-                            {
-                                return Err(self.error(
-                                    module,
-                                    DK::Type,
-                                    span,
-                                    "data type argument does not satisfy its trait bound",
-                                ));
-                            }
+                            self.check_trait_bound(
+                                module,
+                                *argument,
+                                trait_id,
+                                bounds,
+                                span,
+                                "data type argument does not satisfy its trait bound",
+                            )?;
                         }
                     }
                     pending.extend(args);
@@ -149,26 +189,66 @@ impl Checker {
         span: Span,
     ) -> Result<(), Diagnostic> {
         for (parameter, bounds) in self.definitions[id.0].bounds.clone() {
-            let instantiated = self.catalog.core.types.subst(parameter, type_arguments);
+            let substitutions = self.schemes.parameters[id.0]
+                .iter()
+                .copied()
+                .zip(type_arguments.iter().copied())
+                .collect();
+            let instantiated = self
+                .solver
+                .substitute(&mut self.catalog.core.types, parameter, &substitutions)
+                .map_err(|error| self.error(module, DK::Type, span, error.message))?;
             let receiver = self
                 .solver
                 .resolve(&mut self.catalog.core.types, instantiated)
                 .map_err(|e| self.error(module, DK::Type, span, e.message))?;
             for bound in bounds {
-                if !self
-                    .traits
-                    .registry
-                    .satisfies(&self.catalog.core, receiver, bound, &self.current_bounds)
-                    .map_err(|e| self.error(module, DK::Type, span, e.message))?
-                {
-                    return Err(self.error(
-                        module,
-                        DK::Type,
-                        span,
-                        "type argument does not satisfy its trait bound",
-                    ));
-                }
+                self.check_trait_bound(
+                    module,
+                    receiver,
+                    bound,
+                    &self.current_bounds.clone(),
+                    span,
+                    "type argument does not satisfy its trait bound",
+                )?;
             }
+        }
+        Ok(())
+    }
+    #[allow(clippy::too_many_arguments)]
+    fn check_trait_bound(
+        &mut self,
+        module: usize,
+        receiver: b::TypeId,
+        trait_id: TraitId,
+        bounds: &crate::frontend::traits::ParamBounds,
+        span: Span,
+        message: &'static str,
+    ) -> Result<(), Diagnostic> {
+        let unresolved = self
+            .solver
+            .free_metas(&mut self.catalog.core.types, receiver)
+            .map_err(|e| self.error(module, DK::Type, span, e.message))?;
+        if !unresolved.is_empty() {
+            // A function or constructor value can acquire its type arguments at
+            // a later Apply. Keep its lexical bounds until inference completes.
+            self.trait_obligations.push(Obligation {
+                module,
+                self_type: receiver,
+                trait_id,
+                kind: ObligationKind::Bound { message },
+                bounds: bounds.clone(),
+                span,
+            });
+            return Ok(());
+        }
+        if !self
+            .traits
+            .registry
+            .satisfies(&self.catalog.core, receiver, trait_id, bounds)
+            .map_err(|e| self.error(module, DK::Type, span, e.message))?
+        {
+            return Err(self.error(module, DK::Type, span, message));
         }
         Ok(())
     }
@@ -271,9 +351,19 @@ impl Checker {
         let params = signature
             .params
             .iter()
-            .map(|&ty| data::frontend_type(self.catalog.core.types.subst(ty, &substitutions)))
+            .map(|&ty| {
+                data::frontend_type(data::substitute(
+                    &mut self.catalog.core.types,
+                    ty,
+                    &substitutions,
+                ))
+            })
             .collect::<Vec<_>>();
-        let ret = data::frontend_type(self.catalog.core.types.subst(signature.ret, &substitutions));
+        let ret = data::frontend_type(data::substitute(
+            &mut self.catalog.core.types,
+            signature.ret,
+            &substitutions,
+        ));
         if let Some(expected) = expected {
             self.expect_type(module, ret, expected, span)?;
         }
@@ -366,7 +456,7 @@ impl Checker {
         )
     }
     #[allow(clippy::too_many_arguments)]
-    fn checked_generic_trait_call(
+    pub(super) fn checked_generic_trait_call(
         &mut self,
         module: usize,
         trait_id: TraitId,
@@ -383,8 +473,10 @@ impl Checker {
             module,
             self_type,
             trait_id,
-            method: method.into(),
-            method_type_arguments: method_type_arguments.clone(),
+            kind: ObligationKind::Method {
+                name: method.into(),
+                arguments: method_type_arguments.clone(),
+            },
             bounds: self.current_bounds.clone(),
             span,
         });

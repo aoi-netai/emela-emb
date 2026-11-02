@@ -1,0 +1,55 @@
+# Source extraction of native closure/FnRef/indirect-call and managed-capture contracts.
+@external(c, "board_mark")
+fn mark(n: Int) -> Int
+@external(c, "board_mutate_input")
+fn mutate_input() -> Unit
+fn identity[A](value: A) -> A { value }
+fn apply[A, B](f: fn(A) -> B, value: A) -> B { f(value) }
+type Action(run: fn(Int) -> Int)
+type Pair(left: Int, right: Int)
+fn adder(n: Int) -> fn(Int) -> Int { mark(3)
+  fn(value) { n + value } }
+fn keep(text: String) -> fn() -> String { fn() { text } }
+fn keep_nested(text: String) -> fn() -> String {
+  values = [(text, Some(text))]
+  f = fn() { values match { [(value, Some(other)), ..] -> String.append(value, other)
+    _ -> "" } }
+  fn() { f() }
+}
+fn with_unit(n: Int) -> fn(Unit, Int) -> Int { fn(_, extra) { n + extra } }
+@export(c, "closure_order")
+pub fn closure_order() -> Int { adder(mark(1))(mark(2)) }
+@export(c, "function_values")
+pub fn function_values(n: Int) -> Int {
+  f: fn(Int) -> Int = identity
+  constructor: fn(Int) -> Option[Int] = Some
+  assert apply(f, n) == n
+  assert apply(constructor, n) == Some(n)
+  action = Action(fn(value) { n + value })
+  assert action.run(2) == n + 2
+  pair_sum = fn(Pair(left, right)) { left + right }
+  assert pair_sum(Pair(20, 22)) == 42
+  tuple_sum = fn((left, right): (Int, Int)) { left + right }
+  assert tuple_sum((20, 22)) == 42
+  assert with_unit(n)((), 2) == n + 2
+  action.run(2)
+}
+@export(c, "closure_snapshot")
+pub fn closure_snapshot(text: String, expected: String) -> Bool {
+  f = keep(text)
+  nested = keep_nested(text)
+  mutate_input()
+  f() == expected && nested() == String.append(expected, expected)
+}
+error Captured(text: String, values: List[String])
+fn make_failure(text: String) -> fn() -> Int fails Captured {
+  values = [text, "tail"]
+  fn() { fail Captured(text:, values:) }
+}
+@export(c, "closure_failure")
+pub fn closure_failure(text: String, expected: String) -> Bool {
+  f = make_failure(text)
+  mutate_input()
+  result = f() escape { Captured(message, values) -> if message == expected && List.head(values) == Some(expected) { 1 } else { 0 } }
+  result == 1
+}
