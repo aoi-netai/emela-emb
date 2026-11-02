@@ -35,8 +35,10 @@ pub fn compile_sources(
     entry: &str,
     options: &Options,
 ) -> Result<Output, Vec<Diagnostic>> {
-    let modules = frontend::modules::collect(sources, entry)?;
+    let mut modules = frontend::modules::collect(sources, entry)?;
+    frontend::consts::expand(&mut modules)?;
     let checked = frontend::check::check(modules)?;
+    let checked = frontend::specialize::specialize(checked)?;
     let lowered = frontend::lower::lower(&checked);
     backend::compile_program(lowered, options).map_err(|errors| {
         errors

@@ -6,6 +6,7 @@ pub(crate) enum TokenKind<'a> {
     Integer(&'a str),
     Float(&'a str),
     String(&'a str),
+    MultilineString(&'a str),
     At,
     LParen,
     RParen,
@@ -33,6 +34,7 @@ pub(crate) enum TokenKind<'a> {
     AndAnd,
     OrOr,
     Pipe,
+    Bar,
     Newline,
     Eof,
 }
@@ -117,6 +119,7 @@ pub(crate) fn lex(source: &str) -> Result<Vec<Token<'_>>, Diagnostic> {
                 pos += 1;
                 Some(TokenKind::Pipe)
             }
+            b'|' => Some(TokenKind::Bar),
             _ => None,
         };
         if let Some(kind) = single {
@@ -247,40 +250,18 @@ pub(crate) fn lex(source: &str) -> Result<Vec<Token<'_>>, Diagnostic> {
                 });
             }
             b'"' => {
-                if source[pos..].starts_with("\"\"\"") {
-                    return Err(Diagnostic::new(
-                        DiagnosticKind::Unsupported,
-                        Span::new(pos, pos + 3),
-                        "multiline strings require P2",
-                    ));
-                }
-                pos += 1;
-                let content = pos;
-                while pos < bytes.len() && bytes[pos] != b'"' {
-                    let ch = source[pos..].chars().next().unwrap();
-                    if matches!(ch, '\n' | '\r') {
-                        return Err(error(
-                            Span::new(start, pos),
-                            "string cannot contain a line break",
-                        ));
-                    }
-                    if ch == '\\' || source[pos..].starts_with("#{") {
-                        return Err(Diagnostic::new(
-                            DiagnosticKind::Unsupported,
-                            Span::new(pos, pos + ch.len_utf8()),
-                            "string escapes and interpolation require P2",
-                        ));
-                    }
-                    pos += ch.len_utf8();
-                }
-                if pos == bytes.len() {
-                    return Err(error(Span::new(start, pos), "unterminated string"));
-                }
+                let (closing, end, multiline) = super::strings::scan(source, pos)?;
+                let width = if multiline { 3 } else { 1 };
+                let raw = &source[pos + width..closing];
                 tokens.push(Token {
-                    kind: TokenKind::String(&source[content..pos]),
-                    span: Span::new(start, pos + 1),
+                    kind: if multiline {
+                        TokenKind::MultilineString(raw)
+                    } else {
+                        TokenKind::String(raw)
+                    },
+                    span: Span::new(start, end),
                 });
-                pos += 1;
+                pos = end;
             }
             _ => {
                 let ch = source[pos..].chars().next().unwrap();

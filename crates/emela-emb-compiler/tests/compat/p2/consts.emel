@@ -1,0 +1,14 @@
+@external(c, "board_seed")
+fn seed(n: Int) -> Int use {}
+@external(c, "board_zero")
+fn zero() -> Int use {}
+const FIRST = seed(1)
+const SECOND = FIRST + seed(2)
+const UNUSED = seed(3)
+const BROKEN = 1 / zero()
+@export(c, "read_first")
+pub fn read_first() -> Int { FIRST }
+@export(c, "read_second")
+pub fn read_second() -> Int { SECOND }
+@export(c, "read_broken")
+pub fn read_broken() -> Int { BROKEN }

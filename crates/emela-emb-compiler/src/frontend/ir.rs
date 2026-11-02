@@ -17,6 +17,10 @@ pub(crate) struct Local {
 #[derive(Clone, Debug)]
 pub(crate) struct Function {
     pub id: DefinitionId,
+    pub type_parameters: usize,
+    pub constant: bool,
+    pub origin: Option<DefinitionId>,
+    pub derivation: Option<super::traits::BuiltinTrait>,
     pub name: String,
     pub source_name: String,
     pub span: Span,
@@ -30,6 +34,8 @@ pub(crate) struct Function {
 }
 #[derive(Clone, Debug)]
 pub(crate) struct Program {
+    pub core: crate::contract::ir::Definitions,
+    pub registry: super::traits::Registry,
     pub functions: Vec<Function>,
 }
 #[derive(Clone, Debug)]
@@ -40,7 +46,7 @@ pub(crate) struct Block {
 }
 #[derive(Clone, Debug)]
 pub(crate) enum Statement {
-    Bind { local: Local, value: Expr },
+    Pattern { pattern: Pattern, value: Expr },
     Expr(Expr),
 }
 #[derive(Clone, Debug)]
@@ -52,6 +58,42 @@ pub(crate) struct Expr {
 #[derive(Clone, Debug)]
 pub(crate) enum ExprKind {
     Literal(Literal),
+    Concat(Vec<Expr>),
+    Fail(Box<Expr>),
+    Escape {
+        value: Box<Expr>,
+        error: Local,
+        arms: Vec<Arm>,
+    },
+    Tag(Box<Expr>),
+    Builtin {
+        op: crate::contract::ir::Builtin,
+        args: Vec<Expr>,
+    },
+    TraitCall {
+        trait_id: super::traits::TraitId,
+        method: String,
+        self_type: crate::contract::ir::TypeId,
+        method_type_arguments: Vec<crate::contract::ir::TypeId>,
+        args: Vec<Expr>,
+        order: Vec<usize>,
+        nested_show: bool,
+    },
+    Match {
+        value: Box<Expr>,
+        arms: Vec<Arm>,
+    },
+    Tuple(Vec<Expr>),
+    Make {
+        ctor: crate::contract::ir::CtorRef,
+        args: Vec<Expr>,
+        order: Vec<usize>,
+    },
+    Field {
+        base: Box<Expr>,
+        ctor: crate::contract::ir::CtorRef,
+        index: usize,
+    },
     Local(LocalId),
     Unary {
         op: Unary,
@@ -64,7 +106,9 @@ pub(crate) enum ExprKind {
     },
     Call {
         target: DefinitionId,
+        type_arguments: Vec<crate::contract::ir::TypeId>,
         args: Vec<Expr>,
+        order: Vec<usize>,
     },
     If {
         condition: Box<Expr>,
@@ -79,6 +123,42 @@ pub(crate) enum Literal {
     Int(i32),
     Int64(i64),
     Float(f64),
+    String(String),
     Bool(bool),
     Unit,
+}
+
+#[derive(Clone, Debug)]
+pub(crate) struct Pattern {
+    pub kind: PatternKind,
+    pub ty: ValueType,
+    pub span: Span,
+}
+#[derive(Clone, Debug)]
+pub(crate) enum PatternKind {
+    Constant {
+        value: Box<Expr>,
+        coverage: Option<Box<Pattern>>,
+        comparison: Option<ConstantEquality>,
+    },
+    Any,
+    Bind(Local),
+    Literal(Literal),
+    Tuple(Vec<Pattern>),
+    Constructor {
+        ctor: crate::contract::ir::CtorRef,
+        fields: Vec<Pattern>,
+    },
+}
+#[derive(Clone, Debug)]
+pub(crate) struct Arm {
+    pub pattern: Pattern,
+    pub guard: Option<Expr>,
+    pub value: Expr,
+}
+
+#[derive(Clone, Debug)]
+pub(crate) enum ConstantEquality {
+    Function(DefinitionId),
+    Structural(crate::contract::ir::TypeId),
 }

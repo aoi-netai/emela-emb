@@ -561,3 +561,823 @@ fn float_constant_bits_and_non_finite_values_execute() {
         0,
     );
 }
+
+#[test]
+fn strings_unicode_comparisons_and_float_rounding_execute() {
+    let mut f = simple();
+    let joined = f.vars.alloc(VarData {
+        hint: "joined".into(),
+        ty: TypeId::STRING,
+        repr: Repr::Ref,
+    });
+    let count = variable(&mut f, TypeId::INT);
+    let rounded = variable(&mut f, TypeId::INT);
+    let result = variable(&mut f, TypeId::INT);
+    let text = binding(
+        &mut f,
+        Some(joined),
+        Value::Builtin {
+            op: Builtin::StringAppend,
+            args: vec![
+                Const::String("a\u{0301}".into()).into(),
+                Const::String("Z".into()).into(),
+            ],
+        },
+    );
+    let length = binding(
+        &mut f,
+        Some(count),
+        Value::Builtin {
+            op: Builtin::StringLength,
+            args: vec![joined.into()],
+        },
+    );
+    let floor = binding(
+        &mut f,
+        Some(rounded),
+        Value::Builtin {
+            op: Builtin::FloatFloor,
+            args: vec![Const::Float(40.9).into()],
+        },
+    );
+    let add = binding(
+        &mut f,
+        Some(result),
+        Value::Prim {
+            op: PrimOp::Add,
+            ty: PrimTy::I32,
+            args: vec![count.into(), rounded.into()],
+        },
+    );
+    f.seqs[f.body.unwrap()] = Seq {
+        stmts: vec![text, length, floor, add],
+        term: Term::Return(Some(result.into())),
+    };
+    let output = crate::backend::compile_program(program(vec![f]), &Options::default()).unwrap();
+    execute(&output, DEFECT_HARNESS, 0);
+    let mut f = simple();
+    f.ret = TypeId::BOOL;
+    let result = variable(&mut f, TypeId::BOOL);
+    let compare = binding(
+        &mut f,
+        Some(result),
+        Value::Prim {
+            op: PrimOp::Lt,
+            ty: PrimTy::String,
+            args: vec![
+                Const::String("a\0x".into()).into(),
+                Const::String("a\0y".into()).into(),
+            ],
+        },
+    );
+    f.seqs[f.body.unwrap()] = Seq {
+        stmts: vec![compare],
+        term: Term::Return(Some(result.into())),
+    };
+    let output = crate::backend::compile_program(program(vec![f]), &Options::default()).unwrap();
+    execute(
+        &output,
+        &DEFECT_HARNESS.replace("INT32_C(42)", "INT32_C(1)"),
+        0,
+    );
+}
+
+#[test]
+fn discarded_string_results_keep_capacity_checks() {
+    let mut f = simple();
+    let input = f.vars.alloc(VarData {
+        hint: "input".into(),
+        ty: TypeId::STRING,
+        repr: Repr::Ref,
+    });
+    f.params.push(input);
+    let append = binding(
+        &mut f,
+        None,
+        Value::Builtin {
+            op: Builtin::StringAppend,
+            args: vec![input.into(), Const::String("bb".into()).into()],
+        },
+    );
+    f.seqs[f.body.unwrap()].stmts.push(append);
+    let output = crate::backend::compile_program(
+        program(vec![f]),
+        &Options::default().with_string_capacity(3),
+    )
+    .unwrap();
+    execute(
+        &output,
+        "#include <stdlib.h>\n#include \"emela_embedded.h\"\n#include \"emela_board.h\"\n_Noreturn void emela_board_defect(EmelaDefectKind k, const char *m, uint16_t n) { (void)m; (void)n; exit(k == EMELA_DEFECT_STRING_CAPACITY ? 7 : 8); }\nint main(void) { return answer((EmelaString){ \"aa\", UINT16_C(2), NULL }); }\n",
+        7,
+    );
+}
+
+fn aggregate_variable(f: &mut Function, ty: TypeId) -> VarId {
+    f.vars.alloc(VarData {
+        hint: String::new(),
+        ty,
+        repr: Repr::Ref,
+    })
+}
+#[test]
+fn tuple_constructor_projection_and_enum_switch_execute() {
+    let mut p = program(vec![]);
+    let tuple_ty = p
+        .core
+        .types
+        .intern(Type::Tuple(vec![TypeId::INT, TypeId::BOOL]));
+    let enum_id = p.core.enums.alloc(EnumDef {
+        name: "Choice".into(),
+        params: 0,
+        variants: vec![
+            VariantDef {
+                name: "Number".into(),
+                fields: VariantFields::Positional(1),
+                tys: vec![TypeId::INT],
+            },
+            VariantDef {
+                name: "Empty".into(),
+                fields: VariantFields::Unit,
+                tys: vec![],
+            },
+        ],
+        error: false,
+        external: false,
+    });
+    let enum_ty = p.core.types.intern(Type::Enum(enum_id, vec![]));
+    let mut f = simple();
+    let pair = aggregate_variable(&mut f, tuple_ty);
+    let number = variable(&mut f, TypeId::INT);
+    let choice = aggregate_variable(&mut f, enum_ty);
+    let payload = variable(&mut f, TypeId::INT);
+    let result = variable(&mut f, TypeId::INT);
+    let tuple = binding(
+        &mut f,
+        Some(pair),
+        Value::Tuple(vec![Const::Int(42).into(), Const::Bool(true).into()]),
+    );
+    let project = binding(
+        &mut f,
+        Some(number),
+        Value::TupleGet {
+            base: pair,
+            index: 0,
+        },
+    );
+    let make = binding(
+        &mut f,
+        Some(choice),
+        Value::Make {
+            ctor: CtorRef {
+                enum_id,
+                variant: 0,
+            },
+            args: vec![number.into()],
+        },
+    );
+    let field = binding(
+        &mut f,
+        Some(payload),
+        Value::Field {
+            base: choice,
+            ctor: CtorRef {
+                enum_id,
+                variant: 0,
+            },
+            index: 0,
+        },
+    );
+    let number_case = f.seqs.alloc(Seq {
+        stmts: vec![field],
+        term: Term::Yield(Some(payload.into())),
+    });
+    let empty_case = f.seqs.alloc(Seq {
+        stmts: vec![],
+        term: Term::Yield(Some(Const::Int(0).into())),
+    });
+    let switch = f.stmts.alloc(Stmt::Switch {
+        dst: Some(result),
+        on: SwitchOn::Tag(choice),
+        cases: vec![
+            Case {
+                key: CaseKey::Variant(0),
+                body: number_case,
+            },
+            Case {
+                key: CaseKey::Variant(1),
+                body: empty_case,
+            },
+        ],
+        default: None,
+    });
+    f.seqs[f.body.unwrap()] = Seq {
+        stmts: vec![tuple, project, make, switch],
+        term: Term::Return(Some(result.into())),
+    };
+    p.functions.alloc(f);
+    let output = crate::backend::compile_program(p, &Options::default()).unwrap();
+    execute(&output, DEFECT_HARNESS, 0);
+}
+
+#[test]
+fn failure_payload_recovery_runs_cleanup_once() {
+    let mut p = program(vec![]);
+    let error_id = p.core.enums.alloc(EnumDef {
+        name: "Failure".into(),
+        params: 0,
+        variants: vec![VariantDef {
+            name: "Failure".into(),
+            fields: VariantFields::Positional(1),
+            tys: vec![TypeId::INT],
+        }],
+        error: true,
+        external: false,
+    });
+    let error_ty = p.core.types.intern(Type::Enum(error_id, vec![]));
+    let mut tick = Function::new("tick");
+    tick.external = Some(External {
+        bindings: vec![ExternalBinding {
+            target: "c".into(),
+            host: HostRef::Global("tick".into()),
+        }],
+    });
+    let tick_id = p.functions.alloc(tick);
+    let mut fail = Function::new("fail");
+    fail.fails = true;
+    fail.ret = TypeId::INT;
+    let error_value = aggregate_variable(&mut fail, error_ty);
+    let error_make = binding(
+        &mut fail,
+        Some(error_value),
+        Value::Make {
+            ctor: CtorRef {
+                enum_id: error_id,
+                variant: 0,
+            },
+            args: vec![Const::Int(42).into()],
+        },
+    );
+    let body = fail.seqs.alloc(Seq {
+        stmts: vec![error_make],
+        term: Term::Fail(error_value.into()),
+    });
+    let cleanup_call = binding(
+        &mut fail,
+        None,
+        Value::Call {
+            callee: Callee::Direct(tick_id),
+            args: vec![],
+            suspends: false,
+            on_fail: None,
+        },
+    );
+    let cleanup = fail.seqs.alloc(Seq {
+        stmts: vec![cleanup_call],
+        term: Term::Yield(None),
+    });
+    let protect = fail.stmts.alloc(Stmt::Protect {
+        dst: None,
+        body,
+        cleanup,
+    });
+    fail.body = Some(fail.seqs.alloc(Seq {
+        stmts: vec![protect],
+        term: Term::Unreachable,
+    }));
+    let fail_id = p.functions.alloc(fail);
+    let mut answer = simple();
+    let caught = aggregate_variable(&mut answer, TypeId::ANY);
+    let unpacked = aggregate_variable(&mut answer, error_ty);
+    let code = variable(&mut answer, TypeId::INT);
+    let result = variable(&mut answer, TypeId::INT);
+    let unpack = binding(
+        &mut answer,
+        Some(unpacked),
+        Value::AsError {
+            error: caught,
+            enum_id: error_id,
+            error_type: error_ty,
+        },
+    );
+    let field = binding(
+        &mut answer,
+        Some(code),
+        Value::Field {
+            base: unpacked,
+            ctor: CtorRef {
+                enum_id: error_id,
+                variant: 0,
+            },
+            index: 0,
+        },
+    );
+    let handler = answer.seqs.alloc(Seq {
+        stmts: vec![unpack, field],
+        term: Term::Yield(Some(code.into())),
+    });
+    let call = binding(
+        &mut answer,
+        Some(result),
+        Value::Call {
+            callee: Callee::Direct(fail_id),
+            args: vec![],
+            suspends: false,
+            on_fail: Some(OnFail::Handle {
+                error: caught,
+                body: handler,
+            }),
+        },
+    );
+    answer.seqs[answer.body.unwrap()] = Seq {
+        stmts: vec![call],
+        term: Term::Return(Some(result.into())),
+    };
+    let answer_id = p.functions.alloc(answer);
+    let mut malformed = p.clone();
+    if let Stmt::Let {
+        value: Value::AsError { error_type, .. },
+        ..
+    } = &mut malformed.functions[answer_id].stmts[unpack]
+    {
+        *error_type = TypeId::INT;
+    }
+    assert!(
+        lower_program(malformed).unwrap_err()[0]
+            .message
+            .contains("error operation type")
+    );
+    let output = crate::backend::compile_program(p, &Options::default()).unwrap();
+    execute(
+        &output,
+        "#include <stdlib.h>\n#include \"emela_embedded.h\"\n#include \"emela_board.h\"\nstatic int ticks;\nvoid tick(void) { ++ticks; }\n_Noreturn void emela_board_defect(EmelaDefectKind k,const char*m,uint16_t n) { (void)k;(void)m;(void)n;exit(9); }\nint main(void) { int value=answer(); return value==42 && ticks==1 ? 0 : 1; }\n",
+        0,
+    );
+}
+
+#[test]
+fn rejects_malformed_generic_fields_and_unhandled_failure_channels() {
+    let mut p = program(vec![simple()]);
+    let param = p.core.types.intern(Type::Param(3));
+    let tuple = p.core.types.intern(Type::Tuple(vec![param]));
+    p.core.enums.alloc(EnumDef {
+        name: "Invalid".into(),
+        params: 1,
+        variants: vec![VariantDef {
+            name: "Invalid".into(),
+            fields: VariantFields::Positional(1),
+            tys: vec![tuple],
+        }],
+        error: false,
+        external: false,
+    });
+    assert!(
+        lower_program(p).unwrap_err()[0]
+            .message
+            .contains("undeclared type parameter")
+    );
+    let mut p = program(vec![]);
+    let mut fail = Function::new("fails");
+    fail.fails = true;
+    fail.body = Some(fail.seqs.alloc(Seq {
+        stmts: vec![],
+        term: Term::Return(None),
+    }));
+    let fail_id = p.functions.alloc(fail);
+    let mut f = simple();
+    let call = binding(
+        &mut f,
+        None,
+        Value::Call {
+            callee: Callee::Direct(fail_id),
+            args: vec![],
+            suspends: false,
+            on_fail: None,
+        },
+    );
+    f.seqs[f.body.unwrap()].stmts.push(call);
+    p.functions.alloc(f);
+    assert!(
+        lower_program(p).unwrap_err()[0]
+            .message
+            .contains("failure edge")
+    );
+}
+
+#[test]
+fn string_parameter_tail_recursion_tracks_loop_ownership() {
+    let mut f = simple();
+    f.ret = TypeId::BOOL;
+    let left = aggregate_variable(&mut f, TypeId::STRING);
+    let right = aggregate_variable(&mut f, TypeId::STRING);
+    let count = variable(&mut f, TypeId::INT);
+    f.params = vec![left, right, count];
+    let done = variable(&mut f, TypeId::BOOL);
+    let equal = variable(&mut f, TypeId::BOOL);
+    let next = variable(&mut f, TypeId::INT);
+    let condition = binding(
+        &mut f,
+        Some(done),
+        Value::Prim {
+            op: PrimOp::Eq,
+            ty: PrimTy::I32,
+            args: vec![count.into(), Const::Int(0).into()],
+        },
+    );
+    let compare = binding(
+        &mut f,
+        Some(equal),
+        Value::Prim {
+            op: PrimOp::Eq,
+            ty: PrimTy::String,
+            args: vec![left.into(), right.into()],
+        },
+    );
+    let decrement = binding(
+        &mut f,
+        Some(next),
+        Value::Prim {
+            op: PrimOp::Sub,
+            ty: PrimTy::I32,
+            args: vec![count.into(), Const::Int(1).into()],
+        },
+    );
+    let yes = f.seqs.alloc(Seq {
+        stmts: vec![compare],
+        term: Term::Return(Some(equal.into())),
+    });
+    let no = f.seqs.alloc(Seq {
+        stmts: vec![decrement],
+        term: Term::Recur(vec![right.into(), left.into(), next.into()]),
+    });
+    let branch = f.stmts.alloc(Stmt::If {
+        dst: None,
+        cond: done.into(),
+        then: yes,
+        else_: no,
+    });
+    f.seqs[f.body.unwrap()] = Seq {
+        stmts: vec![condition, branch],
+        term: Term::Unreachable,
+    };
+    let output = crate::backend::compile_program(program(vec![f]), &Options::default()).unwrap();
+    execute(
+        &output,
+        "#include <stdlib.h>\n#include \"emela_embedded.h\"\n#include \"emela_board.h\"\n_Noreturn void emela_board_defect(EmelaDefectKind k,const char*m,uint16_t n) { (void)k;(void)m;(void)n;exit(9); }\nint main(void) { EmelaString a={\"same\",UINT16_C(4),NULL}; EmelaString b={\"other\",UINT16_C(5),NULL}; if (!answer(a,a,100000)) return 1; return answer(a,b,100001) ? 2 : 0; }\n",
+        0,
+    );
+}
+
+fn runtime_const_program(defect: bool) -> Program {
+    let mut p = program(vec![]);
+    let mut external = Function::new("read_once");
+    external.ret = TypeId::INT;
+    external.external = Some(External {
+        bindings: vec![ExternalBinding {
+            target: "c".into(),
+            host: HostRef::Global("read_once".into()),
+        }],
+    });
+    let external_id = p.functions.alloc(external);
+    let mut constant = Function::new("Once");
+    constant.ret = TypeId::INT;
+    constant.constant = true;
+    let value = variable(&mut constant, TypeId::INT);
+    let call = binding(
+        &mut constant,
+        Some(value),
+        Value::Call {
+            callee: Callee::Direct(external_id),
+            args: vec![],
+            suspends: false,
+            on_fail: None,
+        },
+    );
+    let mut statements = vec![call];
+    let result = if defect {
+        let result = variable(&mut constant, TypeId::INT);
+        statements.push(binding(
+            &mut constant,
+            Some(result),
+            Value::Prim {
+                op: PrimOp::Div,
+                ty: PrimTy::I32,
+                args: vec![value.into(), Const::Int(0).into()],
+            },
+        ));
+        result
+    } else {
+        value
+    };
+    constant.body = Some(constant.seqs.alloc(Seq {
+        stmts: statements,
+        term: Term::Return(Some(result.into())),
+    }));
+    let constant_id = p.functions.alloc(constant);
+    let mut answer = simple();
+    let first = variable(&mut answer, TypeId::INT);
+    let second = variable(&mut answer, TypeId::INT);
+    let result = variable(&mut answer, TypeId::INT);
+    let a = binding(
+        &mut answer,
+        Some(first),
+        Value::Call {
+            callee: Callee::Direct(constant_id),
+            args: vec![],
+            suspends: false,
+            on_fail: None,
+        },
+    );
+    let b = binding(
+        &mut answer,
+        Some(second),
+        Value::Call {
+            callee: Callee::Direct(constant_id),
+            args: vec![],
+            suspends: false,
+            on_fail: None,
+        },
+    );
+    let add = binding(
+        &mut answer,
+        Some(result),
+        Value::Prim {
+            op: PrimOp::Add,
+            ty: PrimTy::I32,
+            args: vec![first.into(), second.into()],
+        },
+    );
+    answer.seqs[answer.body.unwrap()] = Seq {
+        stmts: vec![a, b, add],
+        term: Term::Return(Some(result.into())),
+    };
+    p.functions.alloc(answer);
+    p
+}
+#[test]
+fn monomorphic_runtime_const_initializes_once() {
+    let output =
+        crate::backend::compile_program(runtime_const_program(false), &Options::default()).unwrap();
+    execute(
+        &output,
+        "#include <stdlib.h>\n#include \"emela_embedded.h\"\n#include \"emela_board.h\"\nstatic int reads;\nint32_t read_once(void) { ++reads;return INT32_C(21); }\n_Noreturn void emela_board_defect(EmelaDefectKind k,const char*m,uint16_t n) { (void)k;(void)m;(void)n;exit(9); }\nint main(void) { return answer()==42 && answer()==42 && reads==1 ? 0 : 1; }\n",
+        0,
+    );
+}
+#[test]
+fn evaluated_const_does_not_emit_unused_initializer_helpers() {
+    let mut p = runtime_const_program(false);
+    let helper_id = p.functions.iter().next().unwrap().0;
+    let helper = &mut p.functions[helper_id];
+    helper.external = None;
+    helper.body = Some(helper.seqs.alloc(Seq {
+        stmts: vec![],
+        term: Term::Return(Some(Const::Int(21).into())),
+    }));
+    let lowered = lower_program(p.clone()).unwrap();
+    assert!(!lowered.emitted_functions.contains(&helper_id));
+    let output = crate::backend::compile_program(p, &Options::default()).unwrap();
+    execute(&output, DEFECT_HARNESS, 0);
+}
+#[test]
+fn runtime_const_defect_is_cached_with_context() {
+    let output =
+        crate::backend::compile_program(runtime_const_program(true), &Options::default()).unwrap();
+    execute(
+        &output,
+        "#include <stdlib.h>\n#include <setjmp.h>\n#include <string.h>\n#include \"emela_embedded.h\"\n#include \"emela_board.h\"\nstatic int reads; static jmp_buf target;\nint32_t read_once(void) { ++reads;return INT32_C(21); }\n_Noreturn void emela_board_defect(EmelaDefectKind k,const char*m,uint16_t n) { const char expected[]=\"while evaluating const Once: division by zero\"; if (k!=EMELA_DEFECT_DIVISION_BY_ZERO || n!=sizeof expected-1 || memcmp(m,expected,n)!=0) exit(9); longjmp(target,1); }\nint main(void) { for (int i=0;i<2;i++) { if (setjmp(target)==0) { (void)answer();return 1; } } return reads==1 ? 0 : 2; }\n",
+        0,
+    );
+}
+#[test]
+fn static_const_and_aggregate_runtime_const_execute() {
+    let mut p = program(vec![]);
+    let tuple_ty = p
+        .core
+        .types
+        .intern(Type::Tuple(vec![TypeId::INT, TypeId::BOOL]));
+    let mut aggregate = Function::new("Pair");
+    aggregate.ret = tuple_ty;
+    aggregate.constant = true;
+    let tuple = aggregate_variable(&mut aggregate, tuple_ty);
+    let make = binding(
+        &mut aggregate,
+        Some(tuple),
+        Value::Tuple(vec![Const::Int(42).into(), Const::Bool(true).into()]),
+    );
+    aggregate.body = Some(aggregate.seqs.alloc(Seq {
+        stmts: vec![make],
+        term: Term::Return(Some(tuple.into())),
+    }));
+    let aggregate_id = p.functions.alloc(aggregate);
+    let mut answer = simple();
+    let returned = aggregate_variable(&mut answer, tuple_ty);
+    let result = variable(&mut answer, TypeId::INT);
+    let call = binding(
+        &mut answer,
+        Some(returned),
+        Value::Call {
+            callee: Callee::Direct(aggregate_id),
+            args: vec![],
+            suspends: false,
+            on_fail: None,
+        },
+    );
+    let get = binding(
+        &mut answer,
+        Some(result),
+        Value::TupleGet {
+            base: returned,
+            index: 0,
+        },
+    );
+    answer.seqs[answer.body.unwrap()] = Seq {
+        stmts: vec![call, get],
+        term: Term::Return(Some(result.into())),
+    };
+    p.functions.alloc(answer);
+    let output = crate::backend::compile_program(p, &Options::default()).unwrap();
+    execute(&output, DEFECT_HARNESS, 0);
+    let mut answer = simple();
+    answer.constant = true;
+    let result = variable(&mut answer, TypeId::INT);
+    let add = binding(
+        &mut answer,
+        Some(result),
+        Value::Prim {
+            op: PrimOp::Add,
+            ty: PrimTy::I32,
+            args: vec![Const::Int(i32::MAX).into(), Const::Int(1).into()],
+        },
+    );
+    answer.seqs[answer.body.unwrap()] = Seq {
+        stmts: vec![add],
+        term: Term::Return(Some(result.into())),
+    };
+    let output =
+        crate::backend::compile_program(program(vec![answer]), &Options::default()).unwrap();
+    execute(
+        &output,
+        &DEFECT_HARNESS.replace("INT32_C(42)", "INT32_MIN"),
+        0,
+    );
+}
+
+#[test]
+fn structural_equality_and_show_use_materialized_tuple_layouts() {
+    let mut p = program(vec![]);
+    let tuple_ty = p
+        .core
+        .types
+        .intern(Type::Tuple(vec![TypeId::INT, TypeId::BOOL]));
+    let mut eq = Function::new("tuple_eq");
+    eq.ret = TypeId::BOOL;
+    eq.derivation = Some(crate::DerivedOperation::Eq);
+    eq.external = Some(External { bindings: vec![] });
+    let a = aggregate_variable(&mut eq, tuple_ty);
+    let b = aggregate_variable(&mut eq, tuple_ty);
+    eq.params = vec![a, b];
+    let eq_id = p.functions.alloc(eq);
+    let mut show = Function::new("tuple_show");
+    show.ret = TypeId::STRING;
+    show.derivation = Some(crate::DerivedOperation::Show);
+    show.external = Some(External { bindings: vec![] });
+    let value = aggregate_variable(&mut show, tuple_ty);
+    show.params.push(value);
+    let show_id = p.functions.alloc(show);
+    let mut answer = simple();
+    let tuple = aggregate_variable(&mut answer, tuple_ty);
+    let equals = variable(&mut answer, TypeId::BOOL);
+    let displayed = aggregate_variable(&mut answer, TypeId::STRING);
+    let length = variable(&mut answer, TypeId::INT);
+    let result = variable(&mut answer, TypeId::INT);
+    let make = binding(
+        &mut answer,
+        Some(tuple),
+        Value::Tuple(vec![Const::Int(42).into(), Const::Bool(true).into()]),
+    );
+    let compare = binding(
+        &mut answer,
+        Some(equals),
+        Value::Call {
+            callee: Callee::Direct(eq_id),
+            args: vec![tuple.into(), tuple.into()],
+            suspends: false,
+            on_fail: None,
+        },
+    );
+    let display = binding(
+        &mut answer,
+        Some(displayed),
+        Value::Call {
+            callee: Callee::Direct(show_id),
+            args: vec![tuple.into()],
+            suspends: false,
+            on_fail: None,
+        },
+    );
+    let size = binding(
+        &mut answer,
+        Some(length),
+        Value::Builtin {
+            op: Builtin::StringByteSize,
+            args: vec![displayed.into()],
+        },
+    );
+    let yes = answer.seqs.alloc(Seq {
+        stmts: vec![],
+        term: Term::Yield(Some(length.into())),
+    });
+    let no = answer.seqs.alloc(Seq {
+        stmts: vec![],
+        term: Term::Yield(Some(Const::Int(0).into())),
+    });
+    let branch = answer.stmts.alloc(Stmt::If {
+        dst: Some(result),
+        cond: equals.into(),
+        then: yes,
+        else_: no,
+    });
+    answer.seqs[answer.body.unwrap()] = Seq {
+        stmts: vec![make, compare, display, size, branch],
+        term: Term::Return(Some(result.into())),
+    };
+    p.functions.alloc(answer);
+    let output = crate::backend::compile_program(p, &Options::default()).unwrap();
+    execute(
+        &output,
+        &DEFECT_HARNESS.replace("INT32_C(42)", "INT32_C(10)"),
+        0,
+    );
+}
+
+#[test]
+fn unit_enum_uses_the_scalar_tag_representation() {
+    let mut p = program(vec![]);
+    let enum_id = p.core.enums.alloc(EnumDef {
+        name: "Marker".into(),
+        params: 0,
+        variants: vec![
+            VariantDef {
+                name: "First".into(),
+                fields: VariantFields::Unit,
+                tys: vec![],
+            },
+            VariantDef {
+                name: "Second".into(),
+                fields: VariantFields::Unit,
+                tys: vec![],
+            },
+        ],
+        error: false,
+        external: false,
+    });
+    let ty = p.core.types.intern(Type::Enum(enum_id, vec![]));
+    let mut f = simple();
+    let tag = f.vars.alloc(VarData {
+        hint: "tag".into(),
+        ty,
+        repr: Repr::I32,
+    });
+    let result = variable(&mut f, TypeId::INT);
+    let make = binding(
+        &mut f,
+        Some(tag),
+        Value::Make {
+            ctor: CtorRef {
+                enum_id,
+                variant: 1,
+            },
+            args: vec![],
+        },
+    );
+    let first = f.seqs.alloc(Seq {
+        stmts: vec![],
+        term: Term::Yield(Some(Const::Int(0).into())),
+    });
+    let second = f.seqs.alloc(Seq {
+        stmts: vec![],
+        term: Term::Yield(Some(Const::Int(42).into())),
+    });
+    let switch = f.stmts.alloc(Stmt::Switch {
+        dst: Some(result),
+        on: SwitchOn::Tag(tag),
+        cases: vec![
+            Case {
+                key: CaseKey::Variant(0),
+                body: first,
+            },
+            Case {
+                key: CaseKey::Variant(1),
+                body: second,
+            },
+        ],
+        default: None,
+    });
+    f.seqs[f.body.unwrap()] = Seq {
+        stmts: vec![make, switch],
+        term: Term::Return(Some(result.into())),
+    };
+    p.functions.alloc(f);
+    let output = crate::backend::compile_program(p, &Options::default()).unwrap();
+    execute(&output, DEFECT_HARNESS, 0);
+}

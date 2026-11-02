@@ -1,0 +1,1 @@
+pub fn to_string(value: ()) -> String { "()" }

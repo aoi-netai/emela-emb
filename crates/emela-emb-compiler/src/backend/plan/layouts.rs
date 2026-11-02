@@ -205,6 +205,9 @@ impl<'a> LayoutPreparation<'a> for LayoutBuilder<'a> {
                     continue;
                 };
                 match value {
+                    Value::IsError { error_type, .. } | Value::AsError { error_type, .. } => {
+                        layouts.collect(*error_type, &function.name, &mut states)?;
+                    }
                     Value::Builtin {
                         op: Builtin::CellNew,
                         args,

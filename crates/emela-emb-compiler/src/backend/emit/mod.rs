@@ -415,6 +415,9 @@ pub(super) fn render(plan: &PlannedModule<'_>) -> Result<Output, Vec<Error>> {
                     options.string_capacity()
                 )),
             );
+            // A String result can still have no returning path (for example a
+            // function whose body always fails). Keep its output ABI uniform.
+            source.line("(void)emela_emb_string_output_capacity;");
         }
         let string_buffers = &plan.strings[&id];
         emit_local_declarations(layouts, function, string_buffers, &mut source);

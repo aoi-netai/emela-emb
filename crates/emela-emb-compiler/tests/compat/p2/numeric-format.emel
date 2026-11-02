@@ -1,0 +1,28 @@
+@export(c, "int_text_matches")
+pub fn int_text_matches(n: Int, expected: String) -> Bool { Int.to_string(n) == expected }
+@export(c, "int64_text_matches")
+pub fn int64_text_matches(n: Int64, expected: String) -> Bool { Int64.to_string(n) == expected }
+@export(c, "float_text_matches")
+pub fn float_text_matches(n: Float, expected: String) -> Bool { Float.to_string(n) == expected }
+@export(c, "float_text_size")
+pub fn float_text_size(n: Float) -> Int { String.byte_size(Float.to_string(n)) }
+@export(c, "floor_value")
+pub fn floor_value(n: Float) -> Int { Float.floor(n) }
+@export(c, "ceil_value")
+pub fn ceil_value(n: Float) -> Int { Float.ceil(n) }
+@export(c, "round_value")
+pub fn round_value(n: Float) -> Int { Float.round(n) }
+@export(c, "truncate_value")
+pub fn truncate_value(n: Float) -> Int { Float.truncate(n) }
+@export(c, "discard_floor")
+pub fn discard_floor(n: Float) -> Unit { ignored = Float.floor(n)
+ () }
+@export(c, "discard_ceil")
+pub fn discard_ceil(n: Float) -> Unit { ignored = Float.ceil(n)
+ () }
+@export(c, "discard_round")
+pub fn discard_round(n: Float) -> Unit { ignored = Float.round(n)
+ () }
+@export(c, "discard_truncate")
+pub fn discard_truncate(n: Float) -> Unit { ignored = Float.truncate(n)
+ () }

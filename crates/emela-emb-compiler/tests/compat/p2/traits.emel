@@ -1,0 +1,22 @@
+
+trait Priority: Eq {
+  fn rank(self) -> Int
+  fn higher(self, other: Self) -> Self {
+    if self == other { self } else if Priority.rank(self) < Priority.rank(other) { other } else { self }
+  }
+}
+impl Key: Priority { fn rank(self) { self.value } }
+error ReadError(code: Int)
+trait Read { fn read(self) -> Int fails ReadError }
+impl Key: Read {
+  fn read(self) { if self.value < 0 { fail ReadError(code: self.value) } else { self.value } }
+}
+@export(c, "trait_defaults")
+pub fn trait_defaults() -> Int {
+  assert Priority.higher(Key(value: 1), Key(value: 11)).value == 1
+  Priority.higher(Key(value: 2), Key(value: 11)).value
+}
+@export(c, "trait_failure")
+pub fn trait_failure(n: Int) -> Int {
+  Read.read(Key(value: n)) escape { ReadError(code) -> code + 100 }
+}

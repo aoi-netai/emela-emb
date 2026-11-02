@@ -5,11 +5,16 @@ use super::{
     types::ValueType as Ty,
 };
 use crate::{contract::ir as b, sources::Intrinsic};
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
+
+#[path = "lower/constant_patterns.rs"]
+mod constant_patterns;
+#[path = "lower/failures.rs"]
+mod failures;
 
 pub(crate) fn lower(input: &ir::Program) -> b::Program {
     let mut program = b::Program {
-        core: b::Definitions::default(),
+        core: input.core.clone(),
         functions: Default::default(),
         error_shows: vec![],
         const_function_groups: vec![],
@@ -18,11 +23,12 @@ pub(crate) fn lower(input: &ir::Program) -> b::Program {
     let mut ids = HashMap::new();
     for function in &input.functions {
         if function.intrinsic.is_none() {
-            debug_assert!(
-                function.signature.sets.errors.is_empty()
-                    && function.signature.sets.effects.is_empty()
-            );
+            debug_assert!(function.signature.sets.effects.is_empty());
+            debug_assert!(function.derivation.is_none());
+            debug_assert!(function.origin.is_none() || function.constant);
             let mut target = b::Function::new(&function.name);
+            target.constant = function.constant;
+            target.fails = !function.signature.sets.errors.is_empty();
             target.exported = function.exported;
             target.export_symbol = function
                 .exported
@@ -40,6 +46,13 @@ pub(crate) fn lower(input: &ir::Program) -> b::Program {
             ids.insert(function.id, program.functions.alloc(target));
         }
     }
+    let raises = failures::allocate_raises(input, &mut program);
+    let structural_equality = constant_patterns::allocate_structural_equality(input, &mut program);
+    let failing: HashSet<_> = input
+        .functions
+        .iter()
+        .filter_map(|function| (!function.signature.sets.errors.is_empty()).then_some(function.id))
+        .collect();
     let intrinsics = input
         .functions
         .iter()
@@ -57,6 +70,11 @@ pub(crate) fn lower(input: &ir::Program) -> b::Program {
             ids: &ids,
             intrinsics: &intrinsics,
             locals: HashMap::new(),
+            core: &program.core,
+            failing: &failing,
+            raises: &raises,
+            structural_equality: &structural_equality,
+            escape: None,
         };
         for param in &function.params {
             if param.ty == Ty::Unit {
@@ -75,6 +93,11 @@ pub(crate) fn lower(input: &ir::Program) -> b::Program {
     }
     program
 }
+enum PatternStep {
+    Statement(b::StmtId),
+    Test(b::Operand),
+    Terminal(b::Term),
+}
 struct Builder {
     statements: Vec<b::StmtId>,
     term: Option<b::Term>,
@@ -85,12 +108,17 @@ struct Context<'a> {
     ids: &'a HashMap<DefinitionId, b::FnId>,
     intrinsics: &'a HashMap<DefinitionId, Intrinsic>,
     locals: HashMap<LocalId, b::Operand>,
+    core: &'a b::Definitions,
+    failing: &'a HashSet<DefinitionId>,
+    raises: &'a HashMap<b::TypeId, b::FnId>,
+    structural_equality: &'a HashMap<b::TypeId, b::FnId>,
+    escape: Option<(b::VarId, b::SeqId)>,
 }
 impl Context<'_> {
     fn var(&mut self, name: &str, value_type: Ty) -> b::VarId {
         self.function.vars.alloc(b::VarData {
             hint: name.into(),
-            repr: repr(value_type),
+            repr: repr(value_type, self.core),
             ty: ty(value_type),
         })
     }
@@ -155,10 +183,27 @@ impl Context<'_> {
                 break;
             }
             match statement {
-                ir::Statement::Bind { local, value } => {
+                ir::Statement::Pattern { pattern, value } => {
                     let value = self.expression(builder, value, false);
-                    self.locals
-                        .insert(local.id, value.unwrap_or(b::Operand::Const(b::Const::Unit)));
+                    if builder.term.is_some() {
+                        break;
+                    }
+                    let mut steps = Vec::new();
+                    self.prepare_pattern(
+                        pattern,
+                        value.unwrap_or(b::Operand::Const(b::Const::Unit)),
+                        &mut steps,
+                    );
+                    for step in steps {
+                        match step {
+                            PatternStep::Statement(id) => builder.statements.push(id),
+                            PatternStep::Test(_) => unreachable!("irrefutable binding pattern"),
+                            PatternStep::Terminal(term) => {
+                                builder.term = Some(term);
+                                break;
+                            }
+                        }
+                    }
                     result = None;
                 }
                 ir::Statement::Expr(expression) => {
@@ -180,6 +225,178 @@ impl Context<'_> {
     ) -> Option<b::Operand> {
         use ir::ExprKind as E;
         match &expression.kind {
+            E::Fail(value) => {
+                let error = self.expression(builder, value, false);
+                if builder.term.is_some() {
+                    return None;
+                }
+                self.raise(builder, error.expect("checked error value"), ty(value.ty));
+                None
+            }
+            E::Escape { value, error, arms } => {
+                self.escape_expression(builder, value, error, arms, expression.ty)
+            }
+            E::TraitCall { .. } => {
+                unreachable!("trait methods are resolved before backend lowering")
+            }
+            E::Tag(value) => {
+                let b::Operand::Var(value) = self.expression(builder, value, false)? else {
+                    unreachable!("tagged enum is a variable")
+                };
+                self.value(builder, b::Value::Tag(value), expression.ty)
+            }
+            E::Builtin { op, args } => {
+                let mut values = Vec::new();
+                for arg in args {
+                    let value = self.expression(builder, arg, false);
+                    if builder.term.is_some() {
+                        return None;
+                    }
+                    values.push(value.unwrap_or(b::Operand::Const(b::Const::Unit)));
+                }
+                if *op == b::Builtin::Panic {
+                    builder.term = Some(b::Term::Defect(values[0].clone()));
+                    return None;
+                }
+                if *op == b::Builtin::Todo {
+                    builder.term = Some(b::Term::Defect(b::Operand::Const(b::Const::String(
+                        "not yet implemented".into(),
+                    ))));
+                    return None;
+                }
+                let value = match op {
+                    b::Builtin::ShowNested | b::Builtin::ShowString => b::Value::Runtime {
+                        op: b::RuntimeOp::ShowString,
+                        args: values,
+                    },
+                    b::Builtin::DebugPrint => b::Value::Runtime {
+                        op: b::RuntimeOp::DebugPrint,
+                        args: values,
+                    },
+                    op => b::Value::Builtin {
+                        op: *op,
+                        args: values,
+                    },
+                };
+                self.value(builder, value, expression.ty)
+            }
+            E::Match { value, arms } => {
+                let value = self.expression(builder, value, false);
+                if builder.term.is_some() {
+                    return None;
+                }
+                let value = value.unwrap_or(b::Operand::Const(b::Const::Unit));
+                let mut failure = self.function.seqs.alloc(b::Seq {
+                    stmts: vec![],
+                    term: b::Term::Unreachable,
+                });
+                for arm in arms.iter().rev() {
+                    let mut steps = Vec::new();
+                    self.prepare_pattern(&arm.pattern, value.clone(), &mut steps);
+                    let body = ir::Block {
+                        statements: vec![ir::Statement::Expr(arm.value.clone())],
+                        ty: arm.value.ty,
+                        span: arm.value.span,
+                    };
+                    let mut success = self.block(&body, tail);
+                    if let Some(guard) = &arm.guard {
+                        let mut guard_builder = Builder {
+                            statements: Vec::new(),
+                            term: None,
+                        };
+                        let condition = self.expression(&mut guard_builder, guard, false);
+                        if let Some(term) = guard_builder.term {
+                            success = self.function.seqs.alloc(b::Seq {
+                                stmts: guard_builder.statements,
+                                term,
+                            });
+                        } else {
+                            let choice = self.choose(
+                                condition.expect("Bool guard"),
+                                success,
+                                failure,
+                                expression.ty,
+                                tail,
+                            );
+                            guard_builder.statements.reverse();
+                            success = self.prepend(&mut guard_builder.statements, choice);
+                        }
+                    }
+                    failure = self.pattern_steps(steps, success, failure, expression.ty, tail);
+                }
+                let sequence = self.function.seqs[failure].clone();
+                builder.statements.extend(sequence.stmts);
+                match sequence.term {
+                    b::Term::Yield(value) => value,
+                    term => {
+                        builder.term = Some(term);
+                        None
+                    }
+                }
+            }
+            E::Tuple(elements) => {
+                let mut values = Vec::new();
+                for element in elements {
+                    let value = self.expression(builder, element, false);
+                    if builder.term.is_some() {
+                        return None;
+                    }
+                    values.push(value.unwrap_or(b::Operand::Const(b::Const::Unit)));
+                }
+                self.value(builder, b::Value::Tuple(values), expression.ty)
+            }
+            E::Make { ctor, args, order } => {
+                let mut evaluated = Vec::new();
+                for argument in args {
+                    let value = self.expression(builder, argument, false);
+                    if builder.term.is_some() {
+                        return None;
+                    }
+                    evaluated.push(value.unwrap_or(b::Operand::Const(b::Const::Unit)));
+                }
+                self.value(
+                    builder,
+                    b::Value::Make {
+                        ctor: *ctor,
+                        args: order
+                            .iter()
+                            .map(|&index| evaluated[index].clone())
+                            .collect(),
+                    },
+                    expression.ty,
+                )
+            }
+            E::Field { base, ctor, index } => {
+                let b::Operand::Var(base) = self.expression(builder, base, false)? else {
+                    unreachable!("constructed record is bound to a variable")
+                };
+                self.value(
+                    builder,
+                    b::Value::Field {
+                        base,
+                        ctor: *ctor,
+                        index: *index,
+                    },
+                    expression.ty,
+                )
+            }
+            E::Concat(parts) => {
+                let mut combined = b::Operand::Const(b::Const::String(String::new()));
+                for part in parts {
+                    let value = self.expression(builder, part, false)?;
+                    combined = self
+                        .value(
+                            builder,
+                            b::Value::Builtin {
+                                op: b::Builtin::StringAppend,
+                                args: vec![combined, value],
+                            },
+                            Ty::String,
+                        )
+                        .expect("String result");
+                }
+                Some(combined)
+            }
             E::Literal(value) => {
                 if expression.ty == Ty::Unit {
                     None
@@ -269,20 +486,30 @@ impl Context<'_> {
                     expression.ty,
                 )
             }
-            E::Call { target, args } => {
-                let mut operands = Vec::new();
+            E::Call {
+                target,
+                args,
+                order,
+                ..
+            } => {
+                let mut evaluated = Vec::new();
                 for argument in args {
                     let value = self.expression(builder, argument, false);
                     if builder.term.is_some() {
                         return None;
                     }
-                    // Unit has no C parameter, but evaluating its source expression can
-                    // still call externals or stop execution. Erase only the resulting value.
-                    if argument.ty != Ty::Unit {
-                        operands.push(value.expect("non-Unit checked argument"));
-                    }
+                    // Evaluate even Unit arguments before omitting their C values.
+                    evaluated.push(value);
                 }
-                if tail && *target == self.current {
+                let operands = order
+                    .iter()
+                    .filter_map(|&index| evaluated[index].clone())
+                    .collect();
+                if tail
+                    && *target == self.current
+                    && !self.function.constant
+                    && self.escape.is_none()
+                {
                     builder.term = Some(b::Term::Recur(operands));
                     return None;
                 }
@@ -295,7 +522,7 @@ impl Context<'_> {
                         callee: b::Callee::Direct(self.ids[target]),
                         args: operands,
                         suspends: false,
-                        on_fail: None,
+                        on_fail: self.failing.contains(target).then(|| self.failure_edge()),
                     },
                 };
                 self.value(builder, value, expression.ty)
@@ -334,6 +561,212 @@ impl Context<'_> {
             }
         }
     }
+    fn pattern_value(
+        &mut self,
+        steps: &mut Vec<PatternStep>,
+        value: b::Value,
+        value_type: Ty,
+    ) -> b::Operand {
+        let dst = self.var("pattern", value_type);
+        steps.push(PatternStep::Statement(self.function.stmts.alloc(
+            b::Stmt::Let {
+                dst: Some(dst),
+                value,
+                on_defect: None,
+                on_suspend: None,
+            },
+        )));
+        b::Operand::Var(dst)
+    }
+    fn prepare_pattern(
+        &mut self,
+        pattern: &ir::Pattern,
+        value: b::Operand,
+        steps: &mut Vec<PatternStep>,
+    ) {
+        use ir::PatternKind as P;
+        match &pattern.kind {
+            P::Constant {
+                value: expected,
+                comparison,
+                ..
+            } => self.constant_pattern(pattern, expected, comparison, value, steps),
+            P::Any => {}
+            P::Bind(local) => {
+                self.locals.insert(local.id, value);
+            }
+            P::Literal(ir::Literal::Unit) => {}
+            P::Literal(lit) => {
+                let condition = self.pattern_value(
+                    steps,
+                    b::Value::Prim {
+                        op: b::PrimOp::Eq,
+                        ty: prim_ty(pattern.ty),
+                        args: vec![value, b::Operand::Const(literal(lit))],
+                    },
+                    Ty::Bool,
+                );
+                steps.push(PatternStep::Test(condition));
+            }
+            P::Tuple(fields) => {
+                let base = match value {
+                    b::Operand::Var(var) => var,
+                    b::Operand::Const(value) => {
+                        let b::Operand::Var(var) =
+                            self.pattern_value(steps, b::Value::Const(value), pattern.ty)
+                        else {
+                            unreachable!()
+                        };
+                        var
+                    }
+                };
+                for (index, field) in fields.iter().enumerate() {
+                    let value = if field.ty == Ty::Unit {
+                        b::Operand::Const(b::Const::Unit)
+                    } else {
+                        self.pattern_value(steps, b::Value::TupleGet { base, index }, field.ty)
+                    };
+                    self.prepare_pattern(field, value, steps);
+                }
+            }
+            P::Constructor { ctor, fields } => {
+                let value = if let b::Operand::Var(error) = value {
+                    if self.function.vars[error].ty == b::TypeId::ANY {
+                        let condition = self.pattern_value(
+                            steps,
+                            b::Value::IsError {
+                                error,
+                                enum_id: ctor.enum_id,
+                                error_type: ty(pattern.ty),
+                            },
+                            Ty::Bool,
+                        );
+                        steps.push(PatternStep::Test(condition));
+                        self.pattern_value(
+                            steps,
+                            b::Value::AsError {
+                                error,
+                                enum_id: ctor.enum_id,
+                                error_type: ty(pattern.ty),
+                            },
+                            pattern.ty,
+                        )
+                    } else {
+                        b::Operand::Var(error)
+                    }
+                } else {
+                    value
+                };
+                let base = match value {
+                    b::Operand::Var(var) => var,
+                    b::Operand::Const(value) => {
+                        let b::Operand::Var(var) =
+                            self.pattern_value(steps, b::Value::Const(value), pattern.ty)
+                        else {
+                            unreachable!()
+                        };
+                        var
+                    }
+                };
+                if self.core.enums[ctor.enum_id].variants.len() > 1 {
+                    let tag = self.pattern_value(steps, b::Value::Tag(base), Ty::Int);
+                    let condition = self.pattern_value(
+                        steps,
+                        b::Value::Prim {
+                            op: b::PrimOp::Eq,
+                            ty: b::PrimTy::I32,
+                            args: vec![tag, b::Operand::Const(b::Const::Int(ctor.variant as i32))],
+                        },
+                        Ty::Bool,
+                    );
+                    steps.push(PatternStep::Test(condition));
+                }
+                for (index, field) in fields.iter().enumerate() {
+                    let value = if field.ty == Ty::Unit {
+                        b::Operand::Const(b::Const::Unit)
+                    } else {
+                        self.pattern_value(
+                            steps,
+                            b::Value::Field {
+                                base,
+                                ctor: *ctor,
+                                index,
+                            },
+                            field.ty,
+                        )
+                    };
+                    self.prepare_pattern(field, value, steps);
+                }
+            }
+        }
+    }
+    fn prepend(&mut self, statements: &mut Vec<b::StmtId>, body: b::SeqId) -> b::SeqId {
+        if statements.is_empty() {
+            return body;
+        }
+        let mut seq = self.function.seqs[body].clone();
+        let mut prefix: Vec<_> = statements.drain(..).rev().collect();
+        prefix.append(&mut seq.stmts);
+        seq.stmts = prefix;
+        self.function.seqs.alloc(seq)
+    }
+    fn choose(
+        &mut self,
+        condition: b::Operand,
+        then: b::SeqId,
+        else_: b::SeqId,
+        value_type: Ty,
+        tail: bool,
+    ) -> b::SeqId {
+        let dst = if tail || matches!(value_type, Ty::Unit | Ty::Never) {
+            None
+        } else {
+            Some(self.var("matched", value_type))
+        };
+        let statement = self.function.stmts.alloc(b::Stmt::If {
+            dst,
+            cond: condition,
+            then,
+            else_,
+        });
+        self.function.seqs.alloc(b::Seq {
+            stmts: vec![statement],
+            term: if tail || value_type == Ty::Never {
+                b::Term::Unreachable
+            } else {
+                b::Term::Yield(dst.map(b::Operand::Var))
+            },
+        })
+    }
+    fn pattern_steps(
+        &mut self,
+        steps: Vec<PatternStep>,
+        success: b::SeqId,
+        failure: b::SeqId,
+        value_type: Ty,
+        tail: bool,
+    ) -> b::SeqId {
+        let mut result = success;
+        let mut statements = Vec::new();
+        for step in steps.into_iter().rev() {
+            match step {
+                PatternStep::Statement(id) => statements.push(id),
+                PatternStep::Terminal(term) => {
+                    statements.clear();
+                    result = self.function.seqs.alloc(b::Seq {
+                        stmts: vec![],
+                        term,
+                    });
+                }
+                PatternStep::Test(condition) => {
+                    result = self.prepend(&mut statements, result);
+                    result = self.choose(condition, result, failure, value_type, tail);
+                }
+            }
+        }
+        self.prepend(&mut statements, result)
+    }
+
     fn branch(
         &mut self,
         builder: &mut Builder,
@@ -370,17 +803,32 @@ fn ty(value: Ty) -> b::TypeId {
         Ty::Int => b::TypeId::INT,
         Ty::Int64 => b::TypeId::INT64,
         Ty::Float => b::TypeId::FLOAT,
+        Ty::String => b::TypeId::STRING,
         Ty::Bool => b::TypeId::BOOL,
         Ty::Unit => b::TypeId::UNIT,
         Ty::Never => b::TypeId::NEVER,
+        Ty::Any => b::TypeId::ANY,
+        Ty::Compound(id) => id,
     }
 }
-fn repr(value: Ty) -> b::Repr {
+fn repr(value: Ty, core: &b::Definitions) -> b::Repr {
     match value {
         Ty::Int | Ty::Bool => b::Repr::I32,
         Ty::Int64 => b::Repr::I64,
         Ty::Float => b::Repr::F64,
+        Ty::String | Ty::Any => b::Repr::Ref,
         Ty::Unit | Ty::Never => b::Repr::Void,
+        Ty::Compound(id) => match core.ty(id) {
+            b::Type::Enum(id, _)
+                if !core.enums[*id].error
+                    && !core.enums[*id].external
+                    && !core.enums[*id].variants.is_empty()
+                    && core.enums[*id].variants.iter().all(|v| v.tys.is_empty()) =>
+            {
+                b::Repr::I32
+            }
+            _ => b::Repr::Ref,
+        },
     }
 }
 fn prim_ty(value: Ty) -> b::PrimTy {
@@ -388,6 +836,7 @@ fn prim_ty(value: Ty) -> b::PrimTy {
         Ty::Int | Ty::Bool => b::PrimTy::I32,
         Ty::Int64 => b::PrimTy::I64,
         Ty::Float => b::PrimTy::F64,
+        Ty::String => b::PrimTy::String,
         _ => unreachable!("non-numeric primitive in checked IR"),
     }
 }
@@ -412,12 +861,17 @@ fn literal(value: &ir::Literal) -> b::Const {
         ir::Literal::Int(n) => b::Const::Int(*n),
         ir::Literal::Int64(n) => b::Const::Int64(*n),
         ir::Literal::Float(n) => b::Const::Float(*n),
+        ir::Literal::String(text) => b::Const::String(text.clone()),
         ir::Literal::Bool(n) => b::Const::Bool(*n),
         ir::Literal::Unit => b::Const::Unit,
     }
 }
 fn builtin(op: Intrinsic) -> b::Builtin {
     match op {
+        Intrinsic::Panic => b::Builtin::Panic,
+        Intrinsic::Todo => b::Builtin::Todo,
+        Intrinsic::Dbg => b::Builtin::Dbg,
+        Intrinsic::Inspect | Intrinsic::ShowNested => b::Builtin::ShowNested,
         Intrinsic::IntBitAnd => b::Builtin::IntBitAnd,
         Intrinsic::IntBitOr => b::Builtin::IntBitOr,
         Intrinsic::IntBitXor => b::Builtin::IntBitXor,
@@ -435,5 +889,23 @@ fn builtin(op: Intrinsic) -> b::Builtin {
         Intrinsic::Int64ShiftRight => b::Builtin::Int64ShiftRight,
         Intrinsic::Int64ShiftRightUnsigned => b::Builtin::Int64ShiftRightUnsigned,
         Intrinsic::FloatFromInt => b::Builtin::FloatFromInt,
+        Intrinsic::IntToString => b::Builtin::IntToString,
+        Intrinsic::Int64ToString => b::Builtin::Int64ToString,
+        Intrinsic::FloatToString => b::Builtin::FloatToString,
+        Intrinsic::FloatFloor => b::Builtin::FloatFloor,
+        Intrinsic::FloatCeil => b::Builtin::FloatCeil,
+        Intrinsic::FloatRound => b::Builtin::FloatRound,
+        Intrinsic::FloatTruncate => b::Builtin::FloatTruncate,
+        Intrinsic::StringLength => b::Builtin::StringLength,
+        Intrinsic::StringByteSize => b::Builtin::StringByteSize,
+        Intrinsic::StringAppend => b::Builtin::StringAppend,
+        Intrinsic::StringContains => b::Builtin::StringContains,
+        Intrinsic::StringStartsWith => b::Builtin::StringStartsWith,
+        Intrinsic::StringEndsWith => b::Builtin::StringEndsWith,
+        Intrinsic::StringTrim => b::Builtin::StringTrim,
+        Intrinsic::IntParse => b::Builtin::IntParse,
+        Intrinsic::IntCheckedAdd => b::Builtin::IntCheckedAdd,
+        Intrinsic::FloatParse => b::Builtin::FloatParse,
+        Intrinsic::StringFromCodePoint => b::Builtin::StringFromCodePoint,
     }
 }

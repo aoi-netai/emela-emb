@@ -1,0 +1,34 @@
+# Extracted synchronous String operations from the fixed legacy compiler tests.
+@export(c, "message")
+pub fn message(text: String) -> String {
+  String.append(String.append("Missing(text: ", text), ")")
+}
+@export(c, "string_eq")
+pub fn eq(a: String, b: String) -> Bool { a == b }
+@export(c, "string_ne")
+pub fn ne(a: String, b: String) -> Bool { a != b }
+@export(c, "string_lt")
+pub fn lt(a: String, b: String) -> Bool { a < b }
+@export(c, "string_le")
+pub fn le(a: String, b: String) -> Bool { a <= b }
+@export(c, "string_gt")
+pub fn gt(a: String, b: String) -> Bool { a > b }
+@export(c, "string_ge")
+pub fn ge(a: String, b: String) -> Bool { a >= b }
+@export(c, "string_repeated")
+pub fn repeated(a: String, b: String, n: Int) -> Bool {
+  if n == 0 { a == b } else { repeated(b, a, n - 1) }
+}
+@export(c, "string_length")
+pub fn length(text: String) -> Int { String.length(text) }
+@export(c, "string_byte_size")
+pub fn byte_size(text: String) -> Int { String.byte_size(text) }
+@export(c, "string_predicates")
+pub fn predicates(text: String, pattern: String) -> Int {
+  contains = if String.contains(text, pattern) { 4 } else { 0 }
+  starts = if String.starts_with(text, pattern) { 2 } else { 0 }
+  ends = if String.ends_with(text, pattern) { 1 } else { 0 }
+  contains + starts + ends
+}
+@export(c, "string_trimmed")
+pub fn trimmed(text: String, expected: String) -> Bool { String.trim(text) == expected }

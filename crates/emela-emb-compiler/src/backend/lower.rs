@@ -6,6 +6,13 @@ use crate::contract::lowered::LoweredModule;
 use crate::{Error, ErrorKind};
 use std::collections::{HashMap, HashSet};
 
+mod const_eval;
+mod error_types;
+mod failures;
+mod types;
+mod values;
+use values::value_type;
+
 type Result<T> = std::result::Result<T, Vec<Error>>;
 fn invalid(name: &str, message: impl Into<String>) -> Vec<Error> {
     vec![Error {
@@ -29,6 +36,9 @@ pub(crate) fn lower_program(
     mut program: Program,
     options: &crate::Options,
 ) -> Result<LoweredModule> {
+    types::validate_catalog(&program)?;
+    types::normalize_catalog(&mut program)?;
+    error_types::normalize(&mut program)?;
     let mut symbols = HashSet::new();
     for (id, function) in program.functions.iter() {
         if function.exported {
@@ -57,6 +67,46 @@ pub(crate) fn lower_program(
         }
         validate_function(&program, function)?;
     }
+    let mut const_outcomes = HashMap::new();
+    let mut runtime_consts = HashSet::new();
+    for (id, function) in program.functions.iter() {
+        if !function.constant {
+            continue;
+        }
+        if !function.params.is_empty()
+            || function.fails
+            || function.suspends
+            || function.external.is_some()
+        {
+            return Err(invalid(
+                &function.name,
+                "const must be a zero-argument, infallible synchronous definition",
+            ));
+        }
+        match const_eval::evaluate(&program, id) {
+            Ok(outcome) => {
+                let outcome = match outcome {
+                    const_eval::Outcome::Value(value) => {
+                        crate::contract::lowered::ConstOutcome::Value(value)
+                    }
+                    const_eval::Outcome::Defect { kind, message } => {
+                        crate::contract::lowered::ConstOutcome::Defect { kind, message }
+                    }
+                    const_eval::Outcome::SelfReference { message } => {
+                        crate::contract::lowered::ConstOutcome::SelfReference { message }
+                    }
+                };
+                const_outcomes.insert(id, Ok(outcome));
+            }
+            Err(_) => {
+                runtime_consts.insert(id);
+            }
+        }
+    }
+    for &id in &runtime_consts {
+        program.functions[id].constant = false;
+    }
+    failures::normalize(&mut program);
     // Numeric builtins still execute their checks when their result is unused. Their
     // renderers require a destination, so create an immediately discarded scalar slot.
     let mut discarded_results: HashMap<FnId, HashSet<VarId>> = HashMap::new();
@@ -76,19 +126,20 @@ pub(crate) fn lower_program(
                 discarded.push((
                     function_id,
                     statement,
-                    value_type(&program, function, value, &available)?,
+                    value_type(&program, function, value, &available, None)?,
                 ));
             }
         }
     }
     for (function_id, statement, ty) in discarded {
-        let function = &mut program.functions[function_id];
-        let repr = match ty {
-            TypeId::INT | TypeId::BOOL => Repr::I32,
-            TypeId::INT64 => Repr::I64,
-            TypeId::FLOAT => Repr::F64,
-            _ => unreachable!("validated scalar builtin result"),
+        let repr = match program.core.ty(ty) {
+            Type::Int | Type::Bool => Repr::I32,
+            Type::Int64 => Repr::I64,
+            Type::Float => Repr::F64,
+            Type::Unit | Type::Never => Repr::Void,
+            _ => Repr::Ref,
         };
+        let function = &mut program.functions[function_id];
         let variable = function.vars.alloc(VarData {
             hint: "discarded_result".into(),
             repr,
@@ -131,12 +182,16 @@ pub(crate) fn lower_program(
         .iter()
         .filter_map(|(id, f)| (f.exported || f.name == options.entry()).then_some(id))
         .collect();
-    if pending.is_empty() {
-        pending.extend(program.functions.iter().map(|(id, _)| id));
-    }
+    // Source visibility does not create C roots. A module with neither an export
+    // nor the selected entry still gets validated, but emits no reachable functions.
     let mut emitted_functions = HashSet::new();
     while let Some(id) = pending.pop() {
         if !emitted_functions.insert(id) {
+            continue;
+        }
+        // A resolved constant emits its value or defect directly. Its initializer no longer
+        // calls helpers; retaining those edges can emit unused static C functions.
+        if matches!(const_outcomes.get(&id), Some(Ok(_))) {
             continue;
         }
         let function = &program.functions[id];
@@ -163,42 +218,22 @@ pub(crate) fn lower_program(
         suspensions: HashMap::new(),
         closures: Default::default(),
         const_groups: vec![],
-        runtime_consts: HashSet::new(),
+        runtime_consts,
         deferred_pool: false,
         emitted_functions,
         discarded_results,
-        const_outcomes: HashMap::new(),
+        const_outcomes,
     })
 }
 
 fn validate_function(program: &Program, f: &Function) -> Result<()> {
-    if f.constant
-        || f.suspends
-        || f.fails
-        || f.env.is_some()
-        || f.derivation.is_some()
-        || f.infallible_cause_fail
-    {
+    if f.suspends || f.env.is_some() || f.infallible_cause_fail {
         return Err(unsupported(
             &f.name,
             "const, failure, suspension, closure or derived function",
         ));
     }
-    let check_type = |ty: TypeId| -> Result<()> {
-        if ty.index() >= program.core.types.len() {
-            return Err(invalid(&f.name, "type ID is out of bounds"));
-        }
-        match program.core.ty(ty) {
-            Type::Int
-            | Type::Int64
-            | Type::Float
-            | Type::Bool
-            | Type::String
-            | Type::Unit
-            | Type::Never => Ok(()),
-            _ => Err(unsupported(&f.name, "non-scalar value type")),
-        }
-    };
+    let check_type = |ty| types::validate_type(program, &f.name, ty);
     check_type(f.ret)?;
     for (_, var) in f.vars.iter() {
         check_type(var.ty)?;
@@ -207,6 +242,20 @@ fn validate_function(program: &Program, f: &Function) -> Result<()> {
             Type::Int64 => Repr::I64,
             Type::Float => Repr::F64,
             Type::Unit | Type::Never => Repr::Void,
+            Type::Enum(id, _)
+                if {
+                    let definition = &program.core.enums[*id];
+                    !definition.error
+                        && !definition.external
+                        && !definition.variants.is_empty()
+                        && definition
+                            .variants
+                            .iter()
+                            .all(|variant| variant.fields.is_empty())
+                } =>
+            {
+                Repr::I32
+            }
             _ => Repr::Ref,
         };
         if var.repr != expected {
@@ -221,6 +270,28 @@ fn validate_function(program: &Program, f: &Function) -> Result<()> {
         variable(f, param)?;
         if !available.insert(param) {
             return Err(invalid(&f.name, "duplicate parameter"));
+        }
+    }
+    if let Some(kind) = f.derivation {
+        let valid = !f.exported
+            && f.external.is_some()
+            && f.body.is_none()
+            && !f.fails
+            && !f.suspends
+            && !f.constant
+            && match kind {
+                crate::DerivedOperation::Eq => {
+                    f.params.len() == 2
+                        && f.vars[f.params[0]].ty == f.vars[f.params[1]].ty
+                        && f.ret == TypeId::BOOL
+                }
+                crate::DerivedOperation::Show => f.params.len() == 1 && f.ret == TypeId::STRING,
+            };
+        if !valid {
+            return Err(invalid(
+                &f.name,
+                "derived operation has an invalid signature or body",
+            ));
         }
     }
     match (&f.external, f.body) {
@@ -305,7 +376,45 @@ fn validate_sequence(
                 on_suspend: None,
                 ..
             } => {
-                let result = value_type(program, f, value, &available)?;
+                let result = value_type(program, f, value, &available, dst_type)?;
+                if let Value::Call {
+                    on_fail: Some(edge),
+                    ..
+                } = value
+                {
+                    match edge {
+                        OnFail::Propagate if !f.fails => {
+                            return Err(invalid(
+                                &f.name,
+                                "failure propagation has no function failure channel",
+                            ));
+                        }
+                        OnFail::Propagate => {}
+                        OnFail::Break(label) => {
+                            if blocks.get(label) != Some(&TypeId::ANY) {
+                                return Err(invalid(
+                                    &f.name,
+                                    "failure Break requires an active Any block destination",
+                                ));
+                            }
+                        }
+                        OnFail::Handle { error, body } => {
+                            expect_type(f, variable(f, *error)?, TypeId::ANY)?;
+                            let mut handler_available = available.clone();
+                            handler_available.insert(*error);
+                            validate_sequence(
+                                program,
+                                f,
+                                *body,
+                                &handler_available,
+                                visiting,
+                                Some(dst_type.unwrap_or(TypeId::UNIT)),
+                                recur_vars,
+                                blocks,
+                            )?;
+                        }
+                    }
+                }
                 if let Some(ty) = dst_type {
                     expect_type(f, result, ty)?;
                 }
@@ -357,6 +466,79 @@ fn validate_sequence(
                     visiting,
                     Some(dst_type.unwrap_or(TypeId::UNIT)),
                     vars,
+                    blocks,
+                )?;
+            }
+            Stmt::Switch {
+                on, cases, default, ..
+            } => {
+                let base = match on {
+                    SwitchOn::Tag(base) | SwitchOn::Lit(base) => *base,
+                };
+                let ty = operand(f, &Operand::Var(base), &available)?;
+                let mut seen = Vec::new();
+                for case in cases {
+                    if seen.contains(&case.key) {
+                        return Err(invalid(&f.name, "duplicate switch case"));
+                    }
+                    seen.push(case.key.clone());
+                    match (&case.key, on, program.core.ty(ty)) {
+                        (CaseKey::Variant(variant), SwitchOn::Tag(_), Type::Enum(id, _))
+                            if *variant < program.core.enums[*id].variants.len() => {}
+                        (CaseKey::Lit(Const::Int(_)), SwitchOn::Lit(_), Type::Int)
+                        | (CaseKey::Lit(Const::Int64(_)), SwitchOn::Lit(_), Type::Int64) => {}
+                        _ => {
+                            return Err(invalid(
+                                &f.name,
+                                "switch case key differs from its scrutinee type",
+                            ));
+                        }
+                    }
+                    validate_sequence(
+                        program,
+                        f,
+                        case.body,
+                        &available,
+                        visiting,
+                        Some(dst_type.unwrap_or(TypeId::UNIT)),
+                        recur_vars,
+                        blocks,
+                    )?;
+                }
+                if let Some(body) = default {
+                    validate_sequence(
+                        program,
+                        f,
+                        *body,
+                        &available,
+                        visiting,
+                        Some(dst_type.unwrap_or(TypeId::UNIT)),
+                        recur_vars,
+                        blocks,
+                    )?;
+                } else if matches!(on, SwitchOn::Lit(_)) {
+                    return Err(invalid(&f.name, "literal switch has no default sequence"));
+                }
+            }
+            Stmt::Protect { body, cleanup, .. } => {
+                validate_sequence(
+                    program,
+                    f,
+                    *body,
+                    &available,
+                    visiting,
+                    Some(dst_type.unwrap_or(TypeId::UNIT)),
+                    recur_vars,
+                    blocks,
+                )?;
+                validate_sequence(
+                    program,
+                    f,
+                    *cleanup,
+                    &available,
+                    visiting,
+                    Some(TypeId::UNIT),
+                    recur_vars,
                     blocks,
                 )?;
             }
@@ -436,6 +618,17 @@ fn validate_sequence(
                 .unwrap_or(TypeId::UNIT);
             expect_type(f, actual, expected)?;
         }
+        Term::Fail(error) => {
+            if !f.fails {
+                return Err(invalid(&f.name, "Fail has no function failure channel"));
+            }
+            let ty = operand(f, error, &available)?;
+            if ty != TypeId::ANY
+                && !matches!(program.core.ty(ty),Type::Enum(id,_) if program.core.enums[*id].error)
+            {
+                return Err(invalid(&f.name, "Fail value is not an error enum or Any"));
+            }
+        }
         Term::Defect(message) => {
             expect_type(f, operand(f, message, &available)?, TypeId::STRING)?;
         }
@@ -444,123 +637,6 @@ fn validate_sequence(
     }
     visiting.remove(&id);
     Ok(())
-}
-
-fn value_type(
-    program: &Program,
-    f: &Function,
-    value: &Value,
-    available: &HashSet<VarId>,
-) -> Result<TypeId> {
-    match value {
-        Value::Const(value) => operand(f, &Operand::Const(value.clone()), available),
-        Value::Call {
-            callee: Callee::Direct(id),
-            args,
-            suspends: false,
-            on_fail: None,
-        } => {
-            let target = program
-                .functions
-                .iter()
-                .find_map(|(key, value)| (key == *id).then_some(value))
-                .ok_or_else(|| invalid(&f.name, "callee ID is out of bounds"))?;
-            if args.len() != target.params.len() {
-                return Err(invalid(
-                    &f.name,
-                    "call argument count does not match callee parameters",
-                ));
-            }
-            for (arg, &param) in args.iter().zip(&target.params) {
-                expect_type(f, operand(f, arg, available)?, variable(target, param)?)?;
-            }
-            Ok(target.ret)
-        }
-        Value::Prim { op, ty, args } => {
-            let ty = match ty {
-                PrimTy::I32 => TypeId::INT,
-                PrimTy::I64 => TypeId::INT64,
-                PrimTy::F64 => TypeId::FLOAT,
-                PrimTy::String => return Err(unsupported(&f.name, "String primitive")),
-            };
-            let unary = matches!(op, PrimOp::Neg | PrimOp::Not);
-            if args.len() != if unary { 1 } else { 2 } {
-                return Err(invalid(&f.name, "primitive argument count is invalid"));
-            }
-            let mut first_type = None;
-            for arg in args {
-                let actual = operand(f, arg, available)?;
-                if first_type.is_some_and(|first| first != actual) {
-                    return Err(invalid(&f.name, "primitive operands have different types"));
-                }
-                first_type = Some(actual);
-                // Bool comparisons use the I32 primitive representation.
-                if !(ty == TypeId::INT
-                    && actual == TypeId::BOOL
-                    && matches!(op, PrimOp::Not | PrimOp::Eq | PrimOp::Ne))
-                {
-                    expect_type(f, actual, ty)?;
-                }
-            }
-            Ok(
-                if matches!(
-                    op,
-                    PrimOp::Not
-                        | PrimOp::Eq
-                        | PrimOp::Ne
-                        | PrimOp::Lt
-                        | PrimOp::Le
-                        | PrimOp::Gt
-                        | PrimOp::Ge
-                ) {
-                    TypeId::BOOL
-                } else {
-                    ty
-                },
-            )
-        }
-        Value::Builtin { op, args } => {
-            let (input, result, arity) = match op {
-                Builtin::IntBitNot => (TypeId::INT, TypeId::INT, 1),
-                Builtin::IntBitAnd
-                | Builtin::IntBitOr
-                | Builtin::IntBitXor
-                | Builtin::IntShiftLeft
-                | Builtin::IntShiftRight
-                | Builtin::IntShiftRightUnsigned => (TypeId::INT, TypeId::INT, 2),
-                Builtin::Int64BitNot => (TypeId::INT64, TypeId::INT64, 1),
-                Builtin::Int64BitAnd | Builtin::Int64BitOr | Builtin::Int64BitXor => {
-                    (TypeId::INT64, TypeId::INT64, 2)
-                }
-                Builtin::Int64ShiftLeft
-                | Builtin::Int64ShiftRight
-                | Builtin::Int64ShiftRightUnsigned => {
-                    if args.len() != 2 {
-                        return Err(invalid(&f.name, "shift argument count is invalid"));
-                    }
-                    expect_type(f, operand(f, &args[0], available)?, TypeId::INT64)?;
-                    expect_type(f, operand(f, &args[1], available)?, TypeId::INT)?;
-                    return Ok(TypeId::INT64);
-                }
-                Builtin::Int64FromInt => (TypeId::INT, TypeId::INT64, 1),
-                Builtin::Int64ToInt => (TypeId::INT64, TypeId::INT, 1),
-                Builtin::FloatFromInt => (TypeId::INT, TypeId::FLOAT, 1),
-                Builtin::FloatFloor
-                | Builtin::FloatCeil
-                | Builtin::FloatRound
-                | Builtin::FloatTruncate => (TypeId::FLOAT, TypeId::FLOAT, 1),
-                _ => return Err(unsupported(&f.name, "builtin")),
-            };
-            if args.len() != arity {
-                return Err(invalid(&f.name, "builtin argument count is invalid"));
-            }
-            for arg in args {
-                expect_type(f, operand(f, arg, available)?, input)?;
-            }
-            Ok(result)
-        }
-        _ => Err(unsupported(&f.name, "value variant")),
-    }
 }
 
 fn has_function_recur(f: &Function) -> bool {
@@ -577,6 +653,21 @@ fn has_function_recur(f: &Function) -> bool {
                 }
                 Stmt::Block { body, .. } => pending.push((*body, in_loop)),
                 Stmt::Loop { body, .. } => pending.push((*body, true)),
+                Stmt::Switch { cases, default, .. } => {
+                    pending.extend(cases.iter().map(|case| (case.body, in_loop)));
+                    pending.extend(default.iter().map(|&body| (body, in_loop)));
+                }
+                Stmt::Protect { body, cleanup, .. } => {
+                    pending.extend([(*body, in_loop), (*cleanup, in_loop)])
+                }
+                Stmt::Let {
+                    value:
+                        Value::Call {
+                            on_fail: Some(OnFail::Handle { body, .. }),
+                            ..
+                        },
+                    ..
+                } => pending.push((*body, in_loop)),
                 _ => {}
             }
         }
@@ -607,6 +698,26 @@ fn positions(f: &Function) -> (HashMap<StmtId, usize>, HashMap<SeqId, usize>) {
                 Stmt::Loop { body, .. } | Stmt::Block { body, .. } => {
                     visit(f, *body, next, stmts, seqs)
                 }
+                Stmt::Switch { cases, default, .. } => {
+                    for case in cases {
+                        visit(f, case.body, next, stmts, seqs);
+                    }
+                    if let Some(body) = default {
+                        visit(f, *body, next, stmts, seqs);
+                    }
+                }
+                Stmt::Protect { body, cleanup, .. } => {
+                    visit(f, *body, next, stmts, seqs);
+                    visit(f, *cleanup, next, stmts, seqs);
+                }
+                Stmt::Let {
+                    value:
+                        Value::Call {
+                            on_fail: Some(OnFail::Handle { body, .. }),
+                            ..
+                        },
+                    ..
+                } => visit(f, *body, next, stmts, seqs),
                 _ => {}
             }
         }

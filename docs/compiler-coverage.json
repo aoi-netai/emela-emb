@@ -460,9 +460,9 @@
       "id": "emela_core::Builtin::Dbg",
       "relation": "variant_entry",
       "legacy_role": "reject",
-      "phase": null,
+      "phase": "P7",
       "status": "mapped",
-      "source_scope": "unclassified",
+      "source_scope": "source",
       "new_implementation": [
         {
           "kind": "implementation",
@@ -474,17 +474,25 @@
         {
           "kind": "review",
           "path": "docs/migration-source.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p2_debug.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p2.md"
         }
       ],
-      "reason": "固定revisionの独立backend入口を採用。source・全実行文脈・所有権等の完了は個別の実行証拠が揃うまで判定しない。"
+      "reason": "同期sourceから表示/defectのC hookへの変換を接続。旧未変換input拒否との対応と後段の値型は全件監査で確認する。対象外にはしない。"
     },
     {
       "id": "emela_core::Builtin::DebugPrint",
       "relation": "variant_entry",
       "legacy_role": "reject",
-      "phase": null,
+      "phase": "P7",
       "status": "mapped",
-      "source_scope": "unclassified",
+      "source_scope": "source",
       "new_implementation": [
         {
           "kind": "implementation",
@@ -496,17 +504,25 @@
         {
           "kind": "review",
           "path": "docs/migration-source.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p2_debug.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p2.md"
         }
       ],
-      "reason": "固定revisionの独立backend入口を採用。source・全実行文脈・所有権等の完了は個別の実行証拠が揃うまで判定しない。"
+      "reason": "同期sourceから表示/defectのC hookへの変換を接続。旧未変換input拒否との対応と後段の値型は全件監査で確認する。対象外にはしない。"
     },
     {
       "id": "emela_core::Builtin::FloatCeil",
       "relation": "variant_entry",
       "legacy_role": "emit",
-      "phase": null,
-      "status": "mapped",
-      "source_scope": "unclassified",
+      "phase": "P2",
+      "status": "verified",
+      "source_scope": "source",
       "new_implementation": [
         {
           "kind": "implementation",
@@ -517,23 +533,38 @@
           "kind": "implementation",
           "path": "crates/emela-emb-compiler/src/backend/plan/operations/builtins/float.rs",
           "symbol": "require_runtime"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/sources.rs",
+          "symbol": "intrinsic"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/frontend/lower.rs",
+          "symbol": "builtin"
         }
       ],
       "evidence": [
         {
-          "kind": "review",
-          "path": "docs/migration-source.md"
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p2_compat.rs",
+          "symbol": "legacy_numeric_formatting_rounding_and_unused_defects_execute"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p2.md"
         }
       ],
-      "reason": "固定revisionの独立backend入口を採用。source・全実行文脈・所有権等の完了は個別の実行証拠が揃うまで判定しない。"
+      "reason": "固定旧数値整形・丸め契約の境界/NaN/inf/未使用結果のdefect kind/messageを独自sourceからC -O0/-O2で確認。parseとconstでの静的評価は別record/横断要件で追う。"
     },
     {
       "id": "emela_core::Builtin::FloatFloor",
       "relation": "variant_entry",
       "legacy_role": "emit",
-      "phase": null,
-      "status": "mapped",
-      "source_scope": "unclassified",
+      "phase": "P2",
+      "status": "verified",
+      "source_scope": "source",
       "new_implementation": [
         {
           "kind": "implementation",
@@ -544,15 +575,30 @@
           "kind": "implementation",
           "path": "crates/emela-emb-compiler/src/backend/plan/operations/builtins/float.rs",
           "symbol": "require_runtime"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/sources.rs",
+          "symbol": "intrinsic"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/frontend/lower.rs",
+          "symbol": "builtin"
         }
       ],
       "evidence": [
         {
-          "kind": "review",
-          "path": "docs/migration-source.md"
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p2_compat.rs",
+          "symbol": "legacy_numeric_formatting_rounding_and_unused_defects_execute"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p2.md"
         }
       ],
-      "reason": "固定revisionの独立backend入口を採用。source・全実行文脈・所有権等の完了は個別の実行証拠が揃うまで判定しない。"
+      "reason": "固定旧数値整形・丸め契約の境界/NaN/inf/未使用結果のdefect kind/messageを独自sourceからC -O0/-O2で確認。parseとconstでの静的評価は別record/横断要件で追う。"
     },
     {
       "id": "emela_core::Builtin::FloatFromInt",
@@ -605,9 +651,9 @@
       "id": "emela_core::Builtin::FloatParse",
       "relation": "variant_entry",
       "legacy_role": "emit",
-      "phase": null,
-      "status": "mapped",
-      "source_scope": "unclassified",
+      "phase": "P2",
+      "status": "verified",
+      "source_scope": "source",
       "new_implementation": [
         {
           "kind": "implementation",
@@ -618,23 +664,43 @@
           "kind": "implementation",
           "path": "crates/emela-emb-compiler/src/backend/plan/operations/builtins/float_parse.rs",
           "symbol": "require_runtime"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/frontend/lower.rs"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/sources.rs"
         }
       ],
       "evidence": [
         {
           "kind": "review",
           "path": "docs/migration-source.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p2_parse.rs"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p2_regressions.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p2.md"
         }
       ],
-      "reason": "固定revisionの独立backend入口を採用。source・全実行文脈・所有権等の完了は個別の実行証拠が揃うまで判定しない。"
+      "reason": "固定旧Float parseの短い/長いdecimal・丸めtie・非有限値・不正入力をsourceからC両最適化へ通し、正常値はIEEE754のbit列で確認。"
     },
     {
       "id": "emela_core::Builtin::FloatRound",
       "relation": "variant_entry",
       "legacy_role": "emit",
-      "phase": null,
-      "status": "mapped",
-      "source_scope": "unclassified",
+      "phase": "P2",
+      "status": "verified",
+      "source_scope": "source",
       "new_implementation": [
         {
           "kind": "implementation",
@@ -645,23 +711,38 @@
           "kind": "implementation",
           "path": "crates/emela-emb-compiler/src/backend/plan/operations/builtins/float.rs",
           "symbol": "require_runtime"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/sources.rs",
+          "symbol": "intrinsic"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/frontend/lower.rs",
+          "symbol": "builtin"
         }
       ],
       "evidence": [
         {
-          "kind": "review",
-          "path": "docs/migration-source.md"
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p2_compat.rs",
+          "symbol": "legacy_numeric_formatting_rounding_and_unused_defects_execute"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p2.md"
         }
       ],
-      "reason": "固定revisionの独立backend入口を採用。source・全実行文脈・所有権等の完了は個別の実行証拠が揃うまで判定しない。"
+      "reason": "固定旧数値整形・丸め契約の境界/NaN/inf/未使用結果のdefect kind/messageを独自sourceからC -O0/-O2で確認。parseとconstでの静的評価は別record/横断要件で追う。"
     },
     {
       "id": "emela_core::Builtin::FloatToString",
       "relation": "variant_entry",
       "legacy_role": "emit",
-      "phase": null,
-      "status": "mapped",
-      "source_scope": "unclassified",
+      "phase": "P2",
+      "status": "verified",
+      "source_scope": "source",
       "new_implementation": [
         {
           "kind": "implementation",
@@ -682,23 +763,38 @@
           "kind": "implementation",
           "path": "crates/emela-emb-compiler/src/backend/plan/operations/builtins/float_to_string.rs",
           "symbol": "require_runtime"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/sources.rs",
+          "symbol": "intrinsic"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/frontend/lower.rs",
+          "symbol": "builtin"
         }
       ],
       "evidence": [
         {
-          "kind": "review",
-          "path": "docs/migration-source.md"
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p2_compat.rs",
+          "symbol": "legacy_numeric_formatting_rounding_and_unused_defects_execute"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p2.md"
         }
       ],
-      "reason": "固定revisionの独立backend入口を採用。source・全実行文脈・所有権等の完了は個別の実行証拠が揃うまで判定しない。"
+      "reason": "固定旧数値整形・丸め契約の境界/NaN/inf/未使用結果のdefect kind/messageを独自sourceからC -O0/-O2で確認。parseとconstでの静的評価は別record/横断要件で追う。"
     },
     {
       "id": "emela_core::Builtin::FloatTruncate",
       "relation": "variant_entry",
       "legacy_role": "emit",
-      "phase": null,
-      "status": "mapped",
-      "source_scope": "unclassified",
+      "phase": "P2",
+      "status": "verified",
+      "source_scope": "source",
       "new_implementation": [
         {
           "kind": "implementation",
@@ -709,23 +805,38 @@
           "kind": "implementation",
           "path": "crates/emela-emb-compiler/src/backend/plan/operations/builtins/float.rs",
           "symbol": "require_runtime"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/sources.rs",
+          "symbol": "intrinsic"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/frontend/lower.rs",
+          "symbol": "builtin"
         }
       ],
       "evidence": [
         {
-          "kind": "review",
-          "path": "docs/migration-source.md"
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p2_compat.rs",
+          "symbol": "legacy_numeric_formatting_rounding_and_unused_defects_execute"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p2.md"
         }
       ],
-      "reason": "固定revisionの独立backend入口を採用。source・全実行文脈・所有権等の完了は個別の実行証拠が揃うまで判定しない。"
+      "reason": "固定旧数値整形・丸め契約の境界/NaN/inf/未使用結果のdefect kind/messageを独自sourceからC -O0/-O2で確認。parseとconstでの静的評価は別record/横断要件で追う。"
     },
     {
       "id": "emela_core::Builtin::Inspect",
       "relation": "variant_entry",
       "legacy_role": "reject",
-      "phase": null,
+      "phase": "P7",
       "status": "mapped",
-      "source_scope": "unclassified",
+      "source_scope": "source",
       "new_implementation": [
         {
           "kind": "implementation",
@@ -737,9 +848,17 @@
         {
           "kind": "review",
           "path": "docs/migration-source.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p2_traits.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p2.md"
         }
       ],
-      "reason": "固定revisionの独立backend入口を採用。source・全実行文脈・所有権等の完了は個別の実行証拠が揃うまで判定しない。"
+      "reason": "同期sourceから表示/defectのC hookへの変換を接続。旧未変換input拒否との対応と後段の値型は全件監査で確認する。対象外にはしない。"
     },
     {
       "id": "emela_core::Builtin::Int64BitAnd",
@@ -1168,9 +1287,9 @@
       "id": "emela_core::Builtin::Int64ToString",
       "relation": "variant_entry",
       "legacy_role": "emit",
-      "phase": null,
-      "status": "mapped",
-      "source_scope": "unclassified",
+      "phase": "P2",
+      "status": "verified",
+      "source_scope": "source",
       "new_implementation": [
         {
           "kind": "implementation",
@@ -1191,15 +1310,30 @@
           "kind": "implementation",
           "path": "crates/emela-emb-compiler/src/backend/plan/operations/builtins/int64_to_string.rs",
           "symbol": "require_runtime"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/sources.rs",
+          "symbol": "intrinsic"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/frontend/lower.rs",
+          "symbol": "builtin"
         }
       ],
       "evidence": [
         {
-          "kind": "review",
-          "path": "docs/migration-source.md"
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p2_compat.rs",
+          "symbol": "legacy_numeric_formatting_rounding_and_unused_defects_execute"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p2.md"
         }
       ],
-      "reason": "固定revisionの独立backend入口を採用。source・全実行文脈・所有権等の完了は個別の実行証拠が揃うまで判定しない。"
+      "reason": "固定旧数値整形・丸め契約の境界/NaN/inf/未使用結果のdefect kind/messageを独自sourceからC -O0/-O2で確認。parseとconstでの静的評価は別record/横断要件で追う。"
     },
     {
       "id": "emela_core::Builtin::IntBitAnd",
@@ -1393,31 +1527,47 @@
       "id": "emela_core::Builtin::IntCheckedAdd",
       "relation": "variant_entry",
       "legacy_role": "emit",
-      "phase": null,
-      "status": "mapped",
-      "source_scope": "unclassified",
+      "phase": "P2",
+      "status": "verified",
+      "source_scope": "source",
       "new_implementation": [
         {
           "kind": "implementation",
           "path": "crates/emela-emb-compiler/src/backend/emit/features/builtins/int_checked_add.rs",
           "symbol": "int_checked_add"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/frontend/lower.rs"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/sources.rs"
         }
       ],
       "evidence": [
         {
           "kind": "review",
           "path": "docs/migration-source.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p2_regressions.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p2.md"
         }
       ],
-      "reason": "固定revisionの独立backend入口を採用。source・全実行文脈・所有権等の完了は個別の実行証拠が揃うまで判定しない。"
+      "reason": "標準Int.checked_addからOptionのSome/Noneを観測し、MAX+1・MIN-1のoverflow、MAX+0と-2+1をC両最適化で確認。"
     },
     {
       "id": "emela_core::Builtin::IntParse",
       "relation": "variant_entry",
       "legacy_role": "emit",
-      "phase": null,
-      "status": "mapped",
-      "source_scope": "unclassified",
+      "phase": "P2",
+      "status": "verified",
+      "source_scope": "source",
       "new_implementation": [
         {
           "kind": "implementation",
@@ -1428,15 +1578,35 @@
           "kind": "implementation",
           "path": "crates/emela-emb-compiler/src/backend/plan/operations/builtins/int_parse.rs",
           "symbol": "require_runtime"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/frontend/lower.rs"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/sources.rs"
         }
       ],
       "evidence": [
         {
           "kind": "review",
           "path": "docs/migration-source.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p2_parse.rs"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p2_regressions.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p2.md"
         }
       ],
-      "reason": "固定revisionの独立backend入口を採用。source・全実行文脈・所有権等の完了は個別の実行証拠が揃うまで判定しない。"
+      "reason": "公開Int.parseの成功値とParseErrorをC両最適化で観測。符号・i32境界・overflow・空白・NUL・非ASCII・不正表記を確認。"
     },
     {
       "id": "emela_core::Builtin::IntShiftLeft",
@@ -1583,9 +1753,9 @@
       "id": "emela_core::Builtin::IntToString",
       "relation": "variant_entry",
       "legacy_role": "emit",
-      "phase": null,
-      "status": "mapped",
-      "source_scope": "unclassified",
+      "phase": "P2",
+      "status": "verified",
+      "source_scope": "source",
       "new_implementation": [
         {
           "kind": "implementation",
@@ -1606,23 +1776,38 @@
           "kind": "implementation",
           "path": "crates/emela-emb-compiler/src/backend/plan/operations/builtins/int_to_string.rs",
           "symbol": "require_runtime"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/sources.rs",
+          "symbol": "intrinsic"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/frontend/lower.rs",
+          "symbol": "builtin"
         }
       ],
       "evidence": [
         {
-          "kind": "review",
-          "path": "docs/migration-source.md"
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p2_compat.rs",
+          "symbol": "legacy_numeric_formatting_rounding_and_unused_defects_execute"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p2.md"
         }
       ],
-      "reason": "固定revisionの独立backend入口を採用。source・全実行文脈・所有権等の完了は個別の実行証拠が揃うまで判定しない。"
+      "reason": "固定旧数値整形・丸め契約の境界/NaN/inf/未使用結果のdefect kind/messageを独自sourceからC -O0/-O2で確認。parseとconstでの静的評価は別record/横断要件で追う。"
     },
     {
       "id": "emela_core::Builtin::Panic",
       "relation": "variant_entry",
       "legacy_role": "reject",
-      "phase": null,
+      "phase": "P7",
       "status": "mapped",
-      "source_scope": "unclassified",
+      "source_scope": "source",
       "new_implementation": [
         {
           "kind": "implementation",
@@ -1634,17 +1819,25 @@
         {
           "kind": "review",
           "path": "docs/migration-source.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p2_const_patterns.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p2.md"
         }
       ],
-      "reason": "固定revisionの独立backend入口を採用。source・全実行文脈・所有権等の完了は個別の実行証拠が揃うまで判定しない。"
+      "reason": "同期sourceから表示/defectのC hookへの変換を接続。旧未変換input拒否との対応と後段の値型は全件監査で確認する。対象外にはしない。"
     },
     {
       "id": "emela_core::Builtin::ShowNested",
       "relation": "variant_entry",
       "legacy_role": "reject",
-      "phase": null,
+      "phase": "P7",
       "status": "mapped",
-      "source_scope": "unclassified",
+      "source_scope": "source",
       "new_implementation": [
         {
           "kind": "implementation",
@@ -1656,17 +1849,25 @@
         {
           "kind": "review",
           "path": "docs/migration-source.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p2_traits.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p2.md"
         }
       ],
-      "reason": "固定revisionの独立backend入口を採用。source・全実行文脈・所有権等の完了は個別の実行証拠が揃うまで判定しない。"
+      "reason": "同期sourceから表示/defectのC hookへの変換を接続。旧未変換input拒否との対応と後段の値型は全件監査で確認する。対象外にはしない。"
     },
     {
       "id": "emela_core::Builtin::ShowString",
       "relation": "variant_entry",
       "legacy_role": "reject",
-      "phase": null,
+      "phase": "P7",
       "status": "mapped",
-      "source_scope": "unclassified",
+      "source_scope": "source",
       "new_implementation": [
         {
           "kind": "implementation",
@@ -1678,17 +1879,25 @@
         {
           "kind": "review",
           "path": "docs/migration-source.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p2_traits.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p2.md"
         }
       ],
-      "reason": "固定revisionの独立backend入口を採用。source・全実行文脈・所有権等の完了は個別の実行証拠が揃うまで判定しない。"
+      "reason": "同期sourceから表示/defectのC hookへの変換を接続。旧未変換input拒否との対応と後段の値型は全件監査で確認する。対象外にはしない。"
     },
     {
       "id": "emela_core::Builtin::StringAppend",
       "relation": "variant_entry",
       "legacy_role": "emit",
-      "phase": null,
+      "phase": "P5",
       "status": "mapped",
-      "source_scope": "unclassified",
+      "source_scope": "source",
       "new_implementation": [
         {
           "kind": "implementation",
@@ -1720,17 +1929,25 @@
         {
           "kind": "review",
           "path": "docs/migration-source.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p2_compat.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p2.md"
         }
       ],
-      "reason": "固定revisionの独立backend入口を採用。source・全実行文脈・所有権等の完了は個別の実行証拠が揃うまで判定しない。"
+      "reason": "readonly literal prefix・動的append・caller bufferをsource/Cで確認。所有値と中断の組合せは後段。"
     },
     {
       "id": "emela_core::Builtin::StringByteSize",
       "relation": "variant_entry",
       "legacy_role": "emit",
-      "phase": null,
-      "status": "mapped",
-      "source_scope": "unclassified",
+      "phase": "P2",
+      "status": "verified",
+      "source_scope": "source",
       "new_implementation": [
         {
           "kind": "implementation",
@@ -1741,15 +1958,35 @@
           "kind": "implementation",
           "path": "crates/emela-emb-compiler/src/backend/plan/operations/builtins/string_byte_size.rs",
           "symbol": "string_behavior"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/sources.rs",
+          "symbol": "intrinsic"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/frontend/lower.rs",
+          "symbol": "builtin"
         }
       ],
       "evidence": [
         {
-          "kind": "review",
-          "path": "docs/migration-source.md"
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p2_compat.rs",
+          "symbol": "source_string_length_matches_every_unicode_18_grapheme_vector"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p2_compat.rs",
+          "symbol": "malformed_utf8_string_length_raises_the_legacy_defect"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p2.md"
         }
       ],
-      "reason": "固定revisionの独立backend入口を採用。source・全実行文脈・所有権等の完了は個別の実行証拠が揃うまで判定しない。"
+      "reason": "String viewのbyte数・Unicode18全853 vectorのcluster数・不正UTF-8 defectを独自sourceからC -O0/-O2で確認。List分割/所有化は別recordと後続段階で追う。"
     },
     {
       "id": "emela_core::Builtin::StringChars",
@@ -1809,9 +2046,9 @@
       "id": "emela_core::Builtin::StringContains",
       "relation": "variant_entry",
       "legacy_role": "emit",
-      "phase": null,
-      "status": "mapped",
-      "source_scope": "unclassified",
+      "phase": "P2",
+      "status": "verified",
+      "source_scope": "source",
       "new_implementation": [
         {
           "kind": "implementation",
@@ -1827,23 +2064,38 @@
           "kind": "implementation",
           "path": "crates/emela-emb-compiler/src/backend/plan/operations/builtins/string_contains.rs",
           "symbol": "require_runtime"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/sources.rs",
+          "symbol": "intrinsic"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/frontend/lower.rs",
+          "symbol": "builtin"
         }
       ],
       "evidence": [
         {
-          "kind": "review",
-          "path": "docs/migration-source.md"
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p2_compat.rs",
+          "symbol": "legacy_string_views_comparisons_append_and_bounded_returns_execute"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p2.md"
         }
       ],
-      "reason": "固定revisionの独立backend入口を採用。source・全実行文脈・所有権等の完了は個別の実行証拠が揃うまで判定しない。"
+      "reason": "固定旧String契約のNUL/非ASCII/空view・検索/前後一致/trimを独自sourceからC -O0/-O2で確認。"
     },
     {
       "id": "emela_core::Builtin::StringEndsWith",
       "relation": "variant_entry",
       "legacy_role": "emit",
-      "phase": null,
-      "status": "mapped",
-      "source_scope": "unclassified",
+      "phase": "P2",
+      "status": "verified",
+      "source_scope": "source",
       "new_implementation": [
         {
           "kind": "implementation",
@@ -1859,23 +2111,38 @@
           "kind": "implementation",
           "path": "crates/emela-emb-compiler/src/backend/plan/operations/builtins/string_ends_with.rs",
           "symbol": "require_runtime"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/sources.rs",
+          "symbol": "intrinsic"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/frontend/lower.rs",
+          "symbol": "builtin"
         }
       ],
       "evidence": [
         {
-          "kind": "review",
-          "path": "docs/migration-source.md"
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p2_compat.rs",
+          "symbol": "legacy_string_views_comparisons_append_and_bounded_returns_execute"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p2.md"
         }
       ],
-      "reason": "固定revisionの独立backend入口を採用。source・全実行文脈・所有権等の完了は個別の実行証拠が揃うまで判定しない。"
+      "reason": "固定旧String契約のNUL/非ASCII/空view・検索/前後一致/trimを独自sourceからC -O0/-O2で確認。"
     },
     {
       "id": "emela_core::Builtin::StringFromCodePoint",
       "relation": "variant_entry",
       "legacy_role": "emit",
-      "phase": null,
-      "status": "mapped",
-      "source_scope": "unclassified",
+      "phase": "P2",
+      "status": "verified",
+      "source_scope": "source",
       "new_implementation": [
         {
           "kind": "implementation",
@@ -1896,15 +2163,35 @@
           "kind": "implementation",
           "path": "crates/emela-emb-compiler/src/backend/plan/operations/builtins/string_from_code_point.rs",
           "symbol": "require_runtime"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/frontend/lower.rs"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/sources.rs"
         }
       ],
       "evidence": [
         {
           "kind": "review",
           "path": "docs/migration-source.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p2_standard_api.rs"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p2_regressions.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p2.md"
         }
       ],
-      "reason": "固定revisionの独立backend入口を採用。source・全実行文脈・所有権等の完了は個別の実行証拠が揃うまで判定しない。"
+      "reason": "Unicode scalar境界とsurrogate/範囲外のNone、String容量2で3byteの容量defectをC両最適化で確認。tagだけの利用・結果破棄でもdefectを維持し2byte値を1000回再利用。"
     },
     {
       "id": "emela_core::Builtin::StringJoin",
@@ -1947,9 +2234,9 @@
       "id": "emela_core::Builtin::StringLength",
       "relation": "variant_entry",
       "legacy_role": "emit",
-      "phase": null,
-      "status": "mapped",
-      "source_scope": "unclassified",
+      "phase": "P2",
+      "status": "verified",
+      "source_scope": "source",
       "new_implementation": [
         {
           "kind": "implementation",
@@ -1960,15 +2247,35 @@
           "kind": "implementation",
           "path": "crates/emela-emb-compiler/src/backend/plan/operations/builtins/string_length.rs",
           "symbol": "require_runtime"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/sources.rs",
+          "symbol": "intrinsic"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/frontend/lower.rs",
+          "symbol": "builtin"
         }
       ],
       "evidence": [
         {
-          "kind": "review",
-          "path": "docs/migration-source.md"
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p2_compat.rs",
+          "symbol": "source_string_length_matches_every_unicode_18_grapheme_vector"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p2_compat.rs",
+          "symbol": "malformed_utf8_string_length_raises_the_legacy_defect"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p2.md"
         }
       ],
-      "reason": "固定revisionの独立backend入口を採用。source・全実行文脈・所有権等の完了は個別の実行証拠が揃うまで判定しない。"
+      "reason": "String viewのbyte数・Unicode18全853 vectorのcluster数・不正UTF-8 defectを独自sourceからC -O0/-O2で確認。List分割/所有化は別recordと後続段階で追う。"
     },
     {
       "id": "emela_core::Builtin::StringSplit",
@@ -2001,9 +2308,9 @@
       "id": "emela_core::Builtin::StringStartsWith",
       "relation": "variant_entry",
       "legacy_role": "emit",
-      "phase": null,
-      "status": "mapped",
-      "source_scope": "unclassified",
+      "phase": "P2",
+      "status": "verified",
+      "source_scope": "source",
       "new_implementation": [
         {
           "kind": "implementation",
@@ -2019,23 +2326,38 @@
           "kind": "implementation",
           "path": "crates/emela-emb-compiler/src/backend/plan/operations/builtins/string_starts_with.rs",
           "symbol": "require_runtime"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/sources.rs",
+          "symbol": "intrinsic"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/frontend/lower.rs",
+          "symbol": "builtin"
         }
       ],
       "evidence": [
         {
-          "kind": "review",
-          "path": "docs/migration-source.md"
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p2_compat.rs",
+          "symbol": "legacy_string_views_comparisons_append_and_bounded_returns_execute"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p2.md"
         }
       ],
-      "reason": "固定revisionの独立backend入口を採用。source・全実行文脈・所有権等の完了は個別の実行証拠が揃うまで判定しない。"
+      "reason": "固定旧String契約のNUL/非ASCII/空view・検索/前後一致/trimを独自sourceからC -O0/-O2で確認。"
     },
     {
       "id": "emela_core::Builtin::StringTrim",
       "relation": "variant_entry",
       "legacy_role": "emit",
-      "phase": null,
-      "status": "mapped",
-      "source_scope": "unclassified",
+      "phase": "P2",
+      "status": "verified",
+      "source_scope": "source",
       "new_implementation": [
         {
           "kind": "implementation",
@@ -2056,23 +2378,38 @@
           "kind": "implementation",
           "path": "crates/emela-emb-compiler/src/backend/plan/operations/builtins/string_trim.rs",
           "symbol": "require_runtime"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/sources.rs",
+          "symbol": "intrinsic"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/frontend/lower.rs",
+          "symbol": "builtin"
         }
       ],
       "evidence": [
         {
-          "kind": "review",
-          "path": "docs/migration-source.md"
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p2_compat.rs",
+          "symbol": "legacy_string_views_comparisons_append_and_bounded_returns_execute"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p2.md"
         }
       ],
-      "reason": "固定revisionの独立backend入口を採用。source・全実行文脈・所有権等の完了は個別の実行証拠が揃うまで判定しない。"
+      "reason": "固定旧String契約のNUL/非ASCII/空view・検索/前後一致/trimを独自sourceからC -O0/-O2で確認。"
     },
     {
       "id": "emela_core::Builtin::Todo",
       "relation": "variant_entry",
       "legacy_role": "reject",
-      "phase": null,
+      "phase": "P7",
       "status": "mapped",
-      "source_scope": "unclassified",
+      "source_scope": "source",
       "new_implementation": [
         {
           "kind": "implementation",
@@ -2084,9 +2421,17 @@
         {
           "kind": "review",
           "path": "docs/migration-source.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p2_debug.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p2.md"
         }
       ],
-      "reason": "固定revisionの独立backend入口を採用。source・全実行文脈・所有権等の完了は個別の実行証拠が揃うまで判定しない。"
+      "reason": "同期sourceから表示/defectのC hookへの変換を接続。旧未変換input拒否との対応と後段の値型は全件監査で確認する。対象外にはしない。"
     },
     {
       "id": "emela_core::CtorRef",
@@ -3769,9 +4114,9 @@
       "id": "emela_core::Type::Enum",
       "relation": "variant_entry",
       "legacy_role": "metadata",
-      "phase": null,
+      "phase": "P3",
       "status": "mapped",
-      "source_scope": "unclassified",
+      "source_scope": "source",
       "new_implementation": [
         {
           "kind": "implementation",
@@ -3783,9 +4128,17 @@
         {
           "kind": "review",
           "path": "docs/migration-source.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p2_data.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p2.md"
         }
       ],
-      "reason": "固定revisionの独立backend入口を採用。source・全実行文脈・所有権等の完了は個別の実行証拠が揃うまで判定しない。"
+      "reason": "型宣言・constructor・pattern・genericの同期source経路を接続。再帰・所有値・中断を含む全体は後段で照合する。"
     },
     {
       "id": "emela_core::Type::Enum.0",
@@ -4179,9 +4532,9 @@
       "id": "emela_core::Type::Param",
       "relation": "variant_entry",
       "legacy_role": "metadata",
-      "phase": null,
+      "phase": "P7",
       "status": "mapped",
-      "source_scope": "unclassified",
+      "source_scope": "source",
       "new_implementation": [
         {
           "kind": "implementation",
@@ -4193,9 +4546,17 @@
         {
           "kind": "review",
           "path": "docs/migration-source.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p2_inference.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p2.md"
         }
       ],
-      "reason": "固定revisionの独立backend入口を採用。source・全実行文脈・所有権等の完了は個別の実行証拠が揃うまで判定しない。"
+      "reason": "SCC推論・自動汎化・具体化をsource/Cで確認。汎化constやeffect集合を含む全経路はP7まで追跡する。"
     },
     {
       "id": "emela_core::Type::Param.0",
@@ -4223,9 +4584,9 @@
       "id": "emela_core::Type::Set",
       "relation": "variant_entry",
       "legacy_role": "metadata",
-      "phase": null,
+      "phase": "P4",
       "status": "mapped",
-      "source_scope": "unclassified",
+      "source_scope": "source",
       "new_implementation": [
         {
           "kind": "implementation",
@@ -4237,9 +4598,21 @@
         {
           "kind": "review",
           "path": "docs/migration-source.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p2_failures.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p2.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p2_error_inference.rs"
         }
       ],
-      "reason": "固定revisionの独立backend入口を採用。source・全実行文脈・所有権等の完了は個別の実行証拠が揃うまで判定しない。"
+      "reason": "error集合の推論・generic制約・escape回復を接続。effect/capability集合は後段。 P2最終統合で、error-only型変数のSCC汎化と具体error型ごとのAny payload・IsError/AsErrorを検証済み。"
     },
     {
       "id": "emela_core::Type::Set.0",
@@ -4267,9 +4640,9 @@
       "id": "emela_core::Type::String",
       "relation": "variant_entry",
       "legacy_role": "metadata",
-      "phase": null,
+      "phase": "P5",
       "status": "mapped",
-      "source_scope": "unclassified",
+      "source_scope": "source",
       "new_implementation": [
         {
           "kind": "implementation",
@@ -4281,17 +4654,25 @@
         {
           "kind": "review",
           "path": "docs/migration-source.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p2_compat.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p2.md"
         }
       ],
-      "reason": "固定revisionの独立backend入口を採用。source・全実行文脈・所有権等の完了は個別の実行証拠が揃うまで判定しない。"
+      "reason": "view・動的String・NUL・Unicode・戻りbufferを同期source/Cで確認。所有化と中断/captureの寿命は後段。"
     },
     {
       "id": "emela_core::Type::Tuple",
       "relation": "variant_entry",
       "legacy_role": "metadata",
-      "phase": null,
+      "phase": "P3",
       "status": "mapped",
-      "source_scope": "unclassified",
+      "source_scope": "source",
       "new_implementation": [
         {
           "kind": "implementation",
@@ -4303,9 +4684,17 @@
         {
           "kind": "review",
           "path": "docs/migration-source.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p2_data.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p2.md"
         }
       ],
-      "reason": "固定revisionの独立backend入口を採用。source・全実行文脈・所有権等の完了は個別の実行証拠が揃うまで判定しない。"
+      "reason": "tuple構築・field・pattern・genericの同期source経路を接続。所有値と中断経路は後段で照合する。"
     },
     {
       "id": "emela_core::Type::Tuple.0",
@@ -4485,9 +4874,9 @@
       "id": "emela_core::VariantFields::Named",
       "relation": "variant_entry",
       "legacy_role": "metadata",
-      "phase": null,
+      "phase": "P7",
       "status": "mapped",
-      "source_scope": "unclassified",
+      "source_scope": "schema",
       "new_implementation": [
         {
           "kind": "implementation",
@@ -4499,9 +4888,17 @@
         {
           "kind": "review",
           "path": "docs/migration-source.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p2_data.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p2.md"
         }
       ],
-      "reason": "固定revisionの独立backend入口を採用。source・全実行文脈・所有権等の完了は個別の実行証拠が揃うまで判定しない。"
+      "reason": "field名・順序・型とconstructor/patternを同期source/Cへ接続。再帰payload等を含む最終schema監査はP7。"
     },
     {
       "id": "emela_core::VariantFields::Named.0",
@@ -4529,9 +4926,9 @@
       "id": "emela_core::VariantFields::Positional",
       "relation": "variant_entry",
       "legacy_role": "metadata",
-      "phase": null,
+      "phase": "P7",
       "status": "mapped",
-      "source_scope": "unclassified",
+      "source_scope": "schema",
       "new_implementation": [
         {
           "kind": "implementation",
@@ -4543,9 +4940,17 @@
         {
           "kind": "review",
           "path": "docs/migration-source.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p2_data.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p2.md"
         }
       ],
-      "reason": "固定revisionの独立backend入口を採用。source・全実行文脈・所有権等の完了は個別の実行証拠が揃うまで判定しない。"
+      "reason": "field名・順序・型とconstructor/patternを同期source/Cへ接続。再帰payload等を含む最終schema監査はP7。"
     },
     {
       "id": "emela_core::VariantFields::Positional.0",
@@ -4573,9 +4978,9 @@
       "id": "emela_core::VariantFields::Unit",
       "relation": "variant_entry",
       "legacy_role": "metadata",
-      "phase": null,
+      "phase": "P7",
       "status": "mapped",
-      "source_scope": "unclassified",
+      "source_scope": "schema",
       "new_implementation": [
         {
           "kind": "implementation",
@@ -4587,9 +4992,17 @@
         {
           "kind": "review",
           "path": "docs/migration-source.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p2_data.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p2.md"
         }
       ],
-      "reason": "固定revisionの独立backend入口を採用。source・全実行文脈・所有権等の完了は個別の実行証拠が揃うまで判定しない。"
+      "reason": "field名・順序・型とconstructor/patternを同期source/Cへ接続。再帰payload等を含む最終schema監査はP7。"
     },
     {
       "id": "emela_lir::Callee",
@@ -5107,9 +5520,9 @@
       "id": "emela_lir::CaseKey::Lit",
       "relation": "variant_entry",
       "legacy_role": "emit",
-      "phase": null,
+      "phase": "P5",
       "status": "mapped",
-      "source_scope": "unclassified",
+      "source_scope": "source",
       "new_implementation": [
         {
           "kind": "implementation",
@@ -5121,9 +5534,17 @@
         {
           "kind": "review",
           "path": "docs/migration-source.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p2_data.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p2.md"
         }
       ],
-      "reason": "固定revisionの独立backend入口を採用。source・全実行文脈・所有権等の完了は個別の実行証拠が揃うまで判定しない。"
+      "reason": "データ構築・field読取り・網羅的matchの同期source/Cを接続。旧IR全境界・中断contextは後段の個別照合を残す。"
     },
     {
       "id": "emela_lir::CaseKey::Lit.0",
@@ -5151,9 +5572,9 @@
       "id": "emela_lir::CaseKey::Variant",
       "relation": "variant_entry",
       "legacy_role": "emit",
-      "phase": null,
+      "phase": "P5",
       "status": "mapped",
-      "source_scope": "unclassified",
+      "source_scope": "source",
       "new_implementation": [
         {
           "kind": "implementation",
@@ -5165,9 +5586,17 @@
         {
           "kind": "review",
           "path": "docs/migration-source.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p2_data.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p2.md"
         }
       ],
-      "reason": "固定revisionの独立backend入口を採用。source・全実行文脈・所有権等の完了は個別の実行証拠が揃うまで判定しない。"
+      "reason": "データ構築・field読取り・網羅的matchの同期source/Cを接続。旧IR全境界・中断contextは後段の個別照合を残す。"
     },
     {
       "id": "emela_lir::CaseKey::Variant.0",
@@ -6266,9 +6695,9 @@
       "id": "emela_lir::OnFail::Break",
       "relation": "variant_entry",
       "legacy_role": "emit",
-      "phase": null,
+      "phase": "P6",
       "status": "mapped",
-      "source_scope": "unclassified",
+      "source_scope": "source",
       "new_implementation": [
         {
           "kind": "implementation",
@@ -6280,9 +6709,17 @@
         {
           "kind": "review",
           "path": "docs/migration-source.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p2_failures.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p2.md"
         }
       ],
-      "reason": "固定revisionの独立backend入口を採用。source・全実行文脈・所有権等の完了は個別の実行証拠が揃うまで判定しない。"
+      "reason": "fail/escape・error payload・失敗集合の同期source/C経路を接続。cleanup・中断経路はP6で照合する。"
     },
     {
       "id": "emela_lir::OnFail::Break.0",
@@ -6376,9 +6813,9 @@
       "id": "emela_lir::OnFail::Propagate",
       "relation": "variant_entry",
       "legacy_role": "emit",
-      "phase": null,
+      "phase": "P6",
       "status": "mapped",
-      "source_scope": "unclassified",
+      "source_scope": "source",
       "new_implementation": [
         {
           "kind": "implementation",
@@ -6390,9 +6827,17 @@
         {
           "kind": "review",
           "path": "docs/migration-source.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p2_failures.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p2.md"
         }
       ],
-      "reason": "固定revisionの独立backend入口を採用。source・全実行文脈・所有権等の完了は個別の実行証拠が揃うまで判定しない。"
+      "reason": "fail/escape・error payload・失敗集合の同期source/C経路を接続。cleanup・中断経路はP6で照合する。"
     },
     {
       "id": "emela_lir::Operand",
@@ -8875,9 +9320,9 @@
       "id": "emela_lir::Stmt::Switch",
       "relation": "variant_entry",
       "legacy_role": "emit",
-      "phase": null,
+      "phase": "P5",
       "status": "mapped",
-      "source_scope": "unclassified",
+      "source_scope": "source",
       "new_implementation": [
         {
           "kind": "implementation",
@@ -8904,9 +9349,17 @@
         {
           "kind": "review",
           "path": "docs/migration-source.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p2_data.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p2.md"
         }
       ],
-      "reason": "固定revisionの独立backend入口を採用。source・全実行文脈・所有権等の完了は個別の実行証拠が揃うまで判定しない。"
+      "reason": "データ構築・field読取り・網羅的matchの同期source/Cを接続。旧IR全境界・中断contextは後段の個別照合を残す。"
     },
     {
       "id": "emela_lir::Stmt::Switch.cases",
@@ -9150,9 +9603,9 @@
       "id": "emela_lir::SwitchOn::Lit",
       "relation": "variant_entry",
       "legacy_role": "emit",
-      "phase": null,
+      "phase": "P5",
       "status": "mapped",
-      "source_scope": "unclassified",
+      "source_scope": "source",
       "new_implementation": [
         {
           "kind": "implementation",
@@ -9164,9 +9617,17 @@
         {
           "kind": "review",
           "path": "docs/migration-source.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p2_data.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p2.md"
         }
       ],
-      "reason": "固定revisionの独立backend入口を採用。source・全実行文脈・所有権等の完了は個別の実行証拠が揃うまで判定しない。"
+      "reason": "データ構築・field読取り・網羅的matchの同期source/Cを接続。旧IR全境界・中断contextは後段の個別照合を残す。"
     },
     {
       "id": "emela_lir::SwitchOn::Lit.0",
@@ -9194,9 +9655,9 @@
       "id": "emela_lir::SwitchOn::Tag",
       "relation": "variant_entry",
       "legacy_role": "emit",
-      "phase": null,
+      "phase": "P5",
       "status": "mapped",
-      "source_scope": "unclassified",
+      "source_scope": "source",
       "new_implementation": [
         {
           "kind": "implementation",
@@ -9208,9 +9669,17 @@
         {
           "kind": "review",
           "path": "docs/migration-source.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p2_data.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p2.md"
         }
       ],
-      "reason": "固定revisionの独立backend入口を採用。source・全実行文脈・所有権等の完了は個別の実行証拠が揃うまで判定しない。"
+      "reason": "データ構築・field読取り・網羅的matchの同期source/Cを接続。旧IR全境界・中断contextは後段の個別照合を残す。"
     },
     {
       "id": "emela_lir::SwitchOn::Tag.0",
@@ -9489,9 +9958,9 @@
       "id": "emela_lir::Term::Fail",
       "relation": "variant_entry",
       "legacy_role": "emit",
-      "phase": null,
+      "phase": "P6",
       "status": "mapped",
-      "source_scope": "unclassified",
+      "source_scope": "source",
       "new_implementation": [
         {
           "kind": "implementation",
@@ -9518,9 +9987,21 @@
         {
           "kind": "review",
           "path": "docs/migration-source.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p2_failures.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p2.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p2_error_inference.rs"
         }
       ],
-      "reason": "固定revisionの独立backend入口を採用。source・全実行文脈・所有権等の完了は個別の実行証拠が揃うまで判定しない。"
+      "reason": "fail/escape・error payload・失敗集合の同期source/C経路を接続。cleanup・中断経路はP6で照合する。 P2最終統合で、error-only型変数のSCC汎化と具体error型ごとのAny payload・IsError/AsErrorを検証済み。"
     },
     {
       "id": "emela_lir::Term::Fail.0",
@@ -9925,9 +10406,9 @@
       "id": "emela_lir::Value::AsError",
       "relation": "variant_entry",
       "legacy_role": "emit",
-      "phase": null,
+      "phase": "P6",
       "status": "mapped",
-      "source_scope": "unclassified",
+      "source_scope": "source",
       "new_implementation": [
         {
           "kind": "implementation",
@@ -9944,9 +10425,21 @@
         {
           "kind": "review",
           "path": "docs/migration-source.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p2_failures.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p2.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p2_error_inference.rs"
         }
       ],
-      "reason": "固定revisionの独立backend入口を採用。source・全実行文脈・所有権等の完了は個別の実行証拠が揃うまで判定しない。"
+      "reason": "fail/escape・error payload・失敗集合の同期source/C経路を接続。cleanup・中断経路はP6で照合する。 P2最終統合で、error-only型変数のSCC汎化と具体error型ごとのAny payload・IsError/AsErrorを検証済み。"
     },
     {
       "id": "emela_lir::Value::AsError.enum_id",
@@ -10825,9 +11318,9 @@
       "id": "emela_lir::Value::Field",
       "relation": "variant_entry",
       "legacy_role": "emit",
-      "phase": null,
+      "phase": "P5",
       "status": "mapped",
-      "source_scope": "unclassified",
+      "source_scope": "source",
       "new_implementation": [
         {
           "kind": "implementation",
@@ -10844,9 +11337,17 @@
         {
           "kind": "review",
           "path": "docs/migration-source.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p2_data.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p2.md"
         }
       ],
-      "reason": "固定revisionの独立backend入口を採用。source・全実行文脈・所有権等の完了は個別の実行証拠が揃うまで判定しない。"
+      "reason": "データ構築・field読取り・網羅的matchの同期source/Cを接続。旧IR全境界・中断contextは後段の個別照合を残す。"
     },
     {
       "id": "emela_lir::Value::Field.base",
@@ -11095,9 +11596,9 @@
       "id": "emela_lir::Value::IsError",
       "relation": "variant_entry",
       "legacy_role": "emit",
-      "phase": null,
+      "phase": "P6",
       "status": "mapped",
-      "source_scope": "unclassified",
+      "source_scope": "source",
       "new_implementation": [
         {
           "kind": "implementation",
@@ -11109,9 +11610,21 @@
         {
           "kind": "review",
           "path": "docs/migration-source.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p2_failures.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p2.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p2_error_inference.rs"
         }
       ],
-      "reason": "固定revisionの独立backend入口を採用。source・全実行文脈・所有権等の完了は個別の実行証拠が揃うまで判定しない。"
+      "reason": "fail/escape・error payload・失敗集合の同期source/C経路を接続。cleanup・中断経路はP6で照合する。 P2最終統合で、error-only型変数のSCC汎化と具体error型ごとのAny payload・IsError/AsErrorを検証済み。"
     },
     {
       "id": "emela_lir::Value::IsError.enum_id",
@@ -11444,9 +11957,9 @@
       "id": "emela_lir::Value::Make",
       "relation": "variant_entry",
       "legacy_role": "emit",
-      "phase": null,
+      "phase": "P5",
       "status": "mapped",
-      "source_scope": "unclassified",
+      "source_scope": "source",
       "new_implementation": [
         {
           "kind": "implementation",
@@ -11458,9 +11971,17 @@
         {
           "kind": "review",
           "path": "docs/migration-source.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p2_data.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p2.md"
         }
       ],
-      "reason": "固定revisionの独立backend入口を採用。source・全実行文脈・所有権等の完了は個別の実行証拠が揃うまで判定しない。"
+      "reason": "データ構築・field読取り・網羅的matchの同期source/Cを接続。旧IR全境界・中断contextは後段の個別照合を残す。"
     },
     {
       "id": "emela_lir::Value::Make.args",
@@ -11762,9 +12283,9 @@
       "id": "emela_lir::Value::Tag",
       "relation": "variant_entry",
       "legacy_role": "emit",
-      "phase": null,
+      "phase": "P5",
       "status": "mapped",
-      "source_scope": "unclassified",
+      "source_scope": "source",
       "new_implementation": [
         {
           "kind": "implementation",
@@ -11776,9 +12297,17 @@
         {
           "kind": "review",
           "path": "docs/migration-source.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p2_data.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p2.md"
         }
       ],
-      "reason": "固定revisionの独立backend入口を採用。source・全実行文脈・所有権等の完了は個別の実行証拠が揃うまで判定しない。"
+      "reason": "データ構築・field読取り・網羅的matchの同期source/Cを接続。旧IR全境界・中断contextは後段の個別照合を残す。"
     },
     {
       "id": "emela_lir::Value::Tag.0",
@@ -11806,9 +12335,9 @@
       "id": "emela_lir::Value::Tuple",
       "relation": "variant_entry",
       "legacy_role": "emit",
-      "phase": null,
+      "phase": "P5",
       "status": "mapped",
-      "source_scope": "unclassified",
+      "source_scope": "source",
       "new_implementation": [
         {
           "kind": "implementation",
@@ -11820,9 +12349,17 @@
         {
           "kind": "review",
           "path": "docs/migration-source.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p2_data.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p2.md"
         }
       ],
-      "reason": "固定revisionの独立backend入口を採用。source・全実行文脈・所有権等の完了は個別の実行証拠が揃うまで判定しない。"
+      "reason": "データ構築・field読取り・網羅的matchの同期source/Cを接続。旧IR全境界・中断contextは後段の個別照合を残す。"
     },
     {
       "id": "emela_lir::Value::Tuple.0",
@@ -11850,9 +12387,9 @@
       "id": "emela_lir::Value::TupleGet",
       "relation": "variant_entry",
       "legacy_role": "emit",
-      "phase": null,
+      "phase": "P5",
       "status": "mapped",
-      "source_scope": "unclassified",
+      "source_scope": "source",
       "new_implementation": [
         {
           "kind": "implementation",
@@ -11869,9 +12406,17 @@
         {
           "kind": "review",
           "path": "docs/migration-source.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p2_data.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p2.md"
         }
       ],
-      "reason": "固定revisionの独立backend入口を採用。source・全実行文脈・所有権等の完了は個別の実行証拠が揃うまで判定しない。"
+      "reason": "データ構築・field読取り・網羅的matchの同期source/Cを接続。旧IR全境界・中断contextは後段の個別照合を残す。"
     },
     {
       "id": "emela_lir::Value::TupleGet.base",
@@ -12131,9 +12676,22 @@
     {
       "id": "emela_lir::Term::Fail",
       "context": "sync",
-      "status": "pending",
-      "evidence": [],
-      "reason": ""
+      "status": "mapped",
+      "evidence": [
+        {
+          "kind": "review",
+          "path": "docs/migration-source.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p2_failures.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p2.md"
+        }
+      ],
+      "reason": "fail/escape・error payload・失敗集合の同期source/C経路を接続。cleanup・中断経路はP6で照合する。"
     },
     {
       "id": "emela_lir::Term::Fail",
@@ -12314,9 +12872,22 @@
     {
       "id": "emela_lir::Stmt::Switch",
       "context": "sync",
-      "status": "pending",
-      "evidence": [],
-      "reason": ""
+      "status": "mapped",
+      "evidence": [
+        {
+          "kind": "review",
+          "path": "docs/migration-source.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p2_data.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p2.md"
+        }
+      ],
+      "reason": "データ構築・field読取り・網羅的matchの同期source/Cを接続。旧IR全境界・中断contextは後段の個別照合を残す。"
     },
     {
       "id": "emela_lir::Stmt::Switch",
@@ -12410,9 +12981,22 @@
     {
       "id": "emela_lir::SwitchOn::Tag",
       "context": "sync",
-      "status": "pending",
-      "evidence": [],
-      "reason": ""
+      "status": "mapped",
+      "evidence": [
+        {
+          "kind": "review",
+          "path": "docs/migration-source.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p2_data.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p2.md"
+        }
+      ],
+      "reason": "データ構築・field読取り・網羅的matchの同期source/Cを接続。旧IR全境界・中断contextは後段の個別照合を残す。"
     },
     {
       "id": "emela_lir::SwitchOn::Tag",
@@ -12424,9 +13008,22 @@
     {
       "id": "emela_lir::SwitchOn::Lit",
       "context": "sync",
-      "status": "pending",
-      "evidence": [],
-      "reason": ""
+      "status": "mapped",
+      "evidence": [
+        {
+          "kind": "review",
+          "path": "docs/migration-source.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p2_data.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p2.md"
+        }
+      ],
+      "reason": "データ構築・field読取り・網羅的matchの同期source/Cを接続。旧IR全境界・中断contextは後段の個別照合を残す。"
     },
     {
       "id": "emela_lir::SwitchOn::Lit",
@@ -12438,9 +13035,22 @@
     {
       "id": "emela_lir::CaseKey::Variant",
       "context": "sync",
-      "status": "pending",
-      "evidence": [],
-      "reason": ""
+      "status": "mapped",
+      "evidence": [
+        {
+          "kind": "review",
+          "path": "docs/migration-source.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p2_data.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p2.md"
+        }
+      ],
+      "reason": "データ構築・field読取り・網羅的matchの同期source/Cを接続。旧IR全境界・中断contextは後段の個別照合を残す。"
     },
     {
       "id": "emela_lir::CaseKey::Variant",
@@ -12452,9 +13062,22 @@
     {
       "id": "emela_lir::CaseKey::Lit",
       "context": "sync",
-      "status": "pending",
-      "evidence": [],
-      "reason": ""
+      "status": "mapped",
+      "evidence": [
+        {
+          "kind": "review",
+          "path": "docs/migration-source.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p2_data.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p2.md"
+        }
+      ],
+      "reason": "データ構築・field読取り・網羅的matchの同期source/Cを接続。旧IR全境界・中断contextは後段の個別照合を残す。"
     },
     {
       "id": "emela_lir::CaseKey::Lit",
@@ -12702,9 +13325,22 @@
     {
       "id": "emela_lir::Value::Make",
       "context": "sync",
-      "status": "pending",
-      "evidence": [],
-      "reason": ""
+      "status": "mapped",
+      "evidence": [
+        {
+          "kind": "review",
+          "path": "docs/migration-source.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p2_data.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p2.md"
+        }
+      ],
+      "reason": "データ構築・field読取り・網羅的matchの同期source/Cを接続。旧IR全境界・中断contextは後段の個別照合を残す。"
     },
     {
       "id": "emela_lir::Value::Make",
@@ -12716,9 +13352,22 @@
     {
       "id": "emela_lir::Value::Field",
       "context": "sync",
-      "status": "pending",
-      "evidence": [],
-      "reason": ""
+      "status": "mapped",
+      "evidence": [
+        {
+          "kind": "review",
+          "path": "docs/migration-source.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p2_data.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p2.md"
+        }
+      ],
+      "reason": "データ構築・field読取り・網羅的matchの同期source/Cを接続。旧IR全境界・中断contextは後段の個別照合を残す。"
     },
     {
       "id": "emela_lir::Value::Field",
@@ -12730,9 +13379,22 @@
     {
       "id": "emela_lir::Value::Tag",
       "context": "sync",
-      "status": "pending",
-      "evidence": [],
-      "reason": ""
+      "status": "mapped",
+      "evidence": [
+        {
+          "kind": "review",
+          "path": "docs/migration-source.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p2_data.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p2.md"
+        }
+      ],
+      "reason": "データ構築・field読取り・網羅的matchの同期source/Cを接続。旧IR全境界・中断contextは後段の個別照合を残す。"
     },
     {
       "id": "emela_lir::Value::Tag",
@@ -12744,9 +13406,22 @@
     {
       "id": "emela_lir::Value::Tuple",
       "context": "sync",
-      "status": "pending",
-      "evidence": [],
-      "reason": ""
+      "status": "mapped",
+      "evidence": [
+        {
+          "kind": "review",
+          "path": "docs/migration-source.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p2_data.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p2.md"
+        }
+      ],
+      "reason": "データ構築・field読取り・網羅的matchの同期source/Cを接続。旧IR全境界・中断contextは後段の個別照合を残す。"
     },
     {
       "id": "emela_lir::Value::Tuple",
@@ -12758,9 +13433,22 @@
     {
       "id": "emela_lir::Value::TupleGet",
       "context": "sync",
-      "status": "pending",
-      "evidence": [],
-      "reason": ""
+      "status": "mapped",
+      "evidence": [
+        {
+          "kind": "review",
+          "path": "docs/migration-source.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p2_data.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p2.md"
+        }
+      ],
+      "reason": "データ構築・field読取り・網羅的matchの同期source/Cを接続。旧IR全境界・中断contextは後段の個別照合を残す。"
     },
     {
       "id": "emela_lir::Value::TupleGet",
@@ -12926,9 +13614,22 @@
     {
       "id": "emela_lir::Value::IsError",
       "context": "sync",
-      "status": "pending",
-      "evidence": [],
-      "reason": ""
+      "status": "mapped",
+      "evidence": [
+        {
+          "kind": "review",
+          "path": "docs/migration-source.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p2_failures.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p2.md"
+        }
+      ],
+      "reason": "fail/escape・error payload・失敗集合の同期source/C経路を接続。cleanup・中断経路はP6で照合する。"
     },
     {
       "id": "emela_lir::Value::IsError",
@@ -12940,9 +13641,22 @@
     {
       "id": "emela_lir::Value::AsError",
       "context": "sync",
-      "status": "pending",
-      "evidence": [],
-      "reason": ""
+      "status": "mapped",
+      "evidence": [
+        {
+          "kind": "review",
+          "path": "docs/migration-source.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p2_failures.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p2.md"
+        }
+      ],
+      "reason": "fail/escape・error payload・失敗集合の同期source/C経路を接続。cleanup・中断経路はP6で照合する。"
     },
     {
       "id": "emela_lir::Value::AsError",
@@ -13127,9 +13841,22 @@
     {
       "id": "emela_lir::OnFail::Break",
       "context": "sync",
-      "status": "pending",
-      "evidence": [],
-      "reason": ""
+      "status": "mapped",
+      "evidence": [
+        {
+          "kind": "review",
+          "path": "docs/migration-source.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p2_failures.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p2.md"
+        }
+      ],
+      "reason": "fail/escape・error payload・失敗集合の同期source/C経路を接続。cleanup・中断経路はP6で照合する。"
     },
     {
       "id": "emela_lir::OnFail::Break",
@@ -13141,9 +13868,22 @@
     {
       "id": "emela_lir::OnFail::Propagate",
       "context": "sync",
-      "status": "pending",
-      "evidence": [],
-      "reason": ""
+      "status": "mapped",
+      "evidence": [
+        {
+          "kind": "review",
+          "path": "docs/migration-source.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p2_failures.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p2.md"
+        }
+      ],
+      "reason": "fail/escape・error payload・失敗集合の同期source/C経路を接続。cleanup・中断経路はP6で照合する。"
     },
     {
       "id": "emela_lir::OnFail::Propagate",
@@ -13554,44 +14294,117 @@
     {
       "id": "emela_core::Builtin::StringLength",
       "context": "common",
-      "status": "pending",
-      "evidence": [],
-      "reason": ""
+      "status": "verified",
+      "evidence": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p2_compat.rs",
+          "symbol": "source_string_length_matches_every_unicode_18_grapheme_vector"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p2_compat.rs",
+          "symbol": "malformed_utf8_string_length_raises_the_legacy_defect"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p2.md"
+        }
+      ],
+      "reason": "String viewのbyte数・Unicode18全853 vectorのcluster数・不正UTF-8 defectを独自sourceからC -O0/-O2で確認。List分割/所有化は別recordと後続段階で追う。"
     },
     {
       "id": "emela_core::Builtin::StringByteSize",
       "context": "common",
-      "status": "pending",
-      "evidence": [],
-      "reason": ""
+      "status": "verified",
+      "evidence": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p2_compat.rs",
+          "symbol": "source_string_length_matches_every_unicode_18_grapheme_vector"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p2_compat.rs",
+          "symbol": "malformed_utf8_string_length_raises_the_legacy_defect"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p2.md"
+        }
+      ],
+      "reason": "String viewのbyte数・Unicode18全853 vectorのcluster数・不正UTF-8 defectを独自sourceからC -O0/-O2で確認。List分割/所有化は別recordと後続段階で追う。"
     },
     {
       "id": "emela_core::Builtin::StringAppend",
       "context": "common",
-      "status": "pending",
-      "evidence": [],
-      "reason": ""
+      "status": "mapped",
+      "evidence": [
+        {
+          "kind": "review",
+          "path": "docs/migration-source.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p2_compat.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p2.md"
+        }
+      ],
+      "reason": "readonly literal prefix・動的append・caller bufferをsource/Cで確認。所有値と中断の組合せは後段。"
     },
     {
       "id": "emela_core::Builtin::StringContains",
       "context": "common",
-      "status": "pending",
-      "evidence": [],
-      "reason": ""
+      "status": "verified",
+      "evidence": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p2_compat.rs",
+          "symbol": "legacy_string_views_comparisons_append_and_bounded_returns_execute"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p2.md"
+        }
+      ],
+      "reason": "固定旧String契約のNUL/非ASCII/空view・検索/前後一致/trimを独自sourceからC -O0/-O2で確認。"
     },
     {
       "id": "emela_core::Builtin::StringStartsWith",
       "context": "common",
-      "status": "pending",
-      "evidence": [],
-      "reason": ""
+      "status": "verified",
+      "evidence": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p2_compat.rs",
+          "symbol": "legacy_string_views_comparisons_append_and_bounded_returns_execute"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p2.md"
+        }
+      ],
+      "reason": "固定旧String契約のNUL/非ASCII/空view・検索/前後一致/trimを独自sourceからC -O0/-O2で確認。"
     },
     {
       "id": "emela_core::Builtin::StringEndsWith",
       "context": "common",
-      "status": "pending",
-      "evidence": [],
-      "reason": ""
+      "status": "verified",
+      "evidence": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p2_compat.rs",
+          "symbol": "legacy_string_views_comparisons_append_and_bounded_returns_execute"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p2.md"
+        }
+      ],
+      "reason": "固定旧String契約のNUL/非ASCII/空view・検索/前後一致/trimを独自sourceからC -O0/-O2で確認。"
     },
     {
       "id": "emela_core::Builtin::StringSplit",
@@ -13617,9 +14430,19 @@
     {
       "id": "emela_core::Builtin::StringTrim",
       "context": "common",
-      "status": "pending",
-      "evidence": [],
-      "reason": ""
+      "status": "verified",
+      "evidence": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p2_compat.rs",
+          "symbol": "legacy_string_views_comparisons_append_and_bounded_returns_execute"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p2.md"
+        }
+      ],
+      "reason": "固定旧String契約のNUL/非ASCII/空view・検索/前後一致/trimを独自sourceからC -O0/-O2で確認。"
     },
     {
       "id": "emela_core::Builtin::StringCodePoints",
@@ -13631,9 +14454,26 @@
     {
       "id": "emela_core::Builtin::StringFromCodePoint",
       "context": "common",
-      "status": "pending",
-      "evidence": [],
-      "reason": ""
+      "status": "verified",
+      "evidence": [
+        {
+          "kind": "review",
+          "path": "docs/migration-source.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p2_standard_api.rs"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p2_regressions.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p2.md"
+        }
+      ],
+      "reason": "Unicode scalar境界とsurrogate/範囲外のNone、String容量2で3byteの容量defectをC両最適化で確認。tagだけの利用・結果破棄でもdefectを維持し2byte値を1000回再利用。"
     },
     {
       "id": "emela_core::Builtin::ShowNested",
@@ -13645,23 +14485,63 @@
     {
       "id": "emela_core::Builtin::IntToString",
       "context": "common",
-      "status": "pending",
-      "evidence": [],
-      "reason": ""
+      "status": "verified",
+      "evidence": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p2_compat.rs",
+          "symbol": "legacy_numeric_formatting_rounding_and_unused_defects_execute"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p2.md"
+        }
+      ],
+      "reason": "固定旧数値整形・丸め契約の境界/NaN/inf/未使用結果のdefect kind/messageを独自sourceからC -O0/-O2で確認。parseとconstでの静的評価は別record/横断要件で追う。"
     },
     {
       "id": "emela_core::Builtin::IntParse",
       "context": "common",
-      "status": "pending",
-      "evidence": [],
-      "reason": ""
+      "status": "verified",
+      "evidence": [
+        {
+          "kind": "review",
+          "path": "docs/migration-source.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p2_parse.rs"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p2_regressions.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p2.md"
+        }
+      ],
+      "reason": "公開Int.parseの成功値とParseErrorをC両最適化で観測。符号・i32境界・overflow・空白・NUL・非ASCII・不正表記を確認。"
     },
     {
       "id": "emela_core::Builtin::IntCheckedAdd",
       "context": "common",
-      "status": "pending",
-      "evidence": [],
-      "reason": ""
+      "status": "verified",
+      "evidence": [
+        {
+          "kind": "review",
+          "path": "docs/migration-source.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p2_regressions.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p2.md"
+        }
+      ],
+      "reason": "標準Int.checked_addからOptionのSome/Noneを観測し、MAX+1・MIN-1のoverflow、MAX+0と-2+1をC両最適化で確認。"
     },
     {
       "id": "emela_core::Builtin::IntBitAnd",
@@ -13858,9 +14738,19 @@
     {
       "id": "emela_core::Builtin::Int64ToString",
       "context": "common",
-      "status": "pending",
-      "evidence": [],
-      "reason": ""
+      "status": "verified",
+      "evidence": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p2_compat.rs",
+          "symbol": "legacy_numeric_formatting_rounding_and_unused_defects_execute"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p2.md"
+        }
+      ],
+      "reason": "固定旧数値整形・丸め契約の境界/NaN/inf/未使用結果のdefect kind/messageを独自sourceからC -O0/-O2で確認。parseとconstでの静的評価は別record/横断要件で追う。"
     },
     {
       "id": "emela_core::Builtin::Int64ToInt",
@@ -14057,9 +14947,19 @@
     {
       "id": "emela_core::Builtin::FloatToString",
       "context": "common",
-      "status": "pending",
-      "evidence": [],
-      "reason": ""
+      "status": "verified",
+      "evidence": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p2_compat.rs",
+          "symbol": "legacy_numeric_formatting_rounding_and_unused_defects_execute"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p2.md"
+        }
+      ],
+      "reason": "固定旧数値整形・丸め契約の境界/NaN/inf/未使用結果のdefect kind/messageを独自sourceからC -O0/-O2で確認。parseとconstでの静的評価は別record/横断要件で追う。"
     },
     {
       "id": "emela_core::Builtin::FloatFromInt",
@@ -14088,37 +14988,94 @@
     {
       "id": "emela_core::Builtin::FloatParse",
       "context": "common",
-      "status": "pending",
-      "evidence": [],
-      "reason": ""
+      "status": "verified",
+      "evidence": [
+        {
+          "kind": "review",
+          "path": "docs/migration-source.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p2_parse.rs"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p2_regressions.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p2.md"
+        }
+      ],
+      "reason": "固定旧Float parseの短い/長いdecimal・丸めtie・非有限値・不正入力をsourceからC両最適化へ通し、正常値はIEEE754のbit列で確認。"
     },
     {
       "id": "emela_core::Builtin::FloatFloor",
       "context": "common",
-      "status": "pending",
-      "evidence": [],
-      "reason": ""
+      "status": "verified",
+      "evidence": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p2_compat.rs",
+          "symbol": "legacy_numeric_formatting_rounding_and_unused_defects_execute"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p2.md"
+        }
+      ],
+      "reason": "固定旧数値整形・丸め契約の境界/NaN/inf/未使用結果のdefect kind/messageを独自sourceからC -O0/-O2で確認。parseとconstでの静的評価は別record/横断要件で追う。"
     },
     {
       "id": "emela_core::Builtin::FloatCeil",
       "context": "common",
-      "status": "pending",
-      "evidence": [],
-      "reason": ""
+      "status": "verified",
+      "evidence": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p2_compat.rs",
+          "symbol": "legacy_numeric_formatting_rounding_and_unused_defects_execute"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p2.md"
+        }
+      ],
+      "reason": "固定旧数値整形・丸め契約の境界/NaN/inf/未使用結果のdefect kind/messageを独自sourceからC -O0/-O2で確認。parseとconstでの静的評価は別record/横断要件で追う。"
     },
     {
       "id": "emela_core::Builtin::FloatRound",
       "context": "common",
-      "status": "pending",
-      "evidence": [],
-      "reason": ""
+      "status": "verified",
+      "evidence": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p2_compat.rs",
+          "symbol": "legacy_numeric_formatting_rounding_and_unused_defects_execute"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p2.md"
+        }
+      ],
+      "reason": "固定旧数値整形・丸め契約の境界/NaN/inf/未使用結果のdefect kind/messageを独自sourceからC -O0/-O2で確認。parseとconstでの静的評価は別record/横断要件で追う。"
     },
     {
       "id": "emela_core::Builtin::FloatTruncate",
       "context": "common",
-      "status": "pending",
-      "evidence": [],
-      "reason": ""
+      "status": "verified",
+      "evidence": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p2_compat.rs",
+          "symbol": "legacy_numeric_formatting_rounding_and_unused_defects_execute"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p2.md"
+        }
+      ],
+      "reason": "固定旧数値整形・丸め契約の境界/NaN/inf/未使用結果のdefect kind/messageを独自sourceからC -O0/-O2で確認。parseとconstでの静的評価は別record/横断要件で追う。"
     },
     {
       "id": "emela_core::Builtin::BytesFromList",
@@ -14800,19 +15757,43 @@
       "target": "emit",
       "name": "dynamic_float_formatting_uses_a_bounded_runtime_and_float_parse_uses_the_bounded_parser",
       "legacy_path": "tests/emit.rs",
-      "status": "pending",
-      "new_tests": [],
-      "evidence": [],
-      "reason": ""
+      "status": "mapped",
+      "new_tests": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p2_compat.rs"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p2.md"
+        }
+      ],
+      "reason": "P2報告の固定旧試験対応表にsource/Cの抽出範囲を記録。元試験のconst/ISR/List/parse等を含む全観点の照合は継続中。"
     },
     {
       "target": "emit",
       "name": "dynamic_string_from_code_point_checks_capacity_before_writing",
       "legacy_path": "tests/emit.rs",
-      "status": "pending",
-      "new_tests": [],
-      "evidence": [],
-      "reason": ""
+      "status": "replaced",
+      "new_tests": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p2_standard_api.rs"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p2_standard_api.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p2.md"
+        }
+      ],
+      "reason": "旧code point 0x20ac・容量2のtag利用をsourceのOption matchへ置換し、同じSTRING_CAPACITY kind/messageをC両最適化で確認。結果破棄でも保持する追加回帰を含む。"
     },
     {
       "target": "emit",
@@ -15242,10 +16223,20 @@
       "target": "emit",
       "name": "float_rounding_builtins_match_spec_and_defect_out_of_range",
       "legacy_path": "tests/emit.rs",
-      "status": "pending",
-      "new_tests": [],
-      "evidence": [],
-      "reason": ""
+      "status": "mapped",
+      "new_tests": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p2_compat.rs"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p2.md"
+        }
+      ],
+      "reason": "P2報告の固定旧試験対応表にsource/Cの抽出範囲を記録。元試験のconst/ISR/List/parse等を含む全観点の照合は継続中。"
     },
     {
       "target": "emit",
@@ -15352,10 +16343,20 @@
       "target": "emit",
       "name": "int64_to_string_uses_twenty_byte_scratch_and_matches_decimal_output",
       "legacy_path": "tests/emit.rs",
-      "status": "pending",
-      "new_tests": [],
-      "evidence": [],
-      "reason": ""
+      "status": "mapped",
+      "new_tests": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p2_compat.rs"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p2.md"
+        }
+      ],
+      "reason": "P2報告の固定旧試験対応表にsource/Cの抽出範囲を記録。元試験のconst/ISR/List/parse等を含む全観点の照合は継続中。"
     },
     {
       "target": "emit",
@@ -15524,10 +16525,20 @@
       "target": "emit",
       "name": "string_byte_size_counts_utf8_bytes_from_a_view",
       "legacy_path": "tests/emit.rs",
-      "status": "pending",
-      "new_tests": [],
-      "evidence": [],
-      "reason": ""
+      "status": "mapped",
+      "new_tests": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p2_compat.rs"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p2.md"
+        }
+      ],
+      "reason": "P2報告の固定旧試験対応表にsource/Cの抽出範囲を記録。元試験のconst/ISR/List/parse等を含む全観点の照合は継続中。"
     },
     {
       "target": "emit",
@@ -15542,10 +16553,24 @@
       "target": "emit",
       "name": "string_comparison::all_constant_comparisons_match_runtime_order_without_emitting_the_helper",
       "legacy_path": "tests/string_comparison/mod.rs",
-      "status": "pending",
-      "new_tests": [],
-      "evidence": [],
-      "reason": ""
+      "status": "replaced",
+      "new_tests": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p2_static_strings.rs"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p2_static_strings.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p2.md"
+        }
+      ],
+      "reason": "固定旧5組×6演算の入力・順序期待値をsource constへ再構成。空、NUL、prefix、UTF-16順と異なるUnicode、正規化しない比較の全30戻り値とruntime helper非生成をC両最適化で確認。"
     },
     {
       "target": "emit",
@@ -15560,19 +16585,39 @@
       "target": "emit",
       "name": "string_length_uses_unicode_18_extended_grapheme_clusters",
       "legacy_path": "tests/emit.rs",
-      "status": "pending",
-      "new_tests": [],
-      "evidence": [],
-      "reason": ""
+      "status": "mapped",
+      "new_tests": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p2_compat.rs"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p2.md"
+        }
+      ],
+      "reason": "P2報告の固定旧試験対応表にsource/Cの抽出範囲を記録。元試験のconst/ISR/List/parse等を含む全観点の照合は継続中。"
     },
     {
       "target": "emit",
       "name": "string_search_predicates_match_utf8_substrings_without_copying",
       "legacy_path": "tests/emit.rs",
-      "status": "pending",
-      "new_tests": [],
-      "evidence": [],
-      "reason": ""
+      "status": "mapped",
+      "new_tests": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p2_compat.rs"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p2.md"
+        }
+      ],
+      "reason": "P2報告の固定旧試験対応表にsource/Cの抽出範囲を記録。元試験のconst/ISR/List/parse等を含む全観点の照合は継続中。"
     },
     {
       "target": "emit",
@@ -15849,6 +16894,10 @@
         {
           "kind": "review",
           "path": "docs/language-subset.md"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p2.md"
         }
       ]
     },
@@ -15881,6 +16930,10 @@
         {
           "kind": "review",
           "path": "docs/language-subset.md"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p2.md"
         }
       ]
     },
@@ -15973,6 +17026,10 @@
         {
           "kind": "review",
           "path": "docs/language-subset.md"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p2.md"
         }
       ]
     },
