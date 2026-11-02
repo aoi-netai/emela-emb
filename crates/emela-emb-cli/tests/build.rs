@@ -1,3 +1,6 @@
+#[path = "../../emela-emb-compiler/tests/support/mod.rs"]
+mod c_support;
+
 use std::fs;
 use std::path::{Path, PathBuf};
 use std::process::{Command, Output};
@@ -444,4 +447,57 @@ fn rejects_malformed_duplicate_and_out_of_range_options() {
             .unwrap();
         assert_eq!(result.status.code(), Some(2), "{options:?}");
     }
+}
+
+#[test]
+fn cli_string_capacity_and_caller_output_buffers_execute() {
+    let temp = TestDirectory::new();
+    let input = temp.input(include_str!(
+        "../../emela-emb-compiler/tests/compat/p2/append.emel"
+    ));
+    let out_dir = temp.path("generated");
+    let result = cli()
+        .arg("build")
+        .arg(input)
+        .args(["--string-capacity", "32", "--out-dir"])
+        .arg(&out_dir)
+        .output()
+        .unwrap();
+    assert_success(&result);
+    let files = fs::read_dir(&out_dir)
+        .unwrap()
+        .map(|entry| {
+            let entry = entry.unwrap();
+            emela_emb_compiler::GeneratedFile {
+                path: entry.file_name().to_str().unwrap().to_owned(),
+                contents: fs::read_to_string(entry.path()).unwrap(),
+            }
+        })
+        .collect();
+    let output = emela_emb_compiler::Output {
+        files,
+        ..emela_emb_compiler::Output::default()
+    };
+    c_support::compile_and_run(
+        &output,
+        r#"
+#include <assert.h>
+#include <stdlib.h>
+#include <string.h>
+#include "emela_embedded.h"
+#include "emela_board.h"
+_Noreturn void emela_board_defect(EmelaDefectKind k, const char *m, uint16_t n) { (void)m; exit(k == EMELA_DEFECT_STRING_CAPACITY && n > 0 ? 0 : 5); }
+int main(void) {
+  const char input[] = {'a', 0, 'b'};
+  char output[64];
+  EmelaString value = message((EmelaString){input, 3, NULL}, output, 64);
+  assert(value.data == output && value.length == 18 && !value.owner);
+  assert(memcmp(value.data, "Missing(text: a\0b)", 18) == 0);
+  const char too_long[] = "01234567890123456789012345678901";
+  (void)message((EmelaString){too_long, sizeof too_long - 1, NULL}, output, 64);
+  return 2;
+}
+"#,
+    );
+    temp.assert_no_staging_directories();
 }
