@@ -183,6 +183,7 @@ pub(super) fn normalize_catalog(program: &mut Program) -> Result<()> {
                 }
             }
             Type::List(element) | Type::Cell(element) => pending.push(element),
+            Type::Fn(ft) => pending.extend(ft.params.into_iter().chain([ft.ret])),
             _ => {}
         }
     }
@@ -261,6 +262,15 @@ pub(super) fn validate_type(program: &Program, function: &str, ty: TypeId) -> Re
             Type::List(element) => {
                 visit(program, function, *element, seen, active, indirections + 1)?
             }
+            Type::Fn(ft) => {
+                if ft.suspends || ft.sets.is_some() {
+                    return Err(unsupported(function, "unresolved or suspending function value"));
+                }
+                for &child in ft.params.iter().chain([&ft.ret]) {
+                    visit(program, function, child, seen, active, indirections + 1)?;
+                }
+            }
+            Type::Evidence => {}
             _ => return Err(unsupported(function, "value type")),
         }
         active.remove(&ty);

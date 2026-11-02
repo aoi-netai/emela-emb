@@ -200,16 +200,11 @@ pub(crate) fn lower_program(
             .iter()
             .filter(|(id, _)| function.active_statements.contains(id))
         {
-            if let Stmt::Let {
-                value:
-                    Value::Call {
-                        callee: Callee::Direct(id),
-                        ..
-                    },
-                ..
-            } = stmt
-            {
-                pending.push(*id);
+            if let Stmt::Let { value, .. } = stmt {
+                match value {
+                    Value::Call { callee: Callee::Direct(id), .. } | Value::FnRef(id) => pending.push(*id),
+                    _ => {}
+                }
             }
         }
     }

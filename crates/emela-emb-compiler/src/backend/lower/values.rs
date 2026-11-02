@@ -9,6 +9,38 @@ pub(super) fn value_type(
 ) -> Result<TypeId> {
     match value {
         Value::Const(value) => operand(f, &Operand::Const(value.clone()), available),
+        Value::FnRef(id) => {
+            let target = program.functions.iter().find_map(|(key, value)| (key == *id).then_some(value))
+                .ok_or_else(|| invalid(&f.name, "function reference ID is out of bounds"))?;
+            let Some(expected) = expected else { return Ok(TypeId::UNIT) };
+            let Type::Fn(ft) = program.core.ty(expected) else {
+                return Err(invalid(&f.name, "function reference destination is not a function value"));
+            };
+            let mut params = function_parameters(ft);
+            if ft.ev { params.push(TypeId::EVIDENCE); }
+            if target.params.iter().map(|&p| variable(target, p)).collect::<Result<Vec<_>>>()? != params
+                || target.ret != ft.ret || target.fails != ft.fails || target.suspends != ft.suspends
+            {
+                return Err(invalid(&f.name, "function reference type differs from its target ABI"));
+            }
+            Ok(expected)
+        }
+        Value::Call { callee: Callee::Indirect(callee), args, suspends, on_fail } => {
+            let ty = operand(f, &Operand::Var(*callee), available)?;
+            let Type::Fn(ft) = program.core.ty(ty) else {
+                return Err(invalid(&f.name, "indirect call target is not a function value"));
+            };
+            if ft.fails != on_fail.is_some() || ft.suspends != *suspends {
+                return Err(invalid(&f.name, "indirect call channels differ from its function type"));
+            }
+            let mut params = function_parameters(ft);
+            if ft.ev { params.push(TypeId::EVIDENCE); }
+            if args.len() != params.len() { return Err(invalid(&f.name, "indirect call argument count differs from its function type")); }
+            for (argument, expected) in args.iter().zip(params) {
+                expect_type(f, operand(f, argument, available)?, expected)?;
+            }
+            Ok(ft.ret)
+        }
         Value::Call {
             callee: Callee::Direct(id),
             args,
@@ -271,6 +303,10 @@ pub(super) fn value_type(
         }
         _ => Err(unsupported(&f.name, "value variant")),
     }
+}
+
+fn function_parameters(ft: &FnType) -> Vec<TypeId> {
+    ft.params.iter().copied().filter(|ty| !matches!(*ty, TypeId::UNIT | TypeId::NEVER)).collect()
 }
 
 fn arguments(
