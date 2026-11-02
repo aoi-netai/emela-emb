@@ -750,11 +750,19 @@ fn prepare_inner(
                     "duplicate trait method",
                 ));
             }
-            if !method.type_params.is_empty() || !method.attributes.is_empty() {
+            if !method.type_params.is_empty() {
+                return Err(Diagnostic::new(
+                    DK::Unsupported,
+                    method.name.span,
+                    "generic trait methods require method type arguments in specialization",
+                )
+                .in_source(&collection.scopes[module].source_name));
+            }
+            if !method.attributes.is_empty() {
                 return Err(diagnostic(
                     &collection.scopes[module],
                     method.name.span,
-                    "trait methods cannot introduce type parameters or attributes",
+                    "trait methods cannot introduce attributes",
                 ));
             }
             let signature = method_signature(modules, catalog, module, &method)?;
@@ -874,6 +882,18 @@ fn prepare_inner(
             .expect("resolved trait")
             .clone();
         for method in implementation.methods {
+            if let Some(parameter) = method
+                .params
+                .iter()
+                .skip(1)
+                .find(|parameter| parameter.name.value == "self")
+            {
+                return Err(diagnostic(
+                    &collection.scopes[module],
+                    parameter.name.span,
+                    "self must be the first method parameter",
+                ));
+            }
             if methods.contains_key(&method.name.value) {
                 return Err(diagnostic(
                     &collection.scopes[module],
@@ -1056,6 +1076,16 @@ fn method_signature(
     module: usize,
     method: &ast::Function,
 ) -> Result<Signature, Diagnostic> {
+    for (index, parameter) in method.params.iter().enumerate() {
+        if parameter.name.value == "self" && (index != 0 || parameter.ty.value != "Self") {
+            return Err(Diagnostic::new(
+                DK::Type,
+                parameter.name.span,
+                "self must be the first parameter and have type Self",
+            )
+            .in_source(&modules.modules[module].source_name));
+        }
+    }
     let parameters = HashMap::from([("Self".into(), 0)]);
     let params = method
         .params
@@ -1418,5 +1448,63 @@ mod tests {
             .remove(0);
         assert!(error.message.contains("field type"));
         assert_eq!(error.span, Span::new(5, 13));
+    }
+    #[test]
+    fn identical_public_trait_names_in_different_modules_have_distinct_ids() {
+        let mut modules = modules(
+            "import A\nimport B\n",
+            &[
+                ("A", "pub trait Score { fn score(self) -> Int }"),
+                ("B", "pub trait Score { fn score(self) -> Int }"),
+            ],
+        );
+        let mut catalog = Catalog::collect(&modules).unwrap();
+        let collection = prepare(&mut modules, &mut catalog).unwrap();
+        let a = collection.find_trait(0, "A.Score").unwrap();
+        let b = collection.find_trait(0, "B.Score").unwrap();
+        assert_ne!(a, b);
+        assert_eq!(collection.registry.trait_data(a).unwrap().owner_module, 1);
+        assert_eq!(collection.registry.trait_data(b).unwrap().owner_module, 2);
+        assert!(collection.find_trait(0, "Score").is_none());
+    }
+    #[test]
+    fn fallible_trait_signatures_preserve_error_type_ids_and_pure_effects() {
+        let mut modules = modules(
+            "error Broken(code: Int)\ntype Key(value: Int)\ntrait Decode { fn decode(text: String) -> Self fails Broken }\nimpl Key: Decode { fn decode(text) { Key(value: String.byte_size(text)) } }",
+            &[],
+        );
+        let mut catalog = Catalog::collect(&modules).unwrap();
+        let collection = prepare(&mut modules, &mut catalog).unwrap();
+        let decode = collection.find_trait(0, "Decode").unwrap();
+        let b::Type::Fn(signature) =
+            catalog
+                .core
+                .ty(collection.registry.trait_data(decode).unwrap().methods[0].signature)
+        else {
+            panic!("function signature")
+        };
+        assert!(signature.fails && !signature.suspends && !signature.ev);
+        let sets = signature.sets.unwrap();
+        let b::Type::Set(errors) = catalog.core.ty(sets.errors) else {
+            panic!("error set")
+        };
+        assert!(errors.fails && errors.params.len() == 1);
+        let b::Type::Enum(error, _) = catalog.core.ty(errors.params[0]) else {
+            panic!("error identity")
+        };
+        assert!(catalog.core.enums[*error].error);
+        let b::Type::Set(effects) = catalog.core.ty(sets.effects) else {
+            panic!("effect set")
+        };
+        assert_eq!(effects, &b::SetSummary::default());
+        let info = collection
+            .methods
+            .values()
+            .find(|info| !info.errors_allowed.is_empty())
+            .unwrap();
+        assert_eq!(info.errors_allowed, errors.params);
+        assert_eq!(info.signature.sets.errors, errors.params);
+        assert_eq!(info.type_parameters, 0);
+        assert!(info.derivation.is_none());
     }
 }
