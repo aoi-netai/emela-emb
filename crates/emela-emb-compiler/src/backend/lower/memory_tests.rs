@@ -169,6 +169,42 @@ for (int i = 0; i < 10000; ++i) {
 }
 
 #[test]
+fn any_boxes_retain_managed_lists_and_release_their_payloads() {
+    let mut p = program(vec![]);
+    let integers = p.core.types.intern(Type::List(TypeId::INT));
+    let mut f = simple();
+    let mut statements = vec![];
+    let list = assign(
+        &mut f,
+        &mut statements,
+        integers,
+        Value::List {
+            elems: vec![Const::Int(17).into()],
+            tail: None,
+        },
+    );
+    let boxed = assign(&mut f, &mut statements, TypeId::ANY, Value::Coerce(list));
+    let unboxed = assign(&mut f, &mut statements, integers, Value::Coerce(boxed));
+    let head = assign(
+        &mut f,
+        &mut statements,
+        TypeId::INT,
+        Value::ListHead(unboxed),
+    );
+    f.seqs[f.body.unwrap()] = Seq {
+        stmts: statements,
+        term: Term::Return(Some(head.into())),
+    };
+    p.functions.alloc(f);
+    let output =
+        crate::backend::compile_program(p, &Options::default().with_heap_bytes(4096)).unwrap();
+    execute_repeatedly(
+        output,
+        "for (int i = 0; i < 10000; ++i) { assert(answer() == 17); assert(test_heap_empty()); }",
+    );
+}
+
+#[test]
 fn recursive_enum_tail_construction_and_deep_release_use_fixed_heap() {
     let mut p = program(vec![]);
     let id = p.core.enums.alloc(EnumDef {
