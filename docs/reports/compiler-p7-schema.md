@@ -47,7 +47,7 @@
 | `RuntimeOp` | ShowString/DebugPrint/Retire/Hold/Unhold等のruntime意味と、旧Heap専用残余入力を区別する | 表示/retire/ISR制御のC観測、結果破棄ShowStringの容量defect、Heap専用6種のnative/suspend入力拒否 |
 | `FiberOp` | Scope/Join/Attempt/Interrupt/Await/Deferred/Causeのtyped操作を独立validatorとruntimeへ接続 | P6正常・失敗・取消・suspend cleanup・所有値、P7 source corpusで組合せを照合 |
 
-旧 `Term::Defect` の第2field（local landing）は新Termの入力に設けない。組み込みtargetのdefectはboard hookで即時停止し、cleanup unwindしない契約を維持する。`Stmt::Let.on_defect` が残る入力も拒否する。これは旧Stage selectorの廃止とは異なり、入力検査とdefectの実行証拠を持つschemaの対応として記録する。
+旧 `Term::Defect` の第2fieldはassertのsource位置を表す `Option<String>`。固定旧forkの `crates/emela-codegen-emb/src/compiler/lower/adapter.rs::adapt_term` も `Term::Defect(value0, _)` としてこのfieldを組み込みbackendへ渡さない。新Termもmessage operandだけを保持し、旧組み込みtargetの観測を維持する。これはdefect landingとは別であり、残余 `Stmt::Let.on_defect` の入力拒否と混同しない。defectはboard hookで即時停止し、cleanup unwindしない。
 
 closure内の `Value::Fiber.on_fail` も、Callと同様にHandleのerror/bodyとBreakのlabelを収集・remapする。元arenaのIDをlift先へ残さず、sourceのState/Fiber/Deferred統合試験と、IDをずらした独立IRで制御辺の保存を確認する。
 

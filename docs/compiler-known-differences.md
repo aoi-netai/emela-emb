@@ -25,9 +25,13 @@ ASCIIの識別子、明示した関数引数型、対応する字句・構文、
 
 ## 独立IRの境界
 
-旧Core/Flowを受け取るRust APIの互換性は設けない。旧 `Module.stage` と5個のStage値を指定するAPIを廃止し、独立入力・LoweredModule・PlannedModuleが変換の段階を所有する。旧stage宣言を含む7行のみ、意味の移管先を説明したうえで台帳の対象外候補にする。
+旧Core/Flowを受け取るRust APIの互換性は設けない。旧 `Module.stage` と5個のStage値を指定するAPIを廃止し、独立入力・LoweredModule・PlannedModuleが変換の段階を所有する。旧stage宣言を含む7定義・5文脈と、Stage selectorを指定する1旧試験のみ、意味の移管先を説明したうえで台帳の対象外判定に対応付ける。
 
 既成のMakeClosure/EnvGet、env、Dup/Drop、saved/state、defect landing、Unwind、Heap専用runtime残余を受け入れない。これらは単なる対象外にはせず、入力拒否と、closure・所有権・中断・cleanupを生成する正規経路の試験を対応付ける。旧source builtin8種は独立frontendから変換し、後段に未変換の形が残る入力も拒否する。[schema対応](reports/compiler-p7-schema.md) と各input文脈の台帳を参照。
+
+旧Flow入力では拒否した `OnFail::Handle` は、新frontendのescapeが生成する合法入力として扱う。error/bodyの型と局所変数の可視性を検証し、Block/Breakへ正規化してからruntimeを計画する。正常時のhandler迂回、失敗時の一度だけの回復、不正入力の拒否を同期・中断で確認し、旧拒否試験を置換した理由として台帳へ残す。
+
+sourceのmatchはIfへlowerし、raw Switch/CaseKey/SwitchOnの直接動作は独立IRで検証する。自己末尾呼出しはfrontendがRecurへlowerし、後段がLoopを生成する。旧 `Term::Defect` のassert位置fieldは固定旧embedded adapterでも使用しておらず、新表現もmessage operandだけを保持する。
 
 旧試験にsource lower後のHold挿入、Protect移動、request外部化、GC anchor追加等がある場合は、その後処理も独立IRで再現する。通常sourceだけで実行した試験として数えず、[source観測対応表](compiler-legacy-runtime-crosswalk.json) の `post_lowering_ir_seam` に明記する。生成Cのprivate cancellation flagやheap observerを使う試験も、公開ABIの利用例とは区別する。
 
