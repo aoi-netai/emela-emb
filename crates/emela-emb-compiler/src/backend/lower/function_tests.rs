@@ -532,3 +532,90 @@ fn never_returning_function_values_widen_results_without_losing_failure_channels
         }
     }
 }
+
+#[test]
+fn projected_function_abis_share_type_identity_through_composite_values() {
+    let mut p = program(vec![]);
+    let ft = p.core.types.intern(Type::Fn(FnType {
+        params: vec![],
+        ret: TypeId::INT,
+        fails: false,
+        suspends: false,
+        ev: false,
+        sets: None,
+    }));
+    let empty = p.core.types.intern(Type::Set(SetSummary::default()));
+    let projected = p.core.types.intern(Type::Fn(FnType {
+        params: vec![],
+        ret: TypeId::INT,
+        fails: false,
+        suspends: false,
+        ev: false,
+        sets: Some(FnSets {
+            errors: empty,
+            effects: empty,
+        }),
+    }));
+    let tuple_a = p.core.types.intern(Type::Tuple(vec![ft]));
+    let tuple_b = p.core.types.intern(Type::Tuple(vec![projected]));
+    // Source metadata is projected in place to preserve the typed IR's IDs. Two
+    // source function types may therefore become the same concrete runtime ABI.
+    p.core.types.types[projected.index()] = p.core.types[ft].clone();
+    let mut value = simple();
+    value.exported = false;
+    value.export_symbol = None;
+    value.name = "read_42".into();
+    let target = p.functions.alloc(value);
+    let mut wrap = Function::new("wrap");
+    wrap.ret = tuple_a;
+    let parameter = reference_var(&mut wrap, ft);
+    wrap.params.push(parameter);
+    let tuple = aggregate_variable(&mut wrap, tuple_a);
+    let statement = binding(&mut wrap, Some(tuple), Value::Tuple(vec![parameter.into()]));
+    wrap.body = Some(wrap.seqs.alloc(Seq {
+        stmts: vec![statement],
+        term: Term::Return(Some(tuple.into())),
+    }));
+    let wrap = p.functions.alloc(wrap);
+    let mut answer = simple();
+    let callback = reference_var(&mut answer, projected);
+    let tuple = aggregate_variable(&mut answer, tuple_b);
+    let extracted = reference_var(&mut answer, projected);
+    let result = variable(&mut answer, TypeId::INT);
+    let make = binding(&mut answer, Some(callback), Value::FnRef(target));
+    let call = binding(
+        &mut answer,
+        Some(tuple),
+        Value::Call {
+            callee: Callee::Direct(wrap),
+            args: vec![callback.into()],
+            suspends: false,
+            on_fail: None,
+        },
+    );
+    let extract = binding(
+        &mut answer,
+        Some(extracted),
+        Value::TupleGet {
+            base: tuple,
+            index: 0,
+        },
+    );
+    let apply = binding(
+        &mut answer,
+        Some(result),
+        Value::Call {
+            callee: Callee::Indirect(extracted),
+            args: vec![],
+            suspends: false,
+            on_fail: None,
+        },
+    );
+    answer.seqs[answer.body.unwrap()] = Seq {
+        stmts: vec![make, call, extract, apply],
+        term: Term::Return(Some(result.into())),
+    };
+    p.functions.alloc(answer);
+    let output = crate::backend::compile_program(p, &Options::default()).unwrap();
+    execute(&output, DEFECT_HARNESS, 0);
+}

@@ -3,7 +3,6 @@ use super::*;
 
 pub(super) fn normalize(program: &mut Program) -> Result<()> {
     let mut bases = HashMap::new();
-    let mut has_labels = false;
     for (effect, definition) in program.core.effects.iter() {
         let base = crate::semantics::effect_base(&program.core, effect).ok_or_else(|| {
             invalid(
@@ -11,11 +10,7 @@ pub(super) fn normalize(program: &mut Program) -> Result<()> {
                 "effect label refers to an invalid or cyclic base",
             )
         })?;
-        has_labels |= base != effect;
         bases.insert(effect, base);
-    }
-    if !has_labels {
-        return Ok(());
     }
     let original = &program.core.types;
     let mut nodes = original.types.clone();
@@ -109,6 +104,11 @@ pub(super) fn normalize(program: &mut Program) -> Result<()> {
     }
     for (_, function) in program.functions.iter_mut() {
         map(&mut function.ret)?;
+        if let Some(environment) = &mut function.env {
+            for ty in environment {
+                map(ty)?;
+            }
+        }
         for (_, variable) in function.vars.iter_mut() {
             map(&mut variable.ty)?;
         }
