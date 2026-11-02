@@ -599,6 +599,7 @@ impl Specializer {
                 }
             }
             ir::ExprKind::Fail(base)
+            | ir::ExprKind::Coerce(base)
             | ir::ExprKind::Field { base, .. }
             | ir::ExprKind::Unary { value: base, .. }
             | ir::ExprKind::Assert(base)

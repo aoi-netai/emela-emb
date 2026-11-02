@@ -240,6 +240,7 @@ fn maximum_local(function: &ir::Function) -> Option<usize> {
                 }
             }
             E::Field { base, .. }
+            | E::Coerce(base)
             | E::Tag(base)
             | E::Fail(base)
             | E::Unary { value: base, .. }

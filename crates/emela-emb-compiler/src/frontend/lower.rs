@@ -227,6 +227,29 @@ impl Context<'_> {
     ) -> Option<b::Operand> {
         use ir::ExprKind as E;
         match &expression.kind {
+            E::Coerce(value) => {
+                let operand = self.expression(builder, value, false)?;
+                if expression.ty == value.ty {
+                    return Some(operand);
+                }
+                let source = match operand {
+                    b::Operand::Var(var) => var,
+                    b::Operand::Const(constant) => {
+                        let var = self.var("coercion_source", value.ty);
+                        self.statement(
+                            builder,
+                            b::Stmt::Let {
+                                dst: Some(var),
+                                value: b::Value::Const(constant),
+                                on_defect: None,
+                                on_suspend: None,
+                            },
+                        );
+                        var
+                    }
+                };
+                self.value(builder, b::Value::Coerce(source), expression.ty)
+            }
             E::FnRef { target, .. } => {
                 self.value(builder, b::Value::FnRef(self.ids[target]), expression.ty)
             }

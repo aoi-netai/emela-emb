@@ -324,6 +324,7 @@ impl Context<'_> {
                 }
             }
             E::Unary { value, .. }
+            | E::Coerce(value)
             | E::Assert(value)
             | E::Tag(value)
             | E::Field { base: value, .. } => analysis.merge(self.expression(value, dynamic)?),

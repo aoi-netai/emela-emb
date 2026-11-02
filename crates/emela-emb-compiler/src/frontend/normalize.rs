@@ -189,6 +189,7 @@ impl Context<'_> {
             }
             E::Fail(value)
             | E::Unary { value, .. }
+            | E::Coerce(value)
             | E::Assert(value)
             | E::Field { base: value, .. }
             | E::Tag(value) => self.expression(value)?,

@@ -49,6 +49,7 @@ pub(super) fn allocate_raises(
                 }
             }
             E::Field { base, .. }
+            | E::Coerce(base)
             | E::Tag(base)
             | E::Unary { value: base, .. }
             | E::Assert(base) => collect(base, types),

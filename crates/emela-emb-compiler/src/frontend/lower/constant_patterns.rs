@@ -56,6 +56,7 @@ pub(super) fn allocate_structural_equality(
                 }
             }
             E::Field { base, .. }
+            | E::Coerce(base)
             | E::Tag(base)
             | E::Fail(base)
             | E::Unary { value: base, .. }

@@ -60,6 +60,7 @@ pub(crate) enum ExprKind {
     Literal(Literal),
     Concat(Vec<Expr>),
     Fail(Box<Expr>),
+    Coerce(Box<Expr>),
     Escape {
         value: Box<Expr>,
         error: Local,
