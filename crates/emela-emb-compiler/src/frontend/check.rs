@@ -113,6 +113,8 @@ pub(crate) fn check(mut modules: Modules) -> Result<ir::Program, Vec<Diagnostic>
     super::effect_collect::expand_handlers(&mut modules)?;
     let mut catalog = Catalog::collect(&modules)?;
     super::effect_collect::fill_operations(&modules, &mut catalog)?;
+    catalog.collect_parameter_kinds();
+    catalog.validate_declared_arguments(&modules)?;
     let effects = super::effect_collect::prepare(&mut modules, &mut catalog)?;
     let traits = super::trait_collect::prepare(&mut modules, &mut catalog)?;
     let mut checker = Checker {
@@ -279,6 +281,7 @@ pub(crate) fn check(mut modules: Modules) -> Result<ir::Program, Vec<Diagnostic>
         }
     }
     super::capabilities::audit(&program)?;
+    super::concurrency::audit(&program)?;
     Ok(program)
 }
 impl Checker {
@@ -1968,6 +1971,17 @@ impl Checker {
                     None => self.function(id)?,
                 };
                 if let Some(intrinsic) = self.definitions[id.0].intrinsic {
+                    if intrinsic == Intrinsic::FiberScope {
+                        let result = self.resolve_type(module, ret, span)?;
+                        if super::concurrency::contains_handle(&self.catalog.core, result) {
+                            return Err(self.error(
+                                module,
+                                DK::Type,
+                                span,
+                                "a fiber handle or Deferred cannot escape its scope result",
+                            ));
+                        }
+                    }
                     let op = match intrinsic {
                         Intrinsic::Panic => Some(crate::contract::ir::Builtin::Panic),
                         Intrinsic::Todo => Some(crate::contract::ir::Builtin::Todo),

@@ -56,6 +56,7 @@ pub(crate) fn effects_abi(core: &Definitions, members: &[TypeId]) -> (bool, bool
 }
 
 pub(crate) fn project(program: &mut ir::Program) -> Result<(), Vec<Diagnostic>> {
+    project_concurrency_rows(&mut program.core);
     let mut updates = Vec::new();
     let initial = program.core.types.types.len();
     for index in 0..initial {
@@ -108,6 +109,32 @@ pub(crate) fn project(program: &mut ir::Program) -> Result<(), Vec<Diagnostic>> 
         .map(|(index, ty)| (ty, TypeId::from_index(index)))
         .collect();
     Ok(())
+}
+fn project_concurrency_rows(core: &mut Definitions) {
+    let cause = core
+        .enums
+        .iter()
+        .find_map(|(id, definition)| (definition.name == "Std.Cause.Cause").then_some(id));
+    let exit = core.enums.iter().find_map(|(id, definition)| {
+        (definition.name == "Std.Fiber.Exit" && definition.params == 2).then_some(id)
+    });
+    for node in &mut core.types.types {
+        if let Type::Enum(id, arguments) = node {
+            if Some(*id) == cause {
+                arguments.clear();
+            } else if Some(*id) == exit {
+                arguments.truncate(1);
+            }
+        }
+    }
+    if let Some(cause) = cause {
+        core.enums[cause].params = 0;
+        core.enums[cause].external = true;
+        core.enums[cause].variants.clear();
+    }
+    if let Some(exit) = exit {
+        core.enums[exit].params = 1;
+    }
 }
 fn summary(
     core: &Definitions,

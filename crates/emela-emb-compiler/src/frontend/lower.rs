@@ -316,7 +316,11 @@ impl Context<'_> {
                 self.with_expression(builder, bindings, body, expression.ty)
             }
             E::Coerce(value) => {
-                let operand = self.expression(builder, value, false)?;
+                let operand = self.expression(builder, value, false);
+                if builder.term.is_some() {
+                    return None;
+                }
+                let operand = operand.unwrap_or(b::Operand::Const(b::Const::Unit));
                 if expression.ty == value.ty {
                     return Some(operand);
                 }
@@ -1140,7 +1144,20 @@ fn literal(value: &ir::Literal) -> b::Const {
 }
 fn builtin(op: Intrinsic) -> b::Builtin {
     match op {
-        Intrinsic::StateRun => unreachable!("State.run is expanded before backend lowering"),
+        Intrinsic::StateRun
+        | Intrinsic::FiberScope
+        | Intrinsic::FiberJoin
+        | Intrinsic::FiberAwait
+        | Intrinsic::FiberInterrupt
+        | Intrinsic::FiberAttempt
+        | Intrinsic::DeferredComplete
+        | Intrinsic::DeferredAwait
+        | Intrinsic::DeferredPoll
+        | Intrinsic::CauseKind
+        | Intrinsic::CauseToString
+        | Intrinsic::CauseRaise => {
+            unreachable!("trusted structured operations are expanded before backend lowering")
+        }
         Intrinsic::Panic => b::Builtin::Panic,
         Intrinsic::Todo => b::Builtin::Todo,
         Intrinsic::Dbg => b::Builtin::Dbg,

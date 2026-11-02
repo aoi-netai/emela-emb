@@ -422,3 +422,17 @@ IR/C試験は、callback失敗flagの異なる同一Scope、typed childのJoin�
 保守的failure flagは固定旧の閉鎖性検査に従って除去する。到達関数にFail・Unwind・Cause.raiseがある場合、失敗可能な外部関数、またはC境界から失敗可能関数値・Any・handler/evidenceを受け取る場合は適用しない。適用時は関数型graphを射影し、重複型を正規化した対応表でclosure環境も更新する。C境界の負例、failure runtimeの省略、通常値としてerrorを作るだけのScopeで不要Show関数を生成しないことを検証する。
 
 空Causeのlandingは、固定旧 `crates/emela-codegen-emb/src/input/upstream/cause.rs`（元SHA-256: `8bebbddcd06d60da5a296c5371e7bf6b8ce949433623364b2330f99ac5fcf4cd`）のsource検証後の契約に合わせた。typed Fiberの具体errorsが空の場合だけ、frontend lowerがlocal Breakと内部helperを合成する。通常のbackend IRは明示failure edgeを要求し、helperの署名・非公開性・内部bindingを検査する。外部host実装は追加しない。runtime Cause ABIの中断再送出と、空集合に矛盾するFail CauseのassertをC両最適化で検証する。source Cause/Fiber/Exitに残るphantom row型引数のABI射影は別のsource接続作業とする。
+
+## P6標準sourceとtrusted concurrency合成
+
+固定revision `c34c0aeefdd966d854371b3110db00a47798751d` の次の標準sourceを本文・metadataとも変更せず供給する。外部opaque型の構文と名義、Causeのphantom error row、Exitのerror rowはsource checkerで保持し、runtime ABIへ渡す直前にだけ消去する。
+
+| 元source | SHA-256 |
+| --- | --- |
+| `crates/emela-core/lib/std/fiber.emel` | `bbcd120a2c9fe07eed481b7bfa846f658484b19776107a1af583a4e7b1688c48` |
+| `crates/emela-core/lib/std/deferred.emel` | `bea5f3fa01a529f498c08014e80065643afbb3e63197ea2058e8ac2ec126aabf` |
+| `crates/emela-core/lib/std/cause.emel` | `d2bd541699bd82e34dc20e77caeef2b5aff2ab8a27aacd07ff3132154ea0df8d` |
+
+`crates/emela-core/src/lower/fiber.rs`（元SHA-256 `5811d25b3789ca14d68d96fff316600e7996a51798114429c687caeb77e65d33`）のScopeCall/ForkCall/AttemptCallを独立typed IRへ適応する。Scope handlerは呼出地点のevidenceを保持し、fork callbackへ明示的に渡す。子はfork元のScope capabilityだけをそのtableへ追加する。通常のeffect/label keyは保持し、Scopeだけを`Std.Fiber.Scope[_,_]`へ正規化する。実行時crate・旧checkout・本体compilerへの依存は加えない。
+
+`tests/p6_concurrency.rs`はsourceからScope/fork/join、Deferred、Unit結果、Attempt、Causeのkind/Show/raiseを生成し、C11の両最適化で各1000回のheap全解放を確認する。戻り型にFiber/Deferredを含むScope、Scopeの省略引数をuse clauseへ書く入力、集合kind不一致、user handlerによるScope実装をsource位置付きで拒否する。戻り型に見えないcaptureのscope逸出と取消・cleanupのsource統合は、この基盤回帰と区別して追跡する。

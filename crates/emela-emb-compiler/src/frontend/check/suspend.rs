@@ -153,7 +153,10 @@ fn push_block<'a>(block: &'a ir::Block, pending: &mut Vec<&'a ir::Expr>) {
         ir::Statement::Pattern { value, .. } | ir::Statement::Expr(value) => value,
     }));
 }
-fn push_children<'a>(expression: &'a ir::Expr, pending: &mut Vec<&'a ir::Expr>) {
+pub(in crate::frontend) fn push_children<'a>(
+    expression: &'a ir::Expr,
+    pending: &mut Vec<&'a ir::Expr>,
+) {
     use ir::ExprKind as E;
     match &expression.kind {
         E::Literal(_) | E::Local(_) | E::FnRef { .. } | E::Use { .. } | E::Evidence => {}

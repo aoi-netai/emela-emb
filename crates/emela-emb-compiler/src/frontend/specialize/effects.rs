@@ -69,6 +69,11 @@ impl Specializer {
                 "effect identity is outside the catalog before specialization",
             ));
         };
+        if definition.decl == "Std.Fiber.Scope" {
+            let target = self.scope_effect();
+            self.effect_instances.insert(key, target);
+            return Ok(target);
+        }
         self.effect_instances.insert(key.clone(), effect);
         for arg in &mut definition.args {
             *arg = self.substitute(

@@ -570,6 +570,7 @@ impl Specializer {
             ir::ExprKind::OpCall {
                 handler,
                 effect,
+                op,
                 errors,
                 args,
                 order,
@@ -589,8 +590,28 @@ impl Specializer {
                 }
                 Self::order(function, expression.span, order, args.len())?;
                 self.expression(function, handler, arguments, depth)?;
-                for argument in args {
+                for argument in args.iter_mut() {
                     self.expression(function, argument, arguments, depth)?;
+                }
+                if self.core.effects[*effect].decl == "Std.Fiber.Scope"
+                    && self.core.effects[*effect].ops[*op].name == "fork"
+                {
+                    *expression = self.scope_fork(
+                        function,
+                        *std::mem::replace(
+                            handler,
+                            Box::new(ir::Expr {
+                                kind: ir::ExprKind::Literal(ir::Literal::Unit),
+                                ty: ValueType::Unit,
+                                span: expression.span,
+                            }),
+                        ),
+                        *effect,
+                        *op,
+                        std::mem::take(args),
+                        expression.ty,
+                        expression.span,
+                    )?;
                 }
             }
             ir::ExprKind::Handler {
@@ -828,6 +849,27 @@ impl Specializer {
                 if let Some(runtime) = self
                     .functions
                     .iter()
+                    .find(|candidate| candidate.id == *target)
+                    .cloned()
+                {
+                    if let Some(op) = runtime.intrinsic {
+                        if op.is_concurrent() {
+                            *expression = self.fiber_expression(
+                                function,
+                                &runtime,
+                                op,
+                                std::mem::take(args),
+                                order,
+                                expression.ty,
+                                expression.span,
+                            )?;
+                            return Ok(());
+                        }
+                    }
+                }
+                if let Some(runtime) = self
+                    .functions
+                    .iter()
                     .find(|candidate| {
                         candidate.id == *target
                             && candidate.intrinsic == Some(crate::sources::Intrinsic::StateRun)
@@ -869,3 +911,6 @@ mod effects;
 
 #[path = "specialize/state.rs"]
 mod state;
+
+#[path = "specialize/fiber.rs"]
+mod fiber;

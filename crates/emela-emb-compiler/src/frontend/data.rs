@@ -1,5 +1,6 @@
 //! Source-owned declaration and visibility metadata over the independent concrete type catalog.
 mod function_types;
+mod parameter_kinds;
 mod substitution;
 use super::{ast, effect_collect::EffectRegistry, modules::Modules, types::ValueType as Ty};
 use crate::{Diagnostic, DiagnosticKind as DK, Span, contract::ir as b};
@@ -26,6 +27,7 @@ pub(crate) struct Declaration {
 }
 pub(crate) struct Catalog {
     pub core: b::Definitions,
+    parameter_kinds: parameter_kinds::ParameterKinds,
     pub effects: EffectRegistry,
     pub declarations: Vec<Declaration>,
     pub omitted_rows: OmittedRows,
@@ -41,6 +43,7 @@ impl Catalog {
         let effects = EffectRegistry::declare(modules, &mut core)?;
         let mut catalog = Self {
             core,
+            parameter_kinds: Default::default(),
             effects,
             declarations: Vec::new(),
             omitted_rows: OmittedRows::Empty,
@@ -109,7 +112,11 @@ impl Catalog {
                         }
                     }
                     let id = catalog.core.enums.alloc(b::EnumDef {
-                        name: if module.builtin {
+                        name: if module.builtin
+                            && !matches!(
+                                module.name.as_str(),
+                                "Std.Fiber" | "Std.Deferred" | "Std.Cause"
+                            ) {
                             data.name.value.clone()
                         } else {
                             format!("{}.{}", module.name, data.name.value)
@@ -261,6 +268,19 @@ impl Catalog {
                 self.type_text(modules, module, argument, text.span, params, None)?,
             ));
         }
+        if let Ok(declaration) =
+            self.effects
+                .named_declaration(modules, module, &ast::Text::new(head, text.span))
+        {
+            let effect = declaration.id;
+            for (index, &argument) in args.iter().enumerate() {
+                self.validate_row_argument(
+                    argument,
+                    self.effect_parameter_kind(effect, index),
+                    text.span,
+                )?;
+            }
+        }
         self.effects.resolve_instance(
             modules,
             &mut self.core,
@@ -314,6 +334,45 @@ impl Catalog {
             return Ok(Ty::Compound(
                 self.core.types.intern(b::Type::Param(parameter)),
             ));
+        }
+        if text.starts_with('{') && text.ends_with('}') {
+            let mut members = Vec::new();
+            for member in split(&text[1..text.len() - 1]) {
+                members.push(self.effect_member(
+                    modules,
+                    module,
+                    &ast::Text::new(member, span),
+                    params,
+                )?);
+            }
+            return Ok(frontend_type(self.core.types.intern(b::Type::Set(
+                b::SetSummary {
+                    params: members,
+                    ..Default::default()
+                },
+            ))));
+        }
+        let union = split_with(text, '|');
+        if union.len() > 1 {
+            let mut members = Vec::new();
+            for member in union {
+                let ty = backend_type(self.type_text(
+                    modules,
+                    module,
+                    member.trim(),
+                    span,
+                    params,
+                    self_type,
+                )?);
+                self.validate_row_argument(ty, Some(super::sets::SetKind::Error), span)?;
+                members.push(ty);
+            }
+            return Ok(frontend_type(self.core.types.intern(b::Type::Set(
+                b::SetSummary {
+                    params: members,
+                    ..Default::default()
+                },
+            ))));
         }
         let scalar = match text {
             "Int" => Some(Ty::Int),
@@ -411,10 +470,11 @@ impl Catalog {
             ));
         }
         let mut args = Vec::new();
-        for argument in arguments {
-            args.push(backend_type(
-                self.type_text(modules, module, argument, span, params, self_type)?,
-            ));
+        for (index, argument) in arguments.into_iter().enumerate() {
+            let ty =
+                backend_type(self.type_text(modules, module, argument, span, params, self_type)?);
+            self.validate_row_argument(ty, self.nominal_parameter_kind(id, index), span)?;
+            args.push(ty);
         }
         Ok(Ty::Compound(self.core.types.enum_type(id, args)))
     }
@@ -543,6 +603,9 @@ pub(crate) fn frontend_type(ty: b::TypeId) -> Ty {
     }
 }
 fn split(text: &str) -> Vec<&str> {
+    split_with(text, ',')
+}
+fn split_with(text: &str, separator: char) -> Vec<&str> {
     let mut depth = 0;
     let mut start = 0;
     let mut result = Vec::new();
@@ -550,7 +613,7 @@ fn split(text: &str) -> Vec<&str> {
         match ch {
             '[' | '(' | '{' => depth += 1,
             ']' | ')' | '}' => depth -= 1,
-            ',' if depth == 0 => {
+            ch if ch == separator && depth == 0 => {
                 result.push(&text[start..index]);
                 start = index + 1;
             }
