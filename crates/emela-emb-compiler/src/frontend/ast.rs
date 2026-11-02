@@ -22,6 +22,75 @@ pub(crate) struct Module {
     pub consts: Vec<ConstDeclaration>,
     pub traits: Vec<TraitDeclaration>,
     pub impls: Vec<Implementation>,
+    pub effects: Vec<Effect>,
+    pub handlers: Vec<Handler>,
+    pub layers: Vec<Layer>,
+}
+#[derive(Clone, Debug)]
+pub(crate) struct Effect {
+    pub name: Text,
+    pub public: bool,
+    pub params: Vec<TypeParameter>,
+    pub attributes: Vec<Attribute>,
+    pub operations: Vec<Operation>,
+    pub underlying: Option<Text>,
+    pub default: bool,
+    pub span: Span,
+}
+#[derive(Clone, Debug)]
+pub(crate) struct Operation {
+    pub name: Text,
+    pub type_params: Vec<TypeParameter>,
+    pub params: Vec<Parameter>,
+    pub return_type: Option<Text>,
+    pub fails: Option<Vec<Text>>,
+    pub suspends: bool,
+    pub span: Span,
+}
+#[derive(Clone, Debug)]
+pub(crate) struct Handler {
+    pub name: Text,
+    pub public: bool,
+    pub fields: Option<Vec<Field>>,
+    pub effect: Text,
+    pub init: Option<Initializer>,
+    pub release: Option<Block>,
+    pub operations: Vec<HandlerOperation>,
+    pub span: Span,
+}
+#[derive(Clone, Debug)]
+pub(crate) struct Initializer {
+    pub params: Vec<Parameter>,
+    pub body: Block,
+    pub span: Span,
+}
+#[derive(Clone, Debug)]
+pub(crate) struct HandlerOperation {
+    pub name: Text,
+    pub params: Vec<Parameter>,
+    pub suspends: bool,
+    pub body: Block,
+    pub span: Span,
+}
+#[derive(Clone, Debug)]
+pub(crate) struct Layer {
+    pub name: Text,
+    pub public: bool,
+    pub items: Vec<WithItem>,
+    pub span: Span,
+}
+#[derive(Clone, Debug)]
+pub(crate) struct WithItem {
+    pub name: Text,
+    pub args: Option<Vec<Argument>>,
+    pub by: Option<WithProvider>,
+    pub span: Span,
+}
+#[derive(Clone, Debug)]
+pub(crate) struct WithProvider {
+    pub name: Text,
+    pub args: Option<Vec<Argument>>,
+    pub span: Span,
 }
 #[derive(Clone, Debug)]
 pub(crate) struct TraitDeclaration {
@@ -117,6 +186,11 @@ pub(crate) enum ExprKind {
         return_type: Option<Text>,
         fails: Option<Vec<Text>>,
         effects: Option<Vec<Text>>,
+        body: Block,
+    },
+    Use(Text),
+    With {
+        items: Vec<WithItem>,
         body: Block,
     },
     Match {

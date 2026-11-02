@@ -33,6 +33,9 @@ impl<'t, 's> Parser<'t, 's> {
         let mut consts = Vec::new();
         let mut traits = Vec::new();
         let mut impls = Vec::new();
+        let mut effects = Vec::new();
+        let mut handlers = Vec::new();
+        let mut layers = Vec::new();
         self.newlines();
         while self.current().kind != K::Eof {
             if self.word("import") {
@@ -41,6 +44,9 @@ impl<'t, 's> Parser<'t, 's> {
                     || !consts.is_empty()
                     || !traits.is_empty()
                     || !impls.is_empty()
+                    || !effects.is_empty()
+                    || !handlers.is_empty()
+                    || !layers.is_empty()
                 {
                     return Err(
                         self.error(DiagnosticKind::Syntax, "imports must precede declarations")
@@ -48,13 +54,19 @@ impl<'t, 's> Parser<'t, 's> {
                 }
                 imports.push(self.import()?);
             } else {
-                let intrinsic = self.intrinsic_data_attribute()?;
+                let intrinsic = self.intrinsic_declaration_attribute()?;
                 let declaration = if self.word("pub") {
                     self.peek(1).kind
                 } else {
                     self.current().kind
                 };
-                if declaration == K::Name("const") {
+                if declaration == K::Name("effect") {
+                    effects.push(self.effect_declaration(intrinsic)?);
+                } else if declaration == K::Name("handler") {
+                    handlers.push(self.handler_declaration()?);
+                } else if declaration == K::Name("layer") {
+                    layers.push(self.layer_declaration()?);
+                } else if declaration == K::Name("const") {
                     consts.push(self.constant()?);
                 } else if declaration == K::Name("trait") {
                     traits.push(self.trait_declaration()?);
@@ -83,9 +95,12 @@ impl<'t, 's> Parser<'t, 's> {
             consts,
             traits,
             impls,
+            effects,
+            handlers,
+            layers,
         })
     }
-    fn intrinsic_data_attribute(&mut self) -> Result<Option<Span>, Diagnostic> {
+    fn intrinsic_declaration_attribute(&mut self) -> Result<Option<Span>, Diagnostic> {
         let checkpoint = self.cursor;
         if !self.take(K::At) || !self.word("intrinsic") {
             self.cursor = checkpoint;
@@ -100,7 +115,10 @@ impl<'t, 's> Parser<'t, 's> {
         } else {
             self.current().kind
         };
-        if matches!(declaration, K::Name("type" | "enum" | "error" | "opaque")) {
+        if matches!(
+            declaration,
+            K::Name("type" | "enum" | "error" | "opaque" | "effect")
+        ) {
             Ok(Some(span))
         } else {
             self.cursor = checkpoint;
@@ -484,6 +502,372 @@ impl<'t, 's> Parser<'t, 's> {
             span: Span::new(start, self.previous_end()),
         })
     }
+    fn parameters(&mut self, typed: bool) -> Result<Vec<Parameter>, Diagnostic> {
+        self.expect(K::LParen, "expected '(' before parameters")?;
+        self.newlines();
+        let mut params = Vec::new();
+        while self.current().kind != K::RParen {
+            let name = self.lower_name("expected parameter name")?;
+            self.newlines();
+            let ty = if self.take(K::Colon) {
+                Some(self.type_name()?)
+            } else {
+                None
+            };
+            let ty = match ty {
+                Some(ty) => ty,
+                None if !typed => Text::new("", name.span),
+                None => {
+                    return Err(self.error(
+                        DiagnosticKind::Type,
+                        "operation and init parameters require type annotations",
+                    ));
+                }
+            };
+            params.push(Parameter { name, ty });
+            self.newlines();
+            if !self.take(K::Comma) {
+                break;
+            }
+            self.newlines();
+        }
+        self.expect(K::RParen, "expected ')' after parameters")?;
+        Ok(params)
+    }
+    fn effect_declaration(&mut self, intrinsic: Option<Span>) -> Result<Effect, Diagnostic> {
+        let start = self.current().span.start;
+        let public = self.take_word("pub");
+        self.expect(K::Name("effect"), "expected effect declaration")?;
+        let name = self.name("expected effect name")?;
+        let params = self.type_parameters()?;
+        let attributes = intrinsic.map(Attribute::Intrinsic).into_iter().collect();
+        if self.take_word("of") {
+            let underlying = Some(self.type_reference(true)?);
+            let default = self.take_word("default");
+            if self.current().kind == K::LBrace {
+                return Err(self.error(DiagnosticKind::Syntax, "effect labels have no body"));
+            }
+            return Ok(Effect {
+                name,
+                public,
+                params,
+                attributes,
+                operations: Vec::new(),
+                underlying,
+                default,
+                span: Span::new(start, self.previous_end()),
+            });
+        }
+        self.expect(K::LBrace, "expected '{' after effect name")?;
+        self.newlines();
+        let mut operations = Vec::new();
+        while !matches!(self.current().kind, K::RBrace | K::Eof) {
+            let start = self.current().span.start;
+            let suspends = self.take_word("suspend");
+            self.expect(K::Name("fn"), "effect bodies contain operation signatures")?;
+            let name = self.lower_name("expected operation name")?;
+            let type_params = self.type_parameters()?;
+            let params = self.parameters(true)?;
+            self.continue_before(K::Arrow);
+            self.expect(K::Arrow, "effect operations require a return type")?;
+            let return_type = Some(self.type_name()?);
+            let fails = self.failure_clause()?;
+            self.continue_word("use");
+            if self.word("use") {
+                let start = self.current().span.start;
+                self.effect_clause()?;
+                return Err(Diagnostic::new(
+                    DiagnosticKind::Syntax,
+                    Span::new(start, self.previous_end()),
+                    "effect operations cannot have a use clause",
+                ));
+            }
+            operations.push(Operation {
+                name,
+                type_params,
+                params,
+                return_type,
+                fails,
+                suspends,
+                span: Span::new(start, self.previous_end()),
+            });
+            if !matches!(self.current().kind, K::Newline | K::RBrace) {
+                return Err(self.error(
+                    DiagnosticKind::Syntax,
+                    "expected a line break after operation signature",
+                ));
+            }
+            self.newlines();
+        }
+        self.expect(K::RBrace, "expected '}' after effect operations")?;
+        Ok(Effect {
+            name,
+            public,
+            params,
+            attributes,
+            operations,
+            underlying: None,
+            default: false,
+            span: Span::new(start, self.previous_end()),
+        })
+    }
+    fn context_block(&mut self, allow_self: bool) -> Result<Block, Diagnostic> {
+        let previous = self.method_context;
+        self.method_context = allow_self;
+        let result = self.block();
+        self.method_context = previous;
+        result
+    }
+    fn handler_declaration(&mut self) -> Result<Handler, Diagnostic> {
+        let start = self.current().span.start;
+        let public = self.take_word("pub");
+        self.expect(K::Name("handler"), "expected handler declaration")?;
+        let name = self.name("expected handler name")?;
+        let fields = if self.current().kind == K::LParen {
+            let fields = self.fields()?;
+            if let Some(field) = fields.iter().find(|field| field.name.is_none()) {
+                return Err(Diagnostic::new(
+                    DiagnosticKind::Syntax,
+                    field.ty.span,
+                    "handler fields require names",
+                ));
+            }
+            Some(fields)
+        } else {
+            None
+        };
+        self.expect(K::Colon, "handlers are written 'handler Name: Effect'")?;
+        let effect = self.type_reference(true)?;
+        self.expect(K::LBrace, "expected '{' after handled effect")?;
+        self.newlines();
+        let mut init = None;
+        let mut release = None;
+        let mut operations = Vec::new();
+        while !matches!(self.current().kind, K::RBrace | K::Eof) {
+            let start = self.current().span.start;
+            if self.take_word("init") {
+                if init.is_some() {
+                    return Err(Diagnostic::new(
+                        DiagnosticKind::Syntax,
+                        Span::new(start, self.previous_end()),
+                        "duplicate handler init",
+                    ));
+                }
+                let params = if self.current().kind == K::LParen {
+                    self.parameters(true)?
+                } else {
+                    Vec::new()
+                };
+                let body = self.context_block(false)?;
+                init = Some(Initializer {
+                    params,
+                    body,
+                    span: Span::new(start, self.previous_end()),
+                });
+            } else if self.take_word("release") {
+                if release.is_some() {
+                    return Err(Diagnostic::new(
+                        DiagnosticKind::Syntax,
+                        Span::new(start, self.previous_end()),
+                        "duplicate handler release",
+                    ));
+                }
+                release = Some(self.context_block(true)?);
+            } else {
+                let suspends = self.take_word("suspend");
+                self.expect(
+                    K::Name("fn"),
+                    "expected init, release, or handler operation",
+                )?;
+                let name = self.lower_name("expected handler operation name")?;
+                let params = self.parameters(false)?;
+                let body = self.context_block(true)?;
+                operations.push(HandlerOperation {
+                    name,
+                    params,
+                    suspends,
+                    body,
+                    span: Span::new(start, self.previous_end()),
+                });
+            }
+            if !matches!(self.current().kind, K::Newline | K::RBrace) {
+                return Err(self.error(
+                    DiagnosticKind::Syntax,
+                    "expected a line break after handler item",
+                ));
+            }
+            self.newlines();
+        }
+        self.expect(K::RBrace, "expected '}' after handler items")?;
+        Ok(Handler {
+            name,
+            public,
+            fields,
+            effect,
+            init,
+            release,
+            operations,
+            span: Span::new(start, self.previous_end()),
+        })
+    }
+    fn layer_declaration(&mut self) -> Result<Layer, Diagnostic> {
+        let start = self.current().span.start;
+        let public = self.take_word("pub");
+        self.expect(K::Name("layer"), "expected layer declaration")?;
+        let name = self.name("expected layer name")?;
+        self.expect(K::LBrace, "expected '{' after layer name")?;
+        self.newlines();
+        let mut items = Vec::new();
+        while !matches!(self.current().kind, K::RBrace | K::Eof) {
+            items.push(self.with_item(false)?);
+            if self.take(K::Comma) || self.current().kind == K::Newline {
+                self.newlines();
+            } else if self.current().kind != K::RBrace {
+                return Err(self.error(
+                    DiagnosticKind::Syntax,
+                    "expected comma or line break after layer item",
+                ));
+            }
+        }
+        self.expect(K::RBrace, "expected '}' after layer items")?;
+        Ok(Layer {
+            name,
+            public,
+            items,
+            span: Span::new(start, self.previous_end()),
+        })
+    }
+    fn type_reference(&mut self, arguments: bool) -> Result<Text, Diagnostic> {
+        let first = self.name("expected type or effect reference")?;
+        if !first.value.as_bytes()[0].is_ascii_uppercase() {
+            return Err(Diagnostic::new(
+                DiagnosticKind::Syntax,
+                first.span,
+                "type and effect references require an uppercase initial",
+            ));
+        }
+        let mut value = first.value;
+        while self.current().kind == K::Dot
+            && matches!(self.peek(1).kind,K::Name(name) if name.as_bytes()[0].is_ascii_uppercase())
+        {
+            self.advance();
+            value.push('.');
+            value.push_str(&self.name("expected qualified type reference")?.value);
+        }
+        if arguments && self.take(K::LBracket) {
+            self.newlines();
+            let mut args = Vec::new();
+            while self.current().kind != K::RBracket {
+                args.push(self.type_argument()?.value);
+                self.newlines();
+                if !self.take(K::Comma) {
+                    break;
+                }
+                self.newlines();
+            }
+            self.expect(K::RBracket, "expected ']' after effect type arguments")?;
+            value.push('[');
+            value.push_str(&args.join(","));
+            value.push(']');
+        }
+        Ok(Text::new(
+            value,
+            Span::new(first.span.start, self.previous_end()),
+        ))
+    }
+    fn arguments(&mut self) -> Result<Vec<Argument>, Diagnostic> {
+        self.expect(K::LParen, "expected '(' before arguments")?;
+        self.newlines();
+        let mut args = Vec::new();
+        while self.current().kind != K::RParen {
+            let label =
+                if matches!(self.current().kind, K::Name(_)) && self.peek(1).kind == K::Colon {
+                    let name = self.lower_name("expected argument label")?;
+                    self.advance();
+                    self.newlines();
+                    Some(name)
+                } else {
+                    None
+                };
+            let value = if matches!(self.current().kind, K::Comma | K::RParen) {
+                let Some(label) = &label else {
+                    return Err(self.error(DiagnosticKind::Syntax, "expected argument"));
+                };
+                Expr {
+                    kind: ExprKind::Name(vec![label.clone()]),
+                    span: label.span,
+                }
+            } else {
+                self.expr(0, true)?
+            };
+            args.push(Argument { label, value });
+            self.newlines();
+            if !self.take(K::Comma) {
+                break;
+            }
+            self.newlines();
+        }
+        self.expect(K::RParen, "expected ')' after arguments")?;
+        Ok(args)
+    }
+    fn with_item(&mut self, allow_by: bool) -> Result<WithItem, Diagnostic> {
+        let start = self.current().span.start;
+        let name = self.type_reference(false)?;
+        let args = if self.current().kind == K::LParen {
+            Some(self.arguments()?)
+        } else {
+            None
+        };
+        let by = if allow_by && self.take_word("by") {
+            let start = self.current().span.start;
+            let name = self.type_reference(true)?;
+            if name.value.contains('[') && self.current().kind == K::LParen {
+                return Err(self.error(
+                    DiagnosticKind::Syntax,
+                    "by providers take either effect type arguments or handler init arguments",
+                ));
+            }
+            let args = if self.current().kind == K::LParen {
+                Some(self.arguments()?)
+            } else {
+                None
+            };
+            Some(WithProvider {
+                name,
+                args,
+                span: Span::new(start, self.previous_end()),
+            })
+        } else {
+            None
+        };
+        if self.word("by") {
+            return Err(self.error(
+                DiagnosticKind::Syntax,
+                "by can occur only once on a with item",
+            ));
+        }
+        Ok(WithItem {
+            name,
+            args,
+            by,
+            span: Span::new(start, self.previous_end()),
+        })
+    }
+    fn with_expression(&mut self) -> Result<Expr, Diagnostic> {
+        let start = self.current().span.start;
+        self.expect(K::Name("with"), "expected with expression")?;
+        self.newlines();
+        let mut items = vec![self.with_item(true)?];
+        while self.take(K::Comma) {
+            self.newlines();
+            items.push(self.with_item(true)?);
+        }
+        let body = self.block()?;
+        Ok(Expr {
+            kind: ExprKind::With { items, body },
+            span: Span::new(start, self.previous_end()),
+        })
+    }
     fn type_parameters(&mut self) -> Result<Vec<TypeParameter>, Diagnostic> {
         let mut params = Vec::new();
         if !self.take(K::LBracket) {
@@ -840,6 +1224,19 @@ impl<'t, 's> Parser<'t, 's> {
             }
             K::Name("if") => self.if_expr(multiline)?,
             K::Name("fn") => self.lambda()?,
+            K::Name("with") => self.with_expression()?,
+            K::Name("use") => {
+                self.advance();
+                self.newlines();
+                let effect = self.type_reference(true)?;
+                if matches!(self.current().kind, K::Dot | K::LParen) {
+                    return Err(self.error(DiagnosticKind::Syntax,"parenthesize a use expression before calling an operation: (use Effect).operation(...)"));
+                }
+                Expr {
+                    kind: ExprKind::Use(effect),
+                    span: Span::new(token.span.start, self.previous_end()),
+                }
+            }
             K::Name("assert") => {
                 self.advance();
                 let value = self.expr(0, multiline)?;
@@ -1026,39 +1423,7 @@ impl<'t, 's> Parser<'t, 's> {
                 continue;
             }
             if self.current().kind == K::LParen && min <= 9 {
-                self.advance();
-                self.newlines();
-                let mut args = Vec::new();
-                while self.current().kind != K::RParen {
-                    let label = if matches!(self.current().kind, K::Name(_))
-                        && self.peek(1).kind == K::Colon
-                    {
-                        let name = self.lower_name("expected argument label")?;
-                        self.advance();
-                        self.newlines();
-                        Some(name)
-                    } else {
-                        None
-                    };
-                    let value = if matches!(self.current().kind, K::Comma | K::RParen) {
-                        let Some(label) = &label else {
-                            return Err(self.error(DiagnosticKind::Syntax, "expected argument"));
-                        };
-                        Expr {
-                            kind: ExprKind::Name(vec![label.clone()]),
-                            span: label.span,
-                        }
-                    } else {
-                        self.expr(0, true)?
-                    };
-                    args.push(Argument { label, value });
-                    self.newlines();
-                    if !self.take(K::Comma) {
-                        break;
-                    }
-                    self.newlines();
-                }
-                self.expect(K::RParen, "expected ')' after arguments")?;
+                let args = self.arguments()?;
                 let start = left.span.start;
                 left = Expr {
                     kind: ExprKind::Call {
@@ -1823,5 +2188,161 @@ mod tests {
                 .message
                 .contains("nesting")
         );
+    }
+    #[test]
+    fn effect_operations_and_labels_keep_identity_arguments_and_suspension() {
+        let source = r#"pub effect State[S] {
+ fn get() -> S
+ fn set(value:S) -> () fails Missing
+ suspend fn await_value() -> S
+}
+effect Hits of State[Int]
+pub effect DebugHits of State[Int] default
+@intrinsic
+pub effect Scope[E,R] { fn fork[A](f:fn()->A fails E use R) -> Fiber[A] }
+"#;
+        let module = parse(&lex(source).unwrap()).unwrap();
+        assert!(module.effects[0].public);
+        assert_eq!(module.effects[0].params[0].name.value, "S");
+        assert!(module.effects[0].operations[2].suspends);
+        assert_eq!(
+            module.effects[0].operations[1].fails.as_ref().unwrap()[0].value,
+            "Missing"
+        );
+        assert_eq!(
+            module.effects[1].underlying.as_ref().unwrap().value,
+            "State[Int]"
+        );
+        assert!(!module.effects[1].default && module.effects[2].default);
+        assert!(module.effects[1].operations.is_empty());
+        assert!(matches!(
+            module.effects[3].attributes[0],
+            Attribute::Intrinsic(_)
+        ));
+        assert_eq!(
+            module.effects[3].operations[0].type_params[0].name.value,
+            "A"
+        );
+    }
+    #[test]
+    fn handler_state_initializer_release_and_operation_bodies_keep_self_context() {
+        let source = r#"handler Plain: Read { fn read() { 0 } }
+handler Explicit(): Read { init { Explicit() }
+ fn read() { 1 } }
+pub handler Buffered(value: Int): Read {
+ init(seed:Int) { Buffered(value:seed) }
+ release { fn() { self.value } }
+ fn read() { self.value }
+ suspend fn wait(n,resume) { resume(n) }
+}
+"#;
+        let module = parse(&lex(source).unwrap()).unwrap();
+        assert!(module.handlers[0].fields.is_none());
+        assert!(module.handlers[1].fields.as_ref().unwrap().is_empty());
+        let handler = &module.handlers[2];
+        assert_eq!(
+            handler.fields.as_ref().unwrap()[0]
+                .name
+                .as_ref()
+                .unwrap()
+                .value,
+            "value"
+        );
+        assert_eq!(handler.init.as_ref().unwrap().params[0].ty.value, "Int");
+        assert!(handler.release.is_some());
+        assert!(handler.operations[1].suspends);
+        assert!(handler.operations[1].params[1].ty.value.is_empty());
+        for source in [
+            "handler Bad(n:Int):Read { init { self } }",
+            "handler Bad(n:Int):Read { init { fn() { self } } }",
+            "handler Good:Read { fn read(){self} }\nfn bad(){self}",
+        ] {
+            assert!(parse(&lex(source).unwrap()).is_err(), "{source}");
+        }
+    }
+    #[test]
+    fn layer_and_with_items_keep_init_calls_label_providers_and_written_order() {
+        let source = r#"layer App { First
+ Worker(url:"local"), Last }
+fn main(){ with App, Hits by State[Int], Audit by Worker(url:"audit"), Empty() {
+  reader=use State[Int]
+  (use State[Int]).get()
+} }
+"#;
+        let module = parse(&lex(source).unwrap()).unwrap();
+        assert_eq!(module.layers[0].items.len(), 3);
+        assert_eq!(
+            module.layers[0].items[1].args.as_ref().unwrap()[0]
+                .label
+                .as_ref()
+                .unwrap()
+                .value,
+            "url"
+        );
+        let Statement::Expr(Expr {
+            kind: ExprKind::With { items, body },
+            ..
+        }) = &module.functions[0].body.as_ref().unwrap().statements[0]
+        else {
+            panic!("expected with")
+        };
+        assert_eq!(
+            items
+                .iter()
+                .map(|i| i.name.value.as_str())
+                .collect::<Vec<_>>(),
+            ["App", "Hits", "Audit", "Empty"]
+        );
+        assert_eq!(items[1].by.as_ref().unwrap().name.value, "State[Int]");
+        assert_eq!(
+            items[2].by.as_ref().unwrap().args.as_ref().unwrap().len(),
+            1
+        );
+        assert!(items[3].args.as_ref().unwrap().is_empty());
+        let Statement::Bind {
+            value:
+                Expr {
+                    kind: ExprKind::Use(effect),
+                    ..
+                },
+            ..
+        } = &body.statements[0]
+        else {
+            panic!("expected use")
+        };
+        assert_eq!(effect.value, "State[Int]");
+    }
+    #[test]
+    fn invalid_effect_handler_use_and_label_syntax_reports_the_written_span() {
+        let source = "effect E { fn get() -> Int use {Logger, Clock} }";
+        let error = parse(&lex(source).unwrap()).unwrap_err();
+        assert_eq!(
+            &source[error.span.start..error.span.end],
+            "use {Logger, Clock}"
+        );
+        for source in [
+            "effect L of E default {}",
+            "effect E { fn get() }",
+            "effect E { fn get(n) -> Int }",
+            "effect E { fn get()->Int { 0 } }",
+            "handler H(Int):E { fn get(){0} }",
+            "handler H:E { init(n) {H} }",
+            "handler H:E { init {H}\ninit {H} }",
+            "handler H:E { release {}\nrelease {} }",
+            "handler H:E { fn get()->Int {0} }",
+            "fn main(){ use E.get() }",
+            "fn main(){ use E() }",
+            "fn main(){ with L by H by Other {} }",
+            "fn main(){ with L by State[Int](1) {} }",
+            "layer Bad { L by H }",
+            "layer Bad { First Last }",
+            "effect E {}\nimport Other",
+        ] {
+            let error = parse(&lex(source).unwrap()).unwrap_err();
+            assert!(
+                error.span.start <= error.span.end && error.span.end <= source.len(),
+                "{source}: {error:?}"
+            );
+        }
     }
 }
