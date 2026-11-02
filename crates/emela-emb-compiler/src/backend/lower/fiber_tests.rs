@@ -604,3 +604,234 @@ fn attempts_preserve_success_and_typed_cause_failures_across_raise() {
         }
     }
 }
+
+fn wait_task(p: &mut Program) -> FnId {
+    let mut f = Function::new("wait");
+    f.suspends = true;
+    f.ret = TypeId::UNIT;
+    let argument = variable(&mut f, TypeId::INT);
+    f.params.push(argument);
+    f.external = Some(External {
+        bindings: vec![ExternalBinding {
+            target: "c".into(),
+            host: HostRef::Global("wait".into()),
+        }],
+    });
+    p.functions.alloc(f)
+}
+
+fn wait_at(f: &mut Function, wait: FnId, marker: i32) -> StmtId {
+    binding(
+        f,
+        None,
+        Value::Call {
+            callee: Callee::Direct(wait),
+            args: vec![Const::Int(marker).into()],
+            suspends: true,
+            on_fail: None,
+        },
+    )
+}
+
+#[test]
+fn interruption_waits_for_nested_suspending_cleanup_before_await_reports_its_cause() {
+    let mut p = program(vec![]);
+    let wait = wait_task(&mut p);
+    let child_type = function_type(&mut p, vec![], TypeId::ANY, false);
+    let handle_type = handle_type(&mut p, "Std.Fiber.Fiber", TypeId::STRING);
+    let (cause_type, exit, exit_type, kind, kind_type) = exit_types(&mut p, TypeId::STRING);
+    let mut f = simple();
+    f.suspends = true;
+    let scope = aggregate_variable(&mut f, TypeId::FIBER_SCOPE);
+    let captured = aggregate_variable(&mut f, TypeId::STRING);
+    let make_text = binding(
+        &mut f,
+        Some(captured),
+        Value::Builtin {
+            op: Builtin::IntToString,
+            args: vec![Const::Int(42).into()],
+        },
+    );
+    let boxed = aggregate_variable(&mut f, TypeId::ANY);
+    let wait_body = wait_at(&mut f, wait, 1);
+    let box_value = binding(&mut f, Some(boxed), Value::Coerce(captured));
+    let body = f.seqs.alloc(Seq {
+        stmts: vec![wait_body, box_value],
+        term: Term::Return(Some(boxed.into())),
+    });
+    let wait_inner = wait_at(&mut f, wait, 98);
+    let inner_cleanup = f.seqs.alloc(Seq {
+        stmts: vec![wait_inner],
+        term: Term::Yield(None),
+    });
+    let inner = f.stmts.alloc(Stmt::Protect {
+        dst: None,
+        body,
+        cleanup: inner_cleanup,
+    });
+    let outer_body = f.seqs.alloc(Seq {
+        stmts: vec![inner],
+        term: Term::Unreachable,
+    });
+    let wait_outer = wait_at(&mut f, wait, 99);
+    let outer_cleanup = f.seqs.alloc(Seq {
+        stmts: vec![wait_outer],
+        term: Term::Yield(None),
+    });
+    let outer = f.stmts.alloc(Stmt::Protect {
+        dst: None,
+        body: outer_body,
+        cleanup: outer_cleanup,
+    });
+    let child_body = f.seqs.alloc(Seq {
+        stmts: vec![outer],
+        term: Term::Unreachable,
+    });
+    let child = aggregate_variable(&mut f, child_type);
+    let make_child = binding(
+        &mut f,
+        Some(child),
+        Value::Closure(Box::new(Closure {
+            params: vec![],
+            captures: vec![captured],
+            body: child_body,
+            suspends: true,
+        })),
+    );
+    let handle = aggregate_variable(&mut f, handle_type);
+    let fork = binding(
+        &mut f,
+        Some(handle),
+        Value::Fiber {
+            op: FiberOp::Fork,
+            args: vec![scope.into(), child.into()],
+            on_fail: None,
+        },
+    );
+    let wait_parent = wait_at(&mut f, wait, 2);
+    let interrupt = binding(
+        &mut f,
+        None,
+        Value::Fiber {
+            op: FiberOp::Interrupt,
+            args: vec![handle.into()],
+            on_fail: None,
+        },
+    );
+    let outcome = aggregate_variable(&mut f, exit_type);
+    let await_ = binding(
+        &mut f,
+        Some(outcome),
+        Value::Fiber {
+            op: FiberOp::Await { exit },
+            args: vec![handle.into()],
+            on_fail: None,
+        },
+    );
+    let cause = aggregate_variable(&mut f, cause_type);
+    let extract = binding(
+        &mut f,
+        Some(cause),
+        Value::Field {
+            base: outcome,
+            ctor: CtorRef {
+                enum_id: exit,
+                variant: EXIT_FAILURE,
+            },
+            index: 0,
+        },
+    );
+    let cause_kind = f.vars.alloc(VarData {
+        hint: "kind".into(),
+        ty: kind_type,
+        repr: Repr::I32,
+    });
+    let get_kind = binding(
+        &mut f,
+        Some(cause_kind),
+        Value::Fiber {
+            op: FiberOp::CauseKind { kind },
+            args: vec![cause.into()],
+            on_fail: None,
+        },
+    );
+    let rendered = aggregate_variable(&mut f, TypeId::STRING);
+    let render = binding(
+        &mut f,
+        Some(rendered),
+        Value::Fiber {
+            op: FiberOp::CauseToString,
+            args: vec![cause.into()],
+            on_fail: None,
+        },
+    );
+    let same = variable(&mut f, TypeId::BOOL);
+    let compare = binding(
+        &mut f,
+        Some(same),
+        Value::Prim {
+            op: PrimOp::Eq,
+            ty: PrimTy::String,
+            args: vec![rendered.into(), Const::String("interrupted".into()).into()],
+        },
+    );
+    let text_ok = check_bool(&mut f, same, true);
+    let done = f.seqs.alloc(Seq {
+        stmts: vec![render, compare, text_ok],
+        term: Term::Return(Some(Const::Int(42).into())),
+    });
+    let bad = f.seqs.alloc(Seq {
+        stmts: vec![],
+        term: Term::Defect(Const::String("expected interrupted child".into()).into()),
+    });
+    let check_kind = f.stmts.alloc(Stmt::Switch {
+        dst: None,
+        on: SwitchOn::Tag(cause_kind),
+        cases: vec![Case {
+            key: CaseKey::Variant(CAUSE_INTERRUPT),
+            body: done,
+        }],
+        default: Some(bad),
+    });
+    let failed = f.seqs.alloc(Seq {
+        stmts: vec![extract, get_kind, check_kind],
+        term: Term::Unreachable,
+    });
+    let check_exit = f.stmts.alloc(Stmt::Switch {
+        dst: None,
+        on: SwitchOn::Tag(outcome),
+        cases: vec![Case {
+            key: CaseKey::Variant(EXIT_FAILURE),
+            body: failed,
+        }],
+        default: Some(bad),
+    });
+    let scope_body = f.seqs.alloc(Seq {
+        stmts: vec![
+            make_text,
+            make_child,
+            fork,
+            wait_parent,
+            interrupt,
+            await_,
+            check_exit,
+        ],
+        term: Term::Unreachable,
+    });
+    scope_function(&mut p, &mut f, scope_body, scope);
+    p.functions.alloc(f);
+    let mut output = crate::backend::compile_program(
+        p,
+        &Options::default()
+            .with_heap_bytes(16384)
+            .with_frame_bytes(2048)
+            .with_task_adapter("wait", "board_wait_start"),
+    )
+    .unwrap();
+    audit_heap(&mut output);
+    execute(
+        &output,
+        "#include <stdlib.h>\n#include <string.h>\n#include \"emela_embedded.h\"\n#include \"emela_board.h\"\nint test_heap_empty(void);\nstatic EmelaTask tasks[100];static int seen[100];\nuint32_t emela_board_event_lock(void){return 0;}\nvoid emela_board_event_unlock(uint32_t p){(void)p;}\n_Noreturn void emela_board_defect(EmelaDefectKind k,const char*m,uint16_t n){(void)k;(void)m;(void)n;abort();}\nvoid board_wait_start(EmelaTask t,int32_t marker){if(marker<0||marker>=100)abort();tasks[marker]=t;seen[marker]++;}\nint main(void){for(int i=0;i<1000;i++){memset(seen,0,sizeof seen);int32_t result=0;EmelaFiber root=answer_start(&result);while(emela_scheduler_run(1)){}if(seen[1]!=1||seen[2]!=1||seen[98]||seen[99]||emela_fiber_done(root)||result)return 1;if(!emela_task_complete_unit(tasks[2]))return 2;while(emela_scheduler_run(1)){}if(seen[98]!=1||seen[99]||emela_fiber_done(root)||result||emela_task_complete_unit(tasks[1]))return 3;if(!emela_task_complete_unit(tasks[98]))return 4;while(emela_scheduler_run(1)){}if(seen[99]!=1||emela_fiber_done(root)||result)return 5;if(!emela_task_complete_unit(tasks[99]))return 6;while(!emela_fiber_done(root))if(!emela_scheduler_run(1))return 7;emela_fiber_release(root);if(result!=42||!test_heap_empty())return 8;}return 0;}\n",
+        0,
+    );
+}
