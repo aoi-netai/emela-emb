@@ -276,10 +276,10 @@ impl Context<'_> {
                         tail && index + 1 == block.statements.len(),
                     );
                     if index + 1 != block.statements.len() {
-                        // Only a result produced by this statement can be discarded here.
-                        // An existing local may still be used after this expression.
+                        // Only the final call result can be discarded here. A compound
+                        // expression such as dbg(call()) still consumes an earlier result.
                         if let Some(b::Operand::Var(variable)) = result {
-                            for &statement in &builder.statements[first_statement..] {
+                            if let Some(&statement) = builder.statements[first_statement..].last() {
                                 if let b::Stmt::Let {
                                     dst,
                                     value: b::Value::Call { .. },
@@ -288,7 +288,6 @@ impl Context<'_> {
                                 {
                                     if *dst == Some(variable) {
                                         *dst = None;
-                                        break;
                                     }
                                 }
                             }
