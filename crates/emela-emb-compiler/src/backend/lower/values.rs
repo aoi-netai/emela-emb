@@ -425,6 +425,23 @@ pub(super) fn value_type(
         Value::Coerce(base) => {
             let source = operand(f, &Operand::Var(*base), available)?;
             let destination = expected.unwrap_or(source);
+            if let (Type::Fn(from), Type::Fn(to)) =
+                (program.core.ty(source), program.core.ty(destination))
+            {
+                if from.params != to.params
+                    || from.ret != to.ret
+                    || (from.suspends && !to.suspends)
+                    || (from.ev && !to.ev)
+                    || from.sets.is_some()
+                    || to.sets.is_some()
+                {
+                    return Err(invalid(
+                        &f.name,
+                        "function coercion has incompatible parameters, result, or effect flags",
+                    ));
+                }
+                return Ok(destination);
+            }
             if source != destination && source != TypeId::ANY && destination != TypeId::ANY {
                 return Err(invalid(
                     &f.name,

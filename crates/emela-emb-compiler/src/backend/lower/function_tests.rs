@@ -337,3 +337,90 @@ fn loop_variable_captures_use_the_value_at_closure_creation() {
             .contains("cyclic sequence")
     );
 }
+
+#[test]
+fn function_coercion_adapts_unit_erasure_evidence_and_failure_abi() {
+    let mut p = program(vec![]);
+    let pure = FnType {
+        params: vec![TypeId::UNIT, TypeId::INT],
+        ret: TypeId::INT,
+        fails: false,
+        suspends: false,
+        ev: false,
+        sets: None,
+    };
+    let pure_type = p.core.types.intern(Type::Fn(pure.clone()));
+    let adapted_type = p.core.types.intern(Type::Fn(FnType {
+        fails: true,
+        ev: true,
+        ..pure
+    }));
+    let mut identity = Function::new("identity");
+    identity.ret = TypeId::INT;
+    let input = variable(&mut identity, TypeId::INT);
+    identity.params.push(input);
+    identity.body = Some(identity.seqs.alloc(Seq {
+        stmts: vec![],
+        term: Term::Return(Some(input.into())),
+    }));
+    let identity = p.functions.alloc(identity);
+    let mut f = simple();
+    let source = reference_var(&mut f, pure_type);
+    let destination = reference_var(&mut f, adapted_type);
+    let evidence = reference_var(&mut f, TypeId::EVIDENCE);
+    let error = reference_var(&mut f, TypeId::ANY);
+    let result = variable(&mut f, TypeId::INT);
+    let reference = binding(&mut f, Some(source), Value::FnRef(identity));
+    let coercion = binding(&mut f, Some(destination), Value::Coerce(source));
+    let evidence_binding = binding(
+        &mut f,
+        Some(evidence),
+        Value::EvExtend {
+            base: None,
+            bindings: vec![],
+        },
+    );
+    let handler = f.seqs.alloc(Seq {
+        stmts: vec![],
+        term: Term::Yield(Some(Const::Int(-1).into())),
+    });
+    let call = binding(
+        &mut f,
+        Some(result),
+        Value::Call {
+            callee: Callee::Indirect(destination),
+            args: vec![Const::Int(42).into(), evidence.into()],
+            suspends: false,
+            on_fail: Some(OnFail::Handle {
+                error,
+                body: handler,
+            }),
+        },
+    );
+    f.seqs[f.body.unwrap()] = Seq {
+        stmts: vec![reference, coercion, evidence_binding, call],
+        term: Term::Return(Some(result.into())),
+    };
+    let function = p.functions.alloc(f);
+    let mut output =
+        crate::backend::compile_program(p.clone(), &Options::default().with_heap_bytes(4096))
+            .unwrap();
+    output.files.iter_mut().find(|file| file.path=="emela_embedded.c").unwrap().contents.push_str("\nint test_heap_empty(void){for(unsigned char*p=emela_heap_storage;emela_heap_initialized&&p<emela_heap_end();){emela_heap_block*b=(emela_heap_block*)(void*)p;if(!b->is_free)return 0;p+=b->size;}return 1;}\n");
+    execute(
+        &output,
+        "#include <stdlib.h>\n#include \"emela_embedded.h\"\n#include \"emela_board.h\"\nint test_heap_empty(void);\n_Noreturn void emela_board_defect(EmelaDefectKind k,const char*m,uint16_t n){(void)k;(void)m;(void)n;abort();}\nint main(void){for(int i=0;i<1000;i++)if(answer()!=42||!test_heap_empty())return 1;return 0;}\n",
+        0,
+    );
+    let mut bad = p;
+    let function = &mut bad.functions[function];
+    let narrowed = reference_var(function, pure_type);
+    let coercion = binding(function, Some(narrowed), Value::Coerce(destination));
+    function.seqs[function.body.unwrap()]
+        .stmts
+        .insert(2, coercion);
+    assert!(
+        lower_program(bad).unwrap_err()[0]
+            .message
+            .contains("function coercion")
+    );
+}

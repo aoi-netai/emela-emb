@@ -370,3 +370,5 @@ Map.from_list/keys/valuesとSet.from_listの内部callbackを、評価順と結�
 Handler/Evidence/operation call/RetireとCellの型・ID検証は独自lowerに接続する。静的evidenceは不要なhandler割当を消去できる一方、別関数やAny aliasからretireできるeffectは動的active検査を保つ。Unitを返すCellSetには所有用の仮destinationを追加しない。
 
 `backend/lower/handler_tests.rs` の独自IR/C試験は、heap不要の静的解決、別関数へ渡す動的evidenceとProtect cleanup、Any経由のretire後のdefect、Cell/closure/Any循環の1000回反復と全heap回収を両最適化で確認する。これはsourceのhandler/layer/init/release接続とは別の証拠とする。
+
+関数型間のCoerceは、既存plan/emitのadapter互換条件に沿って独自validatorへ接続する。引数・戻り型の変更やevidenceの消去は拒否し、Unit消去を伴うpure関数からfailure/evidence ABIへの変換をIR/C両最適化・1000回の全heap回収で確認する。
