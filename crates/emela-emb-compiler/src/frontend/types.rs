@@ -39,7 +39,7 @@ impl fmt::Display for ValueType {
 pub(crate) struct InvocationSets {
     pub errors: Vec<crate::contract::ir::TypeId>,
     pub error_constraints: Vec<crate::contract::ir::TypeId>,
-    pub effects: Vec<String>,
+    pub effects: Vec<crate::contract::ir::TypeId>,
 }
 #[derive(Clone, Debug)]
 pub(crate) struct Signature {
