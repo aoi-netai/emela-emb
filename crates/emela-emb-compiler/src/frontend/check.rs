@@ -2,6 +2,7 @@ mod effect_calls;
 mod functions;
 mod methods;
 mod references;
+pub(super) mod suspend;
 mod trait_methods;
 mod with;
 use super::{
@@ -218,7 +219,10 @@ pub(crate) fn check(mut modules: Modules) -> Result<ir::Program, Vec<Diagnostic>
     let mut program = ir::Program {
         core: checker.catalog.core.clone(),
         registry: checker.traits.registry.clone(),
-        functions: checker.checked.into_iter().flatten().collect(),
+        functions: std::mem::take(&mut checker.checked)
+            .into_iter()
+            .flatten()
+            .collect(),
     };
     super::normalize::normalize(
         &mut program,
@@ -259,8 +263,11 @@ pub(crate) fn check(mut modules: Modules) -> Result<ir::Program, Vec<Diagnostic>
         .map(|(index, definition)| (DefinitionId(index), definition.effect_mode.clone()))
         .collect();
     super::effects::infer(&mut program, &effect_modes, &mut checker.catalog)?;
+    checker.validate_sync_operations(&program)?;
     for function in &program.functions {
-        if function.exported && !function.signature.sets.effects.is_empty() {
+        if function.exported
+            && super::function_abi::effects_abi(&program.core, &function.signature.sets.effects).0
+        {
             return Err(vec![
                 Diagnostic::new(
                     DK::Export,
@@ -299,13 +306,6 @@ impl Checker {
             let module = self.modules.modules[module_index].clone();
             for function in &module.ast.functions {
                 let result = (|| -> Result<(), Diagnostic> {
-                    if function.suspends {
-                        return Err(Diagnostic::new(
-                            DK::Unsupported,
-                            function.name.span,
-                            "suspend functions await continuation lowering",
-                        ));
-                    }
                     let effect_method = self
                         .effects
                         .methods
@@ -519,6 +519,13 @@ impl Checker {
                             }
                         }
                     }
+                    if function.suspends && external.is_none() {
+                        return Err(Diagnostic::new(
+                            DK::Type,
+                            function.name.span,
+                            "a top-level suspend fn must be external",
+                        ));
+                    }
                     if external.is_some() || intrinsic.is_some() {
                         if function.body.is_some() {
                             return Err(Diagnostic::new(
@@ -596,6 +603,9 @@ impl Checker {
                         None
                     };
                     let mut written_effects = Vec::new();
+                    if function.suspends {
+                        written_effects.push(self.async_type(module_index, function.name.span)?);
+                    }
                     if let Some(effects) = &function.effects {
                         for effect in effects {
                             let ty = self.catalog.effect_member(
@@ -1155,9 +1165,11 @@ impl Checker {
         self.checked[id.0] = Some(ir::Function {
             id,
             type_parameters: definition.ast.type_params.len(),
+            immediate: matches!(definition.effect_method, Some(super::effect_collect::MethodKind::Operation { handler, operation }) if !self.catalog.core.effects[self.effects.handlers[handler].effect].ops[operation].suspend),
             constant: definition.ast.constant,
             origin: definition.ast.constant.then_some(id),
             derivation: definition.derivation,
+            error_show: None,
             name: definition.name,
             source_name: self.modules.modules[definition.module].source_name.clone(),
             span: definition.ast.name.span,
@@ -1870,6 +1882,7 @@ impl Checker {
                         "a const value cannot be called",
                     ));
                 }
+                self.validate_external_reference(module, id, span)?;
                 let (signature, type_arguments) = self.function_instance(module, id, span)?;
                 if let (Some(ret), Some(expected)) = (signature.ret, expected) {
                     self.expect_type(module, ret, expected, span)?;

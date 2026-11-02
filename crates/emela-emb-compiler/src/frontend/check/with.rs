@@ -239,7 +239,7 @@ impl Checker {
                         retire: None,
                     });
                     let mut operations = Vec::new();
-                    for &target in &info.operations {
+                    for (operation, &target) in info.operations.iter().enumerate() {
                         let (signature, type_arguments) =
                             self.function_instance(module, target, entry.span)?;
                         let params = signature
@@ -272,11 +272,23 @@ impl Checker {
                             ty: ret,
                             span: entry.span,
                         };
+                        let runtime_suspends =
+                            self.catalog.core.effects[info.effect].ops[operation].suspend
+                                && super::super::function_abi::effects_abi(
+                                    &self.catalog.core,
+                                    &signature.sets.effects,
+                                )
+                                .1;
+                        let operation_effects = if runtime_suspends {
+                            vec![self.async_type(module, entry.span)?]
+                        } else {
+                            vec![]
+                        };
                         let callable = Signature {
                             params: params.iter().map(|param| param.ty).collect(),
                             ret: Some(ret),
                             sets: InvocationSets {
-                                effects: vec![],
+                                effects: operation_effects,
                                 ..signature.sets
                             },
                         };

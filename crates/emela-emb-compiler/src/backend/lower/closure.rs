@@ -8,8 +8,8 @@ use std::collections::{HashMap, HashSet};
 
 use crate::contract::ir::Type;
 use crate::contract::ir::{
-    Case, Closure, Const, FnId, Function, LabelId, OnFail, Operand, Program as Module, Seq, SeqId,
-    Stmt, StmtId, Suspend, SwitchOn, Term, Value, VarId,
+    Callee, Case, Closure, Const, FnId, Function, LabelId, OnFail, Operand, Program as Module, Seq,
+    SeqId, Stmt, StmtId, Suspend, SwitchOn, Term, Value, VarId,
 };
 
 use crate::{Error, ErrorKind};
@@ -631,37 +631,90 @@ fn invalid_flow_ir(function: &str, message: &str) -> Vec<Error> {
 }
 
 pub(super) fn runtime_reachable(program: &Module, options: &crate::Options) -> HashSet<FnId> {
+    runtime_reachable_without_initializers(program, options, &HashSet::new())
+}
+
+pub(super) fn runtime_reachable_without_initializers(
+    program: &Module,
+    options: &crate::Options,
+    resolved_constants: &HashSet<FnId>,
+) -> HashSet<FnId> {
     let mut pending: Vec<_> = program
         .functions
         .iter()
         .filter_map(|(id, f)| (f.exported || f.name == options.entry()).then_some(id))
         .collect();
     let mut reachable = HashSet::new();
-    while let Some(id) = pending.pop() {
-        if !reachable.insert(id) {
-            continue;
-        }
-        let function = &program.functions[id];
-        let (positions, _) = function_positions(function);
-        for (stmt, value) in function.stmts.iter() {
-            if !positions.contains_key(&stmt) {
+    loop {
+        while let Some(id) = pending.pop() {
+            if !reachable.insert(id) {
                 continue;
             }
-            if let Stmt::Let {
-                value:
-                    Value::FnRef(target)
-                    | Value::MakeClosure {
-                        function: target, ..
-                    }
-                    | Value::Call {
-                        callee: crate::contract::ir::Callee::Direct(target),
-                        ..
-                    },
-                ..
-            } = value
-            {
-                pending.push(*target);
+            if resolved_constants.contains(&id) {
+                continue;
             }
+            let function = &program.functions[id];
+            let (positions, _) = function_positions(function);
+            for (stmt, value) in function.stmts.iter() {
+                if !positions.contains_key(&stmt) {
+                    continue;
+                }
+                if let Stmt::Let {
+                    value:
+                        Value::FnRef(target)
+                        | Value::MakeClosure {
+                            function: target, ..
+                        }
+                        | Value::Call {
+                            callee: crate::contract::ir::Callee::Direct(target),
+                            ..
+                        },
+                    ..
+                } = value
+                {
+                    pending.push(*target);
+                }
+            }
+        }
+        // Cause rendering and suspended operation diagnostics invoke error Show
+        // functions through generated C, rather than an explicit IR Call.
+        let shows_causes = reachable.iter().any(|id| {
+            let function = &program.functions[*id];
+            let (positions, _) = function_positions(function);
+            function.stmts.iter().any(|(id, statement)| {
+                positions.contains_key(&id)
+                    && match statement {
+                        Stmt::Let {
+                            value: Value::Fiber { .. },
+                            ..
+                        } => true,
+                        Stmt::Let {
+                            value:
+                                Value::Call {
+                                    callee: Callee::Op { effect, op, .. },
+                                    ..
+                                },
+                            ..
+                        } => program.core.effects[*effect].ops[*op].suspend,
+                        _ => false,
+                    }
+            })
+        });
+        if shows_causes {
+            for &(error, show) in &program.error_shows {
+                if !reachable.contains(&show)
+                    && reachable.iter().any(|id| {
+                        program.functions[*id].vars.iter().any(|(_, var)| {
+                        matches!(program.core.types[var.ty], Type::Enum(id, _) if id == error)
+                    })
+                    })
+                {
+                    pending.push(show);
+                }
+            }
+        }
+        if pending.is_empty() {
+            break;
         }
     }
     reachable

@@ -145,9 +145,11 @@ impl Specializer {
         let mut function = ir::Function {
             id,
             type_parameters: 0,
+            immediate: false,
             constant: false,
             origin: None,
             derivation: None,
+            error_show: None,
             name: format!("__trait_{kind:?}_{}_{}", ty.index(), id.0),
             source_name: caller.source_name.clone(),
             span,
@@ -262,6 +264,8 @@ impl Specializer {
         helper.id = id;
         helper.name = format!("__list_show_{}", id.0);
         helper.derivation = None;
+        helper.error_show = None;
+        helper.immediate = false;
         helper.type_parameters = 0;
         helper.constant = false;
         helper.origin = None;

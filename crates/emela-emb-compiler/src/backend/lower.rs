@@ -12,6 +12,7 @@ mod effects;
 mod error_types;
 mod failures;
 mod handler;
+mod suspend;
 mod types;
 mod values;
 use values::value_type;
@@ -72,6 +73,7 @@ pub(crate) fn lower_program(
         validate_function(&program, function)?;
     }
     let (mut program, closures) = closure::lower(&program, options)?;
+    suspend::normalize_handlers(&mut program);
     handler::lower(&mut program, options);
     let mut const_outcomes = HashMap::new();
     let mut runtime_consts = HashSet::new();
@@ -182,46 +184,19 @@ pub(crate) fn lower_program(
         function.statement_positions = statements;
         function.sequence_positions = sequences;
     }
-    let mut pending: Vec<_> = program
-        .functions
-        .iter()
-        .filter_map(|(id, f)| (f.exported || f.name == options.entry()).then_some(id))
-        .collect();
     // Source visibility does not create C roots. A module with neither an export
     // nor the selected entry still gets validated, but emits no reachable functions.
-    let mut emitted_functions = HashSet::new();
-    while let Some(id) = pending.pop() {
-        if !emitted_functions.insert(id) {
-            continue;
-        }
-        // A resolved constant emits its value or defect directly. Its initializer no longer
-        // calls helpers; retaining those edges can emit unused static C functions.
-        if matches!(const_outcomes.get(&id), Some(Ok(_))) {
-            continue;
-        }
-        let function = &program.functions[id];
-        for (_, stmt) in function
-            .stmts
-            .iter()
-            .filter(|(id, _)| function.active_statements.contains(id))
-        {
-            if let Stmt::Let {
-                value:
-                    Value::Call {
-                        callee: Callee::Direct(id),
-                        ..
-                    }
-                    | Value::FnRef(id),
-                ..
-            } = stmt
-            {
-                pending.push(*id);
-            }
-        }
-    }
+    // Resolved constants emit their outcome directly, without initializer helpers.
+    let resolved_constants = const_outcomes
+        .iter()
+        .filter_map(|(id, result)| result.is_ok().then_some(*id))
+        .collect();
+    let emitted_functions =
+        closure::runtime_reachable_without_initializers(&program, options, &resolved_constants);
+    let suspensions = suspend::prepare(&program);
     Ok(LoweredModule {
         lowered: program,
-        suspensions: HashMap::new(),
+        suspensions,
         closures,
         const_groups: vec![],
         runtime_consts,
@@ -233,10 +208,10 @@ pub(crate) fn lower_program(
 }
 
 fn validate_function(program: &Program, f: &Function) -> Result<()> {
-    if f.suspends || f.env.is_some() || f.infallible_cause_fail {
+    if f.env.is_some() || f.infallible_cause_fail {
         return Err(unsupported(
             &f.name,
-            "const, failure, suspension, closure or derived function",
+            "explicit closure environment or cause failure function",
         ));
     }
     let check_type = |ty| types::validate_type(program, &f.name, ty);

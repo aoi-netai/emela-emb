@@ -660,9 +660,11 @@ mod tests {
         ir::Function {
             id: ir::DefinitionId(id),
             type_parameters: 0,
+            immediate: false,
             constant: false,
             origin: None,
             derivation: None,
+            error_show: None,
             name: format!("function_{id}"),
             source_name: "main.emel".into(),
             span: span(),

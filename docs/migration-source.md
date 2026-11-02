@@ -396,3 +396,17 @@ Stringの`@deprecated`・`@internal`は従来と同じmetadata適応として省
 固定revisionの `crates/emela-core/lib/std/console.emel`（SHA-256: `35e8a9bafad0db2c285fe6bd44627b7eb4fd41bbf2e1238a4b3d519c0a1d2d0e`）を `lib/std/console.emel` へ採用する。Console・SystemConsole・TestConsoleのbodyを保持し、他targetのexternal metadataを省略、C相対pathは呼出し元が接続するsymbolへ適応した。予約済みC名はcompiler所有module・宣言名・固定symbolが一致する場合だけ許可し、user宣言には開放しない。
 
 `tests/p4_console.rs` はStateへ記録するTestConsoleと、既存の明示external adapterを使うSystemConsoleのC mockを接続する。List.mapのeffect多相、lineの順序・stderrの処理差、埋込みNULのString、1000回のheap全回収を両最適化で確認する。物理boardやplatformのservice接続はP7で扱う。
+
+## P5の時刻とClock標準source
+
+固定revisionから以下を採用する。Duration/Instantのbodyは変更しない。Clockは他targetのexternal metadataを省略し、C相対pathをcaller側で接続するsymbolへ適応する。Clockの通常供給はsuspend source接続と同時に有効化する。
+
+| 旧source | SHA-256 |
+| --- | --- |
+| `crates/emela-core/lib/std/duration.emel` | `ea8213958171fe0191b58782984b7d187ab12cbd54ae5212996bf9c34b7a37f1` |
+| `crates/emela-core/lib/std/instant.emel` | `938695f012e3ae9ecf1a621af44d1fc572521bbb0e76d093b55a91a1a9dcdcc5` |
+| `crates/emela-core/lib/std/clock.emel` | `c76b333c822f56bb3e344062364c0bffc239fc9a98d799c453f64bd098971dda` |
+
+`tests/p5_time.rs`はDurationのwrap/符号付き変換・opaque境界と、Instantのepoch、負のmillisecond、閏日、年0・拡張年・負年をheapなしのC両最適化で1000回確認する。負年のゼロ埋めから既存String appendの入力/output重複を検出したため、P5では両入力を最大512byteの固定scratchへ退避してから出力する。`tests/p5_string_alias.rs`で重複view・容量境界・10万回の末尾再帰におけるstack非増加を検証し、mallocやVLAは追加しない。
+
+Clockを通常sourceへ登録し、予約C symbolはcompiler所有のClock宣言だけに許可する。`tests/p5_clock.rs`ではSystemClockのnow/sleep、TestClockの負の待機時間のclampとState[Instant]の更新を明示task adapterへ接続する。List.mapのeffect多相callbackから順に中断・再開して時刻列を構築し、再帰する標準APIのframeと結果所有権も通す。nowだけを使う関数もClockの中断可能性を保持する。queue通知前の非完了、重複/stale通知、1000回のheap全回収をC両最適化で確認し、adapter未指定・予約名偽装・Immediate制約違反を拒否する。

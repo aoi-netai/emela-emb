@@ -7,6 +7,10 @@
 # Bool and its False/True constructors are compiler-owned primitives in this repository.
 # Their Eq/Ord/Show meaning is preserved without declaring a second nominal Bool.
 
+# Runtime suspension is an execution requirement, with no capability value or operations.
+@intrinsic
+pub effect Async {}
+
 ## Eq, Ord and Show are in option.emel (spec 10.6).
 pub enum Option[A] {
   Some(A)

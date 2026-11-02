@@ -39,9 +39,11 @@ fn function(
     ir::Function {
         id: ir::DefinitionId(id),
         type_parameters: 0,
+        immediate: false,
         constant: false,
         origin: None,
         derivation: None,
+        error_show: None,
         name: name.into(),
         source_name: format!("{name}.emel"),
         span: span(),

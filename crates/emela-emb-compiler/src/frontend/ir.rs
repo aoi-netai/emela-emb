@@ -18,9 +18,13 @@ pub(crate) struct Local {
 pub(crate) struct Function {
     pub id: DefinitionId,
     pub type_parameters: usize,
+    /// A synchronous operation implementation keeps a synchronous ABI after its body is checked.
+    pub immediate: bool,
     pub constant: bool,
     pub origin: Option<DefinitionId>,
     pub derivation: Option<super::traits::BuiltinTrait>,
+    /// Concrete error display entry; its parameter retains generic error arguments.
+    pub error_show: Option<crate::contract::ir::EnumId>,
     pub name: String,
     pub source_name: String,
     pub span: Span,

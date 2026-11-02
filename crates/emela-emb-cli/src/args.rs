@@ -1,3 +1,4 @@
+use std::collections::BTreeMap;
 use std::ffi::OsString;
 use std::path::PathBuf;
 
@@ -10,6 +11,12 @@ pub const USAGE: &str = "Usage: emela-emb build <file>... --out-dir <dir> [optio
                         --entry-function <name>  Select the program entry function (default: main).\n\
                         --heap-bytes <bytes>     Set the fixed heap capacity (default: 0).\n\
                         --string-capacity <bytes> Set the generated String capacity (default: 256).\n\
+                        --fiber-capacity <count> Set the fiber pool capacity (default: 8).\n\
+                        --frame-capacity <count> Set the frame pool capacity (default: 32).\n\
+                        --frame-bytes <bytes>    Set each frame capacity (default: 256).\n\
+                        --task-capacity <count>  Set the external task capacity (default: 8).\n\
+                        --event-capacity <count> Set the completion queue capacity (default: 8).\n\
+                        --task-adapter <C=adapter> Map an external task binding (repeatable).\n\
                         Use -- before input paths beginning with '-'.";
 
 #[derive(Debug)]
@@ -44,6 +51,8 @@ pub fn parse(args: impl IntoIterator<Item = OsString>) -> Result<Command, String
     let mut entry_function = None;
     let mut heap_bytes = None;
     let mut string_capacity = None;
+    let mut capacities = BTreeMap::new();
+    let mut task_adapters = BTreeMap::new();
     let mut positional_only = false;
     while let Some(arg) = args.next() {
         if !positional_only && arg == "--" {
@@ -60,7 +69,18 @@ pub fn parse(args: impl IntoIterator<Item = OsString>) -> Result<Command, String
         } else if !positional_only
             && matches!(
                 arg.to_str(),
-                Some("--entry" | "--entry-function" | "--heap-bytes" | "--string-capacity")
+                Some(
+                    "--entry"
+                        | "--entry-function"
+                        | "--heap-bytes"
+                        | "--string-capacity"
+                        | "--fiber-capacity"
+                        | "--frame-capacity"
+                        | "--frame-bytes"
+                        | "--task-capacity"
+                        | "--event-capacity"
+                        | "--task-adapter"
+                )
             )
         {
             let option = arg.to_str().unwrap();
@@ -82,7 +102,24 @@ pub fn parse(args: impl IntoIterator<Item = OsString>) -> Result<Command, String
                     parse_number::<u16>(value, option)?,
                     option,
                 )?,
-                _ => unreachable!(),
+                "--task-adapter" => {
+                    let (symbol, adapter) = value
+                        .split_once('=')
+                        .filter(|(symbol, adapter)| c_identifier(symbol) && c_identifier(adapter))
+                        .ok_or("--task-adapter requires C_symbol=adapter_symbol")?;
+                    if task_adapters
+                        .insert(symbol.to_owned(), adapter.to_owned())
+                        .is_some()
+                    {
+                        return Err(format!("--task-adapter repeats the binding '{symbol}'"));
+                    }
+                }
+                _ => {
+                    let capacity = parse_number::<u16>(value, option)?;
+                    if capacities.insert(option.to_owned(), capacity).is_some() {
+                        return Err(format!("{option} was specified more than once"));
+                    }
+                }
             }
         } else if !positional_only && (arg == "--help" || arg == "-h") {
             if inputs.is_empty()
@@ -91,6 +128,8 @@ pub fn parse(args: impl IntoIterator<Item = OsString>) -> Result<Command, String
                 && entry_function.is_none()
                 && heap_bytes.is_none()
                 && string_capacity.is_none()
+                && capacities.is_empty()
+                && task_adapters.is_empty()
                 && args.peek().is_none()
             {
                 return Ok(Command::Help);
@@ -117,6 +156,19 @@ pub fn parse(args: impl IntoIterator<Item = OsString>) -> Result<Command, String
     if let Some(bytes) = string_capacity {
         options = options.with_string_capacity(bytes);
     }
+    for (option, capacity) in capacities {
+        options = match option.as_str() {
+            "--fiber-capacity" => options.with_fiber_capacity(capacity),
+            "--frame-capacity" => options.with_frame_capacity(capacity),
+            "--frame-bytes" => options.with_frame_bytes(capacity),
+            "--task-capacity" => options.with_task_capacity(capacity),
+            "--event-capacity" => options.with_event_capacity(capacity),
+            _ => unreachable!(),
+        };
+    }
+    for (symbol, adapter) in task_adapters {
+        options = options.with_task_adapter(symbol, adapter);
+    }
     Ok(Command::Build {
         inputs,
         out_dir: out_dir.ok_or("expected --out-dir <dir>")?,
@@ -140,4 +192,12 @@ fn parse_number<T: std::str::FromStr>(value: &str, option: &str) -> Result<T, St
     value
         .parse()
         .map_err(|_| format!("{option} is out of range"))
+}
+
+fn c_identifier(value: &str) -> bool {
+    let mut bytes = value.bytes();
+    bytes
+        .next()
+        .is_some_and(|byte| byte.is_ascii_alphabetic() || byte == b'_')
+        && bytes.all(|byte| byte.is_ascii_alphanumeric() || byte == b'_')
 }

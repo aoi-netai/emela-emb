@@ -72,7 +72,7 @@ impl Context<'_> {
                     .iter()
                     .filter_map(|&index| evaluated[index].clone())
                     .collect(),
-                suspends: operation.suspend,
+                suspends: operation.suspend && self.current_suspends,
                 on_fail: operation.fails.then(|| self.failure_edge()),
             },
             result,

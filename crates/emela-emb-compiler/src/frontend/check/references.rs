@@ -11,6 +11,7 @@ impl Checker {
         expected: Option<Ty>,
         span: Span,
     ) -> Result<ir::Expr, Diagnostic> {
+        self.validate_external_reference(module, id, span)?;
         let (signature, type_arguments) = self.function_instance(module, id, span)?;
         let ret = match signature.ret {
             Some(ret) => ret,

@@ -107,6 +107,12 @@ pub(super) fn value_type(
                     "indirect call channels differ from its function type",
                 ));
             }
+            if *suspends && !f.suspends {
+                return Err(invalid(
+                    &f.name,
+                    "suspending indirect call requires a suspending caller",
+                ));
+            }
             let mut params = function_parameters(ft);
             if ft.ev {
                 params.push(TypeId::EVIDENCE);
@@ -148,14 +154,11 @@ pub(super) fn value_type(
                     "unspecialized generic effect operation",
                 ));
             }
-            if operation.fails != on_fail.is_some() || operation.suspend != *suspends {
+            if operation.fails != on_fail.is_some() || (!operation.suspend && *suspends) {
                 return Err(invalid(
                     &f.name,
                     "operation call channels differ from its declaration",
                 ));
-            }
-            if *suspends {
-                return Err(unsupported(&f.name, "suspending operation call"));
             }
             let parameters: Vec<_> = operation
                 .params
@@ -169,7 +172,7 @@ pub(super) fn value_type(
         Value::Call {
             callee: Callee::Direct(id),
             args,
-            suspends: false,
+            suspends,
             on_fail,
         } => {
             let target = program
@@ -181,6 +184,18 @@ pub(super) fn value_type(
                 return Err(invalid(
                     &f.name,
                     "call failure edge differs from callee failure channel",
+                ));
+            }
+            if target.suspends != *suspends {
+                return Err(invalid(
+                    &f.name,
+                    "call suspension edge differs from callee suspension channel",
+                ));
+            }
+            if *suspends && !f.suspends {
+                return Err(invalid(
+                    &f.name,
+                    "suspending direct call requires a suspending caller",
                 ));
             }
             if args.len() != target.params.len() {
@@ -210,22 +225,40 @@ pub(super) fn value_type(
                         "handler operation is not a function value",
                     ));
                 };
-                if declared.type_params != 0 || declared.suspend {
-                    return Err(unsupported(
-                        &f.name,
-                        "generic or suspending handler operation",
-                    ));
+                if declared.type_params != 0 {
+                    return Err(unsupported(&f.name, "generic handler operation"));
                 }
-                let parameters: Vec<_> = declared
+                let mut parameters: Vec<_> = declared
                     .params
                     .iter()
                     .copied()
                     .filter(|ty| !matches!(*ty, TypeId::UNIT | TypeId::NEVER))
                     .collect();
+                let ret = if declared.suspend {
+                    let Some(&resume) = ft.params.last() else {
+                        return Err(invalid(
+                            &f.name,
+                            "suspend handler operation is missing its resume parameter",
+                        ));
+                    };
+                    let valid = matches!(program.core.ty(resume), Type::Fn(resume)
+                        if resume.params == [declared.ret] && resume.ret == TypeId::UNIT
+                            && !resume.fails && !resume.suspends && !resume.ev && resume.sets.is_none());
+                    if !valid {
+                        return Err(invalid(
+                            &f.name,
+                            "suspend handler operation has an invalid resume function type",
+                        ));
+                    }
+                    parameters.push(resume);
+                    TypeId::UNIT
+                } else {
+                    declared.ret
+                };
                 if function_parameters(ft) != parameters
-                    || ft.ret != declared.ret
+                    || ft.ret != ret
                     || ft.fails != declared.fails
-                    || ft.suspends
+                    || (!declared.suspend && ft.suspends)
                     || ft.ev
                     || ft.sets.is_some()
                 {

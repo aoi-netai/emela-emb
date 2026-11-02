@@ -439,6 +439,23 @@ fn rejects_malformed_duplicate_and_out_of_range_options() {
         vec!["--heap-bytes", "1", "--heap-bytes", "2"],
         vec!["--string-capacity", "65536"],
         vec!["--string-capacity", "12.5"],
+        vec!["--frame-capacity", "65536"],
+        vec!["--frame-bytes", "-1"],
+        vec!["--fiber-capacity", "1", "--fiber-capacity", "2"],
+        vec!["--task-capacity", "1", "--task-capacity", "2"],
+        vec!["--event-capacity", "1.5"],
+        vec!["--task-adapter"],
+        vec!["--task-adapter", "wait"],
+        vec!["--task-adapter", "wait="],
+        vec!["--task-adapter", "=board_wait"],
+        vec!["--task-adapter", "wait=board_wait=extra"],
+        vec!["--task-adapter", "wait=not-a-symbol"],
+        vec![
+            "--task-adapter",
+            "wait=board_wait",
+            "--task-adapter",
+            "wait=other",
+        ],
     ] {
         let result = cli()
             .args(["build", "main.emel", "--out-dir", "generated"])
@@ -497,6 +514,109 @@ int main(void) {
   (void)message((EmelaString){too_long, sizeof too_long - 1, NULL}, output, 64);
   return 2;
 }
+"#,
+    );
+    temp.assert_no_staging_directories();
+}
+
+#[test]
+fn cli_task_adapter_and_fixed_pools_generate_a_resumable_c_program() {
+    let temp = TestDirectory::new();
+    let input = temp.input(
+        r#"
+effect Wait{suspend fn get(value:Int)->Int}
+@external(c,"wait")
+suspend fn wait(value:Int)->Int
+handler Host:Wait{suspend fn get(value,resume){resume(wait(value))}}
+@export(c,"answer")
+pub fn run()->Int{with Host{(use Wait).get(40)+2}}
+"#,
+    );
+    let out_dir = temp.path("generated");
+    let options = [
+        "--heap-bytes",
+        "16384",
+        "--frame-bytes",
+        "1024",
+        "--fiber-capacity",
+        "2",
+        "--frame-capacity",
+        "16",
+        "--task-capacity",
+        "4",
+        "--event-capacity",
+        "4",
+    ];
+    let missing = cli()
+        .arg("build")
+        .arg(&input)
+        .args(options)
+        .arg("--out-dir")
+        .arg(&out_dir)
+        .output()
+        .unwrap();
+    assert_eq!(missing.status.code(), Some(1));
+    assert!(String::from_utf8_lossy(&missing.stderr).contains("with_task_adapter"));
+    assert!(!out_dir.exists());
+    let result = cli()
+        .arg("build")
+        .arg(&input)
+        .args(options)
+        .args(["--task-adapter", "wait=board_wait", "--out-dir"])
+        .arg(&out_dir)
+        .output()
+        .unwrap();
+    assert_success(&result);
+    let files: Vec<_> = fs::read_dir(&out_dir)
+        .unwrap()
+        .map(|entry| {
+            let entry = entry.unwrap();
+            emela_emb_compiler::GeneratedFile {
+                path: entry.file_name().to_str().unwrap().to_owned(),
+                contents: fs::read_to_string(entry.path()).unwrap(),
+            }
+        })
+        .collect();
+    let source = files
+        .iter()
+        .find(|file| file.path == "emela_embedded.c")
+        .unwrap();
+    for declaration in [
+        "#define EMELA_FIBER_CAPACITY 2",
+        "#define EMELA_FRAME_CAPACITY 16",
+        "#define EMELA_FRAME_BYTES 1024",
+        "#define EMELA_TASK_CAPACITY 4",
+        "#define EMELA_EVENT_CAPACITY 4",
+    ] {
+        assert!(source.contents.contains(declaration), "{declaration}");
+    }
+    let output = emela_emb_compiler::Output {
+        files,
+        ..emela_emb_compiler::Output::default()
+    };
+    c_support::compile_and_run(
+        &output,
+        r#"
+#include <assert.h>
+#include <stdlib.h>
+#include "emela_embedded.h"
+#include "emela_board.h"
+static EmelaTask pending;
+static int32_t value;
+uint32_t emela_board_event_lock(void){return 0;}
+void emela_board_event_unlock(uint32_t previous){(void)previous;}
+_Noreturn void emela_board_defect(EmelaDefectKind k,const char*m,uint16_t n){(void)k;(void)m;(void)n;abort();}
+void board_wait(EmelaTask task,int32_t n){pending=task;value=n;}
+int main(void){for(int i=0;i<1000;i++){
+ int32_t result=0;EmelaFiber fiber=answer_start(&result);
+ while(emela_scheduler_run(1)){}
+ assert(value==40&&!emela_fiber_done(fiber)&&result==0);
+ assert(emela_task_complete_int(pending,value));
+ assert(!emela_task_complete_int(pending,7)&&!emela_fiber_done(fiber));
+ while(!emela_fiber_done(fiber))assert(emela_scheduler_run(1));
+ assert(result==42);emela_fiber_release(fiber);
+ assert(!emela_task_complete_int(pending,8));
+}return 0;}
 "#,
     );
     temp.assert_no_staging_directories();

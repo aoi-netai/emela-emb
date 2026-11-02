@@ -2172,7 +2172,7 @@
       "relation": "variant_entry",
       "legacy_role": "emit",
       "phase": "P5",
-      "status": "mapped",
+      "status": "verified",
       "source_scope": "source",
       "new_implementation": [
         {
@@ -2199,6 +2199,18 @@
           "kind": "implementation",
           "path": "crates/emela-emb-compiler/src/backend/plan/operations/builtins/string_append.rs",
           "symbol": "require_runtime"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/frontend/function_abi.rs"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/frontend/lower.rs"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend.rs"
         }
       ],
       "evidence": [
@@ -2213,9 +2225,29 @@
         {
           "kind": "run_report",
           "path": "docs/reports/compiler-p2.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_string_alias.rs"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_time.rs"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_suspend.rs"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_clock.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p5.md"
         }
       ],
-      "reason": "readonly literal prefix・動的append・caller bufferをsource/Cで確認。所有値と中断の組合せは後段。"
+      "reason": "既存同期/中断のString操作に加え、入力・出力が重なるviewを固定snapshotで維持。0/1/512/513の容量境界、小callerbuffer、tail recursionのstack非増加と所有Stringの中断越えをC両最適化で確認。"
     },
     {
       "id": "emela_core::Builtin::StringByteSize",
@@ -3681,111 +3713,451 @@
       "id": "emela_core::FnSets",
       "relation": "shared_declaration",
       "legacy_role": "schema",
-      "phase": null,
-      "status": "pending",
+      "phase": "P6",
+      "status": "mapped",
       "source_scope": "schema",
-      "new_implementation": [],
-      "evidence": [],
-      "reason": ""
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/frontend/function_abi.rs"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/frontend/lower.rs"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend.rs"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_suspend.rs"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_clock.rs"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend_tests.rs"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p4_rows.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p5.md"
+        }
+      ],
+      "reason": "独立集合表現と値型から具体化後のfailure/effect/evidence/suspends ABIを確定。Asyncはevidence不要・中断可能、普通effectはoperation構成に従う。Scopeの集合制約とintrinsic ABIはP6で追加検証する。"
     },
     {
       "id": "emela_core::FnSets.effects",
       "relation": "member_of_declaration",
       "legacy_role": "schema",
-      "phase": null,
-      "status": "pending",
+      "phase": "P6",
+      "status": "mapped",
       "source_scope": "schema",
-      "new_implementation": [],
-      "evidence": [],
-      "reason": ""
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/frontend/function_abi.rs"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/frontend/lower.rs"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend.rs"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_suspend.rs"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_clock.rs"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend_tests.rs"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p4_rows.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p5.md"
+        }
+      ],
+      "reason": "独立集合表現と値型から具体化後のfailure/effect/evidence/suspends ABIを確定。Asyncはevidence不要・中断可能、普通effectはoperation構成に従う。Scopeの集合制約とintrinsic ABIはP6で追加検証する。"
     },
     {
       "id": "emela_core::FnSets.errors",
       "relation": "member_of_declaration",
       "legacy_role": "schema",
-      "phase": null,
-      "status": "pending",
+      "phase": "P6",
+      "status": "mapped",
       "source_scope": "schema",
-      "new_implementation": [],
-      "evidence": [],
-      "reason": ""
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/frontend/function_abi.rs"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/frontend/lower.rs"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend.rs"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_suspend.rs"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_clock.rs"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend_tests.rs"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p4_rows.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p5.md"
+        }
+      ],
+      "reason": "独立集合表現と値型から具体化後のfailure/effect/evidence/suspends ABIを確定。Asyncはevidence不要・中断可能、普通effectはoperation構成に従う。Scopeの集合制約とintrinsic ABIはP6で追加検証する。"
     },
     {
       "id": "emela_core::FnType",
       "relation": "shared_declaration",
       "legacy_role": "schema",
-      "phase": null,
-      "status": "pending",
+      "phase": "P6",
+      "status": "mapped",
       "source_scope": "schema",
-      "new_implementation": [],
-      "evidence": [],
-      "reason": ""
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/frontend/function_abi.rs"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/frontend/lower.rs"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend.rs"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_suspend.rs"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_clock.rs"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend_tests.rs"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p4_rows.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p5.md"
+        }
+      ],
+      "reason": "独立集合表現と値型から具体化後のfailure/effect/evidence/suspends ABIを確定。Asyncはevidence不要・中断可能、普通effectはoperation構成に従う。Scopeの集合制約とintrinsic ABIはP6で追加検証する。"
     },
     {
       "id": "emela_core::FnType.ev",
       "relation": "member_of_declaration",
       "legacy_role": "schema",
-      "phase": null,
-      "status": "pending",
+      "phase": "P6",
+      "status": "mapped",
       "source_scope": "schema",
-      "new_implementation": [],
-      "evidence": [],
-      "reason": ""
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/frontend/function_abi.rs"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/frontend/lower.rs"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend.rs"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_suspend.rs"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_clock.rs"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend_tests.rs"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p4_rows.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p5.md"
+        }
+      ],
+      "reason": "独立集合表現と値型から具体化後のfailure/effect/evidence/suspends ABIを確定。Asyncはevidence不要・中断可能、普通effectはoperation構成に従う。Scopeの集合制約とintrinsic ABIはP6で追加検証する。"
     },
     {
       "id": "emela_core::FnType.fails",
       "relation": "member_of_declaration",
       "legacy_role": "schema",
-      "phase": null,
-      "status": "pending",
+      "phase": "P6",
+      "status": "mapped",
       "source_scope": "schema",
-      "new_implementation": [],
-      "evidence": [],
-      "reason": ""
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/frontend/function_abi.rs"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/frontend/lower.rs"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend.rs"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_suspend.rs"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_clock.rs"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend_tests.rs"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p4_rows.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p5.md"
+        }
+      ],
+      "reason": "独立集合表現と値型から具体化後のfailure/effect/evidence/suspends ABIを確定。Asyncはevidence不要・中断可能、普通effectはoperation構成に従う。Scopeの集合制約とintrinsic ABIはP6で追加検証する。"
     },
     {
       "id": "emela_core::FnType.params",
       "relation": "member_of_declaration",
       "legacy_role": "schema",
-      "phase": null,
-      "status": "pending",
+      "phase": "P6",
+      "status": "mapped",
       "source_scope": "schema",
-      "new_implementation": [],
-      "evidence": [],
-      "reason": ""
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/frontend/function_abi.rs"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/frontend/lower.rs"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend.rs"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_suspend.rs"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_clock.rs"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend_tests.rs"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p4_rows.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p5.md"
+        }
+      ],
+      "reason": "独立集合表現と値型から具体化後のfailure/effect/evidence/suspends ABIを確定。Asyncはevidence不要・中断可能、普通effectはoperation構成に従う。Scopeの集合制約とintrinsic ABIはP6で追加検証する。"
     },
     {
       "id": "emela_core::FnType.ret",
       "relation": "member_of_declaration",
       "legacy_role": "schema",
-      "phase": null,
-      "status": "pending",
+      "phase": "P6",
+      "status": "mapped",
       "source_scope": "schema",
-      "new_implementation": [],
-      "evidence": [],
-      "reason": ""
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/frontend/function_abi.rs"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/frontend/lower.rs"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend.rs"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_suspend.rs"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_clock.rs"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend_tests.rs"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p4_rows.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p5.md"
+        }
+      ],
+      "reason": "独立集合表現と値型から具体化後のfailure/effect/evidence/suspends ABIを確定。Asyncはevidence不要・中断可能、普通effectはoperation構成に従う。Scopeの集合制約とintrinsic ABIはP6で追加検証する。"
     },
     {
       "id": "emela_core::FnType.sets",
       "relation": "member_of_declaration",
       "legacy_role": "schema",
-      "phase": null,
-      "status": "pending",
+      "phase": "P6",
+      "status": "mapped",
       "source_scope": "schema",
-      "new_implementation": [],
-      "evidence": [],
-      "reason": ""
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/frontend/function_abi.rs"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/frontend/lower.rs"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend.rs"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_suspend.rs"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_clock.rs"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend_tests.rs"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p4_rows.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p5.md"
+        }
+      ],
+      "reason": "独立集合表現と値型から具体化後のfailure/effect/evidence/suspends ABIを確定。Asyncはevidence不要・中断可能、普通effectはoperation構成に従う。Scopeの集合制約とintrinsic ABIはP6で追加検証する。"
     },
     {
       "id": "emela_core::FnType.suspends",
       "relation": "member_of_declaration",
       "legacy_role": "schema",
-      "phase": null,
-      "status": "pending",
+      "phase": "P6",
+      "status": "mapped",
       "source_scope": "schema",
-      "new_implementation": [],
-      "evidence": [],
-      "reason": ""
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/frontend/function_abi.rs"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/frontend/lower.rs"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend.rs"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_suspend.rs"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_clock.rs"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend_tests.rs"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p4_rows.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p5.md"
+        }
+      ],
+      "reason": "独立集合表現と値型から具体化後のfailure/effect/evidence/suspends ABIを確定。Asyncはevidence不要・中断可能、普通effectはoperation構成に従う。Scopeの集合制約とintrinsic ABIはP6で追加検証する。"
     },
     {
       "id": "emela_core::HostModule",
@@ -4231,56 +4603,226 @@
       "id": "emela_core::SetSummary",
       "relation": "shared_declaration",
       "legacy_role": "schema",
-      "phase": null,
-      "status": "pending",
+      "phase": "P6",
+      "status": "mapped",
       "source_scope": "schema",
-      "new_implementation": [],
-      "evidence": [],
-      "reason": ""
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/frontend/function_abi.rs"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/frontend/lower.rs"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend.rs"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_suspend.rs"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_clock.rs"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend_tests.rs"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p4_rows.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p5.md"
+        }
+      ],
+      "reason": "独立集合表現と値型から具体化後のfailure/effect/evidence/suspends ABIを確定。Asyncはevidence不要・中断可能、普通effectはoperation構成に従う。Scopeの集合制約とintrinsic ABIはP6で追加検証する。"
     },
     {
       "id": "emela_core::SetSummary.ev",
       "relation": "member_of_declaration",
       "legacy_role": "schema",
-      "phase": null,
-      "status": "pending",
+      "phase": "P6",
+      "status": "mapped",
       "source_scope": "schema",
-      "new_implementation": [],
-      "evidence": [],
-      "reason": ""
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/frontend/function_abi.rs"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/frontend/lower.rs"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend.rs"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_suspend.rs"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_clock.rs"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend_tests.rs"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p4_rows.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p5.md"
+        }
+      ],
+      "reason": "独立集合表現と値型から具体化後のfailure/effect/evidence/suspends ABIを確定。Asyncはevidence不要・中断可能、普通effectはoperation構成に従う。Scopeの集合制約とintrinsic ABIはP6で追加検証する。"
     },
     {
       "id": "emela_core::SetSummary.fails",
       "relation": "member_of_declaration",
       "legacy_role": "schema",
-      "phase": null,
-      "status": "pending",
+      "phase": "P6",
+      "status": "mapped",
       "source_scope": "schema",
-      "new_implementation": [],
-      "evidence": [],
-      "reason": ""
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/frontend/function_abi.rs"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/frontend/lower.rs"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend.rs"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_suspend.rs"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_clock.rs"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend_tests.rs"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p4_rows.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p5.md"
+        }
+      ],
+      "reason": "独立集合表現と値型から具体化後のfailure/effect/evidence/suspends ABIを確定。Asyncはevidence不要・中断可能、普通effectはoperation構成に従う。Scopeの集合制約とintrinsic ABIはP6で追加検証する。"
     },
     {
       "id": "emela_core::SetSummary.params",
       "relation": "member_of_declaration",
       "legacy_role": "schema",
-      "phase": null,
-      "status": "pending",
+      "phase": "P6",
+      "status": "mapped",
       "source_scope": "schema",
-      "new_implementation": [],
-      "evidence": [],
-      "reason": ""
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/frontend/function_abi.rs"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/frontend/lower.rs"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend.rs"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_suspend.rs"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_clock.rs"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend_tests.rs"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p4_rows.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p5.md"
+        }
+      ],
+      "reason": "独立集合表現と値型から具体化後のfailure/effect/evidence/suspends ABIを確定。Asyncはevidence不要・中断可能、普通effectはoperation構成に従う。Scopeの集合制約とintrinsic ABIはP6で追加検証する。"
     },
     {
       "id": "emela_core::SetSummary.suspends",
       "relation": "member_of_declaration",
       "legacy_role": "schema",
-      "phase": null,
-      "status": "pending",
+      "phase": "P6",
+      "status": "mapped",
       "source_scope": "schema",
-      "new_implementation": [],
-      "evidence": [],
-      "reason": ""
+      "new_implementation": [
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/frontend/function_abi.rs"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/frontend/lower.rs"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend.rs"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_suspend.rs"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_clock.rs"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend_tests.rs"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p4_rows.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p5.md"
+        }
+      ],
+      "reason": "独立集合表現と値型から具体化後のfailure/effect/evidence/suspends ABIを確定。Asyncはevidence不要・中断可能、普通effectはoperation構成に従う。Scopeの集合制約とintrinsic ABIはP6で追加検証する。"
     },
     {
       "id": "emela_core::Type",
@@ -4674,29 +5216,61 @@
       "id": "emela_core::Type::Fn",
       "relation": "variant_entry",
       "legacy_role": "metadata",
-      "phase": null,
+      "phase": "P6",
       "status": "mapped",
-      "source_scope": "unclassified",
+      "source_scope": "source",
       "new_implementation": [
         {
           "kind": "implementation",
           "path": "crates/emela-emb-compiler/src/semantics/type_representations.rs",
           "symbol": "fn_repr"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/frontend/function_abi.rs"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/frontend/lower.rs"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend.rs"
         }
       ],
       "evidence": [
         {
           "kind": "review",
           "path": "docs/migration-source.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_suspend.rs"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_clock.rs"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend_tests.rs"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p4_rows.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p5.md"
         }
       ],
-      "reason": "固定revisionの独立backend入口を採用。source・全実行文脈・所有権等の完了は個別の実行証拠が揃うまで判定しない。"
+      "reason": "独立集合表現と値型から具体化後のfailure/effect/evidence/suspends ABIを確定。Asyncはevidence不要・中断可能、普通effectはoperation構成に従う。Scopeの集合制約とintrinsic ABIはP6で追加検証する。"
     },
     {
       "id": "emela_core::Type::Fn.0",
       "relation": "member_of_variant",
       "legacy_role": "metadata",
-      "phase": null,
+      "phase": "P6",
       "status": "mapped",
       "source_scope": "schema",
       "new_implementation": [
@@ -4704,15 +5278,47 @@
           "kind": "implementation",
           "path": "crates/emela-emb-compiler/src/semantics/type_representations.rs",
           "symbol": "fn_repr"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/frontend/function_abi.rs"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/frontend/lower.rs"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend.rs"
         }
       ],
       "evidence": [
         {
           "kind": "review",
           "path": "docs/migration-source.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_suspend.rs"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_clock.rs"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend_tests.rs"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p4_rows.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p5.md"
         }
       ],
-      "reason": "固定revisionの独立backend入口を採用。source・全実行文脈・所有権等の完了は個別の実行証拠が揃うまで判定しない。"
+      "reason": "独立集合表現と値型から具体化後のfailure/effect/evidence/suspends ABIを確定。Asyncはevidence不要・中断可能、普通effectはoperation構成に従う。Scopeの集合制約とintrinsic ABIはP6で追加検証する。"
     },
     {
       "id": "emela_core::Type::Handler",
@@ -5602,8 +6208,8 @@
       "id": "emela_lir::Callee::Direct",
       "relation": "variant_entry",
       "legacy_role": "emit",
-      "phase": "P1",
-      "status": "mapped",
+      "phase": "P5",
+      "status": "verified",
       "source_scope": "source",
       "new_implementation": [
         {
@@ -5635,6 +6241,18 @@
           "kind": "implementation",
           "path": "crates/emela-emb-compiler/src/backend/emit/features/values/call.rs",
           "symbol": "emit_suspend_direct"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/frontend/function_abi.rs"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/frontend/lower.rs"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend.rs"
         }
       ],
       "evidence": [
@@ -5657,16 +6275,32 @@
         {
           "kind": "run_report",
           "path": "docs/reports/compiler-p1.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_suspend.rs"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_clock.rs"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend_tests.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p5.md"
         }
       ],
-      "reason": "P1の同期scalar経路を接続・実行済み。suspend・所有値等を含むvariant全体は後続段階で確認する。"
+      "reason": "同期/中断/evidence付き関数参照・closure・間接呼出し・ABI拡大をsource/独自IRからC両最適化で確認。中断をまたぐ所有capture、String producerの11byte保存先・同時保持・NULL出力・容量defect、外部FnRefと内部frame呼出しを検証。"
     },
     {
       "id": "emela_lir::Callee::Direct.0",
       "relation": "member_of_variant",
       "legacy_role": "emit",
-      "phase": null,
-      "status": "mapped",
+      "phase": "P5",
+      "status": "verified",
       "source_scope": "schema",
       "new_implementation": [
         {
@@ -5693,23 +6327,51 @@
           "kind": "implementation",
           "path": "crates/emela-emb-compiler/src/backend/plan/operations/values/call.rs",
           "symbol": "require_runtime"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/frontend/function_abi.rs"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/frontend/lower.rs"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend.rs"
         }
       ],
       "evidence": [
         {
           "kind": "review",
           "path": "docs/migration-source.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_suspend.rs"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_clock.rs"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend_tests.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p5.md"
         }
       ],
-      "reason": "固定revisionの独立backend入口を採用。source・全実行文脈・所有権等の完了は個別の実行証拠が揃うまで判定しない。"
+      "reason": "同期/中断/evidence付き関数参照・closure・間接呼出し・ABI拡大をsource/独自IRからC両最適化で確認。中断をまたぐ所有capture、String producerの11byte保存先・同時保持・NULL出力・容量defect、外部FnRefと内部frame呼出しを検証。"
     },
     {
       "id": "emela_lir::Callee::Indirect",
       "relation": "variant_entry",
       "legacy_role": "emit",
-      "phase": null,
-      "status": "mapped",
-      "source_scope": "unclassified",
+      "phase": "P5",
+      "status": "verified",
+      "source_scope": "source",
       "new_implementation": [
         {
           "kind": "implementation",
@@ -5740,22 +6402,50 @@
           "kind": "implementation",
           "path": "crates/emela-emb-compiler/src/backend/emit/features/values/call.rs",
           "symbol": "emit_suspend_indirect"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/frontend/function_abi.rs"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/frontend/lower.rs"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend.rs"
         }
       ],
       "evidence": [
         {
           "kind": "review",
           "path": "docs/migration-source.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_suspend.rs"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_clock.rs"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend_tests.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p5.md"
         }
       ],
-      "reason": "固定revisionの独立backend入口を採用。source・全実行文脈・所有権等の完了は個別の実行証拠が揃うまで判定しない。"
+      "reason": "同期/中断/evidence付き関数参照・closure・間接呼出し・ABI拡大をsource/独自IRからC両最適化で確認。中断をまたぐ所有capture、String producerの11byte保存先・同時保持・NULL出力・容量defect、外部FnRefと内部frame呼出しを検証。"
     },
     {
       "id": "emela_lir::Callee::Indirect.0",
       "relation": "member_of_variant",
       "legacy_role": "emit",
-      "phase": null,
-      "status": "mapped",
+      "phase": "P5",
+      "status": "verified",
       "source_scope": "schema",
       "new_implementation": [
         {
@@ -5782,23 +6472,51 @@
           "kind": "implementation",
           "path": "crates/emela-emb-compiler/src/backend/plan/operations/values/call.rs",
           "symbol": "require_runtime"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/frontend/function_abi.rs"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/frontend/lower.rs"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend.rs"
         }
       ],
       "evidence": [
         {
           "kind": "review",
           "path": "docs/migration-source.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_suspend.rs"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_clock.rs"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend_tests.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p5.md"
         }
       ],
-      "reason": "固定revisionの独立backend入口を採用。source・全実行文脈・所有権等の完了は個別の実行証拠が揃うまで判定しない。"
+      "reason": "同期/中断/evidence付き関数参照・closure・間接呼出し・ABI拡大をsource/独自IRからC両最適化で確認。中断をまたぐ所有capture、String producerの11byte保存先・同時保持・NULL出力・容量defect、外部FnRefと内部frame呼出しを検証。"
     },
     {
       "id": "emela_lir::Callee::Op",
       "relation": "variant_entry",
       "legacy_role": "emit",
-      "phase": null,
-      "status": "mapped",
-      "source_scope": "unclassified",
+      "phase": "P5",
+      "status": "verified",
+      "source_scope": "source",
       "new_implementation": [
         {
           "kind": "implementation",
@@ -5829,22 +6547,50 @@
           "kind": "implementation",
           "path": "crates/emela-emb-compiler/src/backend/emit/features/values/call.rs",
           "symbol": "emit_suspend_op"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/frontend/function_abi.rs"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/frontend/lower.rs"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend.rs"
         }
       ],
       "evidence": [
         {
           "kind": "review",
           "path": "docs/migration-source.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_suspend.rs"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_clock.rs"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend_tests.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p5.md"
         }
       ],
-      "reason": "固定revisionの独立backend入口を採用。source・全実行文脈・所有権等の完了は個別の実行証拠が揃うまで判定しない。"
+      "reason": "同期/中断/evidence付き関数参照・closure・間接呼出し・ABI拡大をsource/独自IRからC両最適化で確認。中断をまたぐ所有capture、String producerの11byte保存先・同時保持・NULL出力・容量defect、外部FnRefと内部frame呼出しを検証。"
     },
     {
       "id": "emela_lir::Callee::Op.effect",
       "relation": "member_of_variant",
       "legacy_role": "emit",
-      "phase": null,
-      "status": "mapped",
+      "phase": "P5",
+      "status": "verified",
       "source_scope": "schema",
       "new_implementation": [
         {
@@ -5871,22 +6617,50 @@
           "kind": "implementation",
           "path": "crates/emela-emb-compiler/src/backend/plan/operations/values/call.rs",
           "symbol": "require_runtime"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/frontend/function_abi.rs"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/frontend/lower.rs"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend.rs"
         }
       ],
       "evidence": [
         {
           "kind": "review",
           "path": "docs/migration-source.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_suspend.rs"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_clock.rs"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend_tests.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p5.md"
         }
       ],
-      "reason": "固定revisionの独立backend入口を採用。source・全実行文脈・所有権等の完了は個別の実行証拠が揃うまで判定しない。"
+      "reason": "同期/中断/evidence付き関数参照・closure・間接呼出し・ABI拡大をsource/独自IRからC両最適化で確認。中断をまたぐ所有capture、String producerの11byte保存先・同時保持・NULL出力・容量defect、外部FnRefと内部frame呼出しを検証。"
     },
     {
       "id": "emela_lir::Callee::Op.handler",
       "relation": "member_of_variant",
       "legacy_role": "emit",
-      "phase": null,
-      "status": "mapped",
+      "phase": "P5",
+      "status": "verified",
       "source_scope": "schema",
       "new_implementation": [
         {
@@ -5913,22 +6687,50 @@
           "kind": "implementation",
           "path": "crates/emela-emb-compiler/src/backend/plan/operations/values/call.rs",
           "symbol": "require_runtime"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/frontend/function_abi.rs"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/frontend/lower.rs"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend.rs"
         }
       ],
       "evidence": [
         {
           "kind": "review",
           "path": "docs/migration-source.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_suspend.rs"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_clock.rs"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend_tests.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p5.md"
         }
       ],
-      "reason": "固定revisionの独立backend入口を採用。source・全実行文脈・所有権等の完了は個別の実行証拠が揃うまで判定しない。"
+      "reason": "同期/中断/evidence付き関数参照・closure・間接呼出し・ABI拡大をsource/独自IRからC両最適化で確認。中断をまたぐ所有capture、String producerの11byte保存先・同時保持・NULL出力・容量defect、外部FnRefと内部frame呼出しを検証。"
     },
     {
       "id": "emela_lir::Callee::Op.op",
       "relation": "member_of_variant",
       "legacy_role": "emit",
-      "phase": null,
-      "status": "mapped",
+      "phase": "P5",
+      "status": "verified",
       "source_scope": "schema",
       "new_implementation": [
         {
@@ -5955,15 +6757,43 @@
           "kind": "implementation",
           "path": "crates/emela-emb-compiler/src/backend/plan/operations/values/call.rs",
           "symbol": "require_runtime"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/frontend/function_abi.rs"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/frontend/lower.rs"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend.rs"
         }
       ],
       "evidence": [
         {
           "kind": "review",
           "path": "docs/migration-source.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_suspend.rs"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_clock.rs"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend_tests.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p5.md"
         }
       ],
-      "reason": "固定revisionの独立backend入口を採用。source・全実行文脈・所有権等の完了は個別の実行証拠が揃うまで判定しない。"
+      "reason": "同期/中断/evidence付き関数参照・closure・間接呼出し・ABI拡大をsource/独自IRからC両最適化で確認。中断をまたぐ所有capture、String producerの11byte保存先・同時保持・NULL出力・容量defect、外部FnRefと内部frame呼出しを検証。"
     },
     {
       "id": "emela_lir::Case",
@@ -6177,7 +7007,7 @@
       "relation": "shared_declaration",
       "legacy_role": "schema",
       "phase": "P5",
-      "status": "mapped",
+      "status": "verified",
       "source_scope": "schema",
       "new_implementation": [
         {
@@ -6191,6 +7021,14 @@
         {
           "kind": "implementation",
           "path": "crates/emela-emb-compiler/src/backend/lower.rs"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/frontend/function_abi.rs"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend.rs"
         }
       ],
       "evidence": [
@@ -6217,16 +7055,32 @@
         {
           "kind": "run_report",
           "path": "docs/reports/compiler-p4.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_suspend.rs"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_clock.rs"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend_tests.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p5.md"
         }
       ],
-      "reason": "関数値・capture・間接呼出し・failure/evidence/Never ABI拡大をsource/独自IRから同期Cで確認。captureの型・順序・所有化と返却後の寿命を保持。suspend文脈とsuspends metadataはP5で確認する。"
+      "reason": "同期/中断/evidence付き関数参照・closure・間接呼出し・ABI拡大をsource/独自IRからC両最適化で確認。中断をまたぐ所有capture、String producerの11byte保存先・同時保持・NULL出力・容量defect、外部FnRefと内部frame呼出しを検証。"
     },
     {
       "id": "emela_lir::Closure.body",
       "relation": "member_of_declaration",
       "legacy_role": "schema",
       "phase": "P5",
-      "status": "mapped",
+      "status": "verified",
       "source_scope": "schema",
       "new_implementation": [
         {
@@ -6240,6 +7094,14 @@
         {
           "kind": "implementation",
           "path": "crates/emela-emb-compiler/src/backend/lower.rs"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/frontend/function_abi.rs"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend.rs"
         }
       ],
       "evidence": [
@@ -6266,16 +7128,32 @@
         {
           "kind": "run_report",
           "path": "docs/reports/compiler-p4.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_suspend.rs"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_clock.rs"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend_tests.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p5.md"
         }
       ],
-      "reason": "関数値・capture・間接呼出し・failure/evidence/Never ABI拡大をsource/独自IRから同期Cで確認。captureの型・順序・所有化と返却後の寿命を保持。suspend文脈とsuspends metadataはP5で確認する。"
+      "reason": "同期/中断/evidence付き関数参照・closure・間接呼出し・ABI拡大をsource/独自IRからC両最適化で確認。中断をまたぐ所有capture、String producerの11byte保存先・同時保持・NULL出力・容量defect、外部FnRefと内部frame呼出しを検証。"
     },
     {
       "id": "emela_lir::Closure.captures",
       "relation": "member_of_declaration",
       "legacy_role": "schema",
       "phase": "P5",
-      "status": "mapped",
+      "status": "verified",
       "source_scope": "schema",
       "new_implementation": [
         {
@@ -6289,6 +7167,14 @@
         {
           "kind": "implementation",
           "path": "crates/emela-emb-compiler/src/backend/lower.rs"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/frontend/function_abi.rs"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend.rs"
         }
       ],
       "evidence": [
@@ -6315,16 +7201,32 @@
         {
           "kind": "run_report",
           "path": "docs/reports/compiler-p4.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_suspend.rs"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_clock.rs"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend_tests.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p5.md"
         }
       ],
-      "reason": "関数値・capture・間接呼出し・failure/evidence/Never ABI拡大をsource/独自IRから同期Cで確認。captureの型・順序・所有化と返却後の寿命を保持。suspend文脈とsuspends metadataはP5で確認する。"
+      "reason": "同期/中断/evidence付き関数参照・closure・間接呼出し・ABI拡大をsource/独自IRからC両最適化で確認。中断をまたぐ所有capture、String producerの11byte保存先・同時保持・NULL出力・容量defect、外部FnRefと内部frame呼出しを検証。"
     },
     {
       "id": "emela_lir::Closure.params",
       "relation": "member_of_declaration",
       "legacy_role": "schema",
       "phase": "P5",
-      "status": "mapped",
+      "status": "verified",
       "source_scope": "schema",
       "new_implementation": [
         {
@@ -6338,6 +7240,14 @@
         {
           "kind": "implementation",
           "path": "crates/emela-emb-compiler/src/backend/lower.rs"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/frontend/function_abi.rs"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend.rs"
         }
       ],
       "evidence": [
@@ -6364,16 +7274,32 @@
         {
           "kind": "run_report",
           "path": "docs/reports/compiler-p4.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_suspend.rs"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_clock.rs"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend_tests.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p5.md"
         }
       ],
-      "reason": "関数値・capture・間接呼出し・failure/evidence/Never ABI拡大をsource/独自IRから同期Cで確認。captureの型・順序・所有化と返却後の寿命を保持。suspend文脈とsuspends metadataはP5で確認する。"
+      "reason": "同期/中断/evidence付き関数参照・closure・間接呼出し・ABI拡大をsource/独自IRからC両最適化で確認。中断をまたぐ所有capture、String producerの11byte保存先・同時保持・NULL出力・容量defect、外部FnRefと内部frame呼出しを検証。"
     },
     {
       "id": "emela_lir::Closure.suspends",
       "relation": "member_of_declaration",
       "legacy_role": "schema",
       "phase": "P5",
-      "status": "mapped",
+      "status": "verified",
       "source_scope": "schema",
       "new_implementation": [
         {
@@ -6387,6 +7313,14 @@
         {
           "kind": "implementation",
           "path": "crates/emela-emb-compiler/src/backend/lower.rs"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/frontend/function_abi.rs"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend.rs"
         }
       ],
       "evidence": [
@@ -6413,9 +7347,25 @@
         {
           "kind": "run_report",
           "path": "docs/reports/compiler-p4.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_suspend.rs"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_clock.rs"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend_tests.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p5.md"
         }
       ],
-      "reason": "関数値・capture・間接呼出し・failure/evidence/Never ABI拡大をsource/独自IRから同期Cで確認。captureの型・順序・所有化と返却後の寿命を保持。suspend文脈とsuspends metadataはP5で確認する。"
+      "reason": "同期/中断/evidence付き関数参照・closure・間接呼出し・ABI拡大をsource/独自IRからC両最適化で確認。中断をまたぐ所有capture、String producerの11byte保存先・同時保持・NULL出力・容量defect、外部FnRefと内部frame呼出しを検証。"
     },
     {
       "id": "emela_lir::Const",
@@ -8744,9 +9694,9 @@
       "id": "emela_lir::RuntimeOp::DefectResume",
       "relation": "variant_entry",
       "legacy_role": "reject",
-      "phase": null,
+      "phase": "P7",
       "status": "mapped",
-      "source_scope": "unclassified",
+      "source_scope": "source",
       "new_implementation": [
         {
           "kind": "implementation",
@@ -8772,15 +9722,35 @@
           "kind": "implementation",
           "path": "crates/emela-emb-compiler/src/backend/plan/operations/runtime.rs",
           "symbol": "require_runtime"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/frontend/function_abi.rs"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/frontend/lower.rs"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend.rs"
         }
       ],
       "evidence": [
         {
           "kind": "review",
           "path": "docs/migration-source.md"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend_tests.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p5.md"
         }
       ],
-      "reason": "固定revisionの独立backend入口を採用。source・全実行文脈・所有権等の完了は個別の実行証拠が揃うまで判定しない。"
+      "reason": "即時/遅延のone-shot resumeを確認し、二重resumeをC defectで拒否する。旧残余RuntimeOp自体の拒否とsource再開逸出の全corpus照合はP7で判定する。"
     },
     {
       "id": "emela_lir::RuntimeOp::DefectTake",
@@ -9983,9 +10953,9 @@
       "id": "emela_lir::Stmt::Protect",
       "relation": "variant_entry",
       "legacy_role": "emit",
-      "phase": null,
+      "phase": "P6",
       "status": "mapped",
-      "source_scope": "unclassified",
+      "source_scope": "source",
       "new_implementation": [
         {
           "kind": "implementation",
@@ -10011,21 +10981,49 @@
           "kind": "implementation",
           "path": "crates/emela-emb-compiler/src/backend/emit/features/statements/protect.rs",
           "symbol": "emit_finish"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/frontend/function_abi.rs"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/frontend/lower.rs"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend.rs"
         }
       ],
       "evidence": [
         {
           "kind": "review",
           "path": "docs/migration-source.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_suspend.rs"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_clock.rs"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend_tests.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p5.md"
         }
       ],
-      "reason": "固定revisionの独立backend入口を採用。source・全実行文脈・所有権等の完了は個別の実行証拠が揃うまで判定しない。"
+      "reason": "成功/失敗とも中断するcleanup完了前に元結果を公開せず、失敗payloadを保持して外側のescapeへ配送する。取消時のcleanup完了はP6へ残す。"
     },
     {
       "id": "emela_lir::Stmt::Protect.body",
       "relation": "member_of_variant",
       "legacy_role": "emit",
-      "phase": null,
+      "phase": "P6",
       "status": "mapped",
       "source_scope": "schema",
       "new_implementation": [
@@ -10038,21 +11036,49 @@
           "kind": "implementation",
           "path": "crates/emela-emb-compiler/src/backend/plan/operations/statements/protect.rs",
           "symbol": "lower"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/frontend/function_abi.rs"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/frontend/lower.rs"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend.rs"
         }
       ],
       "evidence": [
         {
           "kind": "review",
           "path": "docs/migration-source.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_suspend.rs"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_clock.rs"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend_tests.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p5.md"
         }
       ],
-      "reason": "固定revisionの独立backend入口を採用。source・全実行文脈・所有権等の完了は個別の実行証拠が揃うまで判定しない。"
+      "reason": "成功/失敗とも中断するcleanup完了前に元結果を公開せず、失敗payloadを保持して外側のescapeへ配送する。取消時のcleanup完了はP6へ残す。"
     },
     {
       "id": "emela_lir::Stmt::Protect.cleanup",
       "relation": "member_of_variant",
       "legacy_role": "emit",
-      "phase": null,
+      "phase": "P6",
       "status": "mapped",
       "source_scope": "schema",
       "new_implementation": [
@@ -10065,21 +11091,49 @@
           "kind": "implementation",
           "path": "crates/emela-emb-compiler/src/backend/plan/operations/statements/protect.rs",
           "symbol": "lower"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/frontend/function_abi.rs"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/frontend/lower.rs"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend.rs"
         }
       ],
       "evidence": [
         {
           "kind": "review",
           "path": "docs/migration-source.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_suspend.rs"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_clock.rs"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend_tests.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p5.md"
         }
       ],
-      "reason": "固定revisionの独立backend入口を採用。source・全実行文脈・所有権等の完了は個別の実行証拠が揃うまで判定しない。"
+      "reason": "成功/失敗とも中断するcleanup完了前に元結果を公開せず、失敗payloadを保持して外側のescapeへ配送する。取消時のcleanup完了はP6へ残す。"
     },
     {
       "id": "emela_lir::Stmt::Protect.dst",
       "relation": "member_of_variant",
       "legacy_role": "emit",
-      "phase": null,
+      "phase": "P6",
       "status": "mapped",
       "source_scope": "schema",
       "new_implementation": [
@@ -10092,15 +11146,43 @@
           "kind": "implementation",
           "path": "crates/emela-emb-compiler/src/backend/plan/operations/statements/protect.rs",
           "symbol": "lower"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/frontend/function_abi.rs"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/frontend/lower.rs"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend.rs"
         }
       ],
       "evidence": [
         {
           "kind": "review",
           "path": "docs/migration-source.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_suspend.rs"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_clock.rs"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend_tests.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p5.md"
         }
       ],
-      "reason": "固定revisionの独立backend入口を採用。source・全実行文脈・所有権等の完了は個別の実行証拠が揃うまで判定しない。"
+      "reason": "成功/失敗とも中断するcleanup完了前に元結果を公開せず、失敗payloadを保持して外側のescapeへ配送する。取消時のcleanup完了はP6へ残す。"
     },
     {
       "id": "emela_lir::Stmt::Switch",
@@ -11367,8 +12449,8 @@
       "id": "emela_lir::Value::Call",
       "relation": "variant_entry",
       "legacy_role": "emit",
-      "phase": "P1",
-      "status": "mapped",
+      "phase": "P5",
+      "status": "verified",
       "source_scope": "source",
       "new_implementation": [
         {
@@ -11410,6 +12492,18 @@
           "kind": "implementation",
           "path": "crates/emela-emb-compiler/src/backend/emit/features/values/call.rs",
           "symbol": "emit_suspend_op"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/frontend/function_abi.rs"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/frontend/lower.rs"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend.rs"
         }
       ],
       "evidence": [
@@ -11432,16 +12526,32 @@
         {
           "kind": "run_report",
           "path": "docs/reports/compiler-p1.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_suspend.rs"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_clock.rs"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend_tests.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p5.md"
         }
       ],
-      "reason": "P1の同期scalar経路を接続・実行済み。suspend・所有値等を含むvariant全体は後続段階で確認する。"
+      "reason": "同期/中断/evidence付き関数参照・closure・間接呼出し・ABI拡大をsource/独自IRからC両最適化で確認。中断をまたぐ所有capture、String producerの11byte保存先・同時保持・NULL出力・容量defect、外部FnRefと内部frame呼出しを検証。"
     },
     {
       "id": "emela_lir::Value::Call.args",
       "relation": "member_of_variant",
       "legacy_role": "emit",
-      "phase": null,
-      "status": "mapped",
+      "phase": "P5",
+      "status": "verified",
       "source_scope": "schema",
       "new_implementation": [
         {
@@ -11468,22 +12578,50 @@
           "kind": "implementation",
           "path": "crates/emela-emb-compiler/src/backend/plan/operations/values/call.rs",
           "symbol": "require_runtime"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/frontend/function_abi.rs"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/frontend/lower.rs"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend.rs"
         }
       ],
       "evidence": [
         {
           "kind": "review",
           "path": "docs/migration-source.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_suspend.rs"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_clock.rs"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend_tests.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p5.md"
         }
       ],
-      "reason": "固定revisionの独立backend入口を採用。source・全実行文脈・所有権等の完了は個別の実行証拠が揃うまで判定しない。"
+      "reason": "同期/中断/evidence付き関数参照・closure・間接呼出し・ABI拡大をsource/独自IRからC両最適化で確認。中断をまたぐ所有capture、String producerの11byte保存先・同時保持・NULL出力・容量defect、外部FnRefと内部frame呼出しを検証。"
     },
     {
       "id": "emela_lir::Value::Call.callee",
       "relation": "member_of_variant",
       "legacy_role": "emit",
-      "phase": null,
-      "status": "mapped",
+      "phase": "P5",
+      "status": "verified",
       "source_scope": "schema",
       "new_implementation": [
         {
@@ -11510,22 +12648,50 @@
           "kind": "implementation",
           "path": "crates/emela-emb-compiler/src/backend/plan/operations/values/call.rs",
           "symbol": "require_runtime"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/frontend/function_abi.rs"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/frontend/lower.rs"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend.rs"
         }
       ],
       "evidence": [
         {
           "kind": "review",
           "path": "docs/migration-source.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_suspend.rs"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_clock.rs"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend_tests.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p5.md"
         }
       ],
-      "reason": "固定revisionの独立backend入口を採用。source・全実行文脈・所有権等の完了は個別の実行証拠が揃うまで判定しない。"
+      "reason": "同期/中断/evidence付き関数参照・closure・間接呼出し・ABI拡大をsource/独自IRからC両最適化で確認。中断をまたぐ所有capture、String producerの11byte保存先・同時保持・NULL出力・容量defect、外部FnRefと内部frame呼出しを検証。"
     },
     {
       "id": "emela_lir::Value::Call.on_fail",
       "relation": "member_of_variant",
       "legacy_role": "emit",
-      "phase": null,
-      "status": "mapped",
+      "phase": "P5",
+      "status": "verified",
       "source_scope": "schema",
       "new_implementation": [
         {
@@ -11552,22 +12718,50 @@
           "kind": "implementation",
           "path": "crates/emela-emb-compiler/src/backend/plan/operations/values/call.rs",
           "symbol": "require_runtime"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/frontend/function_abi.rs"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/frontend/lower.rs"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend.rs"
         }
       ],
       "evidence": [
         {
           "kind": "review",
           "path": "docs/migration-source.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_suspend.rs"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_clock.rs"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend_tests.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p5.md"
         }
       ],
-      "reason": "固定revisionの独立backend入口を採用。source・全実行文脈・所有権等の完了は個別の実行証拠が揃うまで判定しない。"
+      "reason": "同期/中断/evidence付き関数参照・closure・間接呼出し・ABI拡大をsource/独自IRからC両最適化で確認。中断をまたぐ所有capture、String producerの11byte保存先・同時保持・NULL出力・容量defect、外部FnRefと内部frame呼出しを検証。"
     },
     {
       "id": "emela_lir::Value::Call.suspends",
       "relation": "member_of_variant",
       "legacy_role": "emit",
-      "phase": null,
-      "status": "mapped",
+      "phase": "P5",
+      "status": "verified",
       "source_scope": "schema",
       "new_implementation": [
         {
@@ -11594,22 +12788,50 @@
           "kind": "implementation",
           "path": "crates/emela-emb-compiler/src/backend/plan/operations/values/call.rs",
           "symbol": "require_runtime"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/frontend/function_abi.rs"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/frontend/lower.rs"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend.rs"
         }
       ],
       "evidence": [
         {
           "kind": "review",
           "path": "docs/migration-source.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_suspend.rs"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_clock.rs"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend_tests.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p5.md"
         }
       ],
-      "reason": "固定revisionの独立backend入口を採用。source・全実行文脈・所有権等の完了は個別の実行証拠が揃うまで判定しない。"
+      "reason": "同期/中断/evidence付き関数参照・closure・間接呼出し・ABI拡大をsource/独自IRからC両最適化で確認。中断をまたぐ所有capture、String producerの11byte保存先・同時保持・NULL出力・容量defect、外部FnRefと内部frame呼出しを検証。"
     },
     {
       "id": "emela_lir::Value::Closure",
       "relation": "variant_entry",
       "legacy_role": "lower",
       "phase": "P5",
-      "status": "mapped",
+      "status": "verified",
       "source_scope": "source",
       "new_implementation": [
         {
@@ -11623,6 +12845,14 @@
         {
           "kind": "implementation",
           "path": "crates/emela-emb-compiler/src/backend/lower.rs"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/frontend/function_abi.rs"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend.rs"
         }
       ],
       "evidence": [
@@ -11649,16 +12879,32 @@
         {
           "kind": "run_report",
           "path": "docs/reports/compiler-p4.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_suspend.rs"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_clock.rs"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend_tests.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p5.md"
         }
       ],
-      "reason": "関数値・capture・間接呼出し・failure/evidence/Never ABI拡大をsource/独自IRから同期Cで確認。captureの型・順序・所有化と返却後の寿命を保持。suspend文脈とsuspends metadataはP5で確認する。"
+      "reason": "同期/中断/evidence付き関数参照・closure・間接呼出し・ABI拡大をsource/独自IRからC両最適化で確認。中断をまたぐ所有capture、String producerの11byte保存先・同時保持・NULL出力・容量defect、外部FnRefと内部frame呼出しを検証。"
     },
     {
       "id": "emela_lir::Value::Closure.0",
       "relation": "member_of_variant",
       "legacy_role": "lower",
       "phase": "P5",
-      "status": "mapped",
+      "status": "verified",
       "source_scope": "schema",
       "new_implementation": [
         {
@@ -11672,6 +12918,14 @@
         {
           "kind": "implementation",
           "path": "crates/emela-emb-compiler/src/backend/lower.rs"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/frontend/function_abi.rs"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend.rs"
         }
       ],
       "evidence": [
@@ -11698,16 +12952,32 @@
         {
           "kind": "run_report",
           "path": "docs/reports/compiler-p4.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_suspend.rs"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_clock.rs"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend_tests.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p5.md"
         }
       ],
-      "reason": "関数値・capture・間接呼出し・failure/evidence/Never ABI拡大をsource/独自IRから同期Cで確認。captureの型・順序・所有化と返却後の寿命を保持。suspend文脈とsuspends metadataはP5で確認する。"
+      "reason": "同期/中断/evidence付き関数参照・closure・間接呼出し・ABI拡大をsource/独自IRからC両最適化で確認。中断をまたぐ所有capture、String producerの11byte保存先・同時保持・NULL出力・容量defect、外部FnRefと内部frame呼出しを検証。"
     },
     {
       "id": "emela_lir::Value::Coerce",
       "relation": "variant_entry",
       "legacy_role": "emit",
       "phase": "P5",
-      "status": "mapped",
+      "status": "verified",
       "source_scope": "source",
       "new_implementation": [
         {
@@ -11731,6 +13001,14 @@
         {
           "kind": "implementation",
           "path": "crates/emela-emb-compiler/src/backend/lower.rs"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/frontend/function_abi.rs"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend.rs"
         }
       ],
       "evidence": [
@@ -11761,16 +13039,32 @@
         {
           "kind": "run_report",
           "path": "docs/reports/compiler-p4.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_suspend.rs"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_clock.rs"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend_tests.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p5.md"
         }
       ],
-      "reason": "関数値・capture・間接呼出し・failure/evidence/Never ABI拡大をsource/独自IRから同期Cで確認。captureの型・順序・所有化と返却後の寿命を保持。suspend文脈とsuspends metadataはP5で確認する。"
+      "reason": "同期/中断/evidence付き関数参照・closure・間接呼出し・ABI拡大をsource/独自IRからC両最適化で確認。中断をまたぐ所有capture、String producerの11byte保存先・同時保持・NULL出力・容量defect、外部FnRefと内部frame呼出しを検証。"
     },
     {
       "id": "emela_lir::Value::Coerce.0",
       "relation": "member_of_variant",
       "legacy_role": "emit",
       "phase": "P5",
-      "status": "mapped",
+      "status": "verified",
       "source_scope": "schema",
       "new_implementation": [
         {
@@ -11794,6 +13088,14 @@
         {
           "kind": "implementation",
           "path": "crates/emela-emb-compiler/src/backend/lower.rs"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/frontend/function_abi.rs"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend.rs"
         }
       ],
       "evidence": [
@@ -11824,9 +13126,25 @@
         {
           "kind": "run_report",
           "path": "docs/reports/compiler-p4.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_suspend.rs"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_clock.rs"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend_tests.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p5.md"
         }
       ],
-      "reason": "関数値・capture・間接呼出し・failure/evidence/Never ABI拡大をsource/独自IRから同期Cで確認。captureの型・順序・所有化と返却後の寿命を保持。suspend文脈とsuspends metadataはP5で確認する。"
+      "reason": "同期/中断/evidence付き関数参照・closure・間接呼出し・ABI拡大をsource/独自IRからC両最適化で確認。中断をまたぐ所有capture、String producerの11byte保存先・同時保持・NULL出力・容量defect、外部FnRefと内部frame呼出しを検証。"
     },
     {
       "id": "emela_lir::Value::Const",
@@ -11953,7 +13271,7 @@
       "relation": "variant_entry",
       "legacy_role": "emit",
       "phase": "P5",
-      "status": "mapped",
+      "status": "verified",
       "source_scope": "source",
       "new_implementation": [
         {
@@ -11982,6 +13300,14 @@
         {
           "kind": "implementation",
           "path": "crates/emela-emb-compiler/src/backend/lower.rs"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/frontend/function_abi.rs"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend.rs"
         }
       ],
       "evidence": [
@@ -12008,16 +13334,32 @@
         {
           "kind": "run_report",
           "path": "docs/reports/compiler-p4.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_suspend.rs"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_clock.rs"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend_tests.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p5.md"
         }
       ],
-      "reason": "effect/handler/layer/labelと初期化要求を独自frontendからlowerへ接続し、静的/動的evidence・label keyとruntime ABI・cleanupを同期Cで確認。suspend文脈はP5以降で確認する。"
+      "reason": "P4同期handlerに加え、Asyncと通常effectのevidence要否を区別し、suspend operation/resume・Std.Clock/SystemClock/TestClock・State/高階callbackをsourceからCへ接続。明示taskadapter、source能力/中断制約、one-shot resumeを検証。"
     },
     {
       "id": "emela_lir::Value::EvExtend.base",
       "relation": "member_of_variant",
       "legacy_role": "emit",
       "phase": "P5",
-      "status": "mapped",
+      "status": "verified",
       "source_scope": "schema",
       "new_implementation": [
         {
@@ -12046,6 +13388,14 @@
         {
           "kind": "implementation",
           "path": "crates/emela-emb-compiler/src/backend/lower.rs"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/frontend/function_abi.rs"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend.rs"
         }
       ],
       "evidence": [
@@ -12072,16 +13422,32 @@
         {
           "kind": "run_report",
           "path": "docs/reports/compiler-p4.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_suspend.rs"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_clock.rs"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend_tests.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p5.md"
         }
       ],
-      "reason": "effect/handler/layer/labelと初期化要求を独自frontendからlowerへ接続し、静的/動的evidence・label keyとruntime ABI・cleanupを同期Cで確認。suspend文脈はP5以降で確認する。"
+      "reason": "P4同期handlerに加え、Asyncと通常effectのevidence要否を区別し、suspend operation/resume・Std.Clock/SystemClock/TestClock・State/高階callbackをsourceからCへ接続。明示taskadapter、source能力/中断制約、one-shot resumeを検証。"
     },
     {
       "id": "emela_lir::Value::EvExtend.bindings",
       "relation": "member_of_variant",
       "legacy_role": "emit",
       "phase": "P5",
-      "status": "mapped",
+      "status": "verified",
       "source_scope": "schema",
       "new_implementation": [
         {
@@ -12110,6 +13476,14 @@
         {
           "kind": "implementation",
           "path": "crates/emela-emb-compiler/src/backend/lower.rs"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/frontend/function_abi.rs"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend.rs"
         }
       ],
       "evidence": [
@@ -12136,16 +13510,32 @@
         {
           "kind": "run_report",
           "path": "docs/reports/compiler-p4.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_suspend.rs"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_clock.rs"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend_tests.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p5.md"
         }
       ],
-      "reason": "effect/handler/layer/labelと初期化要求を独自frontendからlowerへ接続し、静的/動的evidence・label keyとruntime ABI・cleanupを同期Cで確認。suspend文脈はP5以降で確認する。"
+      "reason": "P4同期handlerに加え、Asyncと通常effectのevidence要否を区別し、suspend operation/resume・Std.Clock/SystemClock/TestClock・State/高階callbackをsourceからCへ接続。明示taskadapter、source能力/中断制約、one-shot resumeを検証。"
     },
     {
       "id": "emela_lir::Value::EvLookup",
       "relation": "variant_entry",
       "legacy_role": "emit",
       "phase": "P5",
-      "status": "mapped",
+      "status": "verified",
       "source_scope": "source",
       "new_implementation": [
         {
@@ -12174,6 +13564,14 @@
         {
           "kind": "implementation",
           "path": "crates/emela-emb-compiler/src/backend/lower.rs"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/frontend/function_abi.rs"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend.rs"
         }
       ],
       "evidence": [
@@ -12200,16 +13598,32 @@
         {
           "kind": "run_report",
           "path": "docs/reports/compiler-p4.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_suspend.rs"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_clock.rs"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend_tests.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p5.md"
         }
       ],
-      "reason": "effect/handler/layer/labelと初期化要求を独自frontendからlowerへ接続し、静的/動的evidence・label keyとruntime ABI・cleanupを同期Cで確認。suspend文脈はP5以降で確認する。"
+      "reason": "P4同期handlerに加え、Asyncと通常effectのevidence要否を区別し、suspend operation/resume・Std.Clock/SystemClock/TestClock・State/高階callbackをsourceからCへ接続。明示taskadapter、source能力/中断制約、one-shot resumeを検証。"
     },
     {
       "id": "emela_lir::Value::EvLookup.effect",
       "relation": "member_of_variant",
       "legacy_role": "emit",
       "phase": "P5",
-      "status": "mapped",
+      "status": "verified",
       "source_scope": "schema",
       "new_implementation": [
         {
@@ -12238,6 +13652,14 @@
         {
           "kind": "implementation",
           "path": "crates/emela-emb-compiler/src/backend/lower.rs"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/frontend/function_abi.rs"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend.rs"
         }
       ],
       "evidence": [
@@ -12264,16 +13686,32 @@
         {
           "kind": "run_report",
           "path": "docs/reports/compiler-p4.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_suspend.rs"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_clock.rs"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend_tests.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p5.md"
         }
       ],
-      "reason": "effect/handler/layer/labelと初期化要求を独自frontendからlowerへ接続し、静的/動的evidence・label keyとruntime ABI・cleanupを同期Cで確認。suspend文脈はP5以降で確認する。"
+      "reason": "P4同期handlerに加え、Asyncと通常effectのevidence要否を区別し、suspend operation/resume・Std.Clock/SystemClock/TestClock・State/高階callbackをsourceからCへ接続。明示taskadapter、source能力/中断制約、one-shot resumeを検証。"
     },
     {
       "id": "emela_lir::Value::EvLookup.ev",
       "relation": "member_of_variant",
       "legacy_role": "emit",
       "phase": "P5",
-      "status": "mapped",
+      "status": "verified",
       "source_scope": "schema",
       "new_implementation": [
         {
@@ -12302,6 +13740,14 @@
         {
           "kind": "implementation",
           "path": "crates/emela-emb-compiler/src/backend/lower.rs"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/frontend/function_abi.rs"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend.rs"
         }
       ],
       "evidence": [
@@ -12328,9 +13774,25 @@
         {
           "kind": "run_report",
           "path": "docs/reports/compiler-p4.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_suspend.rs"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_clock.rs"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend_tests.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p5.md"
         }
       ],
-      "reason": "effect/handler/layer/labelと初期化要求を独自frontendからlowerへ接続し、静的/動的evidence・label keyとruntime ABI・cleanupを同期Cで確認。suspend文脈はP5以降で確認する。"
+      "reason": "P4同期handlerに加え、Asyncと通常effectのevidence要否を区別し、suspend operation/resume・Std.Clock/SystemClock/TestClock・State/高階callbackをsourceからCへ接続。明示taskadapter、source能力/中断制約、one-shot resumeを検証。"
     },
     {
       "id": "emela_lir::Value::Fiber",
@@ -12561,7 +14023,7 @@
       "relation": "variant_entry",
       "legacy_role": "emit",
       "phase": "P5",
-      "status": "mapped",
+      "status": "verified",
       "source_scope": "source",
       "new_implementation": [
         {
@@ -12585,6 +14047,14 @@
         {
           "kind": "implementation",
           "path": "crates/emela-emb-compiler/src/backend/lower.rs"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/frontend/function_abi.rs"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend.rs"
         }
       ],
       "evidence": [
@@ -12615,16 +14085,32 @@
         {
           "kind": "run_report",
           "path": "docs/reports/compiler-p4.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_suspend.rs"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_clock.rs"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend_tests.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p5.md"
         }
       ],
-      "reason": "関数値・capture・間接呼出し・failure/evidence/Never ABI拡大をsource/独自IRから同期Cで確認。captureの型・順序・所有化と返却後の寿命を保持。suspend文脈とsuspends metadataはP5で確認する。"
+      "reason": "同期/中断/evidence付き関数参照・closure・間接呼出し・ABI拡大をsource/独自IRからC両最適化で確認。中断をまたぐ所有capture、String producerの11byte保存先・同時保持・NULL出力・容量defect、外部FnRefと内部frame呼出しを検証。"
     },
     {
       "id": "emela_lir::Value::FnRef.0",
       "relation": "member_of_variant",
       "legacy_role": "emit",
       "phase": "P5",
-      "status": "mapped",
+      "status": "verified",
       "source_scope": "schema",
       "new_implementation": [
         {
@@ -12648,6 +14134,14 @@
         {
           "kind": "implementation",
           "path": "crates/emela-emb-compiler/src/backend/lower.rs"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/frontend/function_abi.rs"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend.rs"
         }
       ],
       "evidence": [
@@ -12678,16 +14172,32 @@
         {
           "kind": "run_report",
           "path": "docs/reports/compiler-p4.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_suspend.rs"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_clock.rs"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend_tests.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p5.md"
         }
       ],
-      "reason": "関数値・capture・間接呼出し・failure/evidence/Never ABI拡大をsource/独自IRから同期Cで確認。captureの型・順序・所有化と返却後の寿命を保持。suspend文脈とsuspends metadataはP5で確認する。"
+      "reason": "同期/中断/evidence付き関数参照・closure・間接呼出し・ABI拡大をsource/独自IRからC両最適化で確認。中断をまたぐ所有capture、String producerの11byte保存先・同時保持・NULL出力・容量defect、外部FnRefと内部frame呼出しを検証。"
     },
     {
       "id": "emela_lir::Value::Handler",
       "relation": "variant_entry",
       "legacy_role": "emit",
       "phase": "P5",
-      "status": "mapped",
+      "status": "verified",
       "source_scope": "source",
       "new_implementation": [
         {
@@ -12711,6 +14221,14 @@
         {
           "kind": "implementation",
           "path": "crates/emela-emb-compiler/src/backend/lower.rs"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/frontend/function_abi.rs"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend.rs"
         }
       ],
       "evidence": [
@@ -12737,16 +14255,32 @@
         {
           "kind": "run_report",
           "path": "docs/reports/compiler-p4.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_suspend.rs"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_clock.rs"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend_tests.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p5.md"
         }
       ],
-      "reason": "effect/handler/layer/labelと初期化要求を独自frontendからlowerへ接続し、静的/動的evidence・label keyとruntime ABI・cleanupを同期Cで確認。suspend文脈はP5以降で確認する。"
+      "reason": "P4同期handlerに加え、Asyncと通常effectのevidence要否を区別し、suspend operation/resume・Std.Clock/SystemClock/TestClock・State/高階callbackをsourceからCへ接続。明示taskadapter、source能力/中断制約、one-shot resumeを検証。"
     },
     {
       "id": "emela_lir::Value::Handler.effect",
       "relation": "member_of_variant",
       "legacy_role": "emit",
       "phase": "P5",
-      "status": "mapped",
+      "status": "verified",
       "source_scope": "schema",
       "new_implementation": [
         {
@@ -12770,6 +14304,14 @@
         {
           "kind": "implementation",
           "path": "crates/emela-emb-compiler/src/backend/lower.rs"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/frontend/function_abi.rs"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend.rs"
         }
       ],
       "evidence": [
@@ -12796,16 +14338,32 @@
         {
           "kind": "run_report",
           "path": "docs/reports/compiler-p4.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_suspend.rs"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_clock.rs"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend_tests.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p5.md"
         }
       ],
-      "reason": "effect/handler/layer/labelと初期化要求を独自frontendからlowerへ接続し、静的/動的evidence・label keyとruntime ABI・cleanupを同期Cで確認。suspend文脈はP5以降で確認する。"
+      "reason": "P4同期handlerに加え、Asyncと通常effectのevidence要否を区別し、suspend operation/resume・Std.Clock/SystemClock/TestClock・State/高階callbackをsourceからCへ接続。明示taskadapter、source能力/中断制約、one-shot resumeを検証。"
     },
     {
       "id": "emela_lir::Value::Handler.name",
       "relation": "member_of_variant",
       "legacy_role": "emit",
       "phase": "P5",
-      "status": "mapped",
+      "status": "verified",
       "source_scope": "schema",
       "new_implementation": [
         {
@@ -12829,6 +14387,14 @@
         {
           "kind": "implementation",
           "path": "crates/emela-emb-compiler/src/backend/lower.rs"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/frontend/function_abi.rs"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend.rs"
         }
       ],
       "evidence": [
@@ -12855,16 +14421,32 @@
         {
           "kind": "run_report",
           "path": "docs/reports/compiler-p4.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_suspend.rs"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_clock.rs"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend_tests.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p5.md"
         }
       ],
-      "reason": "effect/handler/layer/labelと初期化要求を独自frontendからlowerへ接続し、静的/動的evidence・label keyとruntime ABI・cleanupを同期Cで確認。suspend文脈はP5以降で確認する。"
+      "reason": "P4同期handlerに加え、Asyncと通常effectのevidence要否を区別し、suspend operation/resume・Std.Clock/SystemClock/TestClock・State/高階callbackをsourceからCへ接続。明示taskadapter、source能力/中断制約、one-shot resumeを検証。"
     },
     {
       "id": "emela_lir::Value::Handler.ops",
       "relation": "member_of_variant",
       "legacy_role": "emit",
       "phase": "P5",
-      "status": "mapped",
+      "status": "verified",
       "source_scope": "schema",
       "new_implementation": [
         {
@@ -12888,6 +14470,14 @@
         {
           "kind": "implementation",
           "path": "crates/emela-emb-compiler/src/backend/lower.rs"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/frontend/function_abi.rs"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend.rs"
         }
       ],
       "evidence": [
@@ -12914,9 +14504,25 @@
         {
           "kind": "run_report",
           "path": "docs/reports/compiler-p4.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_suspend.rs"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_clock.rs"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend_tests.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p5.md"
         }
       ],
-      "reason": "effect/handler/layer/labelと初期化要求を独自frontendからlowerへ接続し、静的/動的evidence・label keyとruntime ABI・cleanupを同期Cで確認。suspend文脈はP5以降で確認する。"
+      "reason": "P4同期handlerに加え、Asyncと通常effectのevidence要否を区別し、suspend operation/resume・Std.Clock/SystemClock/TestClock・State/高階callbackをsourceからCへ接続。明示taskadapter、source能力/中断制約、one-shot resumeを検証。"
     },
     {
       "id": "emela_lir::Value::IsError",
@@ -13502,7 +15108,7 @@
       "relation": "variant_entry",
       "legacy_role": "reject",
       "phase": "P5",
-      "status": "mapped",
+      "status": "verified",
       "source_scope": "source",
       "new_implementation": [
         {
@@ -13521,6 +15127,14 @@
         {
           "kind": "implementation",
           "path": "crates/emela-emb-compiler/src/backend/lower.rs"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/frontend/function_abi.rs"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend.rs"
         }
       ],
       "evidence": [
@@ -13551,16 +15165,32 @@
         {
           "kind": "run_report",
           "path": "docs/reports/compiler-p4.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_suspend.rs"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_clock.rs"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend_tests.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p5.md"
         }
       ],
-      "reason": "関数値・capture・間接呼出し・failure/evidence/Never ABI拡大をsource/独自IRから同期Cで確認。captureの型・順序・所有化と返却後の寿命を保持。suspend文脈とsuspends metadataはP5で確認する。"
+      "reason": "同期/中断/evidence付き関数参照・closure・間接呼出し・ABI拡大をsource/独自IRからC両最適化で確認。中断をまたぐ所有capture、String producerの11byte保存先・同時保持・NULL出力・容量defect、外部FnRefと内部frame呼出しを検証。"
     },
     {
       "id": "emela_lir::Value::MakeClosure.captures",
       "relation": "member_of_variant",
       "legacy_role": "reject",
       "phase": "P5",
-      "status": "mapped",
+      "status": "verified",
       "source_scope": "schema",
       "new_implementation": [
         {
@@ -13579,6 +15209,14 @@
         {
           "kind": "implementation",
           "path": "crates/emela-emb-compiler/src/backend/lower.rs"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/frontend/function_abi.rs"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend.rs"
         }
       ],
       "evidence": [
@@ -13609,16 +15247,32 @@
         {
           "kind": "run_report",
           "path": "docs/reports/compiler-p4.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_suspend.rs"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_clock.rs"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend_tests.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p5.md"
         }
       ],
-      "reason": "関数値・capture・間接呼出し・failure/evidence/Never ABI拡大をsource/独自IRから同期Cで確認。captureの型・順序・所有化と返却後の寿命を保持。suspend文脈とsuspends metadataはP5で確認する。"
+      "reason": "同期/中断/evidence付き関数参照・closure・間接呼出し・ABI拡大をsource/独自IRからC両最適化で確認。中断をまたぐ所有capture、String producerの11byte保存先・同時保持・NULL出力・容量defect、外部FnRefと内部frame呼出しを検証。"
     },
     {
       "id": "emela_lir::Value::MakeClosure.function",
       "relation": "member_of_variant",
       "legacy_role": "reject",
       "phase": "P5",
-      "status": "mapped",
+      "status": "verified",
       "source_scope": "schema",
       "new_implementation": [
         {
@@ -13637,6 +15291,14 @@
         {
           "kind": "implementation",
           "path": "crates/emela-emb-compiler/src/backend/lower.rs"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/frontend/function_abi.rs"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend.rs"
         }
       ],
       "evidence": [
@@ -13667,9 +15329,25 @@
         {
           "kind": "run_report",
           "path": "docs/reports/compiler-p4.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_suspend.rs"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_clock.rs"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend_tests.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p5.md"
         }
       ],
-      "reason": "関数値・capture・間接呼出し・failure/evidence/Never ABI拡大をsource/独自IRから同期Cで確認。captureの型・順序・所有化と返却後の寿命を保持。suspend文脈とsuspends metadataはP5で確認する。"
+      "reason": "同期/中断/evidence付き関数参照・closure・間接呼出し・ABI拡大をsource/独自IRからC両最適化で確認。中断をまたぐ所有capture、String producerの11byte保存先・同時保持・NULL出力・容量defect、外部FnRefと内部frame呼出しを検証。"
     },
     {
       "id": "emela_lir::Value::Prim",
@@ -14531,16 +16209,50 @@
     {
       "id": "emela_lir::Stmt::Protect",
       "context": "sync",
-      "status": "pending",
-      "evidence": [],
-      "reason": ""
+      "status": "verified",
+      "evidence": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_suspend.rs"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_clock.rs"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend_tests.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p5.md"
+        }
+      ],
+      "reason": "成功/失敗とも中断するcleanup完了前に元結果を公開せず、失敗payloadを保持して外側のescapeへ配送する。取消時のcleanup完了はP6へ残す。"
     },
     {
       "id": "emela_lir::Stmt::Protect",
       "context": "suspend",
-      "status": "pending",
-      "evidence": [],
-      "reason": ""
+      "status": "verified",
+      "evidence": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_suspend.rs"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_clock.rs"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend_tests.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p5.md"
+        }
+      ],
+      "reason": "成功/失敗とも中断するcleanup完了前に元結果を公開せず、失敗payloadを保持して外側のescapeへ配送する。取消時のcleanup完了はP6へ残す。"
     },
     {
       "id": "emela_lir::Stmt::Dup",
@@ -14849,7 +16561,7 @@
     {
       "id": "emela_lir::Value::Call",
       "context": "sync",
-      "status": "mapped",
+      "status": "verified",
       "evidence": [
         {
           "kind": "source_test",
@@ -14862,16 +16574,49 @@
         {
           "kind": "run_report",
           "path": "docs/reports/compiler-p1.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_suspend.rs"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_clock.rs"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend_tests.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p5.md"
         }
       ],
-      "reason": "同期scalarで実行済み。管理値・failure等との組合せを後続段階で追加するため文脈全体は未完了。"
+      "reason": "同期/中断/evidence付き関数参照・closure・間接呼出し・ABI拡大をsource/独自IRからC両最適化で確認。中断をまたぐ所有capture、String producerの11byte保存先・同時保持・NULL出力・容量defect、外部FnRefと内部frame呼出しを検証。"
     },
     {
       "id": "emela_lir::Value::Call",
       "context": "suspend",
-      "status": "pending",
-      "evidence": [],
-      "reason": ""
+      "status": "verified",
+      "evidence": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_suspend.rs"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_clock.rs"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend_tests.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p5.md"
+        }
+      ],
+      "reason": "同期/中断/evidence付き関数参照・closure・間接呼出し・ABI拡大をsource/独自IRからC両最適化で確認。中断をまたぐ所有capture、String producerの11byte保存先・同時保持・NULL出力・容量defect、外部FnRefと内部frame呼出しを検証。"
     },
     {
       "id": "emela_lir::Value::Builtin",
@@ -15187,14 +16932,30 @@
         {
           "kind": "run_report",
           "path": "docs/reports/compiler-p4.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_suspend.rs"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_clock.rs"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend_tests.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p5.md"
         }
       ],
-      "reason": "関数値・capture・間接呼出し・failure/evidence/Never ABI拡大をsource/独自IRから同期Cで確認。captureの型・順序・所有化と返却後の寿命を保持。suspend文脈とsuspends metadataはP5で確認する。"
+      "reason": "同期/中断/evidence付き関数参照・closure・間接呼出し・ABI拡大をsource/独自IRからC両最適化で確認。中断をまたぐ所有capture、String producerの11byte保存先・同時保持・NULL出力・容量defect、外部FnRefと内部frame呼出しを検証。"
     },
     {
       "id": "emela_lir::Value::FnRef",
       "context": "suspend",
-      "status": "mapped",
+      "status": "verified",
       "evidence": [
         {
           "kind": "source_test",
@@ -15219,9 +16980,25 @@
         {
           "kind": "run_report",
           "path": "docs/reports/compiler-p4.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_suspend.rs"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_clock.rs"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend_tests.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p5.md"
         }
       ],
-      "reason": "P4の同期経路は確認済み。suspend経路はP5以降の独立した実行証拠で判定する。"
+      "reason": "同期/中断/evidence付き関数参照・closure・間接呼出し・ABI拡大をsource/独自IRからC両最適化で確認。中断をまたぐ所有capture、String producerの11byte保存先・同時保持・NULL出力・容量defect、外部FnRefと内部frame呼出しを検証。"
     },
     {
       "id": "emela_lir::Value::Closure",
@@ -15251,14 +17028,30 @@
         {
           "kind": "run_report",
           "path": "docs/reports/compiler-p4.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_suspend.rs"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_clock.rs"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend_tests.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p5.md"
         }
       ],
-      "reason": "関数値・capture・間接呼出し・failure/evidence/Never ABI拡大をsource/独自IRから同期Cで確認。captureの型・順序・所有化と返却後の寿命を保持。suspend文脈とsuspends metadataはP5で確認する。"
+      "reason": "同期/中断/evidence付き関数参照・closure・間接呼出し・ABI拡大をsource/独自IRからC両最適化で確認。中断をまたぐ所有capture、String producerの11byte保存先・同時保持・NULL出力・容量defect、外部FnRefと内部frame呼出しを検証。"
     },
     {
       "id": "emela_lir::Value::Closure",
       "context": "suspend",
-      "status": "mapped",
+      "status": "verified",
       "evidence": [
         {
           "kind": "source_test",
@@ -15283,9 +17076,25 @@
         {
           "kind": "run_report",
           "path": "docs/reports/compiler-p4.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_suspend.rs"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_clock.rs"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend_tests.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p5.md"
         }
       ],
-      "reason": "P4の同期経路は確認済み。suspend経路はP5以降の独立した実行証拠で判定する。"
+      "reason": "同期/中断/evidence付き関数参照・closure・間接呼出し・ABI拡大をsource/独自IRからC両最適化で確認。中断をまたぐ所有capture、String producerの11byte保存先・同時保持・NULL出力・容量defect、外部FnRefと内部frame呼出しを検証。"
     },
     {
       "id": "emela_lir::Value::MakeClosure",
@@ -15325,14 +17134,30 @@
         {
           "kind": "run_report",
           "path": "docs/reports/compiler-p4.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_suspend.rs"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_clock.rs"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend_tests.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p5.md"
         }
       ],
-      "reason": "effect/handler/layer/labelと初期化要求を独自frontendからlowerへ接続し、静的/動的evidence・label keyとruntime ABI・cleanupを同期Cで確認。suspend文脈はP5以降で確認する。"
+      "reason": "P4同期handlerに加え、Asyncと通常effectのevidence要否を区別し、suspend operation/resume・Std.Clock/SystemClock/TestClock・State/高階callbackをsourceからCへ接続。明示taskadapter、source能力/中断制約、one-shot resumeを検証。"
     },
     {
       "id": "emela_lir::Value::EvLookup",
       "context": "suspend",
-      "status": "mapped",
+      "status": "verified",
       "evidence": [
         {
           "kind": "source_test",
@@ -15353,9 +17178,25 @@
         {
           "kind": "run_report",
           "path": "docs/reports/compiler-p4.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_suspend.rs"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_clock.rs"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend_tests.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p5.md"
         }
       ],
-      "reason": "P4の同期経路は確認済み。suspend経路はP5以降の独立した実行証拠で判定する。"
+      "reason": "P4同期handlerに加え、Asyncと通常effectのevidence要否を区別し、suspend operation/resume・Std.Clock/SystemClock/TestClock・State/高階callbackをsourceからCへ接続。明示taskadapter、source能力/中断制約、one-shot resumeを検証。"
     },
     {
       "id": "emela_lir::Value::EvExtend",
@@ -15381,14 +17222,30 @@
         {
           "kind": "run_report",
           "path": "docs/reports/compiler-p4.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_suspend.rs"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_clock.rs"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend_tests.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p5.md"
         }
       ],
-      "reason": "effect/handler/layer/labelと初期化要求を独自frontendからlowerへ接続し、静的/動的evidence・label keyとruntime ABI・cleanupを同期Cで確認。suspend文脈はP5以降で確認する。"
+      "reason": "P4同期handlerに加え、Asyncと通常effectのevidence要否を区別し、suspend operation/resume・Std.Clock/SystemClock/TestClock・State/高階callbackをsourceからCへ接続。明示taskadapter、source能力/中断制約、one-shot resumeを検証。"
     },
     {
       "id": "emela_lir::Value::EvExtend",
       "context": "suspend",
-      "status": "mapped",
+      "status": "verified",
       "evidence": [
         {
           "kind": "source_test",
@@ -15409,9 +17266,25 @@
         {
           "kind": "run_report",
           "path": "docs/reports/compiler-p4.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_suspend.rs"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_clock.rs"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend_tests.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p5.md"
         }
       ],
-      "reason": "P4の同期経路は確認済み。suspend経路はP5以降の独立した実行証拠で判定する。"
+      "reason": "P4同期handlerに加え、Asyncと通常effectのevidence要否を区別し、suspend operation/resume・Std.Clock/SystemClock/TestClock・State/高階callbackをsourceからCへ接続。明示taskadapter、source能力/中断制約、one-shot resumeを検証。"
     },
     {
       "id": "emela_lir::Value::Handler",
@@ -15437,14 +17310,30 @@
         {
           "kind": "run_report",
           "path": "docs/reports/compiler-p4.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_suspend.rs"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_clock.rs"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend_tests.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p5.md"
         }
       ],
-      "reason": "effect/handler/layer/labelと初期化要求を独自frontendからlowerへ接続し、静的/動的evidence・label keyとruntime ABI・cleanupを同期Cで確認。suspend文脈はP5以降で確認する。"
+      "reason": "P4同期handlerに加え、Asyncと通常effectのevidence要否を区別し、suspend operation/resume・Std.Clock/SystemClock/TestClock・State/高階callbackをsourceからCへ接続。明示taskadapter、source能力/中断制約、one-shot resumeを検証。"
     },
     {
       "id": "emela_lir::Value::Handler",
       "context": "suspend",
-      "status": "mapped",
+      "status": "verified",
       "evidence": [
         {
           "kind": "source_test",
@@ -15465,9 +17354,25 @@
         {
           "kind": "run_report",
           "path": "docs/reports/compiler-p4.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_suspend.rs"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_clock.rs"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend_tests.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p5.md"
         }
       ],
-      "reason": "P4の同期経路は確認済み。suspend経路はP5以降の独立した実行証拠で判定する。"
+      "reason": "P4同期handlerに加え、Asyncと通常effectのevidence要否を区別し、suspend operation/resume・Std.Clock/SystemClock/TestClock・State/高階callbackをsourceからCへ接続。明示taskadapter、source能力/中断制約、one-shot resumeを検証。"
     },
     {
       "id": "emela_lir::Value::Fiber",
@@ -15592,14 +17497,30 @@
         {
           "kind": "run_report",
           "path": "docs/reports/compiler-p4.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_suspend.rs"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_clock.rs"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend_tests.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p5.md"
         }
       ],
-      "reason": "関数値・capture・間接呼出し・failure/evidence/Never ABI拡大をsource/独自IRから同期Cで確認。captureの型・順序・所有化と返却後の寿命を保持。suspend文脈とsuspends metadataはP5で確認する。"
+      "reason": "同期/中断/evidence付き関数参照・closure・間接呼出し・ABI拡大をsource/独自IRからC両最適化で確認。中断をまたぐ所有capture、String producerの11byte保存先・同時保持・NULL出力・容量defect、外部FnRefと内部frame呼出しを検証。"
     },
     {
       "id": "emela_lir::Value::Coerce",
       "context": "suspend",
-      "status": "mapped",
+      "status": "verified",
       "evidence": [
         {
           "kind": "source_test",
@@ -15624,9 +17545,25 @@
         {
           "kind": "run_report",
           "path": "docs/reports/compiler-p4.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_suspend.rs"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_clock.rs"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend_tests.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p5.md"
         }
       ],
-      "reason": "P4の同期経路は確認済み。suspend経路はP5以降の独立した実行証拠で判定する。"
+      "reason": "同期/中断/evidence付き関数参照・closure・間接呼出し・ABI拡大をsource/独自IRからC両最適化で確認。中断をまたぐ所有capture、String producerの11byte保存先・同時保持・NULL出力・容量defect、外部FnRefと内部frame呼出しを検証。"
     },
     {
       "id": "emela_lir::RuntimeOp::ShowString",
@@ -15729,7 +17666,7 @@
     {
       "id": "emela_lir::Callee::Direct",
       "context": "sync",
-      "status": "mapped",
+      "status": "verified",
       "evidence": [
         {
           "kind": "source_test",
@@ -15742,44 +17679,145 @@
         {
           "kind": "run_report",
           "path": "docs/reports/compiler-p1.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_suspend.rs"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_clock.rs"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend_tests.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p5.md"
         }
       ],
-      "reason": "同期scalarで実行済み。管理値・failure等との組合せを後続段階で追加するため文脈全体は未完了。"
+      "reason": "同期/中断/evidence付き関数参照・closure・間接呼出し・ABI拡大をsource/独自IRからC両最適化で確認。中断をまたぐ所有capture、String producerの11byte保存先・同時保持・NULL出力・容量defect、外部FnRefと内部frame呼出しを検証。"
     },
     {
       "id": "emela_lir::Callee::Direct",
       "context": "suspend",
-      "status": "pending",
-      "evidence": [],
-      "reason": ""
+      "status": "verified",
+      "evidence": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_suspend.rs"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_clock.rs"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend_tests.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p5.md"
+        }
+      ],
+      "reason": "同期/中断/evidence付き関数参照・closure・間接呼出し・ABI拡大をsource/独自IRからC両最適化で確認。中断をまたぐ所有capture、String producerの11byte保存先・同時保持・NULL出力・容量defect、外部FnRefと内部frame呼出しを検証。"
     },
     {
       "id": "emela_lir::Callee::Indirect",
       "context": "sync",
-      "status": "pending",
-      "evidence": [],
-      "reason": ""
+      "status": "verified",
+      "evidence": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_suspend.rs"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_clock.rs"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend_tests.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p5.md"
+        }
+      ],
+      "reason": "同期/中断/evidence付き関数参照・closure・間接呼出し・ABI拡大をsource/独自IRからC両最適化で確認。中断をまたぐ所有capture、String producerの11byte保存先・同時保持・NULL出力・容量defect、外部FnRefと内部frame呼出しを検証。"
     },
     {
       "id": "emela_lir::Callee::Indirect",
       "context": "suspend",
-      "status": "pending",
-      "evidence": [],
-      "reason": ""
+      "status": "verified",
+      "evidence": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_suspend.rs"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_clock.rs"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend_tests.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p5.md"
+        }
+      ],
+      "reason": "同期/中断/evidence付き関数参照・closure・間接呼出し・ABI拡大をsource/独自IRからC両最適化で確認。中断をまたぐ所有capture、String producerの11byte保存先・同時保持・NULL出力・容量defect、外部FnRefと内部frame呼出しを検証。"
     },
     {
       "id": "emela_lir::Callee::Op",
       "context": "sync",
-      "status": "pending",
-      "evidence": [],
-      "reason": ""
+      "status": "verified",
+      "evidence": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_suspend.rs"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_clock.rs"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend_tests.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p5.md"
+        }
+      ],
+      "reason": "同期/中断/evidence付き関数参照・closure・間接呼出し・ABI拡大をsource/独自IRからC両最適化で確認。中断をまたぐ所有capture、String producerの11byte保存先・同時保持・NULL出力・容量defect、外部FnRefと内部frame呼出しを検証。"
     },
     {
       "id": "emela_lir::Callee::Op",
       "context": "suspend",
-      "status": "pending",
-      "evidence": [],
-      "reason": ""
+      "status": "verified",
+      "evidence": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_suspend.rs"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_clock.rs"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend_tests.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p5.md"
+        }
+      ],
+      "reason": "同期/中断/evidence付き関数参照・closure・間接呼出し・ABI拡大をsource/独自IRからC両最適化で確認。中断をまたぐ所有capture、String producerの11byte保存先・同時保持・NULL出力・容量defect、外部FnRefと内部frame呼出しを検証。"
     },
     {
       "id": "emela_lir::OnFail::Break",
@@ -16294,7 +18332,7 @@
     {
       "id": "emela_core::Builtin::StringAppend",
       "context": "common",
-      "status": "mapped",
+      "status": "verified",
       "evidence": [
         {
           "kind": "review",
@@ -16307,9 +18345,29 @@
         {
           "kind": "run_report",
           "path": "docs/reports/compiler-p2.md"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_string_alias.rs"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_time.rs"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_suspend.rs"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_clock.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p5.md"
         }
       ],
-      "reason": "readonly literal prefix・動的append・caller bufferをsource/Cで確認。所有値と中断の組合せは後段。"
+      "reason": "既存同期/中断のString操作に加え、入力・出力が重なるviewを固定snapshotで維持。0/1/512/513の容量境界、小callerbuffer、tail recursionのstack非増加と所有Stringの中断越えをC両最適化で確認。"
     },
     {
       "id": "emela_core::Builtin::StringContains",
@@ -19171,47 +21229,109 @@
       "target": "emit",
       "name": "suspend::coerce_adapts_sync_and_suspend_function_values_to_a_suspend_evidence_abi",
       "legacy_path": "tests/suspend/mod.rs",
-      "status": "mapped",
-      "new_tests": [],
+      "status": "replaced",
+      "new_tests": [
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend_tests.rs",
+          "symbol": "function_coercions_adapt_sync_and_suspend_values_to_suspending_evidence_calls"
+        }
+      ],
       "evidence": [
         {
           "kind": "run_report",
           "path": "docs/reports/compiler-p4.md"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend_tests.rs",
+          "symbol": "function_coercions_adapt_sync_and_suspend_values_to_suspending_evidence_calls"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p5.md"
         }
       ],
-      "reason": "P4の同期source/IR実行へ対応付けた。元試験のsuspend・取消・全corpus観点を照合するまで最終状態にしない。"
+      "reason": "固定旧の独自IR入力と観測を再構成し、C両最適化・容量/所有権境界を検証。source経路はP5source試験に分けて記録する。"
     },
     {
       "target": "emit",
       "name": "suspend::constructing_an_immediate_handler_does_not_emit_a_scheduler",
       "legacy_path": "tests/suspend/mod.rs",
-      "status": "mapped",
-      "new_tests": [],
+      "status": "replaced",
+      "new_tests": [
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend_tests.rs",
+          "symbol": "constructing_an_immediate_handler_keeps_scheduler_storage_omitted"
+        }
+      ],
       "evidence": [
         {
           "kind": "run_report",
           "path": "docs/reports/compiler-p4.md"
+        },
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend_tests.rs",
+          "symbol": "constructing_an_immediate_handler_keeps_scheduler_storage_omitted"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p5.md"
         }
       ],
-      "reason": "P4の同期source/IR実行へ対応付けた。元試験のsuspend・取消・全corpus観点を照合するまで最終状態にしない。"
+      "reason": "固定旧の独自IR入力と観測を再構成し、C両最適化・容量/所有権境界を検証。source経路はP5source試験に分けて記録する。"
     },
     {
       "target": "emit",
       "name": "suspend::suspend_fnrefs_dispatch_to_external_tasks_and_internal_frames",
       "legacy_path": "tests/suspend/mod.rs",
-      "status": "pending",
-      "new_tests": [],
-      "evidence": [],
-      "reason": ""
+      "status": "replaced",
+      "new_tests": [
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend_tests.rs",
+          "symbol": "suspending_function_references_dispatch_to_external_tasks_then_internal_frames"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend_tests.rs",
+          "symbol": "suspending_function_references_dispatch_to_external_tasks_then_internal_frames"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p5.md"
+        }
+      ],
+      "reason": "固定旧の独自IR入力と観測を再構成し、C両最適化・容量/所有権境界を検証。source経路はP5source試験に分けて記録する。"
     },
     {
       "target": "emit",
       "name": "suspend::sync_string_producers_coerced_to_suspend_values_keep_their_backing_and_small_buffer",
       "legacy_path": "tests/suspend/mod.rs",
-      "status": "pending",
-      "new_tests": [],
-      "evidence": [],
-      "reason": ""
+      "status": "replaced",
+      "new_tests": [
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend_tests.rs",
+          "symbol": "synchronous_string_producers_coerced_to_suspend_values_keep_small_buffers_and_owned_results"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "ir_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/suspend_tests.rs",
+          "symbol": "synchronous_string_producers_coerced_to_suspend_values_keep_small_buffers_and_owned_results"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p5.md"
+        }
+      ],
+      "reason": "固定旧の独自IR入力と観測を再構成し、C両最適化・容量/所有権境界を検証。source経路はP5source試験に分けて記録する。"
     },
     {
       "target": "emit",
@@ -19444,6 +21564,10 @@
         {
           "kind": "run_report",
           "path": "docs/reports/compiler-p4.md"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p5.md"
         }
       ]
     },
@@ -19523,6 +21647,10 @@
         {
           "kind": "run_report",
           "path": "docs/reports/compiler-p4.md"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p5.md"
         }
       ]
     },

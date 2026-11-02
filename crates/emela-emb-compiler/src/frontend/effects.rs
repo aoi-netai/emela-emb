@@ -200,6 +200,31 @@ struct Context<'a> {
     preserved_rows: HashSet<TypeId>,
 }
 impl Context<'_> {
+    fn escaped_resume(&self, operation: &ir::Expr) -> bool {
+        let ir::ExprKind::Lambda { body, .. } = &operation.kind else {
+            return false;
+        };
+        let Some(ir::Statement::Expr(ir::Expr {
+            kind: ir::ExprKind::Call { target, .. },
+            ..
+        })) = body.statements.last()
+        else {
+            return false;
+        };
+        let Some(&index) = self.index.get(target) else {
+            // A recursive operation body may still be under construction during
+            // source constraints. The complete fixed point revisits it later.
+            return false;
+        };
+        let function = &self.functions[index];
+        if function.immediate {
+            return false;
+        }
+        let (Some(resume), Some(body)) = (function.params.last(), &function.body) else {
+            return false;
+        };
+        super::check::suspend::resume_escapes(body, resume.id)
+    }
     fn error(&self, span: Span, message: impl Into<String>) -> Diagnostic {
         Diagnostic::new(DiagnosticKind::Type, span, message).in_source(self.source)
     }
@@ -446,9 +471,23 @@ impl Context<'_> {
                     needed.extend(self.expression(argument)?);
                 }
             }
-            E::Handler { operations, .. } => {
-                for operation in operations {
+            E::Handler {
+                effect, operations, ..
+            } => {
+                for (index, operation) in operations.iter().enumerate() {
                     needed.extend(self.handler_operation(operation)?);
+                    if self.catalog.core.effects[*effect].ops[index].suspend
+                        && self.escaped_resume(operation)
+                    {
+                        let async_effect = self.catalog.core.effects.iter().find_map(|(id, _)| {
+                            super::function_abi::is_async(&self.catalog.core, id).then_some(id)
+                        });
+                        if let Some(async_effect) = async_effect {
+                            needed.insert(
+                                self.catalog.core.types.intern(Type::Handler(async_effect)),
+                            );
+                        }
+                    }
                 }
             }
             E::Provide { bindings, body } => {

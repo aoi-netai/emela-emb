@@ -1300,13 +1300,17 @@ pub fn prepare(
                 let mut params = vec![state_type];
                 params.extend(operation.params.iter().copied());
                 let ret = if implementation.suspends {
+                    let empty = catalog.core.types.intern(b::Type::Set(Default::default()));
                     params.push(catalog.core.types.intern(b::Type::Fn(b::FnType {
                         params: vec![operation.ret],
                         ret: b::TypeId::UNIT,
                         fails: false,
                         suspends: false,
                         ev: false,
-                        sets: None,
+                        sets: Some(b::FnSets {
+                            errors: empty,
+                            effects: empty,
+                        }),
                     })));
                     b::TypeId::UNIT
                 } else {

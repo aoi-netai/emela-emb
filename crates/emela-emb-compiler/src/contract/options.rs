@@ -82,6 +82,9 @@ impl Default for Options {
 }
 
 impl Options {
+    /// Shared bound for validation and fixed-size String runtime scratch storage.
+    pub(crate) const MAX_STRING_CAPACITY: u16 = 512;
+
     /// Sets the maximum number of uint16_t words in a synchronous peripheral transfer.
     /// Zero is invalid. The default is 256 words; buffers are allocated on the C call stack.
     pub fn with_peripheral_buffer_capacity(mut self, words: u16) -> Self {
