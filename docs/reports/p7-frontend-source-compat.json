@@ -1,0 +1,136 @@
+{
+  "fixed_revision": "c34c0aeefdd966d854371b3110db00a47798751d",
+  "compiler_checkpoint": "549f048 plus the two tests in this commit",
+  "programs": [
+    {
+      "id": "program:7da4f2133cdd62429dab",
+      "legacy_tests": [
+        "frontend::backend_board_handlers_resolve_typecheck_and_lower_with_the_default_frontend"
+      ],
+      "files": [
+        {
+          "name": "app/src/main.emel",
+          "fixture": "sources/a009a39326fe15f46d2ba09f8a64c849be3dd60e11ac363a3a67e008f2f39d0b.emel",
+          "source_id": "source:a009a39326fe15f46d2b",
+          "sha256": "a009a39326fe15f46d2ba09f8a64c849be3dd60e11ac363a3a67e008f2f39d0b"
+        }
+      ],
+      "new_test": {
+        "kind": "source_test",
+        "path": "crates/emela-emb-compiler/tests/p7_services.rs",
+        "symbol": "legacy_board_source_compiles_with_its_original_budget_and_service_headers"
+      },
+      "options": {
+        "heap_bytes": 4096,
+        "frame_bytes": 2048,
+        "entry": "main"
+      },
+      "observations": [
+        "Original BoardClock/BoardConsole source accepts and generates emela_clock.h/emela_console.h at old heap4096/frame2048.",
+        "Old concrete main becomes Options::with_entry(\"main\"); source bytes unchanged. No runtime execution was required by the fixed-old test."
+      ],
+      "source_adaptation": "none; original fixture bytes and filenames unchanged",
+      "validation": {
+        "source_check": "passed",
+        "C_generation": "passed",
+        "C_runtime": "not applicable: fixed-old frontend/artifact-only observation"
+      }
+    },
+    {
+      "id": "program:1422093ab66b603822cf",
+      "legacy_tests": [
+        "frontend::unrelated_project_modules_under_embedded_remain_available"
+      ],
+      "files": [
+        {
+          "name": "app/src/main.emel",
+          "fixture": "sources/bc4bbf80ab40493a7f88d12b34fada853e417876816258f7f9f74115830d2b78.emel",
+          "source_id": "source:bc4bbf80ab40493a7f88",
+          "sha256": "bc4bbf80ab40493a7f88d12b34fada853e417876816258f7f9f74115830d2b78"
+        },
+        {
+          "name": "app/src/embedded/local.emel",
+          "fixture": "sources/707d8cd11e9ffe7d42d9dbd50b2a66fc1a656b0e05f97e6ae9c19fea71638695.emel",
+          "source_id": "source:707d8cd11e9ffe7d42d9",
+          "sha256": "707d8cd11e9ffe7d42d9dbd50b2a66fc1a656b0e05f97e6ae9c19fea71638695"
+        }
+      ],
+      "new_test": {
+        "kind": "source_test",
+        "path": "crates/emela-emb-compiler/tests/p7_services.rs",
+        "symbol": "legacy_embedded_namespace_errors_and_unrelated_project_module_are_preserved"
+      },
+      "options": {},
+      "observations": [
+        "Original Embedded.Local project module and main resolve/typecheck successfully, preserving both original filenames and bytes.",
+        "The new pipeline also generates C; the old observation is frontend success only."
+      ],
+      "source_adaptation": "none; original fixture bytes and filenames unchanged",
+      "validation": {
+        "source_check": "passed",
+        "C_generation": "passed",
+        "C_runtime": "not applicable: fixed-old frontend/artifact-only observation"
+      }
+    }
+  ],
+  "additional_nonruntime_legacy_cases": [
+    {
+      "legacy_test": "frontend::embedded_backend_does_not_supply_the_old_std_namespace",
+      "new_test": "legacy_embedded_namespace_errors_and_unrelated_project_module_are_preserved",
+      "observation": "Original Std.Embedded.Gpio import fails with a Module diagnostic naming the missing module. Old E0205 is replaced by the independent diagnostic kind/message."
+    },
+    {
+      "legacy_test": "frontend::embedded_backend_module_names_cannot_be_shadowed_by_project_files",
+      "new_test": "legacy_embedded_namespace_errors_and_unrelated_project_module_are_preserved",
+      "observation": "Original unimported project Embedded.Gpio file is rejected as reserved. Old E0203 is replaced by the independent Module diagnostic naming Embedded.Gpio."
+    },
+    {
+      "legacy_test": "sources::embedded_sources_are_supplied_by_the_backend_without_shadowing_core",
+      "observation": "All six original Embedded sources are byte-identical. sources::CORE_MODULES owns each name once; frontend::modules::collect lexes/parses every bundled module on every successful compile. These tests and existing p7_services execute that path. No dependency on emela_core or upstream bundles exists.",
+      "evidence": [
+        "crates/emela-emb-compiler/src/sources.rs",
+        "crates/emela-emb-compiler/src/frontend/modules.rs",
+        "crates/emela-emb-compiler/tests/p7_services.rs"
+      ],
+      "files": [
+        {
+          "path": "crates/emela-emb-compiler/lib/embedded/board.emel",
+          "sha256": "f86e8766b31c3611547428d7078b6c47cae44c7f924e4ee1aeba3c46774de2f5",
+          "fixed_old_bytes_match": true
+        },
+        {
+          "path": "crates/emela-emb-compiler/lib/embedded/gpio.emel",
+          "sha256": "b0628f656a4e25a67f10e4db89271a1e60cba3ee3c78f6bc0d45de3946ee4cda",
+          "fixed_old_bytes_match": true
+        },
+        {
+          "path": "crates/emela-emb-compiler/lib/embedded/i2c.emel",
+          "sha256": "89f38481c5f5513fa30007a0da8bbd28089b8d258888bf3a3a71f07b18291572",
+          "fixed_old_bytes_match": true
+        },
+        {
+          "path": "crates/emela-emb-compiler/lib/embedded/peripheral.emel",
+          "sha256": "8f8c8587636a9cbbf8007e73b4e5306ffbfbf07630cfee84481805e1693278a8",
+          "fixed_old_bytes_match": true
+        },
+        {
+          "path": "crates/emela-emb-compiler/lib/embedded/spi.emel",
+          "sha256": "c39a3023e9c2258ecdcb01378011355e961b4140aa2ad11eb616e4357e1c25bc",
+          "fixed_old_bytes_match": true
+        },
+        {
+          "path": "crates/emela-emb-compiler/lib/embedded/uart.emel",
+          "sha256": "49679fa4b32535805c085c1434ed4dd0f99c50b39d83f6f79136277148dec2c5",
+          "fixed_old_bytes_match": true
+        }
+      ]
+    }
+  ],
+  "validation": {
+    "command": "CARGO_PROFILE_TEST_OPT_LEVEL=1 cargo test -p emela-emb-compiler --test p7_services legacy_ --locked --offline",
+    "passed": 2,
+    "failed": 0,
+    "ignored": 0,
+    "C_optimization": "not applicable to these frontend/diagnostic/artifact-only observations; runtime services are separately exercised by existing p7_services/p7_legacy_services at O0/O2"
+  }
+}

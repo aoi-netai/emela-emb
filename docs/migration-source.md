@@ -573,3 +573,5 @@ P7の`p7_payload_compat.rs`は固定旧`tests/fiber/payload.rs`のsource3入力�
 固定旧 `tests/fiber/{aggregate,aggregate_abi,function_aggregate}.rs` の正常source12試験を13個のC実行へ接続した。[対応表](reports/p7-aggregate-source-compat.json) は元本文、C assertion、旧heap/frame/pool設定を記録する。sourceには明示C exportだけを加え、C型・関数・release名は生成headerから解決する。String/Option/List/tuple/enum/functionのnative・suspend・Scope/Deferred・handler resume・失敗・取消・NULL出力をC両最適化で確認し、所有経路は1000回の全heap回収を維持する。heaplessな借用tupleと関数aggregate、heap未指定時の所有producer拒否も元の観測どおり検証する。
 
 Deferred aggregateの768byte frame不足は、所有flagを値fieldの後ろへ配置する修正によって旧容量のまま解消した。P5中断6試験とP7payload3試験を併せて実行し、frame配置の変更後も成功した。
+
+P7 frontend補完: 固定旧 `tests/frontend.rs` の2拒否・2正常sourceと `tests/sources.rs` の6標準module供給/構文観測を `tests/p7_services.rs` と `docs/reports/p7-frontend-source-compat.json` へ対応付けた。正常原文は既存hash fixtureを使い、拒否原文とfilenameも保持する。Pome/driver/Coreへの依存は追加せず、独立Module診断・明示entryへ適応した。

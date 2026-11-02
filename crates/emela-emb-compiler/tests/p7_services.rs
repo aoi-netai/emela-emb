@@ -2,6 +2,73 @@ mod support;
 use emela_emb_compiler::{Options, Source, compile_sources};
 
 #[test]
+fn legacy_embedded_namespace_errors_and_unrelated_project_module_are_preserved() {
+    let errors = compile_sources(
+        &[Source::new(
+            "app/src/main.emel",
+            "import Std.Embedded.Gpio.{Gpio}\nfn main() { 0 }\n",
+        )],
+        "app/src/main.emel",
+        &Options::default(),
+    )
+    .unwrap_err();
+    assert!(errors.iter().any(|error| {
+        error.kind == emela_emb_compiler::DiagnosticKind::Module
+            && error.message.contains("Std.Embedded.Gpio")
+    }));
+    let errors = compile_sources(
+        &[
+            Source::new("app/src/main.emel", "fn main() { 0 }\n"),
+            Source::new("app/src/embedded/gpio.emel", "pub fn user_gpio() { 0 }\n"),
+        ],
+        "app/src/main.emel",
+        &Options::default(),
+    )
+    .unwrap_err();
+    assert!(errors.iter().any(|error| {
+        error.kind == emela_emb_compiler::DiagnosticKind::Module
+            && error.message.contains("Embedded.Gpio")
+            && error.message.contains("reserved")
+    }));
+    // These unchanged files had a frontend-only success expectation in the old test.
+    compile_sources(
+        &[
+            Source::new(
+                "app/src/main.emel",
+                include_str!("compat/legacy-corpus/sources/bc4bbf80ab40493a7f88d12b34fada853e417876816258f7f9f74115830d2b78.emel"),
+            ),
+            Source::new(
+                "app/src/embedded/local.emel",
+                include_str!("compat/legacy-corpus/sources/707d8cd11e9ffe7d42d9dbd50b2a66fc1a656b0e05f97e6ae9c19fea71638695.emel"),
+            ),
+        ],
+        "app/src/main.emel",
+        &Options::default(),
+    )
+    .unwrap();
+}
+
+#[test]
+fn legacy_board_source_compiles_with_its_original_budget_and_service_headers() {
+    let output = compile_sources(
+        &[Source::new(
+            "app/src/main.emel",
+            include_str!("compat/legacy-corpus/sources/a009a39326fe15f46d2ba09f8a64c849be3dd60e11ac363a3a67e008f2f39d0b.emel"),
+        )],
+        "app/src/main.emel",
+        &Options::default()
+            .with_entry("main")
+            .with_heap_bytes(4096)
+            .with_frame_bytes(2048),
+    )
+    .unwrap();
+    // The fixed-old test requires generation and these headers, not C execution.
+    for name in ["emela_clock.h", "emela_console.h"] {
+        assert!(output.files.iter().any(|file| file.path == name));
+    }
+}
+
+#[test]
 fn embedded_handlers_preserve_all_services_errors_buffers_and_owned_receive_lists() {
     let mut output = compile_sources(
         &[Source::new(
