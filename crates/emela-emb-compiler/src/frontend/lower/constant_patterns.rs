@@ -73,6 +73,7 @@ pub(super) fn allocate_structural_equality(
                 }
             }
             E::Call { args, .. }
+            | E::Fiber { args, .. }
             | E::Make { args, .. }
             | E::TraitCall { args, .. }
             | E::Builtin { args, .. }

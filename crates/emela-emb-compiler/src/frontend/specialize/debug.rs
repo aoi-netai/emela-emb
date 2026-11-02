@@ -260,6 +260,7 @@ pub(super) fn maximum_local(function: &ir::Function) -> Option<usize> {
                 }
             }
             E::Call { args, .. }
+            | E::Fiber { args, .. }
             | E::Make { args, .. }
             | E::TraitCall { args, .. }
             | E::Builtin { args, .. }

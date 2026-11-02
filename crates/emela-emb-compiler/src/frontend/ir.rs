@@ -88,6 +88,13 @@ pub(crate) enum ExprKind {
         bindings: Vec<WithBinding>,
         body: Block,
     },
+    /// Trusted structured concurrency operation. Arguments preserve written order;
+    /// concrete failure identities remain available before ABI projection.
+    Fiber {
+        op: crate::contract::ir::FiberOp,
+        args: Vec<Expr>,
+        errors: Vec<crate::contract::ir::TypeId>,
+    },
     Concat(Vec<Expr>),
     Fail(Box<Expr>),
     Coerce(Box<Expr>),

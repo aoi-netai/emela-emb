@@ -269,6 +269,25 @@ impl Context<'_> {
     ) -> Option<b::Operand> {
         use ir::ExprKind as E;
         match &expression.kind {
+            E::Fiber { op, args, errors } => {
+                let mut values = Vec::new();
+                for argument in args {
+                    let value = self.expression(builder, argument, false);
+                    if builder.term.is_some() {
+                        return None;
+                    }
+                    values.push(value.unwrap_or(b::Operand::Const(b::Const::Unit)));
+                }
+                self.value(
+                    builder,
+                    b::Value::Fiber {
+                        op: *op,
+                        args: values,
+                        on_fail: (!errors.is_empty()).then(|| self.failure_edge()),
+                    },
+                    expression.ty,
+                )
+            }
             E::Use { effect } => self.use_effect(builder, *effect, expression.ty),
             E::OpCall {
                 handler,

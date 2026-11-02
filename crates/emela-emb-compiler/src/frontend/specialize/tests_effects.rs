@@ -1,5 +1,95 @@
 use super::*;
 
+#[test]
+fn generic_attempt_values_cross_the_typed_fiber_schema_and_closure_lowering() {
+    let mut core = b::Definitions::default();
+    let parameter = core.types.intern(b::Type::Param(0));
+    let generic = frontend_type(parameter);
+    let cause = core.enums.alloc(b::EnumDef {
+        name: "Std.Cause.Cause".into(),
+        params: 0,
+        variants: vec![],
+        error: false,
+        external: true,
+    });
+    let cause_type = core.types.intern(b::Type::Enum(cause, vec![]));
+    let exit = core.enums.alloc(b::EnumDef {
+        name: "Exit".into(),
+        params: 1,
+        variants: vec![
+            b::VariantDef {
+                name: "Success".into(),
+                fields: b::VariantFields::Positional(1),
+                tys: vec![parameter],
+            },
+            b::VariantDef {
+                name: "Failure".into(),
+                fields: b::VariantFields::Positional(1),
+                tys: vec![cause_type],
+            },
+        ],
+        error: false,
+        external: false,
+    });
+    let exit_type = frontend_type(core.types.intern(b::Type::Enum(exit, vec![parameter])));
+    let callback_type = frontend_type(core.types.intern(b::Type::Fn(b::FnType {
+        params: vec![],
+        ret: parameter,
+        fails: false,
+        suspends: false,
+        ev: false,
+        sets: None,
+    })));
+    let callback = expression(
+        ir::ExprKind::Lambda {
+            params: vec![],
+            captures: vec![ir::LocalId(0)],
+            body: block(expression(ir::ExprKind::Local(ir::LocalId(0)), generic)),
+        },
+        callback_type,
+    );
+    let attempt = expression(
+        ir::ExprKind::Fiber {
+            op: b::FiberOp::Attempt {
+                exit,
+                suspends: false,
+            },
+            args: vec![callback],
+            errors: vec![],
+        },
+        exit_type,
+    );
+    let body = expression(
+        ir::ExprKind::Field {
+            base: Box::new(attempt),
+            ctor: b::CtorRef {
+                enum_id: exit,
+                variant: b::EXIT_SUCCESS,
+            },
+            index: 0,
+        },
+        generic,
+    );
+    let mut identity = function(0, "through_attempt", vec![local(0, generic)], generic, body);
+    identity.type_parameters = 1;
+    let answer = exported(function(
+        1,
+        "answer",
+        vec![],
+        ValueType::Int,
+        call(0, vec![integer(42)], vec![b::TypeId::INT], ValueType::Int),
+    ));
+    execute_with_options(
+        ir::Program {
+            core,
+            registry: Default::default(),
+            functions: vec![identity, answer],
+        },
+        "#include <stdlib.h>\n#include \"emela_embedded.h\"\n#include \"emela_board.h\"\nint test_heap_empty(void);\n_Noreturn void emela_board_defect(EmelaDefectKind k,const char*m,uint16_t n){(void)k;(void)m;(void)n;abort();}\nint main(void){for(int i=0;i<1000;i++)if(answer()!=42||!test_heap_empty())return 1;return 0;}\n",
+        &crate::Options::default().with_heap_bytes(4096),
+    );
+}
+
 fn effect(core: &mut b::Definitions, name: &str) -> (b::EffectId, ValueType) {
     let effect = core.effects.alloc(b::EffectDef {
         name: name.into(),

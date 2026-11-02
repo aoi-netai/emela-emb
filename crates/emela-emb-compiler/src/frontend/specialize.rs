@@ -532,6 +532,38 @@ impl Specializer {
     ) -> Result<()> {
         expression.ty = self.ty(function, expression.ty, arguments, expression.span)?;
         match &mut expression.kind {
+            ir::ExprKind::Fiber { op, args, errors } => {
+                for error in errors.iter_mut() {
+                    *error = self.substitute(
+                        function,
+                        *error,
+                        arguments,
+                        expression.span,
+                        &mut HashMap::new(),
+                        &mut HashSet::new(),
+                        0,
+                    )?;
+                }
+                let mut pending = std::mem::take(errors);
+                let mut seen = HashSet::new();
+                while let Some(error) = pending.pop() {
+                    if !seen.insert(error) {
+                        continue;
+                    }
+                    if let b::Type::Set(set) = self.core.ty(error) {
+                        pending.extend(set.params.iter().copied());
+                    } else {
+                        errors.push(error);
+                    }
+                }
+                errors.sort();
+                if let b::FiberOp::Scope { fails } = op {
+                    *fails = !errors.is_empty();
+                }
+                for argument in args {
+                    self.expression(function, argument, arguments, depth)?;
+                }
+            }
             ir::ExprKind::Use { effect } => {
                 *effect = self.effect(function, *effect, arguments, expression.span, 0)?;
             }
