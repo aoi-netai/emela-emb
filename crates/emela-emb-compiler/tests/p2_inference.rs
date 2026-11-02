@@ -116,3 +116,26 @@ pub fn inference() -> Int { 42 }
     .unwrap();
     support::compile_and_run(&output, BOARD);
 }
+
+#[test]
+fn recursive_members_only_quantify_variables_present_in_their_own_signatures() {
+    let output = compile(
+        r#"
+enum Maybe[A] { None, Some(A) }
+fn first(n: Int) {
+  if n == 0 { 42 } else { unused = second(n - 1)
+    42 }
+}
+fn second(n: Int) { first(n)
+  None }
+@export(c, "inference")
+pub fn inference() -> Int {
+  unused_int: Maybe[Int] = second(2)
+  unused_text: Maybe[String] = second(2)
+  first(2)
+}
+"#,
+    )
+    .unwrap();
+    support::compile_and_run(&output, BOARD);
+}

@@ -27,11 +27,16 @@ pub(crate) fn normalize(
         })?;
     let mut errors = Vec::new();
     for function in &mut program.functions {
-        let substitutions = parameters[function.id.0]
-            .iter()
-            .enumerate()
-            .map(|(index, &parameter)| (parameter, program.core.types.intern(Type::Param(index))))
+        // A recursive component shares inference variables, but each member only
+        // quantifies its own signature. A variable quantified by a sibling and
+        // unused in this member's signature has no required runtime representation.
+        let mut substitutions: HashMap<_, _> = solver
+            .quantified_parameters()
+            .map(|parameter| (parameter, TypeId::UNIT))
             .collect();
+        for (index, &parameter) in parameters[function.id.0].iter().enumerate() {
+            substitutions.insert(parameter, program.core.types.intern(Type::Param(index)));
+        }
         let mut context = Context {
             solver,
             types: &mut program.core.types,

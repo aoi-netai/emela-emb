@@ -85,6 +85,7 @@ pub(crate) struct Scheme {
 #[derive(Debug)]
 pub(crate) struct Solver {
     metas: HashMap<TypeId, Meta>,
+    quantified: HashSet<TypeId>,
     allocated_parameters: HashSet<usize>,
     next_parameter: Option<usize>,
 }
@@ -92,6 +93,7 @@ impl Default for Solver {
     fn default() -> Self {
         Self {
             metas: HashMap::new(),
+            quantified: HashSet::new(),
             allocated_parameters: HashSet::new(),
             next_parameter: Some(usize::MAX),
         }
@@ -162,6 +164,9 @@ impl Solver {
     }
     pub(crate) fn is_meta(&self, ty: TypeId) -> bool {
         self.metas.contains_key(&ty)
+    }
+    pub(crate) fn quantified_parameters(&self) -> impl Iterator<Item = TypeId> + '_ {
+        self.quantified.iter().copied()
     }
     pub(crate) fn constraint(&self, ty: TypeId) -> Option<Constraint> {
         self.metas.get(&ty).map(|meta| meta.constraint)
@@ -486,6 +491,7 @@ impl Solver {
         let mut constraints = Vec::new();
         for variable in variables {
             let rigid = self.parameter(types)?;
+            self.quantified.insert(rigid);
             substitutions.insert(variable, rigid);
             params.push(rigid);
             constraints.push(self.metas[&variable].constraint);
