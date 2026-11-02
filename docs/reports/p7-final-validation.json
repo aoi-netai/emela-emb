@@ -46,7 +46,11 @@
       "cargo run --locked --offline -p emela-emb-cli -- build examples/minimal/main.emel --out-dir generated",
       "cc -std=c11 -Wall -Werror -O0/-O2 -Igenerated generated/emela_embedded.c generated/harness.c -lm -o minimal; execute and assert answer()==42"
     ],
-    "local_log": ".local/experiment/p7-final-standalone.log"
+    "local_log": ".local/experiment/p7-final-standalone.log",
+    "snapshot_regular_files_byte_verified": 927,
+    "started_JST": "2026-11-03T02:49:41.525+09:00",
+    "finished_JST": "2026-11-03T03:08:45.557+09:00",
+    "elapsed_seconds": 1144.031
   },
   "static_checks": {
     "passed": true,
@@ -62,11 +66,18 @@
     "evidence": "docs/reports/p7-backend-proof-integration.json"
   },
   "final_document_checks": {
-    "status": "pending_final_audit",
+    "status": "passed",
     "coverage_ledger_tests_passed": 2,
     "coverage_ledger_tests_failed": 0,
     "implementation_test_paths_and_symbols": "all exist",
-    "fixed_sets": "428/226/115/10 match with no missing/extra/duplicate IDs"
+    "fixed_sets": "428/226/115/10 match with no missing/extra/duplicate IDs",
+    "source_crosswalk_reproduction": "passed; 174 normal + 3 additional; open 0",
+    "completion_audit_reproduction": "passed; all 428/226/115/10 final; open obligations 0",
+    "completion_audit_ledger_revision": "27fa16abe8fb3daa9e9135e0ce4a2bf28229632a",
+    "reference_paths": 867,
+    "missing_reference_paths": 0,
+    "symbol_components_missing": 0,
+    "fmt_and_diff": "passed"
   },
   "scope": {
     "records": 428,
