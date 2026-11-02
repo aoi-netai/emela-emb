@@ -127,7 +127,11 @@ impl Schemes {
             }
         }
         let tuple = types.intern(Type::Tuple(values));
-        let scheme = solver.generalize(types, tuple, &environment)?;
+        let row_candidates = component
+            .iter()
+            .flat_map(|id| signatures[id.0].params.iter().copied().map(backend_type))
+            .collect::<Vec<_>>();
+        let scheme = solver.generalize_with_rows(types, tuple, &environment, &row_candidates)?;
         for &id in component {
             if constants[id.0] {
                 continue;
@@ -167,5 +171,6 @@ fn signature_types(signature: &Signature) -> Vec<TypeId> {
         .map(backend_type)
         .chain(signature.sets.errors.iter().copied())
         .chain(signature.sets.error_constraints.iter().copied())
+        .chain(signature.sets.effects.iter().copied())
         .collect()
 }

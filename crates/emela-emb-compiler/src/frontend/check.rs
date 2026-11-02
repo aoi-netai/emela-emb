@@ -20,6 +20,8 @@ struct Definition {
     module: usize,
     ast: ast::Function,
     signature: Signature,
+    parameters: Vec<crate::contract::ir::TypeId>,
+    parameter_names: HashMap<String, usize>,
     name: String,
     exported: bool,
     export_symbol: Option<String>,
@@ -180,17 +182,7 @@ pub(crate) fn check(mut modules: Modules) -> Result<ir::Program, Vec<Diagnostic>
         checker
             .definitions
             .iter()
-            .map(|definition| {
-                (0..definition.ast.type_params.len())
-                    .map(|index| {
-                        checker
-                            .catalog
-                            .core
-                            .types
-                            .intern(crate::contract::ir::Type::Param(index))
-                    })
-                    .collect()
-            })
+            .map(|definition| definition.parameters.clone())
             .collect(),
     );
     let mut errors = Vec::new();
@@ -203,7 +195,7 @@ pub(crate) fn check(mut modules: Modules) -> Result<ir::Program, Vec<Diagnostic>
         return Err(errors);
     }
     checker.validate_trait_obligations()?;
-    let modes: HashMap<_, _> = checker
+    let mut modes: HashMap<_, _> = checker
         .definitions
         .iter()
         .enumerate()
@@ -219,6 +211,31 @@ pub(crate) fn check(mut modules: Modules) -> Result<ir::Program, Vec<Diagnostic>
         &mut checker.solver,
         &checker.schemes.parameters,
     )?;
+    for (&id, mode) in &mut modes {
+        let substitutions = checker.schemes.parameters[id.0]
+            .iter()
+            .enumerate()
+            .map(|(index, &parameter)| {
+                (
+                    parameter,
+                    program
+                        .core
+                        .types
+                        .intern(crate::contract::ir::Type::Param(index)),
+                )
+            })
+            .collect();
+        if let Some(allowed) = &mut mode.allowed {
+            for ty in allowed {
+                *ty = checker
+                    .solver
+                    .substitute(&mut program.core.types, *ty, &substitutions)
+                    .map_err(|error| {
+                        vec![Diagnostic::new(DK::Type, Span::new(0, 0), error.message)]
+                    })?;
+            }
+        }
+    }
     checker.catalog.core = program.core.clone();
     super::errors::infer(&mut program, &modes, &mut checker.catalog)?;
     Ok(program)
@@ -286,6 +303,9 @@ impl Checker {
                     for (index, parameter) in function.type_params.iter().enumerate() {
                         let mut constraints = Vec::new();
                         for bound in &parameter.bounds {
+                            if bound.value == "Immediate" {
+                                continue;
+                            }
                             constraints.push(
                                 self.traits
                                     .find_trait(module_index, &bound.value)
@@ -333,6 +353,7 @@ impl Checker {
                     }
                     let mut names = HashSet::new();
                     let mut params = Vec::new();
+                    self.catalog.omitted_rows = data::OmittedRows::Hidden;
                     for (parameter_index, param) in function.params.iter().enumerate() {
                         if param.name.value != "_" && !names.insert(param.name.value.clone()) {
                             return Err(Diagnostic::new(
@@ -360,6 +381,7 @@ impl Checker {
                             )?);
                         }
                     }
+                    self.catalog.omitted_rows = data::OmittedRows::Inferred;
                     let ret = if let Some(method) = &method {
                         method.signature.ret
                     } else {
@@ -376,6 +398,7 @@ impl Checker {
                             })
                             .transpose()?
                     };
+                    self.catalog.omitted_rows = data::OmittedRows::Empty;
                     let mut export_symbol = None;
                     let mut external = None;
                     let mut intrinsic = None;
@@ -471,7 +494,7 @@ impl Checker {
                             "generic functions require a concrete wrapper at the C boundary",
                         ));
                     }
-                    let ret = match ret {
+                    let mut ret = match ret {
                         Some(ret) => Some(ret),
                         None => Some(Ty::Compound(
                             self.solver
@@ -536,17 +559,93 @@ impl Checker {
                     } else {
                         format!("{}.{}", module.name, function.name.value)
                     };
+                    // A parameter's identity belongs to its declaration. Keeping
+                    // distinct IDs also lets error/effect kinds coexist with a
+                    // value parameter at the same position in another function.
+                    let mut parameters = (0..function.type_params.len())
+                        .map(|_| {
+                            self.solver
+                                .fresh_rigid_parameter(&mut self.catalog.core.types)
+                        })
+                        .collect::<Result<Vec<_>, _>>()
+                        .map_err(|error| {
+                            Diagnostic::new(DK::Type, function.name.span, error.message)
+                        })?;
+                    for ty in params.iter_mut().chain(ret.iter_mut()) {
+                        *ty = data::frontend_type(data::substitute(
+                            &mut self.catalog.core.types,
+                            data::backend_type(*ty),
+                            &parameters,
+                        ));
+                    }
+                    let mut allowed_errors = allowed_errors.map(|errors| {
+                        errors
+                            .into_iter()
+                            .map(|ty| {
+                                data::substitute(&mut self.catalog.core.types, ty, &parameters)
+                            })
+                            .collect::<Vec<_>>()
+                    });
+                    let mut effects = Vec::new();
+                    for request in std::mem::take(&mut self.catalog.row_requests) {
+                        self.solver
+                            .register_row(request.proxy, request.kind, request.origin)
+                            .map_err(|error| {
+                                Diagnostic::new(DK::Type, function.name.span, error.message)
+                            })?;
+                        if request.origin == super::sets::Origin::HiddenParameter {
+                            parameters.push(request.proxy);
+                            if request.positive {
+                                match request.kind {
+                                    super::sets::SetKind::Error => allowed_errors
+                                        .get_or_insert_with(Vec::new)
+                                        .push(request.proxy),
+                                    super::sets::SetKind::Effect => effects.push(request.proxy),
+                                }
+                            }
+                        }
+                    }
+                    let bounds = bounds
+                        .into_iter()
+                        .map(|(ty, bounds)| {
+                            (
+                                data::substitute(&mut self.catalog.core.types, ty, &parameters),
+                                bounds,
+                            )
+                        })
+                        .collect();
+                    let self_type = method
+                        .as_ref()
+                        .and_then(|method| method.self_type)
+                        .map(|ty| data::substitute(&mut self.catalog.core.types, ty, &parameters));
+                    let parameter_names = function
+                        .type_params
+                        .iter()
+                        .zip(&parameters)
+                        .map(|(parameter, &ty)| {
+                            let crate::contract::ir::Type::Param(index) = self.catalog.core.ty(ty)
+                            else {
+                                unreachable!("fresh rigid parameter")
+                            };
+                            (parameter.name.value.clone(), *index)
+                        })
+                        .collect();
+                    let signature = Signature {
+                        params,
+                        ret,
+                        sets: InvocationSets {
+                            errors: allowed_errors.clone().unwrap_or_default(),
+                            effects,
+                            ..Default::default()
+                        },
+                    };
+                    self.classify_parameter_kinds(module_index, function, &signature, &parameters)?;
                     self.definitions.push(Definition {
                         module: module_index,
                         ast: function.clone(),
-                        signature: Signature {
-                            params,
-                            ret,
-                            sets: InvocationSets {
-                                errors: allowed_errors.clone().unwrap_or_default(),
-                                ..InvocationSets::default()
-                            },
-                        },
+                        signature,
+                        parameters,
+                        parameter_names,
                         name,
                         exported: export_symbol.is_some(),
                         export_symbol,
@@ -556,7 +655,7 @@ impl Checker {
                             allowed: allowed_errors,
                         },
                         bounds,
-                        self_type: method.as_ref().and_then(|m| m.self_type),
+                        self_type,
                         derivation: method.and_then(|m| m.derivation),
                     });
                     Ok(())
@@ -819,17 +918,13 @@ impl Checker {
             .collect();
         let saved_parameters = std::mem::replace(
             &mut self.current_parameters,
-            definition
-                .ast
-                .type_params
-                .iter()
-                .enumerate()
-                .map(|(i, p)| (p.name.value.clone(), i))
-                .collect(),
+            definition.parameter_names.clone(),
         );
         let saved_bounds = std::mem::replace(&mut self.current_bounds, definition.bounds.clone());
         let saved_self = std::mem::replace(&mut self.current_self_type, definition.self_type);
         let saved_closures = std::mem::take(&mut self.closures);
+        let saved_row_mode =
+            std::mem::replace(&mut self.catalog.omitted_rows, data::OmittedRows::Inferred);
         let body = definition
             .ast
             .body
@@ -847,6 +942,7 @@ impl Checker {
         self.current_bounds = saved_bounds;
         self.current_self_type = saved_self;
         self.closures = saved_closures;
+        self.catalog.omitted_rows = saved_row_mode;
         let body = body?;
         if definition.ast.return_type.is_none()
             && body.as_ref().is_some_and(|body| body.ty == Ty::Never)
@@ -1027,7 +1123,8 @@ impl Checker {
                         "anonymous functions have only parameters and a body",
                     ));
                 }
-                return self.lambda(module, params, body, locals, expected, span);
+                let value = self.lambda(module, params, body, locals, expected, span)?;
+                return self.coerce_function(module, value, expected, span);
             }
             A::Integer(raw) => {
                 let target = expected.filter(|t| *t == Ty::Int64).unwrap_or(Ty::Int);
@@ -1362,14 +1459,15 @@ impl Checker {
                         .collect::<Vec<_>>()
                         .join(".");
                     if let Some(trait_id) = self.traits.find_trait(module, &prefix) {
-                        return self.trait_function_value(
+                        let value = self.trait_function_value(
                             module,
                             trait_id,
                             &path.last().unwrap().value,
                             locals,
                             expected,
                             span,
-                        );
+                        )?;
+                        return self.coerce_function(module, value, expected, span);
                     }
                 }
                 if let Some(local) = (path.len() == 1)
@@ -1390,8 +1488,9 @@ impl Checker {
                                 .tys
                                 .is_empty()
                             {
-                                return self
-                                    .constructor_value(module, ctor, locals, expected, span);
+                                let value =
+                                    self.constructor_value(module, ctor, locals, expected, span)?;
+                                return self.coerce_function(module, value, expected, span);
                             }
                             return self.construct(module, ctor, &[], locals, expected, span);
                         }
@@ -1417,7 +1516,8 @@ impl Checker {
                             });
                         }
                         Symbol::Function(id) => {
-                            return self.function_value(module, id, locals, expected, span);
+                            let value = self.function_value(module, id, locals, expected, span)?;
+                            return self.coerce_function(module, value, expected, span);
                         }
                     }
                 }
@@ -1781,7 +1881,7 @@ impl Checker {
             &self.current_bounds.clone(),
             span,
         )?;
-        Ok(ir::Expr { kind, ty, span })
+        self.coerce_function(module, ir::Expr { kind, ty, span }, expected, span)
     }
     fn known_errors(
         &mut self,
@@ -1801,6 +1901,7 @@ impl Checker {
     }
 
     fn resolve_type(&mut self, module: usize, ty: Ty, span: Span) -> Result<Ty, Diagnostic> {
+        self.register_row_requests(module, span)?;
         self.solver
             .resolve(&mut self.catalog.core.types, data::backend_type(ty))
             .map(data::frontend_type)
@@ -1813,6 +1914,8 @@ impl Checker {
         expected: Ty,
         span: Span,
     ) -> Result<(), Diagnostic> {
+        self.register_row_requests(module, span)?;
+        self.solver.register_effects(&self.catalog.core);
         self.solver
             .unify(
                 &mut self.catalog.core.types,
@@ -1820,6 +1923,14 @@ impl Checker {
                 data::backend_type(expected),
             )
             .map_err(|e| self.error(module, DK::Type, span, e.message))
+    }
+    fn register_row_requests(&mut self, module: usize, span: Span) -> Result<(), Diagnostic> {
+        for request in std::mem::take(&mut self.catalog.row_requests) {
+            self.solver
+                .register_row(request.proxy, request.kind, request.origin)
+                .map_err(|error| self.error(module, DK::Type, span, error.message))?;
+        }
+        Ok(())
     }
     fn numeric(&mut self, module: usize, ty: Ty, span: Span) -> Result<(), Diagnostic> {
         let numeric = self

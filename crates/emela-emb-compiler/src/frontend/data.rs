@@ -4,6 +4,19 @@ mod substitution;
 use super::{ast, effect_collect::EffectRegistry, modules::Modules, types::ValueType as Ty};
 use crate::{Diagnostic, DiagnosticKind as DK, Span, contract::ir as b};
 use std::collections::{HashMap, HashSet};
+#[derive(Clone, Copy, Default)]
+pub(crate) enum OmittedRows {
+    #[default]
+    Empty,
+    Hidden,
+    Inferred,
+}
+pub(crate) struct RowRequest {
+    pub proxy: b::TypeId,
+    pub kind: super::sets::SetKind,
+    pub origin: super::sets::Origin,
+    pub positive: bool,
+}
 pub(crate) use substitution::substitute;
 #[derive(Clone)]
 pub(crate) struct Declaration {
@@ -15,6 +28,9 @@ pub(crate) struct Catalog {
     pub core: b::Definitions,
     pub effects: EffectRegistry,
     pub declarations: Vec<Declaration>,
+    pub omitted_rows: OmittedRows,
+    pub row_positive: bool,
+    pub row_requests: Vec<RowRequest>,
     types: Vec<HashMap<String, b::EnumId>>,
     native_types: Vec<HashMap<String, b::TypeId>>,
     constructors: Vec<HashMap<String, b::CtorRef>>,
@@ -27,6 +43,9 @@ impl Catalog {
             core,
             effects,
             declarations: Vec::new(),
+            omitted_rows: OmittedRows::Empty,
+            row_positive: true,
+            row_requests: Vec::new(),
             types: vec![HashMap::new(); modules.modules.len()],
             native_types: vec![HashMap::new(); modules.modules.len()],
             constructors: vec![HashMap::new(); modules.modules.len()],

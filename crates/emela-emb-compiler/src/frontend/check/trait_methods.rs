@@ -189,8 +189,15 @@ impl Checker {
         span: Span,
     ) -> Result<(), Diagnostic> {
         for (parameter, bounds) in self.definitions[id.0].bounds.clone() {
-            let instantiated =
-                data::substitute(&mut self.catalog.core.types, parameter, type_arguments);
+            let substitutions = self.schemes.parameters[id.0]
+                .iter()
+                .copied()
+                .zip(type_arguments.iter().copied())
+                .collect();
+            let instantiated = self
+                .solver
+                .substitute(&mut self.catalog.core.types, parameter, &substitutions)
+                .map_err(|error| self.error(module, DK::Type, span, error.message))?;
             let receiver = self
                 .solver
                 .resolve(&mut self.catalog.core.types, instantiated)

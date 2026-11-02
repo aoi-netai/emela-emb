@@ -92,6 +92,7 @@ pub(crate) struct Solver {
     next_parameter: Option<usize>,
     rows: rows::Rows,
     row_parameters: HashSet<TypeId>,
+    immediate_rows: HashSet<TypeId>,
 }
 impl Default for Solver {
     fn default() -> Self {
@@ -102,6 +103,7 @@ impl Default for Solver {
             next_parameter: Some(usize::MAX),
             rows: rows::Rows::default(),
             row_parameters: HashSet::new(),
+            immediate_rows: HashSet::new(),
         }
     }
 }
@@ -151,8 +153,47 @@ impl Solver {
     pub(crate) fn copy_row_kind(&mut self, source: TypeId, destination: TypeId) -> Result<()> {
         if let Some(kind) = self.row_kind(source) {
             self.register_row(destination, kind, Origin::Inferred)?;
+            if self.immediate_rows.contains(&source) {
+                let variable = self.rows.variables[&destination].1;
+                self.rows
+                    .solver
+                    .require_immediate(crate::frontend::sets::Row::variable(kind, variable))
+                    .map_err(rows::set_error)?;
+            }
         }
         Ok(())
+    }
+    pub(crate) fn declare_row_immediate(&mut self, proxy: TypeId) -> Result<()> {
+        let Some(&(kind, variable)) = self.rows.variables.get(&proxy) else {
+            return Err(error(
+                TypeErrorKind::Constraint,
+                proxy,
+                proxy,
+                "Immediate requires an effect-set parameter",
+            ));
+        };
+        if kind != SetKind::Effect {
+            return Err(error(
+                TypeErrorKind::Constraint,
+                proxy,
+                proxy,
+                "Immediate requires an effect-set parameter",
+            ));
+        }
+        self.rows
+            .solver
+            .declare_immediate(variable)
+            .map_err(rows::set_error)?;
+        self.immediate_rows.insert(proxy);
+        Ok(())
+    }
+    pub(crate) fn require_immediate(&mut self, types: &mut TypeTable, ty: TypeId) -> Result<()> {
+        let row = self.rows.row(types, ty, SetKind::Effect, &self.metas)?;
+        self.rows
+            .solver
+            .require_immediate(row)
+            .map_err(rows::set_error)?;
+        self.solve_rows(types)
     }
     pub(crate) fn register_effects(&mut self, core: &crate::contract::ir::Definitions) {
         let mut declarations = HashMap::new();
@@ -741,6 +782,9 @@ impl Solver {
                 self.rows.proxies.insert(row, rigid);
                 if self.row_parameters.contains(&variable) {
                     self.row_parameters.insert(rigid);
+                }
+                if self.immediate_rows.contains(&variable) {
+                    self.immediate_rows.insert(rigid);
                 }
             }
             self.quantified.insert(rigid);

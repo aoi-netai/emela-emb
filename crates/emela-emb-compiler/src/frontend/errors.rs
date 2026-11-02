@@ -115,6 +115,34 @@ fn infer_phase(
             }
             .map_err(|e| vec![e])?;
             let declared = modes.get(&function.id).and_then(|m| m.allowed.as_ref());
+            if let (Some(allowed), Some(solver)) = (declared, context.solver.as_deref_mut()) {
+                let actual =
+                    context
+                        .catalog
+                        .core
+                        .types
+                        .intern(Type::Set(crate::contract::ir::SetSummary {
+                            params: analysis.errors.iter().copied().collect(),
+                            ..Default::default()
+                        }));
+                let expected =
+                    context
+                        .catalog
+                        .core
+                        .types
+                        .intern(Type::Set(crate::contract::ir::SetSummary {
+                            params: allowed.clone(),
+                            ..Default::default()
+                        }));
+                solver
+                    .include_sets(
+                        &mut context.catalog.core.types,
+                        actual,
+                        expected,
+                        super::sets::SetKind::Error,
+                    )
+                    .map_err(|error| vec![context.error(function.span, &error.message)])?;
+            }
             let errors = declared.cloned().unwrap_or_else(|| sorted(analysis.errors));
             let mut constraints = analysis.constraints;
             constraints.extend(errors.iter().copied());
@@ -270,6 +298,34 @@ impl Context<'_> {
             Err(self.error(span, "a failure parameter must denote a single error type"))
         }
     }
+    fn error_members(&mut self, ty: TypeId, span: Span) -> Result<Vec<TypeId>, Diagnostic> {
+        let mut pending = vec![ty];
+        let mut members = Vec::new();
+        let mut seen = HashSet::new();
+        while let Some(ty) = pending.pop() {
+            let mut ty = self.resolve(ty, span)?;
+            if let Some(solver) = self.solver.as_deref_mut() {
+                if solver.row_kind(ty) == Some(super::sets::SetKind::Error) && solver.is_meta(ty) {
+                    ty = solver
+                        .resolve_row(&mut self.catalog.core.types, ty)
+                        .map_err(|error| {
+                            Diagnostic::new(DiagnosticKind::Type, span, error.message)
+                                .in_source(self.source)
+                        })?;
+                }
+            }
+            if !seen.insert(ty) {
+                continue;
+            }
+            if let Type::Set(row) = self.catalog.core.ty(ty) {
+                pending.extend(&row.params);
+            } else {
+                self.require_error(ty, span)?;
+                members.push(ty);
+            }
+        }
+        Ok(members)
+    }
     fn block(
         &mut self,
         body: &ir::Block,
@@ -333,9 +389,9 @@ impl Context<'_> {
                         if let Type::Set(errors) = self.catalog.core.ty(sets.errors).clone() {
                             for error in errors.params {
                                 let error = self.resolve(error, expression.span)?;
-                                self.require_error(error, expression.span)?;
-                                analysis.errors.insert(error);
-                                analysis.constraints.insert(error);
+                                let members = self.error_members(error, expression.span)?;
+                                analysis.errors.extend(members.iter().copied());
+                                analysis.constraints.extend(members);
                             }
                         }
                     }
@@ -402,9 +458,9 @@ impl Context<'_> {
                                         &arguments,
                                     );
                                     let error = self.resolve(error, expression.span)?;
-                                    self.require_error(error, expression.span)?;
-                                    analysis.errors.insert(error);
-                                    analysis.constraints.insert(error);
+                                    let members = self.error_members(error, expression.span)?;
+                                    analysis.errors.extend(members.iter().copied());
+                                    analysis.constraints.extend(members);
                                 }
                             }
                         }
@@ -436,15 +492,15 @@ impl Context<'_> {
                 for error in signature.sets.errors {
                     let error =
                         self.instantiate(*target, error, type_arguments, expression.span)?;
-                    self.require_error(error, expression.span)?;
-                    analysis.errors.insert(error);
-                    analysis.constraints.insert(error);
+                    let members = self.error_members(error, expression.span)?;
+                    analysis.errors.extend(members.iter().copied());
+                    analysis.constraints.extend(members);
                 }
                 for constraint in signature.sets.error_constraints {
                     let constraint =
                         self.instantiate(*target, constraint, type_arguments, expression.span)?;
-                    self.require_error(constraint, expression.span)?;
-                    analysis.constraints.insert(constraint);
+                    let members = self.error_members(constraint, expression.span)?;
+                    analysis.constraints.extend(members);
                 }
             }
             E::If {

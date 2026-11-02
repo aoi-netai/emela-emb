@@ -6,6 +6,161 @@ pub(super) struct CaptureScope {
     pub captures: HashSet<LocalId>,
 }
 impl Checker {
+    pub(super) fn classify_parameter_kinds(
+        &mut self,
+        module: usize,
+        function: &ast::Function,
+        signature: &Signature,
+        parameters: &[TypeId],
+    ) -> Result<(), Diagnostic> {
+        let mut value = HashSet::new();
+        let mut errors = HashSet::new();
+        let mut effects = HashSet::new();
+        let mut pending = signature
+            .params
+            .iter()
+            .copied()
+            .chain(signature.ret)
+            .map(|ty| (data::backend_type(ty), None))
+            .collect::<Vec<_>>();
+        pending.extend(
+            signature
+                .sets
+                .errors
+                .iter()
+                .copied()
+                .map(|ty| (ty, Some(super::super::sets::SetKind::Error))),
+        );
+        pending.extend(
+            signature
+                .sets
+                .effects
+                .iter()
+                .copied()
+                .map(|ty| (ty, Some(super::super::sets::SetKind::Effect))),
+        );
+        let mut seen = HashSet::new();
+        while let Some((ty, kind)) = pending.pop() {
+            if !seen.insert((
+                ty,
+                kind.map(|kind| kind == super::super::sets::SetKind::Effect),
+            )) {
+                continue;
+            }
+            match self.catalog.core.ty(ty) {
+                Type::Param(_) => match kind {
+                    None => {
+                        value.insert(ty);
+                    }
+                    Some(super::super::sets::SetKind::Error) => {
+                        errors.insert(ty);
+                    }
+                    Some(super::super::sets::SetKind::Effect) => {
+                        effects.insert(ty);
+                    }
+                },
+                Type::Tuple(fields) | Type::Enum(_, fields) => {
+                    pending.extend(fields.iter().copied().map(|ty| (ty, None)))
+                }
+                Type::List(ty) | Type::Cell(ty) => pending.push((*ty, None)),
+                Type::Handler(id) => pending.extend(
+                    self.catalog.core.effects[*id]
+                        .args
+                        .iter()
+                        .copied()
+                        .map(|ty| (ty, None)),
+                ),
+                Type::Fn(function) => {
+                    pending.extend(
+                        function
+                            .params
+                            .iter()
+                            .copied()
+                            .chain([function.ret])
+                            .map(|ty| (ty, None)),
+                    );
+                    if let Some(sets) = function.sets {
+                        pending.extend([
+                            (sets.errors, Some(super::super::sets::SetKind::Error)),
+                            (sets.effects, Some(super::super::sets::SetKind::Effect)),
+                        ]);
+                    }
+                }
+                Type::Set(row) => pending.extend(row.params.iter().copied().map(|ty| (ty, kind))),
+                _ => {}
+            }
+        }
+        for (&ty, parameter) in parameters.iter().zip(&function.type_params) {
+            let kind = if effects.contains(&ty) {
+                if errors.contains(&ty) || value.contains(&ty) {
+                    return Err(self.error(
+                        module,
+                        DK::Type,
+                        parameter.name.span,
+                        "an effect-set parameter cannot also be a value type or error set",
+                    ));
+                }
+                Some(super::super::sets::SetKind::Effect)
+            } else if errors.contains(&ty) && !value.contains(&ty) {
+                Some(super::super::sets::SetKind::Error)
+            } else {
+                None
+            };
+            if let Some(kind) = kind {
+                self.solver
+                    .register_row(ty, kind, super::super::sets::Origin::OpaqueParameter)
+                    .map_err(|error| {
+                        self.error(module, DK::Type, parameter.name.span, error.message)
+                    })?;
+            }
+            for bound in &parameter.bounds {
+                if bound.value == "Immediate" {
+                    self.solver
+                        .declare_row_immediate(ty)
+                        .map_err(|error| self.error(module, DK::Type, bound.span, error.message))?;
+                } else if kind.is_some() {
+                    return Err(self.error(
+                        module,
+                        DK::Type,
+                        bound.span,
+                        "set parameters support only the Immediate effect bound",
+                    ));
+                }
+            }
+        }
+        Ok(())
+    }
+    pub(super) fn coerce_function(
+        &mut self,
+        module: usize,
+        value: ir::Expr,
+        expected: Option<Ty>,
+        span: Span,
+    ) -> Result<ir::Expr, Diagnostic> {
+        let Some(expected) = expected else {
+            return Ok(value);
+        };
+        let actual = self.resolve_type(module, value.ty, span)?;
+        let expected = self.resolve_type(module, expected, span)?;
+        if actual != expected
+            && matches!(
+                self.catalog.core.ty(data::backend_type(actual)),
+                Type::Fn(_)
+            )
+            && matches!(
+                self.catalog.core.ty(data::backend_type(expected)),
+                Type::Fn(_)
+            )
+        {
+            Ok(ir::Expr {
+                kind: ir::ExprKind::Coerce(Box::new(value)),
+                ty: expected,
+                span,
+            })
+        } else {
+            Ok(value)
+        }
+    }
     #[allow(clippy::too_many_arguments)]
     pub(super) fn lambda(
         &mut self,
@@ -283,6 +438,11 @@ impl Checker {
             .copied()
             .zip(type_arguments.iter().copied())
             .collect();
+        for (&source, &destination) in &substitutions {
+            self.solver
+                .copy_row_kind(source, destination)
+                .map_err(|error| self.error(module, DK::Type, span, error.message))?;
+        }
         if !type_arguments.is_empty() {
             if let Some(ret) = signature.ret {
                 let resolved = self
@@ -319,6 +479,7 @@ impl Checker {
             .errors
             .iter_mut()
             .chain(&mut signature.sets.error_constraints)
+            .chain(&mut signature.sets.effects)
         {
             *ty = self
                 .solver
@@ -330,15 +491,13 @@ impl Checker {
     pub(super) fn signature_type(&mut self, signature: &Signature, ret: Ty) -> Ty {
         let fails = !signature.sets.errors.is_empty();
         let errors = self.catalog.core.types.intern(Type::Set(b::SetSummary {
-            fails,
             params: signature.sets.errors.clone(),
             ..Default::default()
         }));
-        let effects = self
-            .catalog
-            .core
-            .types
-            .intern(Type::Set(b::SetSummary::default()));
+        let effects = self.catalog.core.types.intern(Type::Set(b::SetSummary {
+            params: signature.sets.effects.clone(),
+            ..Default::default()
+        }));
         Ty::Compound(
             self.catalog.core.types.intern(Type::Fn(b::FnType {
                 params: signature
@@ -350,7 +509,7 @@ impl Checker {
                 ret: data::backend_type(ret),
                 fails,
                 suspends: false,
-                ev: false,
+                ev: !signature.sets.effects.is_empty(),
                 sets: Some(b::FnSets { errors, effects }),
             })),
         )

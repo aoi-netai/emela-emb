@@ -82,7 +82,6 @@ fn trait_name(kind: BuiltinTrait) -> &'static str {
 }
 fn function_type(core: &mut b::Definitions, signature: &Signature) -> b::TypeId {
     let errors = core.types.intern(b::Type::Set(b::SetSummary {
-        fails: !signature.sets.errors.is_empty(),
         params: signature.sets.errors.clone(),
         ..b::SetSummary::default()
     }));
@@ -1575,7 +1574,8 @@ mod tests {
         let b::Type::Set(errors) = catalog.core.ty(sets.errors) else {
             panic!("error set")
         };
-        assert!(errors.fails && errors.params.len() == 1);
+        // Source rows retain identities; ABI flags are computed after instantiation.
+        assert!(!errors.fails && errors.params.len() == 1);
         let b::Type::Enum(error, _) = catalog.core.ty(errors.params[0]) else {
             panic!("error identity")
         };

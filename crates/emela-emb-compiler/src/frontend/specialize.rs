@@ -356,12 +356,19 @@ impl Specializer {
                 &mut HashSet::new(),
                 0,
             )?;
+        }
+        function.signature.sets.errors = self.flatten_set_members(&function.signature.sets.errors);
+        function.signature.sets.error_constraints =
+            self.flatten_set_members(&function.signature.sets.error_constraints);
+        for &error_type in function
+            .signature
+            .sets
+            .errors
+            .iter()
+            .chain(&function.signature.sets.error_constraints)
+        {
             let valid = match self.core.types.types.get(error_type.index()) {
-                Some(b::Type::Enum(id, _)) => self
-                    .core
-                    .enums
-                    .iter()
-                    .any(|(key, definition)| key == *id && definition.error),
+                Some(b::Type::Enum(id, _)) => self.core.enums[*id].error,
                 _ => false,
             };
             if !valid {
@@ -383,6 +390,8 @@ impl Specializer {
                 0,
             )?;
         }
+        function.signature.sets.effects =
+            self.flatten_set_members(&function.signature.sets.effects);
         function.signature.sets.effects.sort_by_key(|ty| ty.index());
         function.signature.sets.effects.dedup();
         function.signature.sets.errors.sort_by_key(|ty| ty.index());
@@ -403,6 +412,24 @@ impl Specializer {
             self.block(&source, body, args, depth)?;
         }
         Ok(())
+    }
+    fn flatten_set_members(&self, members: &[b::TypeId]) -> Vec<b::TypeId> {
+        let mut pending = members.to_vec();
+        let mut seen = HashSet::new();
+        let mut result = Vec::new();
+        while let Some(member) = pending.pop() {
+            if !seen.insert(member) {
+                continue;
+            }
+            if let b::Type::Set(row) = self.core.ty(member) {
+                pending.extend(&row.params);
+            } else {
+                result.push(member);
+            }
+        }
+        result.sort();
+        result.dedup();
+        result
     }
     fn block(
         &mut self,

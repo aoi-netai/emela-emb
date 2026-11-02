@@ -2,6 +2,25 @@
 use super::*;
 
 impl Catalog {
+    fn omitted_function_row(&mut self, kind: super::super::sets::SetKind) -> Vec<b::TypeId> {
+        let origin = match self.omitted_rows {
+            OmittedRows::Empty => return vec![],
+            OmittedRows::Hidden => super::super::sets::Origin::HiddenParameter,
+            OmittedRows::Inferred => super::super::sets::Origin::Inferred,
+        };
+        let mut index = usize::MAX;
+        while self.core.types.ids.contains_key(&b::Type::Param(index)) {
+            index -= 1;
+        }
+        let proxy = self.core.types.intern(b::Type::Param(index));
+        self.row_requests.push(RowRequest {
+            proxy,
+            kind,
+            origin,
+            positive: self.row_positive,
+        });
+        vec![proxy]
+    }
     pub(super) fn function_type(
         &mut self,
         modules: &Modules,
@@ -30,11 +49,13 @@ impl Catalog {
         let close = close.ok_or_else(malformed)?;
         let tail = text[close + 1..].strip_prefix("->").ok_or_else(malformed)?;
         let mut signature_params = Vec::new();
+        self.row_positive = !self.row_positive;
         for argument in split(&text[3..close]) {
             signature_params.push(backend_type(
                 self.type_text(modules, module, argument, span, parameters, self_type)?,
             ));
         }
+        self.row_positive = !self.row_positive;
         let mut clause_start = tail.len();
         let mut nesting = 0usize;
         if !tail.starts_with("fn(") {
@@ -90,8 +111,10 @@ impl Catalog {
                 }
             }
             clauses = remaining.trim();
+        } else {
+            errors = self.omitted_function_row(super::super::sets::SetKind::Error);
         }
-        if let Some(effects) = clauses.strip_prefix("use") {
+        let effects = if let Some(effects) = clauses.strip_prefix("use") {
             if effects.trim() != "{}" {
                 return Err(Diagnostic::new(
                     DK::Unsupported,
@@ -99,16 +122,21 @@ impl Catalog {
                     "effect function types await effect declaration resolution",
                 ));
             }
+            Vec::new()
         } else if !clauses.is_empty() {
             return Err(malformed());
-        }
+        } else {
+            self.omitted_function_row(super::super::sets::SetKind::Effect)
+        };
         let fails = !errors.is_empty();
         let errors = self.core.types.intern(b::Type::Set(b::SetSummary {
-            fails,
             params: errors,
             ..Default::default()
         }));
-        let effects = self.core.types.intern(b::Type::Set(Default::default()));
+        let effects = self.core.types.intern(b::Type::Set(b::SetSummary {
+            params: effects,
+            ..Default::default()
+        }));
         Ok(Ty::Compound(self.core.types.intern(b::Type::Fn(
             b::FnType {
                 params: signature_params,
