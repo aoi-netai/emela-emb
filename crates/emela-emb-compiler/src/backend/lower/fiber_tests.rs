@@ -4,6 +4,8 @@ use super::*;
 mod deferred;
 #[path = "fiber_scope_tests.rs"]
 mod scope_abi;
+#[path = "fiber_source_tests.rs"]
+mod source_observations;
 #[path = "fiber_unit_tests.rs"]
 mod unit;
 
