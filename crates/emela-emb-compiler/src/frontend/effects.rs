@@ -460,7 +460,7 @@ impl Context<'_> {
         use ir::ExprKind as E;
         let mut needed = HashSet::new();
         match &expression.kind {
-            E::Literal(_) | E::Local(_) | E::FnRef { .. } | E::Lambda { .. } => {}
+            E::Literal(_) | E::Local(_) | E::FnRef { .. } | E::Lambda { .. } | E::Evidence => {}
             E::Use { effect } => {
                 let ty = self.catalog.core.types.intern(Type::Handler(*effect));
                 needed.insert(self.resolve(ty, expression.span)?);
@@ -490,7 +490,14 @@ impl Context<'_> {
                     }
                 }
             }
-            E::Provide { bindings, body } => {
+            E::Provide {
+                base,
+                bindings,
+                body,
+            } => {
+                if let Some(base) = base {
+                    needed.extend(self.expression(base)?);
+                }
                 // Provide constructs all bound values in the incoming environment.
                 for (_, value) in bindings {
                     needed.extend(self.expression(value)?);
