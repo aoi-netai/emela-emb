@@ -90,6 +90,96 @@ fn generic_attempt_values_cross_the_typed_fiber_schema_and_closure_lowering() {
     );
 }
 
+#[test]
+fn empty_cause_raise_gets_a_private_landing_without_an_external_host_dependency() {
+    let mut core = b::Definitions::default();
+    let cause = core.enums.alloc(b::EnumDef {
+        name: "Std.Cause.Cause".into(),
+        params: 0,
+        variants: vec![],
+        error: false,
+        external: true,
+    });
+    let cause_type = frontend_type(core.types.intern(b::Type::Enum(cause, vec![])));
+    let source = exported(function(
+        0,
+        "answer",
+        vec![local(0, cause_type)],
+        ValueType::Never,
+        expression(
+            ir::ExprKind::Fiber {
+                op: b::FiberOp::CauseRaise,
+                args: vec![expression(ir::ExprKind::Local(ir::LocalId(0)), cause_type)],
+                errors: vec![],
+            },
+            ValueType::Never,
+        ),
+    ));
+    let concrete = specialize(ir::Program {
+        core,
+        registry: Default::default(),
+        functions: vec![source],
+    })
+    .unwrap();
+    let lowered = crate::frontend::lower::lower(&concrete);
+    assert_eq!(
+        lowered
+            .functions
+            .iter()
+            .filter(|(_, function)| function.infallible_cause_fail)
+            .count(),
+        1
+    );
+    let mut missing_edge = lowered.clone();
+    for (_, function) in missing_edge.functions.iter_mut() {
+        for (_, statement) in function.stmts.iter_mut() {
+            if let b::Stmt::Let {
+                value:
+                    b::Value::Fiber {
+                        op: b::FiberOp::CauseRaise,
+                        on_fail,
+                        ..
+                    },
+                ..
+            } = statement
+            {
+                *on_fail = None;
+            }
+        }
+    }
+    assert!(
+        crate::backend::compile_program(missing_edge, &crate::Options::default())
+            .unwrap_err()
+            .iter()
+            .any(|error| error.message.contains("explicit failure edge"))
+    );
+    let mut output =
+        crate::backend::compile_program(lowered, &crate::Options::default().with_heap_bytes(4096))
+            .unwrap();
+    assert!(
+        crate::artifact::Manifest::from_files(&output.files)
+            .unwrap()
+            .metadata
+            .external_symbols
+            .is_empty()
+    );
+    output
+        .files
+        .iter_mut()
+        .find(|file| file.path == "emela_embedded.c")
+        .unwrap()
+        .contents
+        .push_str("\nvoid *test_interrupt_cause(void){return emela_cause_interrupt();}\nvoid *test_failed_cause(void){return emela_cause_fail((EmelaError){.tag=UINT32_C(123)});}\n");
+    execute_output(
+        output.clone(),
+        "#include <stdlib.h>\n#include <string.h>\n#include \"emela_embedded.h\"\n#include \"emela_board.h\"\nvoid *test_interrupt_cause(void);\n_Noreturn void emela_board_defect(EmelaDefectKind k,const char*m,uint16_t n){exit(k==EMELA_DEFECT_PANIC&&n==21&&!memcmp(m,\"fiber was interrupted\",21)?0:7);}\nint main(void){answer(test_interrupt_cause());return 8;}\n",
+    );
+    execute_output(
+        output,
+        "#include <stdlib.h>\n#include <string.h>\n#include \"emela_embedded.h\"\n#include \"emela_board.h\"\nvoid *test_failed_cause(void);\n_Noreturn void emela_board_defect(EmelaDefectKind k,const char*m,uint16_t n){exit(k==EMELA_DEFECT_ASSERT&&n==34&&!memcmp(m,\"assertion failed: empty Cause failed\",34)?0:7);}\nint main(void){answer(test_failed_cause());return 8;}\n",
+    );
+}
+
 fn effect(core: &mut b::Definitions, name: &str) -> (b::EffectId, ValueType) {
     let effect = core.effects.alloc(b::EffectDef {
         name: name.into(),

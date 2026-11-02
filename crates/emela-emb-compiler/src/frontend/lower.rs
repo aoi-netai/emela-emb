@@ -153,7 +153,7 @@ struct Context<'a> {
     suspending: &'a HashSet<DefinitionId>,
     current_suspends: bool,
     evidence: Option<b::VarId>,
-    raises: &'a HashMap<b::TypeId, b::FnId>,
+    raises: &'a failures::RaisedFunctions,
     structural_equality: &'a HashMap<b::TypeId, b::FnId>,
     escape: Option<(b::VarId, b::SeqId)>,
     closure_depth: usize,
@@ -277,6 +277,9 @@ impl Context<'_> {
                         return None;
                     }
                     values.push(value.unwrap_or(b::Operand::Const(b::Const::Unit)));
+                }
+                if *op == b::FiberOp::CauseRaise && errors.is_empty() {
+                    return self.raise_empty_cause(builder, values);
                 }
                 self.value(
                     builder,

@@ -216,11 +216,20 @@ pub(crate) fn lower_program(
 }
 
 fn validate_function(program: &Program, f: &Function) -> Result<()> {
-    if f.env.is_some() || f.infallible_cause_fail {
-        return Err(unsupported(
-            &f.name,
-            "explicit closure environment or cause failure function",
-        ));
+    if f.env.is_some() {
+        return Err(unsupported(&f.name, "explicit closure environment"));
+    }
+    if f.infallible_cause_fail {
+        let internal = f
+            .external
+            .as_ref()
+            .and_then(|external| external.binding("emela_emb_internal"));
+        if f.name != "emela_infallible_cause_fail" || f.exported || f.constant || f.fails || f.suspends
+            || f.derivation.is_some() || f.body.is_some() || f.ret != TypeId::NEVER || f.params.len() != 1
+            || variable(f, f.params[0])? != TypeId::ANY
+            || !internal.is_some_and(|binding| matches!(&binding.host, HostRef::Global(name) if name == "emela_infallible_cause_fail")) {
+            return Err(invalid(&f.name, "invalid backend Cause landing binding"));
+        }
     }
     let check_type = |ty| types::validate_type(program, &f.name, ty);
     check_type(f.ret)?;

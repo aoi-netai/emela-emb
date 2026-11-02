@@ -106,6 +106,10 @@ fn execute_with_options(input: ir::Program, harness: &str, options: &crate::Opti
         output.files.iter_mut().find(|file| file.path == "emela_embedded.c").unwrap().contents.push_str(
             "\nint test_heap_empty(void){for(unsigned char*p=emela_heap_storage;emela_heap_initialized&&p<emela_heap_end();){emela_heap_block*b=(emela_heap_block*)(void*)p;if(!b->is_free)return 0;p+=b->size;}return 1;}\n");
     }
+    execute_output(output, harness);
+}
+
+fn execute_output(output: crate::Output, harness: &str) {
     static NEXT: AtomicU64 = AtomicU64::new(0);
     let path = std::env::temp_dir().join(format!(
         "emela-specialize-{}-{}",
