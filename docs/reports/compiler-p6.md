@@ -21,8 +21,18 @@ source revision `d4b9b23` の `cargo test -p emela-emb-compiler --lib --locked -
 
 `1086f6a` はStd.Fiber/Deferred/Causeの固定source、名義型のrow kind推論、Scope省略推論・子Scope供給、Cause/Exitのphantom row ABI射影を接続する。`p6_concurrency.rs` の2試験は通常のRust test profileで成功した。Scope/Fork/Join/Deferred、Unit child/Deferred、Attempt/Cause分類・表示・再送出の7exportをC両最適化・各1000回の全heap回収で確認し、Scope戻り型のhandle逸出と集合kind等7不正sourceを拒否した。
 
-同revisionのstrict Clippy全target・実Rust1.85全target check・fmt/diffは成功、警告0。全workspace回帰は実行中で、Rust側は `CARGO_PROFILE_TEST_OPT_LEVEL=1` を使う。C側の必須両最適化は同じ。ログは `.local/experiment/p6-source-{initial,clippy,msrv}.log` と `p6-workspace-initial.log`。
+同revisionのstrict Clippy全target・実Rust1.85全target check・fmt/diffは成功、警告0。全workspace回帰は386 pass、失敗/ignore 0で成功した。Rust側は `CARGO_PROFILE_TEST_OPT_LEVEL=1` を使う。C側の必須両最適化は同じ。ログは `.local/experiment/p6-source-{initial,clippy,msrv}.log` と `p6-workspace-initial.log`。
 
 ## 残る完了条件
 
 sourceから取消・中断cleanup・lexical provider・入れ子Scope・標準combinatorの回帰を追加し、最終sourceの全workspace・strict Clippy・実Rust1.85・独立環境検証を行う。台帳はそれらの証拠に基づいて更新し、独自IRの成功だけでsource対応を完了扱いにしない。
+
+## 追加したsource回帰
+
+`26cb8d0`のsource combinator試験は、Scope呼出地点のevidenceとfork地点のevidenceの区別、入れ子Scopeからの外側Scope利用、both/race/all/mapのString/List所有値をC両最適化・1000回の全heap回収で確認した。`dd5104e`の2試験は、attempt内のdefectが即時停止しreleaseを走らせないことと、先行するtyped failureではreleaseを行うことを検証する。停止後にしか使わない同期cleanup helperをCへ出さず、strict Cの未使用関数警告も解消した。
+
+`0f9a3ca`はScope集合をchildごとの包含関係として推論し、pure childで提供集合を空へ固定しない。原本文を保存した4 sourceの回帰が成功し、直前の169プログラム監査でMissingTagだった15入力もすべて受理された。監査のC rootは旧Optionsを再現していないため、この15件の受理をC実行成功へ読み替えない。
+
+`888b821`は旧4入力のchild await/join FIFO、失敗したhandleなしchildの回収、中断するsibling cleanup、取消通知と所有String、複数失敗noteの順序をC両最適化で各1000回検証する。[入力と観測の対応](p6-child-waiters-compat.json)にhashと旧試験名を記録した。overlapだけは旧試験と同じsource後のHold挿入を必要とし、純sourceの経路と区別する。
+
+closing-ready・入れ子取消・interrupt待機のsource/C回帰を追加中。完了済みchildの未使用handleが親の最初の待機時点まで残る差分を検出しており、旧期待値どおり回収する修正を完了してからP6最終検証を行う。この時点ではP6を完了扱いにしない。
