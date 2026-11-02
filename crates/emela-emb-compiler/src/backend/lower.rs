@@ -184,43 +184,15 @@ pub(crate) fn lower_program(
         function.statement_positions = statements;
         function.sequence_positions = sequences;
     }
-    let mut pending: Vec<_> = program
-        .functions
-        .iter()
-        .filter_map(|(id, f)| (f.exported || f.name == options.entry()).then_some(id))
-        .collect();
     // Source visibility does not create C roots. A module with neither an export
     // nor the selected entry still gets validated, but emits no reachable functions.
-    let mut emitted_functions = HashSet::new();
-    while let Some(id) = pending.pop() {
-        if !emitted_functions.insert(id) {
-            continue;
-        }
-        // A resolved constant emits its value or defect directly. Its initializer no longer
-        // calls helpers; retaining those edges can emit unused static C functions.
-        if matches!(const_outcomes.get(&id), Some(Ok(_))) {
-            continue;
-        }
-        let function = &program.functions[id];
-        for (_, stmt) in function
-            .stmts
-            .iter()
-            .filter(|(id, _)| function.active_statements.contains(id))
-        {
-            if let Stmt::Let {
-                value:
-                    Value::Call {
-                        callee: Callee::Direct(id),
-                        ..
-                    }
-                    | Value::FnRef(id),
-                ..
-            } = stmt
-            {
-                pending.push(*id);
-            }
-        }
-    }
+    // Resolved constants emit their outcome directly, without initializer helpers.
+    let resolved_constants = const_outcomes
+        .iter()
+        .filter_map(|(id, result)| result.is_ok().then_some(*id))
+        .collect();
+    let emitted_functions =
+        closure::runtime_reachable_without_initializers(&program, options, &resolved_constants);
     let suspensions = suspend::prepare(&program);
     Ok(LoweredModule {
         lowered: program,
