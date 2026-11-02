@@ -20,12 +20,16 @@ fn empty() { None }
 fn forward() { empty() }
 fn pair[A](value: A) { (value, empty()) }
 fn zero() { 0 }
+fn is_empty[A](value: Maybe[A]) -> Bool { value match { None -> True
+Some(_) -> False } }
 fn int_value(value: Maybe[Int]) -> Int { value match { None -> 42
 Some(n) -> n } }
 fn string_value(value: Maybe[String]) -> String { value match { None -> "empty"
 Some(s) -> s } }
 @export(c, "inference")
 pub fn inference() -> Int {
+    unused = None
+    assert is_empty(empty())
     a: Maybe[Int] = empty()
     b: Maybe[String] = empty()
     assert int_value(a) == 42 && string_value(b) == "empty"

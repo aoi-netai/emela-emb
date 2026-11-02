@@ -431,6 +431,21 @@ impl Solver {
     pub(crate) fn finish_defaults(&mut self, types: &mut TypeTable) -> Result<()> {
         self.default_metas(types, self.metas.keys().copied().collect::<Vec<_>>())
     }
+    /// After top-level generalization, an unconstrained variable used only inside
+    /// a body has no observable representation requirement (for example discarded None).
+    pub(crate) fn finish_unused(&mut self, types: &mut TypeTable) -> Result<()> {
+        for variable in self.metas.keys().copied().collect::<Vec<_>>() {
+            let resolved = self.resolve(types, variable)?;
+            if self
+                .metas
+                .get(&resolved)
+                .is_some_and(|meta| meta.binding.is_none())
+            {
+                self.bind(types, resolved, TypeId::UNIT)?;
+            }
+        }
+        Ok(())
+    }
     pub(crate) fn substitute(
         &mut self,
         types: &mut TypeTable,

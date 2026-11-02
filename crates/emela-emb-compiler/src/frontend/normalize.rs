@@ -17,6 +17,7 @@ pub(crate) fn normalize(
 ) -> Result<(), Vec<Diagnostic>> {
     solver
         .finish_defaults(&mut program.core.types)
+        .and_then(|()| solver.finish_unused(&mut program.core.types))
         .map_err(|e| {
             vec![Diagnostic::new(
                 DiagnosticKind::Type,
