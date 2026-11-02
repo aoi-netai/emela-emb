@@ -221,3 +221,220 @@ fn local_failure_handlers_are_validated_and_normalized_in_sync_and_suspend_calls
         execute(&output, &harness, 0);
     }
 }
+
+#[test]
+fn interrupt_masks_are_rejected_from_nested_isr_entries_with_or_without_unwind_runtime() {
+    for op in [RuntimeOp::Hold, RuntimeOp::Unhold] {
+        for via_callee in [false, true] {
+            for with_unwind in [false, true] {
+                let mut p = program(vec![]);
+                let mut action = simple();
+                if via_callee {
+                    action.exported = false;
+                    action.export_symbol = None;
+                    action.name = "action".into();
+                }
+                let mask = binding(&mut action, None, Value::Runtime { op, args: vec![] });
+                action.seqs[action.body.unwrap()].stmts = vec![mask];
+                let action = p.functions.alloc(action);
+                if via_callee {
+                    let mut entry = simple();
+                    let call = binding(
+                        &mut entry,
+                        None,
+                        Value::Call {
+                            callee: Callee::Direct(action),
+                            args: vec![],
+                            suspends: false,
+                            on_fail: None,
+                        },
+                    );
+                    entry.seqs[entry.body.unwrap()].stmts = vec![call];
+                    p.functions.alloc(entry);
+                }
+                if with_unwind {
+                    let mut f = Function::new("other");
+                    f.exported = true;
+                    f.export_symbol = Some("other".into());
+                    f.suspends = true;
+                    let body = f.seqs.alloc(Seq {
+                        stmts: vec![],
+                        term: Term::Yield(None),
+                    });
+                    let cleanup = f.seqs.alloc(Seq {
+                        stmts: vec![],
+                        term: Term::Yield(None),
+                    });
+                    let protect = f.stmts.alloc(Stmt::Protect {
+                        dst: None,
+                        body,
+                        cleanup,
+                    });
+                    f.body = Some(f.seqs.alloc(Seq {
+                        stmts: vec![protect],
+                        term: Term::Return(None),
+                    }));
+                    p.functions.alloc(f);
+                }
+                let errors = crate::backend::compile_program(
+                    p,
+                    &Options::default().with_isr_entry("answer"),
+                )
+                .unwrap_err();
+                assert!(
+                    errors.iter().any(|error| error
+                        .message
+                        .contains("fiber interrupt control reachable from ISR entry")),
+                    "{op:?}/{via_callee}/{with_unwind}: {errors:?}"
+                );
+            }
+        }
+    }
+}
+
+#[test]
+fn structured_fiber_waits_accept_suspending_and_reject_native_callers() {
+    for case in ["scope", "join", "await", "interrupt", "deferred_await"] {
+        let mut p = program(vec![]);
+        let child = p.core.enums.alloc(EnumDef {
+            name: "Std.Fiber.Fiber".into(),
+            params: 1,
+            variants: vec![],
+            error: false,
+            external: true,
+        });
+        let child = p.core.types.intern(Type::Enum(child, vec![TypeId::INT]));
+        let deferred = p.core.enums.alloc(EnumDef {
+            name: "Std.Deferred.Deferred".into(),
+            params: 1,
+            variants: vec![],
+            error: false,
+            external: true,
+        });
+        let deferred = p.core.types.intern(Type::Enum(deferred, vec![TypeId::INT]));
+        let cause = p.core.enums.alloc(EnumDef {
+            name: "Std.Cause.Cause".into(),
+            params: 0,
+            variants: vec![],
+            error: false,
+            external: true,
+        });
+        let cause = p.core.types.intern(Type::Enum(cause, vec![]));
+        let param = p.core.types.intern(Type::Param(0));
+        let exit = p.core.enums.alloc(EnumDef {
+            name: "Std.Fiber.Exit".into(),
+            params: 1,
+            variants: vec![
+                VariantDef {
+                    name: "Success".into(),
+                    fields: VariantFields::Positional(1),
+                    tys: vec![param],
+                },
+                VariantDef {
+                    name: "Failure".into(),
+                    fields: VariantFields::Positional(1),
+                    tys: vec![cause],
+                },
+            ],
+            error: false,
+            external: false,
+        });
+        let callback = p.core.types.intern(Type::Fn(FnType {
+            params: vec![TypeId::FIBER_SCOPE],
+            ret: TypeId::UNIT,
+            fails: false,
+            suspends: true,
+            ev: false,
+            sets: None,
+        }));
+        let mut f = simple();
+        f.ret = TypeId::UNIT;
+        f.suspends = true;
+        let ty = match case {
+            "scope" => callback,
+            "deferred_await" => deferred,
+            _ => child,
+        };
+        let argument = aggregate_variable(&mut f, ty);
+        f.params.push(argument);
+        let op = match case {
+            "scope" => FiberOp::Scope { fails: false },
+            "join" => FiberOp::Join,
+            "await" => FiberOp::Await { exit },
+            "interrupt" => FiberOp::Interrupt,
+            _ => FiberOp::DeferredAwait,
+        };
+        let wait = binding(
+            &mut f,
+            None,
+            Value::Fiber {
+                op,
+                args: vec![argument.into()],
+                on_fail: None,
+            },
+        );
+        f.seqs[f.body.unwrap()] = Seq {
+            stmts: vec![wait],
+            term: Term::Return(None),
+        };
+        let id = p.functions.alloc(f);
+        lower_program(p.clone()).unwrap();
+        p.functions[id].suspends = false;
+        let errors = lower_program(p).unwrap_err();
+        assert!(
+            errors
+                .iter()
+                .any(|error| error.kind == ErrorKind::InvalidFlowIr
+                    && error
+                        .message
+                        .contains("fiber wait requires a suspending caller")),
+            "{case}: {errors:?}"
+        );
+    }
+}
+
+#[test]
+fn cause_raise_requires_a_failure_edge_and_a_propagation_channel() {
+    for suspends in [false, true] {
+        for propagate in [false, true] {
+            let mut p = program(vec![]);
+            let cause = p.core.enums.alloc(EnumDef {
+                name: "Std.Cause.Cause".into(),
+                params: 0,
+                variants: vec![],
+                error: false,
+                external: true,
+            });
+            let cause = p.core.types.intern(Type::Enum(cause, vec![]));
+            let mut f = simple();
+            f.ret = TypeId::NEVER;
+            f.suspends = suspends;
+            let value = aggregate_variable(&mut f, cause);
+            f.params.push(value);
+            let raise = binding(
+                &mut f,
+                None,
+                Value::Fiber {
+                    op: FiberOp::CauseRaise,
+                    args: vec![value.into()],
+                    on_fail: propagate.then_some(OnFail::Propagate),
+                },
+            );
+            f.seqs[f.body.unwrap()] = Seq {
+                stmts: vec![raise],
+                term: Term::Unreachable,
+            };
+            p.functions.alloc(f);
+            let errors = lower_program(p).unwrap_err();
+            let expected = if propagate {
+                "failure propagation has no function failure channel"
+            } else {
+                "explicit failure edge"
+            };
+            assert!(
+                errors.iter().any(|error| error.message.contains(expected)),
+                "{suspends}/{propagate}: {errors:?}"
+            );
+        }
+    }
+}

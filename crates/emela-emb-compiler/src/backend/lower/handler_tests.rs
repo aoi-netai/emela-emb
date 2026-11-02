@@ -1,4 +1,6 @@
 use super::*;
+#[path = "p7_handler_lifetime_tests.rs"]
+mod p7_lifetimes;
 
 fn reference(f: &mut Function, ty: TypeId) -> VarId {
     f.vars.alloc(VarData {

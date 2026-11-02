@@ -16,6 +16,8 @@ mod handlers;
 mod isr;
 #[path = "memory_tests.rs"]
 mod memory;
+#[path = "p7_aggregate_failure_tests.rs"]
+mod p7_aggregate_failures;
 #[path = "p7_binding_tests.rs"]
 mod p7_bindings;
 #[path = "p7_const_source_tests.rs"]
@@ -36,6 +38,8 @@ mod p7_integration;
 mod services;
 #[path = "source_builtin_tests.rs"]
 mod source_builtins;
+#[path = "p7_string_frame_tests.rs"]
+mod p7_string_frames;
 #[path = "suspend_tests.rs"]
 mod suspend;
 
