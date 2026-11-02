@@ -1,0 +1,7464 @@
+{
+  "schema_version": 1,
+  "baseline_revision": "c34c0aeefdd966d854371b3110db00a47798751d",
+  "baseline_provenance": "docs/reference/legacy-flow/provenance.json",
+  "records": [
+    {
+      "id": "emela_core::Builtin",
+      "relation": "shared_declaration",
+      "legacy_role": "schema",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::Builtin::AssertFail",
+      "relation": "variant_entry",
+      "legacy_role": "reject",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::Builtin::BytesConcat",
+      "relation": "variant_entry",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::Builtin::BytesDecodeValidUtf8",
+      "relation": "variant_entry",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::Builtin::BytesEncodeUtf8",
+      "relation": "variant_entry",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::Builtin::BytesFromList",
+      "relation": "variant_entry",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::Builtin::BytesGet",
+      "relation": "variant_entry",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::Builtin::BytesSize",
+      "relation": "variant_entry",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::Builtin::BytesSlice",
+      "relation": "variant_entry",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::Builtin::BytesToList",
+      "relation": "variant_entry",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::Builtin::CellGet",
+      "relation": "variant_entry",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::Builtin::CellNew",
+      "relation": "variant_entry",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::Builtin::CellSet",
+      "relation": "variant_entry",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::Builtin::Dbg",
+      "relation": "variant_entry",
+      "legacy_role": "reject",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::Builtin::DebugPrint",
+      "relation": "variant_entry",
+      "legacy_role": "reject",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::Builtin::FloatCeil",
+      "relation": "variant_entry",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::Builtin::FloatFloor",
+      "relation": "variant_entry",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::Builtin::FloatFromInt",
+      "relation": "variant_entry",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::Builtin::FloatParse",
+      "relation": "variant_entry",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::Builtin::FloatRound",
+      "relation": "variant_entry",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::Builtin::FloatToString",
+      "relation": "variant_entry",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::Builtin::FloatTruncate",
+      "relation": "variant_entry",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::Builtin::Inspect",
+      "relation": "variant_entry",
+      "legacy_role": "reject",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::Builtin::Int64BitAnd",
+      "relation": "variant_entry",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::Builtin::Int64BitNot",
+      "relation": "variant_entry",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::Builtin::Int64BitOr",
+      "relation": "variant_entry",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::Builtin::Int64BitXor",
+      "relation": "variant_entry",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::Builtin::Int64FromInt",
+      "relation": "variant_entry",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::Builtin::Int64ShiftLeft",
+      "relation": "variant_entry",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::Builtin::Int64ShiftRight",
+      "relation": "variant_entry",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::Builtin::Int64ShiftRightUnsigned",
+      "relation": "variant_entry",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::Builtin::Int64ToInt",
+      "relation": "variant_entry",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::Builtin::Int64ToString",
+      "relation": "variant_entry",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::Builtin::IntBitAnd",
+      "relation": "variant_entry",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::Builtin::IntBitNot",
+      "relation": "variant_entry",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::Builtin::IntBitOr",
+      "relation": "variant_entry",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::Builtin::IntBitXor",
+      "relation": "variant_entry",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::Builtin::IntCheckedAdd",
+      "relation": "variant_entry",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::Builtin::IntParse",
+      "relation": "variant_entry",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::Builtin::IntShiftLeft",
+      "relation": "variant_entry",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::Builtin::IntShiftRight",
+      "relation": "variant_entry",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::Builtin::IntShiftRightUnsigned",
+      "relation": "variant_entry",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::Builtin::IntToString",
+      "relation": "variant_entry",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::Builtin::Panic",
+      "relation": "variant_entry",
+      "legacy_role": "reject",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::Builtin::ShowNested",
+      "relation": "variant_entry",
+      "legacy_role": "reject",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::Builtin::ShowString",
+      "relation": "variant_entry",
+      "legacy_role": "reject",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::Builtin::StringAppend",
+      "relation": "variant_entry",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::Builtin::StringByteSize",
+      "relation": "variant_entry",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::Builtin::StringChars",
+      "relation": "variant_entry",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::Builtin::StringCodePoints",
+      "relation": "variant_entry",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::Builtin::StringContains",
+      "relation": "variant_entry",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::Builtin::StringEndsWith",
+      "relation": "variant_entry",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::Builtin::StringFromCodePoint",
+      "relation": "variant_entry",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::Builtin::StringJoin",
+      "relation": "variant_entry",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::Builtin::StringLength",
+      "relation": "variant_entry",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::Builtin::StringSplit",
+      "relation": "variant_entry",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::Builtin::StringStartsWith",
+      "relation": "variant_entry",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::Builtin::StringTrim",
+      "relation": "variant_entry",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::Builtin::Todo",
+      "relation": "variant_entry",
+      "legacy_role": "reject",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::CtorRef",
+      "relation": "shared_declaration",
+      "legacy_role": "schema",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::CtorRef.enum_id",
+      "relation": "member_of_declaration",
+      "legacy_role": "schema",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::CtorRef.variant",
+      "relation": "member_of_declaration",
+      "legacy_role": "schema",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::EffectDef",
+      "relation": "shared_declaration",
+      "legacy_role": "schema",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::EffectDef.args",
+      "relation": "member_of_declaration",
+      "legacy_role": "schema",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::EffectDef.decl",
+      "relation": "member_of_declaration",
+      "legacy_role": "schema",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::EffectDef.label_of",
+      "relation": "member_of_declaration",
+      "legacy_role": "schema",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::EffectDef.name",
+      "relation": "member_of_declaration",
+      "legacy_role": "schema",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::EffectDef.ops",
+      "relation": "member_of_declaration",
+      "legacy_role": "schema",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::EnumDef",
+      "relation": "shared_declaration",
+      "legacy_role": "schema",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::EnumDef.error",
+      "relation": "member_of_declaration",
+      "legacy_role": "schema",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::EnumDef.external",
+      "relation": "member_of_declaration",
+      "legacy_role": "schema",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::EnumDef.name",
+      "relation": "member_of_declaration",
+      "legacy_role": "schema",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::EnumDef.params",
+      "relation": "member_of_declaration",
+      "legacy_role": "schema",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::EnumDef.variants",
+      "relation": "member_of_declaration",
+      "legacy_role": "schema",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::External",
+      "relation": "shared_declaration",
+      "legacy_role": "schema",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::External.bindings",
+      "relation": "member_of_declaration",
+      "legacy_role": "schema",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::ExternalBinding",
+      "relation": "shared_declaration",
+      "legacy_role": "schema",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::ExternalBinding.host",
+      "relation": "member_of_declaration",
+      "legacy_role": "schema",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::ExternalBinding.target",
+      "relation": "member_of_declaration",
+      "legacy_role": "schema",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::FiberOp",
+      "relation": "shared_declaration",
+      "legacy_role": "schema",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::FiberOp::Attempt",
+      "relation": "variant_entry",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::FiberOp::Attempt.exit",
+      "relation": "member_of_variant",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::FiberOp::Attempt.suspends",
+      "relation": "member_of_variant",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::FiberOp::Await",
+      "relation": "variant_entry",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::FiberOp::Await.exit",
+      "relation": "member_of_variant",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::FiberOp::CauseKind",
+      "relation": "variant_entry",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::FiberOp::CauseKind.kind",
+      "relation": "member_of_variant",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::FiberOp::CauseRaise",
+      "relation": "variant_entry",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::FiberOp::CauseRaise.fails",
+      "relation": "member_of_variant",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::FiberOp::CauseToString",
+      "relation": "variant_entry",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::FiberOp::Complete",
+      "relation": "variant_entry",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::FiberOp::Deferred",
+      "relation": "variant_entry",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::FiberOp::DeferredAwait",
+      "relation": "variant_entry",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::FiberOp::Fork",
+      "relation": "variant_entry",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::FiberOp::Interrupt",
+      "relation": "variant_entry",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::FiberOp::Join",
+      "relation": "variant_entry",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::FiberOp::Poll",
+      "relation": "variant_entry",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::FiberOp::Scope",
+      "relation": "variant_entry",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::FiberOp::Scope.fails",
+      "relation": "member_of_variant",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::FnSets",
+      "relation": "shared_declaration",
+      "legacy_role": "schema",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::FnSets.effects",
+      "relation": "member_of_declaration",
+      "legacy_role": "schema",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::FnSets.errors",
+      "relation": "member_of_declaration",
+      "legacy_role": "schema",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::FnType",
+      "relation": "shared_declaration",
+      "legacy_role": "schema",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::FnType.ev",
+      "relation": "member_of_declaration",
+      "legacy_role": "schema",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::FnType.fails",
+      "relation": "member_of_declaration",
+      "legacy_role": "schema",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::FnType.params",
+      "relation": "member_of_declaration",
+      "legacy_role": "schema",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::FnType.ret",
+      "relation": "member_of_declaration",
+      "legacy_role": "schema",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::FnType.sets",
+      "relation": "member_of_declaration",
+      "legacy_role": "schema",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::FnType.suspends",
+      "relation": "member_of_declaration",
+      "legacy_role": "schema",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::HostModule",
+      "relation": "shared_declaration",
+      "legacy_role": "schema",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::HostModule::Bundled",
+      "relation": "variant_entry",
+      "legacy_role": "metadata",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::HostModule::Bundled.0",
+      "relation": "member_of_variant",
+      "legacy_role": "metadata",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::HostModule::File",
+      "relation": "variant_entry",
+      "legacy_role": "metadata",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::HostModule::File.0",
+      "relation": "member_of_variant",
+      "legacy_role": "metadata",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::HostModule::Named",
+      "relation": "variant_entry",
+      "legacy_role": "metadata",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::HostModule::Named.0",
+      "relation": "member_of_variant",
+      "legacy_role": "metadata",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::HostRef",
+      "relation": "shared_declaration",
+      "legacy_role": "schema",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::HostRef::Global",
+      "relation": "variant_entry",
+      "legacy_role": "metadata",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::HostRef::Global.0",
+      "relation": "member_of_variant",
+      "legacy_role": "metadata",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::HostRef::Import",
+      "relation": "variant_entry",
+      "legacy_role": "metadata",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::HostRef::Import.module",
+      "relation": "member_of_variant",
+      "legacy_role": "metadata",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::HostRef::Import.name",
+      "relation": "member_of_variant",
+      "legacy_role": "metadata",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::OpDef",
+      "relation": "shared_declaration",
+      "legacy_role": "schema",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::OpDef.fails",
+      "relation": "member_of_declaration",
+      "legacy_role": "schema",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::OpDef.name",
+      "relation": "member_of_declaration",
+      "legacy_role": "schema",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::OpDef.params",
+      "relation": "member_of_declaration",
+      "legacy_role": "schema",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::OpDef.ret",
+      "relation": "member_of_declaration",
+      "legacy_role": "schema",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::OpDef.suspend",
+      "relation": "member_of_declaration",
+      "legacy_role": "schema",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::OpDef.type_params",
+      "relation": "member_of_declaration",
+      "legacy_role": "schema",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::SetSummary",
+      "relation": "shared_declaration",
+      "legacy_role": "schema",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::SetSummary.ev",
+      "relation": "member_of_declaration",
+      "legacy_role": "schema",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::SetSummary.fails",
+      "relation": "member_of_declaration",
+      "legacy_role": "schema",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::SetSummary.params",
+      "relation": "member_of_declaration",
+      "legacy_role": "schema",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::SetSummary.suspends",
+      "relation": "member_of_declaration",
+      "legacy_role": "schema",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::Type",
+      "relation": "shared_declaration",
+      "legacy_role": "schema",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::Type::Any",
+      "relation": "variant_entry",
+      "legacy_role": "metadata",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::Type::Bool",
+      "relation": "variant_entry",
+      "legacy_role": "metadata",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::Type::Bytes",
+      "relation": "variant_entry",
+      "legacy_role": "metadata",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::Type::Cell",
+      "relation": "variant_entry",
+      "legacy_role": "metadata",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::Type::Cell.0",
+      "relation": "member_of_variant",
+      "legacy_role": "metadata",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::Type::Enum",
+      "relation": "variant_entry",
+      "legacy_role": "metadata",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::Type::Enum.0",
+      "relation": "member_of_variant",
+      "legacy_role": "metadata",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::Type::Enum.1",
+      "relation": "member_of_variant",
+      "legacy_role": "metadata",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::Type::Evidence",
+      "relation": "variant_entry",
+      "legacy_role": "metadata",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::Type::FiberScope",
+      "relation": "variant_entry",
+      "legacy_role": "metadata",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::Type::Float",
+      "relation": "variant_entry",
+      "legacy_role": "metadata",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::Type::Fn",
+      "relation": "variant_entry",
+      "legacy_role": "metadata",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::Type::Fn.0",
+      "relation": "member_of_variant",
+      "legacy_role": "metadata",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::Type::Handler",
+      "relation": "variant_entry",
+      "legacy_role": "metadata",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::Type::Handler.0",
+      "relation": "member_of_variant",
+      "legacy_role": "metadata",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::Type::Int",
+      "relation": "variant_entry",
+      "legacy_role": "metadata",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::Type::Int64",
+      "relation": "variant_entry",
+      "legacy_role": "metadata",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::Type::List",
+      "relation": "variant_entry",
+      "legacy_role": "metadata",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::Type::List.0",
+      "relation": "member_of_variant",
+      "legacy_role": "metadata",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::Type::Never",
+      "relation": "variant_entry",
+      "legacy_role": "metadata",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::Type::Param",
+      "relation": "variant_entry",
+      "legacy_role": "metadata",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::Type::Param.0",
+      "relation": "member_of_variant",
+      "legacy_role": "metadata",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::Type::Set",
+      "relation": "variant_entry",
+      "legacy_role": "metadata",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::Type::Set.0",
+      "relation": "member_of_variant",
+      "legacy_role": "metadata",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::Type::String",
+      "relation": "variant_entry",
+      "legacy_role": "metadata",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::Type::Tuple",
+      "relation": "variant_entry",
+      "legacy_role": "metadata",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::Type::Tuple.0",
+      "relation": "member_of_variant",
+      "legacy_role": "metadata",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::Type::Unit",
+      "relation": "variant_entry",
+      "legacy_role": "metadata",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::VariantDef",
+      "relation": "shared_declaration",
+      "legacy_role": "schema",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::VariantDef.fields",
+      "relation": "member_of_declaration",
+      "legacy_role": "schema",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::VariantDef.name",
+      "relation": "member_of_declaration",
+      "legacy_role": "schema",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::VariantDef.tys",
+      "relation": "member_of_declaration",
+      "legacy_role": "schema",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::VariantFields",
+      "relation": "shared_declaration",
+      "legacy_role": "schema",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::VariantFields::Named",
+      "relation": "variant_entry",
+      "legacy_role": "metadata",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::VariantFields::Named.0",
+      "relation": "member_of_variant",
+      "legacy_role": "metadata",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::VariantFields::Positional",
+      "relation": "variant_entry",
+      "legacy_role": "metadata",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::VariantFields::Positional.0",
+      "relation": "member_of_variant",
+      "legacy_role": "metadata",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::VariantFields::Unit",
+      "relation": "variant_entry",
+      "legacy_role": "metadata",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Callee",
+      "relation": "shared_declaration",
+      "legacy_role": "schema",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Callee::Direct",
+      "relation": "variant_entry",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Callee::Direct.0",
+      "relation": "member_of_variant",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Callee::Indirect",
+      "relation": "variant_entry",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Callee::Indirect.0",
+      "relation": "member_of_variant",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Callee::Op",
+      "relation": "variant_entry",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Callee::Op.effect",
+      "relation": "member_of_variant",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Callee::Op.handler",
+      "relation": "member_of_variant",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Callee::Op.op",
+      "relation": "member_of_variant",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Case",
+      "relation": "shared_declaration",
+      "legacy_role": "schema",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Case.body",
+      "relation": "member_of_declaration",
+      "legacy_role": "schema",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Case.key",
+      "relation": "member_of_declaration",
+      "legacy_role": "schema",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::CaseKey",
+      "relation": "shared_declaration",
+      "legacy_role": "schema",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::CaseKey::Lit",
+      "relation": "variant_entry",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::CaseKey::Lit.0",
+      "relation": "member_of_variant",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::CaseKey::Variant",
+      "relation": "variant_entry",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::CaseKey::Variant.0",
+      "relation": "member_of_variant",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Closure",
+      "relation": "shared_declaration",
+      "legacy_role": "schema",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Closure.body",
+      "relation": "member_of_declaration",
+      "legacy_role": "schema",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Closure.captures",
+      "relation": "member_of_declaration",
+      "legacy_role": "schema",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Closure.params",
+      "relation": "member_of_declaration",
+      "legacy_role": "schema",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Closure.suspends",
+      "relation": "member_of_declaration",
+      "legacy_role": "schema",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Const",
+      "relation": "shared_declaration",
+      "legacy_role": "schema",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Const::Bool",
+      "relation": "variant_entry",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Const::Bool.0",
+      "relation": "member_of_variant",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Const::Float",
+      "relation": "variant_entry",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Const::Float.0",
+      "relation": "member_of_variant",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Const::Int",
+      "relation": "variant_entry",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Const::Int.0",
+      "relation": "member_of_variant",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Const::Int64",
+      "relation": "variant_entry",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Const::Int64.0",
+      "relation": "member_of_variant",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Const::String",
+      "relation": "variant_entry",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Const::String.0",
+      "relation": "member_of_variant",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Const::Unit",
+      "relation": "variant_entry",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::FnId",
+      "relation": "shared_declaration",
+      "legacy_role": "schema",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Function",
+      "relation": "shared_declaration",
+      "legacy_role": "schema",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Function.body",
+      "relation": "member_of_declaration",
+      "legacy_role": "schema",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Function.constant",
+      "relation": "member_of_declaration",
+      "legacy_role": "schema",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Function.defects",
+      "relation": "member_of_declaration",
+      "legacy_role": "schema",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Function.env",
+      "relation": "member_of_declaration",
+      "legacy_role": "schema",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Function.exported",
+      "relation": "member_of_declaration",
+      "legacy_role": "schema",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Function.external",
+      "relation": "member_of_declaration",
+      "legacy_role": "schema",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Function.fails",
+      "relation": "member_of_declaration",
+      "legacy_role": "schema",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Function.labels",
+      "relation": "member_of_declaration",
+      "legacy_role": "schema",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Function.name",
+      "relation": "member_of_declaration",
+      "legacy_role": "schema",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Function.params",
+      "relation": "member_of_declaration",
+      "legacy_role": "schema",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Function.ret",
+      "relation": "member_of_declaration",
+      "legacy_role": "schema",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Function.seqs",
+      "relation": "member_of_declaration",
+      "legacy_role": "schema",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Function.stmts",
+      "relation": "member_of_declaration",
+      "legacy_role": "schema",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Function.suspends",
+      "relation": "member_of_declaration",
+      "legacy_role": "schema",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Function.vars",
+      "relation": "member_of_declaration",
+      "legacy_role": "schema",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::LabelData",
+      "relation": "shared_declaration",
+      "legacy_role": "schema",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::LabelData.hint",
+      "relation": "member_of_declaration",
+      "legacy_role": "schema",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::LabelId",
+      "relation": "shared_declaration",
+      "legacy_role": "schema",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Module",
+      "relation": "shared_declaration",
+      "legacy_role": "schema",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Module.core",
+      "relation": "member_of_declaration",
+      "legacy_role": "schema",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Module.error_shows",
+      "relation": "member_of_declaration",
+      "legacy_role": "schema",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Module.functions",
+      "relation": "member_of_declaration",
+      "legacy_role": "schema",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Module.stage",
+      "relation": "member_of_declaration",
+      "legacy_role": "schema",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::OnFail",
+      "relation": "shared_declaration",
+      "legacy_role": "schema",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::OnFail::Break",
+      "relation": "variant_entry",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::OnFail::Break.0",
+      "relation": "member_of_variant",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::OnFail::Handle",
+      "relation": "variant_entry",
+      "legacy_role": "reject",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::OnFail::Handle.body",
+      "relation": "member_of_variant",
+      "legacy_role": "reject",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::OnFail::Handle.error",
+      "relation": "member_of_variant",
+      "legacy_role": "reject",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::OnFail::Propagate",
+      "relation": "variant_entry",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Operand",
+      "relation": "shared_declaration",
+      "legacy_role": "schema",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Operand::Const",
+      "relation": "variant_entry",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Operand::Const.0",
+      "relation": "member_of_variant",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Operand::Var",
+      "relation": "variant_entry",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Operand::Var.0",
+      "relation": "member_of_variant",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::PrimOp",
+      "relation": "shared_declaration",
+      "legacy_role": "schema",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::PrimOp::Add",
+      "relation": "variant_entry",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::PrimOp::Div",
+      "relation": "variant_entry",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::PrimOp::Eq",
+      "relation": "variant_entry",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::PrimOp::Ge",
+      "relation": "variant_entry",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::PrimOp::Gt",
+      "relation": "variant_entry",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::PrimOp::Le",
+      "relation": "variant_entry",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::PrimOp::Lt",
+      "relation": "variant_entry",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::PrimOp::Mul",
+      "relation": "variant_entry",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::PrimOp::Ne",
+      "relation": "variant_entry",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::PrimOp::Neg",
+      "relation": "variant_entry",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::PrimOp::Not",
+      "relation": "variant_entry",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::PrimOp::Rem",
+      "relation": "variant_entry",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::PrimOp::Sub",
+      "relation": "variant_entry",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::PrimTy",
+      "relation": "shared_declaration",
+      "legacy_role": "schema",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::PrimTy::F64",
+      "relation": "variant_entry",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::PrimTy::I32",
+      "relation": "variant_entry",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::PrimTy::I64",
+      "relation": "variant_entry",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::PrimTy::String",
+      "relation": "variant_entry",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Repr",
+      "relation": "shared_declaration",
+      "legacy_role": "schema",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Repr::F64",
+      "relation": "variant_entry",
+      "legacy_role": "metadata",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Repr::I32",
+      "relation": "variant_entry",
+      "legacy_role": "metadata",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Repr::I64",
+      "relation": "variant_entry",
+      "legacy_role": "metadata",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Repr::Ref",
+      "relation": "variant_entry",
+      "legacy_role": "metadata",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Repr::Void",
+      "relation": "variant_entry",
+      "legacy_role": "metadata",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::RuntimeOp",
+      "relation": "shared_declaration",
+      "legacy_role": "schema",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::RuntimeOp::DebugPrint",
+      "relation": "variant_entry",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::RuntimeOp::Defect",
+      "relation": "variant_entry",
+      "legacy_role": "reject",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::RuntimeOp::DefectAt",
+      "relation": "variant_entry",
+      "legacy_role": "reject",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::RuntimeOp::DefectResume",
+      "relation": "variant_entry",
+      "legacy_role": "reject",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::RuntimeOp::DefectTake",
+      "relation": "variant_entry",
+      "legacy_role": "reject",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::RuntimeOp::Hold",
+      "relation": "variant_entry",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::RuntimeOp::Retire",
+      "relation": "variant_entry",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::RuntimeOp::ShowString",
+      "relation": "variant_entry",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::RuntimeOp::Unhold",
+      "relation": "variant_entry",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::RuntimeOp::Yield",
+      "relation": "variant_entry",
+      "legacy_role": "reject",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::RuntimeOp::YieldPerform",
+      "relation": "variant_entry",
+      "legacy_role": "reject",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Seq",
+      "relation": "shared_declaration",
+      "legacy_role": "schema",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Seq.stmts",
+      "relation": "member_of_declaration",
+      "legacy_role": "schema",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Seq.term",
+      "relation": "member_of_declaration",
+      "legacy_role": "schema",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::SeqId",
+      "relation": "shared_declaration",
+      "legacy_role": "schema",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Stage",
+      "relation": "shared_declaration",
+      "legacy_role": "schema",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Stage::ClosuresConverted",
+      "relation": "variant_entry",
+      "legacy_role": "reject",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Stage::DefectsExplicit",
+      "relation": "variant_entry",
+      "legacy_role": "reject",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Stage::Flow",
+      "relation": "variant_entry",
+      "legacy_role": "input",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Stage::RefCounted",
+      "relation": "variant_entry",
+      "legacy_role": "reject",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Stage::StateMachines",
+      "relation": "variant_entry",
+      "legacy_role": "reject",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Stmt",
+      "relation": "shared_declaration",
+      "legacy_role": "schema",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Stmt::Block",
+      "relation": "variant_entry",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Stmt::Block.body",
+      "relation": "member_of_variant",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Stmt::Block.dst",
+      "relation": "member_of_variant",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Stmt::Block.label",
+      "relation": "member_of_variant",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Stmt::Drop",
+      "relation": "variant_entry",
+      "legacy_role": "reject",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Stmt::Drop.0",
+      "relation": "member_of_variant",
+      "legacy_role": "reject",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Stmt::Dup",
+      "relation": "variant_entry",
+      "legacy_role": "reject",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Stmt::Dup.0",
+      "relation": "member_of_variant",
+      "legacy_role": "reject",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Stmt::If",
+      "relation": "variant_entry",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Stmt::If.cond",
+      "relation": "member_of_variant",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Stmt::If.dst",
+      "relation": "member_of_variant",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Stmt::If.else_",
+      "relation": "member_of_variant",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Stmt::If.then",
+      "relation": "member_of_variant",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Stmt::Let",
+      "relation": "variant_entry",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Stmt::Let.dst",
+      "relation": "member_of_variant",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Stmt::Let.on_defect",
+      "relation": "member_of_variant",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Stmt::Let.on_suspend",
+      "relation": "member_of_variant",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Stmt::Let.value",
+      "relation": "member_of_variant",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Stmt::Loop",
+      "relation": "variant_entry",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Stmt::Loop.body",
+      "relation": "member_of_variant",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Stmt::Loop.dst",
+      "relation": "member_of_variant",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Stmt::Loop.inits",
+      "relation": "member_of_variant",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Stmt::Loop.vars",
+      "relation": "member_of_variant",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Stmt::Protect",
+      "relation": "variant_entry",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Stmt::Protect.body",
+      "relation": "member_of_variant",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Stmt::Protect.cleanup",
+      "relation": "member_of_variant",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Stmt::Protect.dst",
+      "relation": "member_of_variant",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Stmt::Switch",
+      "relation": "variant_entry",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Stmt::Switch.cases",
+      "relation": "member_of_variant",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Stmt::Switch.default",
+      "relation": "member_of_variant",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Stmt::Switch.dst",
+      "relation": "member_of_variant",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Stmt::Switch.on",
+      "relation": "member_of_variant",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::StmtId",
+      "relation": "shared_declaration",
+      "legacy_role": "schema",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Suspend",
+      "relation": "shared_declaration",
+      "legacy_role": "schema",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Suspend.saved",
+      "relation": "member_of_declaration",
+      "legacy_role": "schema",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Suspend.state",
+      "relation": "member_of_declaration",
+      "legacy_role": "schema",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::SwitchOn",
+      "relation": "shared_declaration",
+      "legacy_role": "schema",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::SwitchOn::Lit",
+      "relation": "variant_entry",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::SwitchOn::Lit.0",
+      "relation": "member_of_variant",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::SwitchOn::Tag",
+      "relation": "variant_entry",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::SwitchOn::Tag.0",
+      "relation": "member_of_variant",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Term",
+      "relation": "shared_declaration",
+      "legacy_role": "schema",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Term::Break",
+      "relation": "variant_entry",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Term::Break.label",
+      "relation": "member_of_variant",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Term::Break.value",
+      "relation": "member_of_variant",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Term::Defect",
+      "relation": "variant_entry",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Term::Defect.0",
+      "relation": "member_of_variant",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Term::Defect.1",
+      "relation": "member_of_variant",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Term::Fail",
+      "relation": "variant_entry",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Term::Fail.0",
+      "relation": "member_of_variant",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Term::Recur",
+      "relation": "variant_entry",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Term::Recur.0",
+      "relation": "member_of_variant",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Term::Return",
+      "relation": "variant_entry",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Term::Return.0",
+      "relation": "member_of_variant",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Term::Unreachable",
+      "relation": "variant_entry",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Term::Unwind",
+      "relation": "variant_entry",
+      "legacy_role": "reject",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Term::Yield",
+      "relation": "variant_entry",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Term::Yield.0",
+      "relation": "member_of_variant",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Value",
+      "relation": "shared_declaration",
+      "legacy_role": "schema",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Value::AsError",
+      "relation": "variant_entry",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Value::AsError.enum_id",
+      "relation": "member_of_variant",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Value::AsError.error",
+      "relation": "member_of_variant",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Value::Builtin",
+      "relation": "variant_entry",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Value::Builtin.args",
+      "relation": "member_of_variant",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Value::Builtin.op",
+      "relation": "member_of_variant",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Value::Call",
+      "relation": "variant_entry",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Value::Call.args",
+      "relation": "member_of_variant",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Value::Call.callee",
+      "relation": "member_of_variant",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Value::Call.on_fail",
+      "relation": "member_of_variant",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Value::Call.suspends",
+      "relation": "member_of_variant",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Value::Closure",
+      "relation": "variant_entry",
+      "legacy_role": "lower",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Value::Closure.0",
+      "relation": "member_of_variant",
+      "legacy_role": "lower",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Value::Coerce",
+      "relation": "variant_entry",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Value::Coerce.0",
+      "relation": "member_of_variant",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Value::Const",
+      "relation": "variant_entry",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Value::Const.0",
+      "relation": "member_of_variant",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Value::EnvGet",
+      "relation": "variant_entry",
+      "legacy_role": "reject",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Value::EnvGet.env",
+      "relation": "member_of_variant",
+      "legacy_role": "reject",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Value::EnvGet.index",
+      "relation": "member_of_variant",
+      "legacy_role": "reject",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Value::EvExtend",
+      "relation": "variant_entry",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Value::EvExtend.base",
+      "relation": "member_of_variant",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Value::EvExtend.bindings",
+      "relation": "member_of_variant",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Value::EvLookup",
+      "relation": "variant_entry",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Value::EvLookup.effect",
+      "relation": "member_of_variant",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Value::EvLookup.ev",
+      "relation": "member_of_variant",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Value::Fiber",
+      "relation": "variant_entry",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Value::Fiber.args",
+      "relation": "member_of_variant",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Value::Fiber.on_fail",
+      "relation": "member_of_variant",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Value::Fiber.op",
+      "relation": "member_of_variant",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Value::Field",
+      "relation": "variant_entry",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Value::Field.base",
+      "relation": "member_of_variant",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Value::Field.ctor",
+      "relation": "member_of_variant",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Value::Field.index",
+      "relation": "member_of_variant",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Value::FnRef",
+      "relation": "variant_entry",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Value::FnRef.0",
+      "relation": "member_of_variant",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Value::Handler",
+      "relation": "variant_entry",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Value::Handler.effect",
+      "relation": "member_of_variant",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Value::Handler.name",
+      "relation": "member_of_variant",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Value::Handler.ops",
+      "relation": "member_of_variant",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Value::IsError",
+      "relation": "variant_entry",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Value::IsError.enum_id",
+      "relation": "member_of_variant",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Value::IsError.error",
+      "relation": "member_of_variant",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Value::List",
+      "relation": "variant_entry",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Value::List.elems",
+      "relation": "member_of_variant",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Value::List.tail",
+      "relation": "member_of_variant",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Value::ListHead",
+      "relation": "variant_entry",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Value::ListHead.0",
+      "relation": "member_of_variant",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Value::ListIsEmpty",
+      "relation": "variant_entry",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Value::ListIsEmpty.0",
+      "relation": "member_of_variant",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Value::ListTail",
+      "relation": "variant_entry",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Value::ListTail.0",
+      "relation": "member_of_variant",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Value::Make",
+      "relation": "variant_entry",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Value::Make.args",
+      "relation": "member_of_variant",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Value::Make.ctor",
+      "relation": "member_of_variant",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Value::MakeClosure",
+      "relation": "variant_entry",
+      "legacy_role": "reject",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Value::MakeClosure.captures",
+      "relation": "member_of_variant",
+      "legacy_role": "reject",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Value::MakeClosure.function",
+      "relation": "member_of_variant",
+      "legacy_role": "reject",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Value::Prim",
+      "relation": "variant_entry",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Value::Prim.args",
+      "relation": "member_of_variant",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Value::Prim.op",
+      "relation": "member_of_variant",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Value::Prim.ty",
+      "relation": "member_of_variant",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Value::Runtime",
+      "relation": "variant_entry",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Value::Runtime.args",
+      "relation": "member_of_variant",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Value::Runtime.op",
+      "relation": "member_of_variant",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Value::Tag",
+      "relation": "variant_entry",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Value::Tag.0",
+      "relation": "member_of_variant",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Value::Tuple",
+      "relation": "variant_entry",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Value::Tuple.0",
+      "relation": "member_of_variant",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Value::TupleGet",
+      "relation": "variant_entry",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "unclassified",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Value::TupleGet.base",
+      "relation": "member_of_variant",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Value::TupleGet.index",
+      "relation": "member_of_variant",
+      "legacy_role": "emit",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::VarData",
+      "relation": "shared_declaration",
+      "legacy_role": "schema",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::VarData.hint",
+      "relation": "member_of_declaration",
+      "legacy_role": "schema",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::VarData.repr",
+      "relation": "member_of_declaration",
+      "legacy_role": "schema",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::VarData.ty",
+      "relation": "member_of_declaration",
+      "legacy_role": "schema",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::VarId",
+      "relation": "shared_declaration",
+      "legacy_role": "schema",
+      "phase": null,
+      "status": "pending",
+      "source_scope": "schema",
+      "new_implementation": [],
+      "evidence": [],
+      "reason": ""
+    }
+  ],
+  "contexts": [
+    {
+      "id": "emela_lir::Stage::Flow",
+      "context": "input",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Stage::ClosuresConverted",
+      "context": "input",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Stage::DefectsExplicit",
+      "context": "input",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Stage::StateMachines",
+      "context": "input",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Stage::RefCounted",
+      "context": "input",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Term::Yield",
+      "context": "sync",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Term::Yield",
+      "context": "suspend",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Term::Return",
+      "context": "sync",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Term::Return",
+      "context": "suspend",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Term::Fail",
+      "context": "sync",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Term::Fail",
+      "context": "suspend",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Term::Break",
+      "context": "sync",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Term::Break",
+      "context": "suspend",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Term::Recur",
+      "context": "sync",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Term::Recur",
+      "context": "suspend",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Term::Defect",
+      "context": "sync",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Term::Defect",
+      "context": "suspend",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Term::Unwind",
+      "context": "input",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Term::Unreachable",
+      "context": "sync",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Term::Unreachable",
+      "context": "suspend",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Stmt::Let",
+      "context": "sync",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Stmt::Let",
+      "context": "suspend",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Stmt::If",
+      "context": "sync",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Stmt::If",
+      "context": "suspend",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Stmt::Switch",
+      "context": "sync",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Stmt::Switch",
+      "context": "suspend",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Stmt::Loop",
+      "context": "sync",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Stmt::Loop",
+      "context": "suspend",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Stmt::Block",
+      "context": "sync",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Stmt::Block",
+      "context": "suspend",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Stmt::Protect",
+      "context": "sync",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Stmt::Protect",
+      "context": "suspend",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Stmt::Dup",
+      "context": "input",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Stmt::Drop",
+      "context": "input",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::SwitchOn::Tag",
+      "context": "sync",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::SwitchOn::Tag",
+      "context": "suspend",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::SwitchOn::Lit",
+      "context": "sync",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::SwitchOn::Lit",
+      "context": "suspend",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::CaseKey::Variant",
+      "context": "sync",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::CaseKey::Variant",
+      "context": "suspend",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::CaseKey::Lit",
+      "context": "sync",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::CaseKey::Lit",
+      "context": "suspend",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Operand::Var",
+      "context": "common",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Operand::Const",
+      "context": "common",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Const::Int",
+      "context": "common",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Const::Int64",
+      "context": "common",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Const::Float",
+      "context": "common",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Const::Bool",
+      "context": "common",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Const::String",
+      "context": "common",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Const::Unit",
+      "context": "common",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Value::Const",
+      "context": "sync",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Value::Const",
+      "context": "suspend",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Value::Prim",
+      "context": "sync",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Value::Prim",
+      "context": "suspend",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Value::Call",
+      "context": "sync",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Value::Call",
+      "context": "suspend",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Value::Builtin",
+      "context": "sync",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Value::Builtin",
+      "context": "suspend",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Value::Make",
+      "context": "sync",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Value::Make",
+      "context": "suspend",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Value::Field",
+      "context": "sync",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Value::Field",
+      "context": "suspend",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Value::Tag",
+      "context": "sync",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Value::Tag",
+      "context": "suspend",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Value::Tuple",
+      "context": "sync",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Value::Tuple",
+      "context": "suspend",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Value::TupleGet",
+      "context": "sync",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Value::TupleGet",
+      "context": "suspend",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Value::List",
+      "context": "sync",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Value::List",
+      "context": "suspend",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Value::ListIsEmpty",
+      "context": "sync",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Value::ListIsEmpty",
+      "context": "suspend",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Value::ListHead",
+      "context": "sync",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Value::ListHead",
+      "context": "suspend",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Value::ListTail",
+      "context": "sync",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Value::ListTail",
+      "context": "suspend",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Value::FnRef",
+      "context": "sync",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Value::FnRef",
+      "context": "suspend",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Value::Closure",
+      "context": "sync",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Value::Closure",
+      "context": "suspend",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Value::MakeClosure",
+      "context": "input",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Value::EnvGet",
+      "context": "input",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Value::EvLookup",
+      "context": "sync",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Value::EvLookup",
+      "context": "suspend",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Value::EvExtend",
+      "context": "sync",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Value::EvExtend",
+      "context": "suspend",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Value::Handler",
+      "context": "sync",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Value::Handler",
+      "context": "suspend",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Value::Fiber",
+      "context": "sync",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Value::Fiber",
+      "context": "suspend",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Value::IsError",
+      "context": "sync",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Value::IsError",
+      "context": "suspend",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Value::AsError",
+      "context": "sync",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Value::AsError",
+      "context": "suspend",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Value::Runtime",
+      "context": "sync",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Value::Runtime",
+      "context": "suspend",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Value::Coerce",
+      "context": "sync",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Value::Coerce",
+      "context": "suspend",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::RuntimeOp::ShowString",
+      "context": "common",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::RuntimeOp::DebugPrint",
+      "context": "common",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::RuntimeOp::Retire",
+      "context": "common",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::RuntimeOp::Defect",
+      "context": "input",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::RuntimeOp::DefectAt",
+      "context": "input",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::RuntimeOp::DefectTake",
+      "context": "input",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::RuntimeOp::DefectResume",
+      "context": "input",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::RuntimeOp::Hold",
+      "context": "common",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::RuntimeOp::Unhold",
+      "context": "common",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::RuntimeOp::Yield",
+      "context": "input",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::RuntimeOp::YieldPerform",
+      "context": "input",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Callee::Direct",
+      "context": "sync",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Callee::Direct",
+      "context": "suspend",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Callee::Indirect",
+      "context": "sync",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Callee::Indirect",
+      "context": "suspend",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Callee::Op",
+      "context": "sync",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Callee::Op",
+      "context": "suspend",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::OnFail::Break",
+      "context": "sync",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::OnFail::Break",
+      "context": "suspend",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::OnFail::Propagate",
+      "context": "sync",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::OnFail::Propagate",
+      "context": "suspend",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::OnFail::Handle",
+      "context": "input",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::PrimOp::Add",
+      "context": "common",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::PrimOp::Sub",
+      "context": "common",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::PrimOp::Mul",
+      "context": "common",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::PrimOp::Div",
+      "context": "common",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::PrimOp::Rem",
+      "context": "common",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::PrimOp::Neg",
+      "context": "common",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::PrimOp::Not",
+      "context": "common",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::PrimOp::Eq",
+      "context": "common",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::PrimOp::Ne",
+      "context": "common",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::PrimOp::Lt",
+      "context": "common",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::PrimOp::Le",
+      "context": "common",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::PrimOp::Gt",
+      "context": "common",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::PrimOp::Ge",
+      "context": "common",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::PrimTy::I32",
+      "context": "common",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::PrimTy::I64",
+      "context": "common",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::PrimTy::F64",
+      "context": "common",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::PrimTy::String",
+      "context": "common",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Repr::I32",
+      "context": "common",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Repr::I64",
+      "context": "common",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Repr::F64",
+      "context": "common",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Repr::Ref",
+      "context": "common",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_lir::Repr::Void",
+      "context": "common",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::Builtin::StringLength",
+      "context": "common",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::Builtin::StringByteSize",
+      "context": "common",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::Builtin::StringAppend",
+      "context": "common",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::Builtin::StringContains",
+      "context": "common",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::Builtin::StringStartsWith",
+      "context": "common",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::Builtin::StringEndsWith",
+      "context": "common",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::Builtin::StringSplit",
+      "context": "common",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::Builtin::StringChars",
+      "context": "common",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::Builtin::StringJoin",
+      "context": "common",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::Builtin::StringTrim",
+      "context": "common",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::Builtin::StringCodePoints",
+      "context": "common",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::Builtin::StringFromCodePoint",
+      "context": "common",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::Builtin::ShowNested",
+      "context": "input",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::Builtin::IntToString",
+      "context": "common",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::Builtin::IntParse",
+      "context": "common",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::Builtin::IntCheckedAdd",
+      "context": "common",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::Builtin::IntBitAnd",
+      "context": "common",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::Builtin::IntBitOr",
+      "context": "common",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::Builtin::IntBitXor",
+      "context": "common",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::Builtin::IntBitNot",
+      "context": "common",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::Builtin::IntShiftLeft",
+      "context": "common",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::Builtin::IntShiftRight",
+      "context": "common",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::Builtin::IntShiftRightUnsigned",
+      "context": "common",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::Builtin::Int64FromInt",
+      "context": "common",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::Builtin::Int64ToString",
+      "context": "common",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::Builtin::Int64ToInt",
+      "context": "common",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::Builtin::Int64BitAnd",
+      "context": "common",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::Builtin::Int64BitOr",
+      "context": "common",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::Builtin::Int64BitXor",
+      "context": "common",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::Builtin::Int64BitNot",
+      "context": "common",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::Builtin::Int64ShiftLeft",
+      "context": "common",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::Builtin::Int64ShiftRight",
+      "context": "common",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::Builtin::Int64ShiftRightUnsigned",
+      "context": "common",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::Builtin::FloatToString",
+      "context": "common",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::Builtin::FloatFromInt",
+      "context": "common",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::Builtin::FloatParse",
+      "context": "common",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::Builtin::FloatFloor",
+      "context": "common",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::Builtin::FloatCeil",
+      "context": "common",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::Builtin::FloatRound",
+      "context": "common",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::Builtin::FloatTruncate",
+      "context": "common",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::Builtin::BytesFromList",
+      "context": "common",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::Builtin::BytesToList",
+      "context": "common",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::Builtin::BytesSize",
+      "context": "common",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::Builtin::BytesGet",
+      "context": "common",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::Builtin::BytesSlice",
+      "context": "common",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::Builtin::BytesConcat",
+      "context": "common",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::Builtin::BytesEncodeUtf8",
+      "context": "common",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::Builtin::BytesDecodeValidUtf8",
+      "context": "common",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::Builtin::Panic",
+      "context": "input",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::Builtin::Todo",
+      "context": "input",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::Builtin::Dbg",
+      "context": "input",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::Builtin::Inspect",
+      "context": "input",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::Builtin::CellNew",
+      "context": "common",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::Builtin::CellGet",
+      "context": "common",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::Builtin::CellSet",
+      "context": "common",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::Builtin::ShowString",
+      "context": "input",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::Builtin::DebugPrint",
+      "context": "input",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::Builtin::AssertFail",
+      "context": "input",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::FiberOp::Scope",
+      "context": "sync",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::FiberOp::Scope",
+      "context": "suspend",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::FiberOp::Fork",
+      "context": "sync",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::FiberOp::Fork",
+      "context": "suspend",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::FiberOp::Deferred",
+      "context": "sync",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::FiberOp::Deferred",
+      "context": "suspend",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::FiberOp::Join",
+      "context": "sync",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::FiberOp::Join",
+      "context": "suspend",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::FiberOp::Await",
+      "context": "sync",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::FiberOp::Await",
+      "context": "suspend",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::FiberOp::Interrupt",
+      "context": "sync",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::FiberOp::Interrupt",
+      "context": "suspend",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::FiberOp::Attempt",
+      "context": "sync",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::FiberOp::Attempt",
+      "context": "suspend",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::FiberOp::Complete",
+      "context": "sync",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::FiberOp::Complete",
+      "context": "suspend",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::FiberOp::DeferredAwait",
+      "context": "sync",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::FiberOp::DeferredAwait",
+      "context": "suspend",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::FiberOp::Poll",
+      "context": "sync",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::FiberOp::Poll",
+      "context": "suspend",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::FiberOp::CauseKind",
+      "context": "sync",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::FiberOp::CauseKind",
+      "context": "suspend",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::FiberOp::CauseToString",
+      "context": "sync",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::FiberOp::CauseToString",
+      "context": "suspend",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::FiberOp::CauseRaise",
+      "context": "sync",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "id": "emela_core::FiberOp::CauseRaise",
+      "context": "suspend",
+      "status": "pending",
+      "evidence": [],
+      "reason": ""
+    }
+  ],
+  "tests": [
+    {
+      "target": "emit",
+      "name": "adapts_a_function_value_to_effect_evidence_and_failure_call_abis",
+      "legacy_path": "tests/emit.rs",
+      "status": "pending",
+      "new_tests": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "target": "emit",
+      "name": "allocates_and_releases_lists_in_the_fixed_heap",
+      "legacy_path": "tests/emit.rs",
+      "status": "pending",
+      "new_tests": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "target": "emit",
+      "name": "any_boxes_retain_managed_list_payloads_until_the_box_is_released",
+      "legacy_path": "tests/emit.rs",
+      "status": "pending",
+      "new_tests": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "target": "emit",
+      "name": "binding_metadata::imported_c_bindings_preserve_symbols_for_named_file_and_bundled_modules",
+      "legacy_path": "tests/binding_metadata/mod.rs",
+      "status": "pending",
+      "new_tests": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "target": "emit",
+      "name": "binding_metadata::named_enum_fields_preserve_payload_order_in_generated_c",
+      "legacy_path": "tests/binding_metadata/mod.rs",
+      "status": "pending",
+      "new_tests": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "target": "emit",
+      "name": "builtin_audit::discarded_float_rounding_preserves_the_out_of_range_defect",
+      "legacy_path": "tests/builtin_audit/mod.rs",
+      "status": "pending",
+      "new_tests": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "target": "emit",
+      "name": "builtin_audit::discarded_runtime_show_string_keeps_its_capacity_check",
+      "legacy_path": "tests/builtin_audit/mod.rs",
+      "status": "pending",
+      "new_tests": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "target": "emit",
+      "name": "builtin_audit::discarded_string_chars_still_builds_and_releases_its_owned_list",
+      "legacy_path": "tests/builtin_audit/mod.rs",
+      "status": "pending",
+      "new_tests": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "target": "emit",
+      "name": "builtin_audit::retire::retired_handler_aliases_keep_the_active_check_in_native_and_suspend_callers",
+      "legacy_path": "tests/builtin_audit/retire.rs",
+      "status": "pending",
+      "new_tests": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "target": "emit",
+      "name": "bytes::bytes_captured_in_closures_and_state_keep_their_owners",
+      "legacy_path": "tests/bytes/mod.rs",
+      "status": "pending",
+      "new_tests": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "target": "emit",
+      "name": "bytes::bytes_decoding_checks_string_capacity_before_truncating_the_length",
+      "legacy_path": "tests/bytes/mod.rs",
+      "status": "pending",
+      "new_tests": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "target": "emit",
+      "name": "bytes::bytes_dynamic_capacity_is_independent_of_string_capacity",
+      "legacy_path": "tests/bytes/mod.rs",
+      "status": "pending",
+      "new_tests": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "target": "emit",
+      "name": "bytes::bytes_external_adapters_snapshot_borrowed_data_and_transfer_owned_data",
+      "legacy_path": "tests/bytes/mod.rs",
+      "status": "pending",
+      "new_tests": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "target": "emit",
+      "name": "bytes::bytes_external_tasks_snapshot_arguments_and_results_and_release_cancelled_contexts",
+      "legacy_path": "tests/bytes/mod.rs",
+      "status": "pending",
+      "new_tests": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "target": "emit",
+      "name": "bytes::bytes_finite_flow_derivations_compare_and_display_unsigned_bytes",
+      "legacy_path": "tests/bytes/mod.rs",
+      "status": "pending",
+      "new_tests": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "target": "emit",
+      "name": "bytes::bytes_list_round_trips_and_invalid_elements_reclaim_every_allocation",
+      "legacy_path": "tests/bytes/mod.rs",
+      "status": "pending",
+      "new_tests": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "target": "emit",
+      "name": "bytes::bytes_require_a_fixed_heap_and_defect_when_its_capacity_is_exhausted",
+      "legacy_path": "tests/bytes/mod.rs",
+      "status": "pending",
+      "new_tests": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "target": "emit",
+      "name": "bytes::bytes_returns_lists_and_aliases_preserve_ownership_and_release_the_heap",
+      "legacy_path": "tests/bytes/mod.rs",
+      "status": "pending",
+      "new_tests": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "target": "emit",
+      "name": "bytes::bytes_size_and_get_are_heapless_and_keep_lengths_above_u16",
+      "legacy_path": "tests/bytes/mod.rs",
+      "status": "pending",
+      "new_tests": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "target": "emit",
+      "name": "bytes::bytes_std_corpus_matches_other_targets_including_const_traits_and_invalid_utf8",
+      "legacy_path": "tests/bytes/mod.rs",
+      "status": "pending",
+      "new_tests": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "target": "emit",
+      "name": "bytes::bytes_survive_suspension_and_release_on_completion_and_cancellation",
+      "legacy_path": "tests/bytes/mod.rs",
+      "status": "pending",
+      "new_tests": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "target": "emit",
+      "name": "bytes::discarded_bytes_still_check_capacity_and_release_owned_results",
+      "legacy_path": "tests/bytes/mod.rs",
+      "status": "pending",
+      "new_tests": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "target": "emit",
+      "name": "cell::cell_references_in_native_error_payloads_outlive_the_failing_frame",
+      "legacy_path": "tests/cell/mod.rs",
+      "status": "pending",
+      "new_tests": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "target": "emit",
+      "name": "cell::discarded_cell_construction_and_reads_release_their_owned_contents",
+      "legacy_path": "tests/cell/mod.rs",
+      "status": "pending",
+      "new_tests": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "target": "emit",
+      "name": "cell::unit_cells_keep_a_shared_heap_identity_without_reading_a_void_payload",
+      "legacy_path": "tests/cell/mod.rs",
+      "status": "pending",
+      "new_tests": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "target": "emit",
+      "name": "compiles_direct_calls_to_internal_and_external_c_functions",
+      "legacy_path": "tests/emit.rs",
+      "status": "pending",
+      "new_tests": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "target": "emit",
+      "name": "compiles_if_statements_and_boolean_short_circuiting",
+      "legacy_path": "tests/emit.rs",
+      "status": "pending",
+      "new_tests": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "target": "emit",
+      "name": "completion_types::finite_changing_recursive_enum_arguments_run_with_owned_back_edges",
+      "legacy_path": "tests/completion_types/mod.rs",
+      "status": "pending",
+      "new_tests": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "target": "emit",
+      "name": "const_runtime::canonical_const_roots_include_dependency_specializations_until_they_reach_a_fixed_point",
+      "legacy_path": "tests/const_runtime/mod.rs",
+      "status": "pending",
+      "new_tests": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "target": "emit",
+      "name": "constructs_inline_tuples_and_keeps_unit_field_positions",
+      "legacy_path": "tests/emit.rs",
+      "status": "pending",
+      "new_tests": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "target": "emit",
+      "name": "constructs_payload_and_unit_enum_variants_as_inline_values",
+      "legacy_path": "tests/emit.rs",
+      "status": "pending",
+      "new_tests": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "target": "emit",
+      "name": "debug_print_calls_the_board_hook_with_the_string_view",
+      "legacy_path": "tests/emit.rs",
+      "status": "pending",
+      "new_tests": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "target": "emit",
+      "name": "deferred::await_preserves_string_and_list_results_past_frame_and_scope_reuse",
+      "legacy_path": "tests/deferred/mod.rs",
+      "status": "pending",
+      "new_tests": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "target": "emit",
+      "name": "deferred::complete_copies_borrowed_string_and_poll_retains_it_past_scope_end",
+      "legacy_path": "tests/deferred/mod.rs",
+      "status": "pending",
+      "new_tests": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "target": "emit",
+      "name": "deferred::discarded_deferreds_reuse_one_slot_within_a_long_lived_scope",
+      "legacy_path": "tests/deferred/mod.rs",
+      "status": "pending",
+      "new_tests": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "target": "emit",
+      "name": "deferred::poll_observes_empty_and_first_value_for_scalar_and_unit_without_yielding",
+      "legacy_path": "tests/deferred/mod.rs",
+      "status": "pending",
+      "new_tests": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "target": "emit",
+      "name": "dynamic_float_formatting_uses_a_bounded_runtime_and_float_parse_uses_the_bounded_parser",
+      "legacy_path": "tests/emit.rs",
+      "status": "pending",
+      "new_tests": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "target": "emit",
+      "name": "dynamic_string_from_code_point_checks_capacity_before_writing",
+      "legacy_path": "tests/emit.rs",
+      "status": "pending",
+      "new_tests": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "target": "emit",
+      "name": "emits_a_static_string_const_as_a_view",
+      "legacy_path": "tests/emit.rs",
+      "status": "pending",
+      "new_tests": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "target": "emit",
+      "name": "emits_and_runs_a_block_that_yields_a_value",
+      "legacy_path": "tests/emit.rs",
+      "status": "pending",
+      "new_tests": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "target": "emit",
+      "name": "emits_and_runs_a_loop_with_an_initial_value_and_yield",
+      "legacy_path": "tests/emit.rs",
+      "status": "pending",
+      "new_tests": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "target": "emit",
+      "name": "emits_and_runs_break_to_an_enclosing_block",
+      "legacy_path": "tests/emit.rs",
+      "status": "pending",
+      "new_tests": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "target": "emit",
+      "name": "emits_and_runs_exhaustive_payload_enum_switch_and_defects_on_invalid_tag",
+      "legacy_path": "tests/emit.rs",
+      "status": "pending",
+      "new_tests": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "target": "emit",
+      "name": "emits_and_runs_float_constants_including_non_finite_values",
+      "legacy_path": "tests/emit.rs",
+      "status": "pending",
+      "new_tests": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "target": "emit",
+      "name": "emits_and_runs_float_primitive_operations",
+      "legacy_path": "tests/emit.rs",
+      "status": "pending",
+      "new_tests": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "target": "emit",
+      "name": "emits_and_runs_int32_and_int64_literal_switches",
+      "legacy_path": "tests/emit.rs",
+      "status": "pending",
+      "new_tests": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "target": "emit",
+      "name": "emits_and_runs_int32_primitive_operations",
+      "legacy_path": "tests/emit.rs",
+      "status": "pending",
+      "new_tests": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "target": "emit",
+      "name": "emits_and_runs_int64_constants_at_the_signed_boundaries",
+      "legacy_path": "tests/emit.rs",
+      "status": "pending",
+      "new_tests": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "target": "emit",
+      "name": "emits_and_runs_recur_with_multiple_loop_variables",
+      "legacy_path": "tests/emit.rs",
+      "status": "pending",
+      "new_tests": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "target": "emit",
+      "name": "emits_and_runs_switches_on_nullary_enum_representations",
+      "legacy_path": "tests/emit.rs",
+      "status": "pending",
+      "new_tests": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "target": "emit",
+      "name": "emits_c_for_a_function_returning_an_int_constant",
+      "legacy_path": "tests/emit.rs",
+      "status": "pending",
+      "new_tests": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "target": "emit",
+      "name": "emits_empty_list_and_checks_list_emptiness",
+      "legacy_path": "tests/emit.rs",
+      "status": "pending",
+      "new_tests": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "target": "emit",
+      "name": "emits_int32_division_and_remainder_with_emela_semantics",
+      "legacy_path": "tests/emit.rs",
+      "status": "pending",
+      "new_tests": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "target": "emit",
+      "name": "fiber::aggregate_abi::scope_returns_string_enum_exits_after_success_or_interruption_and_frame_reuse",
+      "legacy_path": "tests/fiber/aggregate_abi.rs",
+      "status": "pending",
+      "new_tests": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "target": "emit",
+      "name": "fiber::attempt::attempt_captures_sync_failure_and_returns_owned_cause",
+      "legacy_path": "tests/fiber/attempt.rs",
+      "status": "pending",
+      "new_tests": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "target": "emit",
+      "name": "fiber::await_::await_returns_success_and_can_mix_with_repeated_join_without_yielding",
+      "legacy_path": "tests/fiber/await_.rs",
+      "status": "pending",
+      "new_tests": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "target": "emit",
+      "name": "fiber::cause::cause_kind_reads_failure_without_consuming_the_cause",
+      "legacy_path": "tests/fiber/cause.rs",
+      "status": "pending",
+      "new_tests": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "target": "emit",
+      "name": "fiber::cause::cause_raise_preserves_the_error_and_runs_native_cleanup_before_escape",
+      "legacy_path": "tests/fiber/cause.rs",
+      "status": "pending",
+      "new_tests": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "target": "emit",
+      "name": "fiber::cause::cause_to_string_uses_error_show_and_caller_output_buffer",
+      "legacy_path": "tests/fiber/cause.rs",
+      "status": "pending",
+      "new_tests": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "target": "emit",
+      "name": "fiber::cause::compile_flow_keeps_rejecting_a_cause_failure_without_a_channel",
+      "legacy_path": "tests/fiber/cause.rs",
+      "status": "pending",
+      "new_tests": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "target": "emit",
+      "name": "fiber::failure::caught_failure_inside_suspending_release_does_not_replace_the_original_error",
+      "legacy_path": "tests/fiber/failure.rs",
+      "status": "pending",
+      "new_tests": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "target": "emit",
+      "name": "fiber::function_aggregate::any_fields_nested_in_error_payloads_use_owned_boxes_and_indirect_failure_channels",
+      "legacy_path": "tests/fiber/function_aggregate.rs",
+      "status": "pending",
+      "new_tests": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "target": "emit",
+      "name": "fiber::function_aggregate::growing_generic_recursion_through_a_function_signature_uses_owned_lazy_payloads",
+      "legacy_path": "tests/fiber/function_aggregate.rs",
+      "status": "pending",
+      "new_tests": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "target": "emit",
+      "name": "fiber::interrupt::interrupt_waits_for_suspending_cleanup_and_ignores_old_task_notifications",
+      "legacy_path": "tests/fiber/interrupt.rs",
+      "status": "pending",
+      "new_tests": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "target": "emit",
+      "name": "fiber::join::join_results_own_strings_and_lists_after_scope_and_frame_reuse",
+      "legacy_path": "tests/fiber/join.rs",
+      "status": "pending",
+      "new_tests": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "target": "emit",
+      "name": "fiber::join::join_reuses_completed_results_without_yielding_and_waits_for_discarded_unit",
+      "legacy_path": "tests/fiber/join.rs",
+      "status": "pending",
+      "new_tests": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "target": "emit",
+      "name": "fiber::protect::suspend_cleanup_waits_for_an_external_task_before_publishing_the_result",
+      "legacy_path": "tests/fiber/protect.rs",
+      "status": "pending",
+      "new_tests": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "target": "emit",
+      "name": "float_from_int_converts_the_full_signed_range_exactly",
+      "legacy_path": "tests/emit.rs",
+      "status": "pending",
+      "new_tests": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "target": "emit",
+      "name": "float_rounding_builtins_match_spec_and_defect_out_of_range",
+      "legacy_path": "tests/emit.rs",
+      "status": "pending",
+      "new_tests": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "target": "emit",
+      "name": "float_to_string_constant_contributes_its_exact_append_bound",
+      "legacy_path": "tests/emit.rs",
+      "status": "pending",
+      "new_tests": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "target": "emit",
+      "name": "int32_division_by_zero_calls_the_board_defect_hook",
+      "legacy_path": "tests/emit.rs",
+      "status": "pending",
+      "new_tests": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "target": "emit",
+      "name": "int64_bitwise_builtins_match_signed_64_bit_semantics",
+      "legacy_path": "tests/emit.rs",
+      "status": "pending",
+      "new_tests": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "target": "emit",
+      "name": "int64_conversions_preserve_sign_and_keep_the_low_32_bits",
+      "legacy_path": "tests/emit.rs",
+      "status": "pending",
+      "new_tests": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "target": "emit",
+      "name": "int64_shift_builtins_handle_width_and_negative_amount_boundaries",
+      "legacy_path": "tests/emit.rs",
+      "status": "pending",
+      "new_tests": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "target": "emit",
+      "name": "int64_to_string_uses_twenty_byte_scratch_and_matches_decimal_output",
+      "legacy_path": "tests/emit.rs",
+      "status": "pending",
+      "new_tests": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "target": "emit",
+      "name": "int_bitwise_builtins_match_signed_32_bit_semantics",
+      "legacy_path": "tests/emit.rs",
+      "status": "pending",
+      "new_tests": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "target": "emit",
+      "name": "int_checked_add_returns_some_or_none_at_int_boundaries",
+      "legacy_path": "tests/emit.rs",
+      "status": "pending",
+      "new_tests": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "target": "emit",
+      "name": "int_parse_accepts_decimal_signs_and_rejects_invalid_or_overflowing_text",
+      "legacy_path": "tests/emit.rs",
+      "status": "pending",
+      "new_tests": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "target": "emit",
+      "name": "int_shift_builtins_handle_width_and_negative_amount_boundaries",
+      "legacy_path": "tests/emit.rs",
+      "status": "pending",
+      "new_tests": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "target": "emit",
+      "name": "propagates_failure_from_a_captured_closure_through_its_indirect_call",
+      "legacy_path": "tests/emit.rs",
+      "status": "pending",
+      "new_tests": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "target": "emit",
+      "name": "reads_generic_enum_fields_from_inline_values",
+      "legacy_path": "tests/emit.rs",
+      "status": "pending",
+      "new_tests": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "target": "emit",
+      "name": "reads_list_heads_and_keeps_shared_tails_alive",
+      "legacy_path": "tests/emit.rs",
+      "status": "pending",
+      "new_tests": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "target": "emit",
+      "name": "reads_tags_from_payload_and_nullary_enums",
+      "legacy_path": "tests/emit.rs",
+      "status": "pending",
+      "new_tests": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "target": "emit",
+      "name": "reads_tuple_fields_and_ignores_unit_projections",
+      "legacy_path": "tests/emit.rs",
+      "status": "pending",
+      "new_tests": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "target": "emit",
+      "name": "requires_fixed_heap_capacity_for_returned_list_aliases",
+      "legacy_path": "tests/emit.rs",
+      "status": "pending",
+      "new_tests": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "target": "emit",
+      "name": "sends_dynamic_defect_string_views_to_the_board_hook",
+      "legacy_path": "tests/emit.rs",
+      "status": "pending",
+      "new_tests": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "target": "emit",
+      "name": "statically_evaluates_float_rounding_builtin",
+      "legacy_path": "tests/emit.rs",
+      "status": "pending",
+      "new_tests": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "target": "emit",
+      "name": "statically_evaluates_string_append_in_const_functions",
+      "legacy_path": "tests/emit.rs",
+      "status": "pending",
+      "new_tests": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "target": "emit",
+      "name": "stores_and_releases_list_references_inside_tuples_and_list_elements",
+      "legacy_path": "tests/emit.rs",
+      "status": "pending",
+      "new_tests": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "target": "emit",
+      "name": "string_append::literal_prefixes_are_copied_without_treating_readonly_bytes_as_writable_output",
+      "legacy_path": "tests/string_append/mod.rs",
+      "status": "pending",
+      "new_tests": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "target": "emit",
+      "name": "string_byte_size_counts_utf8_bytes_from_a_view",
+      "legacy_path": "tests/emit.rs",
+      "status": "pending",
+      "new_tests": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "target": "emit",
+      "name": "string_code_points_builds_and_releases_a_list_in_code_point_order",
+      "legacy_path": "tests/emit.rs",
+      "status": "pending",
+      "new_tests": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "target": "emit",
+      "name": "string_comparison::all_constant_comparisons_match_runtime_order_without_emitting_the_helper",
+      "legacy_path": "tests/string_comparison/mod.rs",
+      "status": "pending",
+      "new_tests": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "target": "emit",
+      "name": "string_join_reads_split_views_into_a_bounded_stack_buffer",
+      "legacy_path": "tests/emit.rs",
+      "status": "pending",
+      "new_tests": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "target": "emit",
+      "name": "string_length_uses_unicode_18_extended_grapheme_clusters",
+      "legacy_path": "tests/emit.rs",
+      "status": "pending",
+      "new_tests": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "target": "emit",
+      "name": "string_search_predicates_match_utf8_substrings_without_copying",
+      "legacy_path": "tests/emit.rs",
+      "status": "pending",
+      "new_tests": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "target": "emit",
+      "name": "suspend::coerce_adapts_sync_and_suspend_function_values_to_a_suspend_evidence_abi",
+      "legacy_path": "tests/suspend/mod.rs",
+      "status": "pending",
+      "new_tests": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "target": "emit",
+      "name": "suspend::constructing_an_immediate_handler_does_not_emit_a_scheduler",
+      "legacy_path": "tests/suspend/mod.rs",
+      "status": "pending",
+      "new_tests": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "target": "emit",
+      "name": "suspend::suspend_fnrefs_dispatch_to_external_tasks_and_internal_frames",
+      "legacy_path": "tests/suspend/mod.rs",
+      "status": "pending",
+      "new_tests": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "target": "emit",
+      "name": "suspend::sync_string_producers_coerced_to_suspend_values_keep_their_backing_and_small_buffer",
+      "legacy_path": "tests/suspend/mod.rs",
+      "status": "pending",
+      "new_tests": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "target": "emit",
+      "name": "synchronous_exhaustive_matches_and_list_loops_accept_unreachable_terminators",
+      "legacy_path": "tests/emit.rs",
+      "status": "pending",
+      "new_tests": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "target": "emit",
+      "name": "value_audit::discarded::discarded_evidence_extensions_release_their_handler_references_immediately",
+      "legacy_path": "tests/value_audit/discarded.rs",
+      "status": "pending",
+      "new_tests": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "target": "emit",
+      "name": "value_audit::discarded::unused_dynamic_evidence_lookup_keeps_validation_and_the_callers_owner",
+      "legacy_path": "tests/value_audit/discarded.rs",
+      "status": "pending",
+      "new_tests": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "target": "emit",
+      "name": "value_audit::discarded_integer_division_and_remainder_still_raise_defects_in_sync_and_suspend_code",
+      "legacy_path": "tests/value_audit/mod.rs",
+      "status": "pending",
+      "new_tests": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "target": "flow",
+      "name": "isr_entries_reject_reachable_hold_and_unhold_in_direct_and_nested_calls",
+      "legacy_path": "tests/flow.rs",
+      "status": "pending",
+      "new_tests": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "target": "flow",
+      "name": "lowers_and_verifies_core_as_flow_ir",
+      "legacy_path": "tests/flow.rs",
+      "status": "pending",
+      "new_tests": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "target": "flow",
+      "name": "rejects_every_heap_stage_before_codegen",
+      "legacy_path": "tests/flow.rs",
+      "status": "pending",
+      "new_tests": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "target": "flow",
+      "name": "rejects_heap_only_failure_handle_at_flow_stage",
+      "legacy_path": "tests/flow.rs",
+      "status": "pending",
+      "new_tests": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "target": "flow",
+      "name": "rejects_heap_only_runtime_operations_at_flow_stage",
+      "legacy_path": "tests/flow.rs",
+      "status": "pending",
+      "new_tests": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "target": "flow",
+      "name": "rejects_heap_only_unwind_and_explicit_landing_edges_at_flow_stage",
+      "legacy_path": "tests/flow.rs",
+      "status": "pending",
+      "new_tests": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "target": "flow",
+      "name": "rejects_heap_only_values_and_reference_count_statements_at_flow_stage",
+      "legacy_path": "tests/flow.rs",
+      "status": "pending",
+      "new_tests": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "target": "flow",
+      "name": "rejects_source_builtins_that_must_lower_to_flow_control_or_runtime",
+      "legacy_path": "tests/flow.rs",
+      "status": "pending",
+      "new_tests": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "target": "lib",
+      "name": "compiler::separation_tests::common_closure_lowering_is_shared_and_native_managed_values_run",
+      "legacy_path": "src/compiler/tests/separation.rs",
+      "status": "pending",
+      "new_tests": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "target": "lib",
+      "name": "compiler::separation_tests::common_entries_supply_dynamic_string_output_buffers",
+      "legacy_path": "src/compiler/tests/separation.rs",
+      "status": "pending",
+      "new_tests": [],
+      "evidence": [],
+      "reason": ""
+    },
+    {
+      "target": "lib",
+      "name": "compiler::separation_tests::string_plans_preserve_aliases_while_other_buffers_and_calls_are_live",
+      "legacy_path": "src/compiler/tests/separation.rs",
+      "status": "pending",
+      "new_tests": [],
+      "evidence": [],
+      "reason": ""
+    }
+  ],
+  "requirements": [
+    {
+      "id": "source_corpus",
+      "title": "旧compilerの全source corpusと横断試験の移行",
+      "phases": [
+        "P1",
+        "P2",
+        "P3",
+        "P4",
+        "P5",
+        "P6",
+        "P7"
+      ],
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "frontend_validation",
+      "title": "構文・名前解決・型/trait/error/effect/capability検査",
+      "phases": [
+        "P1",
+        "P2",
+        "P4",
+        "P5",
+        "P6",
+        "P7"
+      ],
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "standard_library",
+      "title": "旧compiler試験が要求するcore/std/Embedded互換API",
+      "phases": [
+        "P1",
+        "P2",
+        "P3",
+        "P4",
+        "P5",
+        "P6",
+        "P7"
+      ],
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "memory_ownership",
+      "title": "固定容量・所有権・深い解放・cycle・未使用結果",
+      "phases": [
+        "P3",
+        "P4",
+        "P5",
+        "P6",
+        "P7"
+      ],
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "const_identity",
+      "title": "汎化constの単一初期化・共有・defect cache",
+      "phases": [
+        "P2",
+        "P4",
+        "P7"
+      ],
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "concurrency_cleanup",
+      "title": "中断・完了通知・取消・cleanup・context解放",
+      "phases": [
+        "P5",
+        "P6",
+        "P7"
+      ],
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "c_abi_isr_services",
+      "title": "C ABI 2・schema 2・ISR到達性・標準bridge",
+      "phases": [
+        "P1",
+        "P5",
+        "P7"
+      ],
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "numeric_unicode",
+      "title": "数値境界・Float変換・Unicode/書記素",
+      "phases": [
+        "P1",
+        "P2",
+        "P3",
+        "P7"
+      ],
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "standalone_execution",
+      "title": "本体非依存と生成Cの-O0/-O2実行",
+      "phases": [
+        "P1",
+        "P2",
+        "P3",
+        "P4",
+        "P5",
+        "P6",
+        "P7"
+      ],
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "known_differences",
+      "title": "旧source制限と対象外の明示・新たな退行の不在",
+      "phases": [
+        "P7"
+      ],
+      "status": "pending",
+      "evidence": []
+    }
+  ]
+}

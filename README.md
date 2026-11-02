@@ -30,6 +30,8 @@ cargo run --locked -p emela-emb-cli -- build examples/minimal/main.emel --out-di
 
 実施した試験と独立した環境での生成確認は [実験結果](docs/minimal-c-experiment.md) に記録しています。
 
+旧fork相当への拡張は [対応表に基づく終了条件と移行台帳](docs/compiler-coverage.md) で追跡します。[旧Flow IR・実装対応表](docs/reference/legacy-flow/README.md) を固定した参照資料として同梱しています。
+
 ## 開発
 
 ```sh
