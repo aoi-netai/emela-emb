@@ -544,3 +544,9 @@ P7の`backend/lower/p7_const_source_tests.rs`は保存済み旧sourceのconst残
 completeの一度だけの格納、空/Unit/Bool/tuple/Int64/Floatのpoll/await、String/List所有とscope/frame再使用、FIFO、取消時のDeferred待機列、再利用slotへ向くleaked callbackのscope終了診断、cycle回収、resume後operation tailの破棄を観測する。成功系は1000回の全heap回収を確認し、旧のterminal defect系は同じ停止hookと文言を確認する。constructorの容量0拒否・pool省略macroは旧artifact検査として残す。C両最適化を必須実行し、source後のIR変更は行わない。旧assertと入力hash、resource budget、実行結果の対応は`docs/reports/p7-concurrency-corpus-compat.json`へ記録する。
 
 同じ固定revisionの`crates/emela-codegen-emb/tests/fiber/join.rs`（SHA-256 `35367507790dd3584f346da32b4b855b048883e19360a02221212ec2a6740def`）と`fiber/await_.rs`（SHA-256 `118a273ac7f749dd9eaa294e56cfe913105a1b80ce5b6c8f760efdc6386f2bd0`）の17旧source試験は、`p7_child_results_compat.rs`の18入力で同様に検証する。旧frame 512 byteとheap・pool容量を維持し、P6へ移植済みのFIFOとready closeも旧resource budgetで再実行する。完了結果の反復join/await、discarded Unit、String/Listと返却Exitの所有、Int64/Float bit・Bool、inline Exitの通常call返却、waitのresume境界、取消時待機列、自己handleをcaptureする結果closureのcycle、leaked callbackのscope終了診断を確認する。runtime macroの有無も旧assertどおり検査する。全体で30旧試験・32実C入力と1 artifact-only入力となり、terminal停止観測と1000回の正常解放観測を別々に記録する。
+
+## P7: State・Fiber・Deferred・外部taskの統合
+
+固定旧 `tests/fiber/integration.rs` と `examples/support/phase7_integration_flow.rs` の2試験を独立frontendへ接続した。原本文と旧managed String置換、request外部化、任意のGC anchorを保持し、C公開名だけを適応する。[対応と観測](reports/p7-integration-corpus-compat.json) を参照。旧4096byte heap等の容量のまま、GC有無・成功/失敗/取消/NULL出力・1000反復・全heap回収をC両最適化で確認した。
+
+この入力でclosure変換時のFiber失敗辺の収集・ID再割当て漏れを検出した。Callと同じくFiberのHandle/Breakを新arenaへ移し、親SeqIdを誤って再利用して走査が循環する不具合を修正する。試験用の旧checkout・旧compiler依存は追加しない。

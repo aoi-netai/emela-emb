@@ -310,6 +310,10 @@ fn visit_sequence(
                 if let Value::Call {
                     on_fail: Some(edge),
                     ..
+                }
+                | Value::Fiber {
+                    on_fail: Some(edge),
+                    ..
                 } = value
                 {
                     match edge {
@@ -432,6 +436,10 @@ fn remap_statement(
                 ));
             }
             if let Value::Call {
+                on_fail: Some(edge),
+                ..
+            }
+            | Value::Fiber {
                 on_fail: Some(edge),
                 ..
             } = &mut value

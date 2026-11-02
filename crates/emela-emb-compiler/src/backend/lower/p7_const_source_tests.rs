@@ -47,6 +47,11 @@ fn fixture(id: &str, exports: &[&str], options: &Options, gc: bool) -> Output {
     let mut checked = crate::frontend::specialize::specialize(checked).unwrap();
     crate::frontend::function_abi::project(&mut checked).unwrap();
     let mut program = crate::frontend::lower::lower(&checked);
+    add_gc_anchor(&mut program);
+    crate::backend::compile_program(program, options).unwrap()
+}
+
+pub(super) fn add_gc_anchor(program: &mut Program) {
     // Same as the fixed old gc_anchor: enable tracing through reachable Cell[Any].
     let ty = program.core.types.intern(Type::Cell(TypeId::ANY));
     let mut anchor = simple();
@@ -78,7 +83,6 @@ fn fixture(id: &str, exports: &[&str], options: &Options, gc: bool) -> Output {
         term: Term::Return(Some(result.into())),
     };
     program.functions.alloc(anchor);
-    crate::backend::compile_program(program, options).unwrap()
 }
 
 const BOARD: &str = r#"

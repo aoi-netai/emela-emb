@@ -1,0 +1,79 @@
+{
+  "schema_version": 1,
+  "baseline_revision": "c34c0aeefdd966d854371b3110db00a47798751d",
+  "entries": [
+    {
+      "program": "program:5aaa984fe4ad33045300",
+      "legacy_tests": [
+        "emit::fiber::integration::managed_task_success_values_share_state_child_and_deferred_ownership_with_and_without_gc"
+      ],
+      "files": [
+        {
+          "name": "main.emel",
+          "fixture": "sources/8a490b7f32de050f7a3fa1feb6bfb44aa46e94b319956ef7b62189588f1df51c.emel",
+          "source_id": "source:8a490b7f32de050f7a3f",
+          "sha256": "8a490b7f32de050f7a3fa1feb6bfb44aa46e94b319956ef7b62189588f1df51c"
+        }
+      ],
+      "new_test": {
+        "kind": "source_test",
+        "path": "crates/emela-emb-compiler/src/backend/lower/p7_integration_tests.rs",
+        "symbol": "managed_task_success_values_share_state_child_and_deferred_ownership_with_and_without_gc"
+      },
+      "route": "original-source-with-legacy-post-lowering-seams",
+      "adaptation": "Add explicit work/parts C exports. After the same independent frontend pipeline, externalize request as host_request exactly as the legacy fixture; optional Cell[Any] anchor enables the cycle collector. Managed variant applies the original two String substitutions. C symbols alone are adapted.",
+      "observations": [
+        "Both GC modes, old 4096-byte heap/32-byte String/48 frames of 2048 bytes/2 Deferred/2 task and event slots.",
+        "1000 outer iterations including 1000 child rounds in the first; result 2*count+2, first failure 11, last failure 6, cancellation/discarded output unchanged.",
+        "At most 3 live child records while running, 2 between requests; no children or allocated heap after release.",
+        "Typed error contains a NUL-bearing borrowed String and List[String]; release poisons input and drops the List owner.",
+        "Managed success producer supplies borrowed String 42; queued producer/context release runs once outside ISR and event lock, cancelled queued completion releases without producing.",
+        "Late task completions fail and returned values survive frame/scope reuse."
+      ]
+    },
+    {
+      "program": "program:614925d9a7716e4eee7e",
+      "legacy_tests": [
+        "emit::fiber::integration::shared_state_child_reclamation_deferreds_and_external_failure_share_owned_edges_with_and_without_gc"
+      ],
+      "files": [
+        {
+          "name": "main.emel",
+          "fixture": "sources/c127a7f88b884662a537b7ece2e02d7785341276e42d16875c0ca03dd329805b.emel",
+          "source_id": "source:c127a7f88b884662a537",
+          "sha256": "c127a7f88b884662a537b7ece2e02d7785341276e42d16875c0ca03dd329805b"
+        }
+      ],
+      "new_test": {
+        "kind": "source_test",
+        "path": "crates/emela-emb-compiler/src/backend/lower/p7_integration_tests.rs",
+        "symbol": "shared_state_child_reclamation_deferreds_and_external_failure_share_owned_edges_with_and_without_gc"
+      },
+      "route": "original-source-with-legacy-post-lowering-seams",
+      "adaptation": "Add explicit work/parts C exports. After the same independent frontend pipeline, externalize request as host_request exactly as the legacy fixture; optional Cell[Any] anchor enables the cycle collector. Managed variant applies the original two String substitutions. C symbols alone are adapted.",
+      "observations": [
+        "Both GC modes, old 4096-byte heap/32-byte String/48 frames of 2048 bytes/2 Deferred/2 task and event slots.",
+        "1000 outer iterations including 1000 child rounds in the first; result 2*count+2, first failure 11, last failure 6, cancellation/discarded output unchanged.",
+        "At most 3 live child records while running, 2 between requests; no children or allocated heap after release.",
+        "Typed error contains a NUL-bearing borrowed String and List[String]; release poisons input and drops the List owner.",
+        "Managed success producer supplies borrowed String 42; queued producer/context release runs once outside ISR and event lock, cancelled queued completion releases without producing.",
+        "Late task completions fail and returned values survive frame/scope reuse."
+      ]
+    }
+  ],
+  "validation": {
+    "C_flags": [
+      "-std=c11",
+      "-Wall",
+      "-Wextra",
+      "-Werror"
+    ],
+    "C_optimizations": [
+      "-O0",
+      "-O2"
+    ],
+    "status": "passed",
+    "new_test_count": 2,
+    "regression": "Closure conversion previously omitted Fiber failure edges from body slicing and ID remapping. A retained parent sequence ID became a cycle and grew the traversal without bound; both failure edge forms now use the lifted arena."
+  }
+}

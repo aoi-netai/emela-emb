@@ -30,6 +30,8 @@ mod p7_discarded;
 mod p7_evidence;
 #[path = "p7_input_tests.rs"]
 mod p7_input;
+#[path = "p7_integration_tests.rs"]
+mod p7_integration;
 #[path = "service_tests.rs"]
 mod services;
 #[path = "source_builtin_tests.rs"]
