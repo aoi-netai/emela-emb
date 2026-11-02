@@ -2133,6 +2133,7 @@ impl Checker {
         if let Some(expected) = expected {
             self.expect_type(module, value_type, expected, span)?;
         }
+        let value_type = self.resolve_type(module, value_type, span)?;
         self.validate_type_bounds(
             module,
             data::backend_type(value_type),
