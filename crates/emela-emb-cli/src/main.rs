@@ -10,7 +10,12 @@ fn main() -> ExitCode {
             println!("{}", args::USAGE);
             ExitCode::SUCCESS
         }
-        Ok(args::Command::Build { input, out_dir }) => match build::run(&input, &out_dir) {
+        Ok(args::Command::Build {
+            inputs,
+            out_dir,
+            entry,
+            options,
+        }) => match build::run(&inputs, &out_dir, entry.as_deref(), &options) {
             Ok(()) => ExitCode::SUCCESS,
             Err(message) => {
                 eprintln!("{message}");

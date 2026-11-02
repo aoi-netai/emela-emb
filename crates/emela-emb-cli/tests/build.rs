@@ -4,9 +4,6 @@ use std::process::{Command, Output};
 use std::sync::atomic::{AtomicU64, Ordering};
 
 const SOURCE: &str = include_str!("../../../examples/minimal/main.emel");
-const EXPECTED_C: &str =
-    "#include \"emela_embedded.h\"\n\nint32_t answer(void) {\n    return 42;\n}\n";
-const EXPECTED_HEADER: &str = "#ifndef EMELA_EMBEDDED_H\n#define EMELA_EMBEDDED_H\n\n#include <stdint.h>\n\nint32_t answer(void);\n\n#endif\n";
 
 static NEXT_ID: AtomicU64 = AtomicU64::new(0);
 
@@ -79,16 +76,15 @@ fn assert_success(output: &Output) {
     );
 }
 
-fn assert_generated(out_dir: &Path, c: &str, header: &str) {
-    assert_eq!(
-        fs::read_to_string(out_dir.join("emela_embedded.c")).unwrap(),
-        c
-    );
-    assert_eq!(
-        fs::read_to_string(out_dir.join("emela_embedded.h")).unwrap(),
-        header
-    );
-    assert_eq!(fs::read_dir(out_dir).unwrap().count(), 2);
+fn assert_generated(out_dir: &Path, source: &str) {
+    let expected = emela_emb_compiler::compile(source).unwrap();
+    for file in &expected.files {
+        assert_eq!(
+            fs::read_to_string(out_dir.join(&file.path)).unwrap(),
+            file.contents
+        );
+    }
+    assert_eq!(fs::read_dir(out_dir).unwrap().count(), expected.files.len());
 }
 
 #[test]
@@ -98,27 +94,21 @@ fn generates_the_accepted_example_through_the_real_cli() {
     let out_dir = temp.path("generated");
     let result = build(&input, &out_dir);
     assert_success(&result);
-    assert_generated(&out_dir, EXPECTED_C, EXPECTED_HEADER);
+    assert_generated(&out_dir, SOURCE);
     temp.assert_no_staging_directories();
 }
 
 #[test]
 fn exports_the_requested_name_and_value_instead_of_fixed_output() {
     let temp = TestDirectory::new();
-    for (number, expected) in [("0", "0"), ("0007", "7"), ("2147483647", "2147483647")] {
-        let input = temp.input(&format!(
-            "@export(c, \"read_value\")\npub fn calculate() -> Int {{ {number} }}\n"
-        ));
+    for number in ["0", "0007", "2147483647"] {
+        let source =
+            format!("@export(c, \"read_value\")\npub fn calculate() -> Int {{ {number} }}\n");
+        let input = temp.input(&source);
         let out_dir = temp.path(format!("generated-{number}"));
         let result = build(&input, &out_dir);
         assert_success(&result);
-        assert_generated(
-            &out_dir,
-            &EXPECTED_C
-                .replace("answer", "read_value")
-                .replace("42", expected),
-            &EXPECTED_HEADER.replace("answer", "read_value"),
-        );
+        assert_generated(&out_dir, &source);
     }
 }
 
@@ -130,7 +120,7 @@ fn accepts_spaces_tabs_blank_lines_and_crlf_in_supported_positions() {
     );
     let out_dir = temp.path("generated");
     assert_success(&build(&input, &out_dir));
-    assert_generated(&out_dir, EXPECTED_C, EXPECTED_HEADER);
+    assert_generated(&out_dir, SOURCE);
 }
 
 #[test]
@@ -139,11 +129,8 @@ fn rejects_bad_inputs_with_a_source_location_and_no_artifacts() {
     let cases = [
         "@export(c, \"answer\")\npub fn answer() -> Int { $ }\n".to_string(),
         "@export(c, \"answer\")\npub fn answer() -> Int { 42\n".to_string(),
-        format!("{SOURCE}pub fn extra() -> Int {{ 1 }}\n"),
         "@export(c, \"answer\")\npub fn answer() -> Bool { 42 }\n".to_string(),
         "@export(c, \"answer\")\npub fn answer() -> Int { 2147483648 }\n".to_string(),
-        "@export(c, \"answer\")\npub fn answer() -> Int { 1 + 2 }\n".to_string(),
-        "@export(c, \"answer\")\npub fn answer(value: Int) -> Int { 42 }\n".to_string(),
         "@export(c, \"int32_t\")\npub fn answer() -> Int { 42 }\n".to_string(),
     ];
     for (index, source) in cases.iter().enumerate() {
@@ -180,7 +167,7 @@ fn compile_failure_preserves_previous_generated_files() {
     temp.input("@export(c, \"answer\")\npub fn answer() -> Int { 2147483648 }\n");
     let result = build(&input, &out_dir);
     assert!(!result.status.success());
-    assert_generated(&out_dir, EXPECTED_C, EXPECTED_HEADER);
+    assert_generated(&out_dir, SOURCE);
     temp.assert_no_staging_directories();
 }
 
@@ -207,7 +194,7 @@ fn refuses_to_overwrite_existing_output_or_unrelated_content() {
     let result = build(&input, &out_dir);
     assert!(!result.status.success());
     assert!(String::from_utf8_lossy(&result.stderr).contains("not empty"));
-    assert_generated(&out_dir, EXPECTED_C, EXPECTED_HEADER);
+    assert_generated(&out_dir, SOURCE);
 
     let unrelated = temp.path("unrelated");
     fs::create_dir(&unrelated).unwrap();
@@ -228,7 +215,7 @@ fn supports_an_existing_empty_output_directory() {
     let out_dir = temp.path("generated");
     fs::create_dir(&out_dir).unwrap();
     assert_success(&build(&input, &out_dir));
-    assert_generated(&out_dir, EXPECTED_C, EXPECTED_HEADER);
+    assert_generated(&out_dir, SOURCE);
 }
 
 #[test]
@@ -272,7 +259,6 @@ fn requires_explicit_unambiguous_arguments_and_has_help() {
         vec!["build"],
         vec!["build", "main.emel"],
         vec!["build", "main.emel", "--out-dir"],
-        vec!["build", "main.emel", "extra.emel", "--out-dir", "generated"],
         vec!["build", "main.emel", "--out-dir", "one", "--out-dir", "two"],
         vec!["build", "main.emel", "--unknown", "--out-dir", "generated"],
     ] {
@@ -297,7 +283,7 @@ fn accepts_an_option_before_the_input_and_a_dash_prefixed_path_after_double_dash
         .output()
         .unwrap();
     assert_success(&result);
-    assert_generated(&temp.path("generated"), EXPECTED_C, EXPECTED_HEADER);
+    assert_generated(&temp.path("generated"), SOURCE);
 }
 
 #[cfg(unix)]
@@ -310,7 +296,7 @@ fn preserves_non_utf8_input_and_output_paths() {
     let out_dir = temp.path(OsString::from_vec(b"generated-\xff".to_vec()));
     fs::write(&input, SOURCE).unwrap();
     assert_success(&build(&input, &out_dir));
-    assert_generated(&out_dir, EXPECTED_C, EXPECTED_HEADER);
+    assert_generated(&out_dir, SOURCE);
 }
 
 #[cfg(unix)]
@@ -332,4 +318,130 @@ fn refuses_an_output_symlink_without_modifying_its_target() {
     );
     assert_eq!(fs::read_dir(&real).unwrap().count(), 0);
     temp.assert_no_staging_directories();
+}
+
+#[test]
+fn multiple_inputs_entry_and_options_generate_executable_c_and_all_artifacts() {
+    let temp = TestDirectory::new();
+    let main = temp.input(include_str!(
+        "../../emela-emb-compiler/tests/compat/p1/modules-main.emel"
+    ));
+    let math = temp.path("math.emel");
+    fs::write(
+        &math,
+        include_str!("../../emela-emb-compiler/tests/compat/p1/math.emel"),
+    )
+    .unwrap();
+    let out_dir = temp.path("generated");
+    let result = cli()
+        .arg("build")
+        .arg(&math)
+        .arg(&main)
+        .arg("--entry")
+        .arg(&main)
+        .args([
+            "--entry-function",
+            "answer",
+            "--heap-bytes",
+            "0",
+            "--string-capacity",
+            "32",
+        ])
+        .arg("--out-dir")
+        .arg(&out_dir)
+        .output()
+        .unwrap();
+    assert_success(&result);
+    for path in [
+        "emela_embedded.c",
+        "emela_embedded.h",
+        "emela_board.h",
+        "emela_artifact.json",
+    ] {
+        assert!(out_dir.join(path).is_file(), "CLI did not save {path}");
+    }
+    let harness = temp.path("harness.c");
+    fs::write(
+        &harness,
+        include_str!("../../emela-emb-compiler/tests/compat/p1/modules-harness.c"),
+    )
+    .unwrap();
+    let mut translation_units = fs::read_dir(&out_dir)
+        .unwrap()
+        .map(|entry| entry.unwrap().path())
+        .filter(|path| path.extension().is_some_and(|extension| extension == "c"))
+        .collect::<Vec<_>>();
+    translation_units.sort();
+    for optimization in ["-O0", "-O2"] {
+        let executable = temp.path(format!("cli-probe{}", &optimization[1..]));
+        let compile = Command::new("cc")
+            .args(["-std=c11", "-Wall", "-Werror", optimization, "-I"])
+            .arg(&out_dir)
+            .args(&translation_units)
+            .arg(&harness)
+            .args(["-lm", "-o"])
+            .arg(&executable)
+            .output()
+            .expect("cc is required for CLI integration tests");
+        assert!(
+            compile.status.success(),
+            "CLI-generated C failed at {optimization}: {}",
+            String::from_utf8_lossy(&compile.stderr)
+        );
+        let run = Command::new(&executable)
+            .output()
+            .expect("execute CLI-generated C");
+        assert!(
+            run.status.success(),
+            "CLI-generated C failed at {optimization}: {:?}: {}",
+            run.status.code(),
+            String::from_utf8_lossy(&run.stderr)
+        );
+    }
+    temp.assert_no_staging_directories();
+}
+
+#[test]
+fn reports_imported_source_locations_and_preserves_atomic_output_on_errors() {
+    let temp = TestDirectory::new();
+    let main = temp.input(
+        "import Math.{invalid}\n@export(c, \"answer\")\npub fn answer() -> Int { invalid() }",
+    );
+    let math = temp.path("math.emel");
+    fs::write(&math, "pub fn invalid() -> Int { missing }\n").unwrap();
+    let out_dir = temp.path("generated");
+    let result = cli()
+        .arg("build")
+        .arg(&main)
+        .arg(&math)
+        .arg("--out-dir")
+        .arg(&out_dir)
+        .output()
+        .unwrap();
+    assert!(!result.status.success());
+    assert!(String::from_utf8_lossy(&result.stderr).starts_with(&format!("{}:1:", math.display())));
+    assert!(!out_dir.exists());
+    temp.assert_no_staging_directories();
+}
+
+#[test]
+fn rejects_malformed_duplicate_and_out_of_range_options() {
+    for options in [
+        vec!["--entry"],
+        vec!["--entry", ""],
+        vec!["--entry", "a", "--entry", "b"],
+        vec!["--entry-function", "run", "--entry-function", "other"],
+        vec!["--heap-bytes", "-1"],
+        vec!["--heap-bytes", "4294967296"],
+        vec!["--heap-bytes", "1", "--heap-bytes", "2"],
+        vec!["--string-capacity", "65536"],
+        vec!["--string-capacity", "12.5"],
+    ] {
+        let result = cli()
+            .args(["build", "main.emel", "--out-dir", "generated"])
+            .args(&options)
+            .output()
+            .unwrap();
+        assert_eq!(result.status.code(), Some(2), "{options:?}");
+    }
 }

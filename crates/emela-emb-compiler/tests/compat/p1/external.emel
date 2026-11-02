@@ -1,0 +1,9 @@
+@external(c, "board_integer")
+fn board_integer(n: Int64) -> Int64
+@external(c, "board_mix")
+fn board_mix(n: Int64, x: Float) -> Float
+fn integer_helper(n: Int64) -> Int64 { board_integer(n) }
+@export(c, "integer_bits")
+pub fn integer_bits(n: Int64) -> Int64 { integer_helper(n) }
+@export(c, "float_bits")
+pub fn float_bits(n: Int64, x: Float) -> Float { board_mix(n, x) }

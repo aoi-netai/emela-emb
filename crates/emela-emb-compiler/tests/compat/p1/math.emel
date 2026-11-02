@@ -1,0 +1,9 @@
+pub fn add(a: Int, b: Int) -> Int { a + b }
+pub fn total(n: Int, sum: Int) -> Int {
+  if n == 0 { sum } else { total(n - 1, sum + 1) }
+}
+fn private_value() -> Int { 99 }
+
+pub fn swap(n: Int, a: Int, b: Int) -> Int {
+  if n == 0 { a } else { swap(n - 1, b, a) }
+}

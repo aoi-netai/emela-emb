@@ -1,5 +1,7 @@
 # 最小C生成の実験結果
 
+本書は最小実験時点の履歴です。現在の対応範囲は [7段階計画](compiler-parity-plan.md)、検証結果は [P1報告](reports/compiler-p1.md) を参照してください。
+
 実施日: 2026-11-02（JST）  
 作業ブランチ: `experiment/minimal-c`  
 検証した実装commit: `b56f84ce4c7bd297d322047ac69a0305eff74f0c`
