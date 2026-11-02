@@ -605,7 +605,8 @@ impl Context<'_> {
             E::Tuple(values)
             | E::Concat(values)
             | E::Make { args: values, .. }
-            | E::Builtin { args: values, .. } => {
+            | E::Builtin { args: values, .. }
+            | E::Fiber { args: values, .. } => {
                 for value in values {
                     needed.extend(self.expression(value)?);
                 }

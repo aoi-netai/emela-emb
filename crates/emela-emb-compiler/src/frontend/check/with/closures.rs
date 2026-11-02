@@ -96,6 +96,9 @@ impl Checker {
             }
             | E::Builtin {
                 args: operations, ..
+            }
+            | E::Fiber {
+                args: operations, ..
             } => {
                 for value in operations {
                     added.extend(self.with_lexical_expression(module, value, provided)?);

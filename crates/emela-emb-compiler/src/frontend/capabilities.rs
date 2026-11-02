@@ -410,7 +410,7 @@ impl Context<'_> {
                 }
                 result
             }
-            E::TraitCall { args, .. } | E::Builtin { args, .. } => {
+            E::TraitCall { args, .. } | E::Builtin { args, .. } | E::Fiber { args, .. } => {
                 let mut result = Flow::default();
                 for argument in self.arguments(args, locals, providers, false) {
                     result.merge(argument);

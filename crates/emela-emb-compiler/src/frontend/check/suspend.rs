@@ -171,6 +171,7 @@ fn push_children<'a>(expression: &'a ir::Expr, pending: &mut Vec<&'a ir::Expr>) 
         | E::Tuple(args)
         | E::Make { args, .. }
         | E::Builtin { args, .. }
+        | E::Fiber { args, .. }
         | E::Call { args, .. }
         | E::TraitCall { args, .. }
         | E::Handler {
