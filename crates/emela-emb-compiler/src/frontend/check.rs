@@ -806,6 +806,36 @@ impl Checker {
                             Some(Symbol::Function(*id))
                         } else if let Some(constant) = constant(&import.path.value, &member.value) {
                             Some(Symbol::Constant(constant))
+                        } else if let Some(public) = self.modules.modules[target]
+                            .ast
+                            .effects
+                            .iter()
+                            .map(|item| (&item.name.value, item.public))
+                            .chain(
+                                self.modules.modules[target]
+                                    .ast
+                                    .handlers
+                                    .iter()
+                                    .map(|item| (&item.name.value, item.public)),
+                            )
+                            .chain(
+                                self.modules.modules[target]
+                                    .ast
+                                    .layers
+                                    .iter()
+                                    .map(|item| (&item.name.value, item.public)),
+                            )
+                            .find_map(|(name, public)| (name == &member.value).then_some(public))
+                        {
+                            if !public {
+                                errors.push(self.error(
+                                    index,
+                                    DK::Name,
+                                    member.span,
+                                    "imported effect, handler, or layer is private",
+                                ));
+                            }
+                            continue;
                         } else if self.traits.find_trait(index, &member.value).is_some()
                             || self.catalog.has_native_type(target, &member.value)
                         {
