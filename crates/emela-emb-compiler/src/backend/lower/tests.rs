@@ -22,6 +22,8 @@ mod services;
 mod source_builtins;
 #[path = "suspend_tests.rs"]
 mod suspend;
+#[path = "p7_data_tests.rs"]
+mod p7_data;
 
 fn lower_program(program: Program) -> Result<LoweredModule> {
     super::lower_program(program, &Options::default())
