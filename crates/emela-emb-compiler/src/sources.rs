@@ -18,6 +18,7 @@ pub(crate) const CORE_MODULES: &[(&str, &str)] = &[
     ("List", include_str!("../lib/core/list.emel")),
     ("Std.Duration", include_str!("../lib/std/duration.emel")),
     ("Std.Instant", include_str!("../lib/std/instant.emel")),
+    ("Std.Clock", include_str!("../lib/std/clock.emel")),
     ("Std.Console", include_str!("../lib/std/console.emel")),
     ("Std.State", include_str!("../lib/std/state.emel")),
     ("Std.Map", include_str!("../lib/std/map.emel")),
@@ -153,6 +154,9 @@ pub(crate) fn intrinsic(module: &str, name: &str) -> Option<Intrinsic> {
 /// A user module or a different declaration cannot select these bindings.
 pub(crate) fn external_symbol(module: &str, name: &str) -> Option<&'static str> {
     match (module, name) {
+        ("Std.Clock", "now_milliseconds") => Some("emela_clock_now_milliseconds"),
+        ("Std.Clock", "sleep_milliseconds") => Some("emela_clock_sleep"),
+        ("Std.Clock", "when_stalled") => Some("emela_clock_when_stalled"),
         ("Std.Console", "console_log") => Some("emela_console_print_line"),
         ("Std.Console", "console_error") => Some("emela_console_print_error_line"),
         _ => None,

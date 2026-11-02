@@ -408,3 +408,5 @@ Stringの`@deprecated`・`@internal`は従来と同じmetadata適応として省
 | `crates/emela-core/lib/std/clock.emel` | `c76b333c822f56bb3e344062364c0bffc239fc9a98d799c453f64bd098971dda` |
 
 `tests/p5_time.rs`はDurationのwrap/符号付き変換・opaque境界と、Instantのepoch、負のmillisecond、閏日、年0・拡張年・負年をheapなしのC両最適化で1000回確認する。負年のゼロ埋めから既存String appendの入力/output重複を検出したため、P5では両入力を最大512byteの固定scratchへ退避してから出力する。`tests/p5_string_alias.rs`で重複view・容量境界・10万回の末尾再帰におけるstack非増加を検証し、mallocやVLAは追加しない。
+
+Clockを通常sourceへ登録し、予約C symbolはcompiler所有のClock宣言だけに許可する。`tests/p5_clock.rs`ではSystemClockのnow/sleep、TestClockの負の待機時間のclampとState[Instant]の更新を明示task adapterへ接続する。nowだけを使う関数もClockの中断可能性を保持する。queue通知前の非完了、重複/stale通知、1000回のheap全回収をC両最適化で確認し、adapter未指定・予約名偽装・Immediate制約違反を拒否する。
