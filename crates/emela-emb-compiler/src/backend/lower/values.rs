@@ -107,6 +107,12 @@ pub(super) fn value_type(
                     "indirect call channels differ from its function type",
                 ));
             }
+            if *suspends && !f.suspends {
+                return Err(invalid(
+                    &f.name,
+                    "suspending indirect call requires a suspending caller",
+                ));
+            }
             let mut params = function_parameters(ft);
             if ft.ev {
                 params.push(TypeId::EVIDENCE);
@@ -169,7 +175,7 @@ pub(super) fn value_type(
         Value::Call {
             callee: Callee::Direct(id),
             args,
-            suspends: false,
+            suspends,
             on_fail,
         } => {
             let target = program
@@ -181,6 +187,18 @@ pub(super) fn value_type(
                 return Err(invalid(
                     &f.name,
                     "call failure edge differs from callee failure channel",
+                ));
+            }
+            if target.suspends != *suspends {
+                return Err(invalid(
+                    &f.name,
+                    "call suspension edge differs from callee suspension channel",
+                ));
+            }
+            if *suspends && !f.suspends {
+                return Err(invalid(
+                    &f.name,
+                    "suspending direct call requires a suspending caller",
                 ));
             }
             if args.len() != target.params.len() {

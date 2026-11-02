@@ -12,6 +12,7 @@ mod effects;
 mod error_types;
 mod failures;
 mod handler;
+mod suspend;
 mod types;
 mod values;
 use values::value_type;
@@ -219,9 +220,10 @@ pub(crate) fn lower_program(
             }
         }
     }
+    let suspensions = suspend::prepare(&program);
     Ok(LoweredModule {
         lowered: program,
-        suspensions: HashMap::new(),
+        suspensions,
         closures,
         const_groups: vec![],
         runtime_consts,
@@ -233,10 +235,10 @@ pub(crate) fn lower_program(
 }
 
 fn validate_function(program: &Program, f: &Function) -> Result<()> {
-    if f.suspends || f.env.is_some() || f.infallible_cause_fail {
+    if f.env.is_some() || f.infallible_cause_fail {
         return Err(unsupported(
             &f.name,
-            "const, failure, suspension, closure or derived function",
+            "explicit closure environment or cause failure function",
         ));
     }
     let check_type = |ty| types::validate_type(program, &f.name, ty);

@@ -12,6 +12,8 @@ mod functions;
 mod handlers;
 #[path = "memory_tests.rs"]
 mod memory;
+#[path = "suspend_tests.rs"]
+mod suspend;
 
 fn lower_program(program: Program) -> Result<LoweredModule> {
     super::lower_program(program, &Options::default())
