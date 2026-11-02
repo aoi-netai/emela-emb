@@ -439,6 +439,23 @@ fn rejects_malformed_duplicate_and_out_of_range_options() {
         vec!["--heap-bytes", "1", "--heap-bytes", "2"],
         vec!["--string-capacity", "65536"],
         vec!["--string-capacity", "12.5"],
+        vec!["--frame-capacity", "65536"],
+        vec!["--frame-bytes", "-1"],
+        vec!["--fiber-capacity", "1", "--fiber-capacity", "2"],
+        vec!["--task-capacity", "1", "--task-capacity", "2"],
+        vec!["--event-capacity", "1.5"],
+        vec!["--task-adapter"],
+        vec!["--task-adapter", "wait"],
+        vec!["--task-adapter", "wait="],
+        vec!["--task-adapter", "=board_wait"],
+        vec!["--task-adapter", "wait=board_wait=extra"],
+        vec!["--task-adapter", "wait=not-a-symbol"],
+        vec![
+            "--task-adapter",
+            "wait=board_wait",
+            "--task-adapter",
+            "wait=other",
+        ],
     ] {
         let result = cli()
             .args(["build", "main.emel", "--out-dir", "generated"])
