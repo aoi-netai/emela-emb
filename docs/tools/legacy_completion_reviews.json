@@ -1,0 +1,225 @@
+{
+  "schema_version": 1,
+  "policy": "Candidate evidence and reviewer assignments only. No ledger status is promoted by this file. Owner checkpoints require final integration and execution review.",
+  "groups": [
+    {
+      "id": "P6-fiber-deferred-cause",
+      "owner": "frontend/backend",
+      "state": "active-implementation",
+      "record_prefixes": ["emela_core::FiberOp", "emela_lir::Value::Fiber", "emela_core::Type::FiberScope"],
+      "test_prefixes": ["emit::fiber::", "emit::deferred::"],
+      "requirement_ids": ["concurrency_cleanup"],
+      "note": "Scope E/R inclusion, child providers, Fiber/Deferred scope lifetime, Cause empty error row, interruption and suspended cleanup still need source/C integration. Existing P5 task evidence does not establish these P6 observations.",
+      "candidate_evidence": [
+        {"path": "crates/emela-emb-compiler/src/backend/lower/suspend_tests.rs", "kind": "ir_test"},
+        {"path": "crates/emela-emb-compiler/tests/p5_task_failures.rs", "kind": "source_test"},
+        {"path": "docs/reports/compiler-p5.md", "kind": "run_report"}
+      ]
+    },
+    {
+      "id": "function-sets-and-invocation-ABI",
+      "owner": "frontend/backend",
+      "state": "P4-P5-verified-with-P6-remainder",
+      "record_prefixes": ["emela_core::FnSets", "emela_core::FnType", "emela_core::SetSummary", "emela_core::Type::Fn", "emela_core::Type::Set", "emela_core::Type::Evidence", "emela_core::Type::Handler", "emela_core::EffectDef", "emela_core::OpDef", "emela_lir::Closure", "emela_lir::Callee"],
+      "test_ids": ["emit::adapts_a_function_value_to_effect_evidence_and_failure_call_abis", "emit::propagates_failure_from_a_captured_closure_through_its_indirect_call", "lib::compiler::separation_tests::common_closure_lowering_is_shared_and_native_managed_values_run"],
+      "note": "Source identity/FnSets survives inference then projects to concrete C ABI. Fields of the old schemas need representation review, including Async without evidence and intrinsic Scope rows. Existing P4/P5 execution is evidence for those paths only.",
+      "candidate_evidence": [
+        {"path": "crates/emela-emb-compiler/src/frontend/function_abi.rs", "kind": "implementation"},
+        {"path": "crates/emela-emb-compiler/tests/p4_rows.rs", "kind": "source_test"},
+        {"path": "crates/emela-emb-compiler/tests/p5_suspend.rs", "kind": "source_test"},
+        {"path": "crates/emela-emb-compiler/src/backend/lower/function_tests.rs", "kind": "ir_test"}
+      ]
+    },
+    {
+      "id": "P7-generic-const-identity",
+      "owner": "backend",
+      "state": "active-implementation",
+      "record_ids": ["emela_core::Type::Param"],
+      "test_prefixes": ["emit::const_runtime::"],
+      "test_ids": ["emit::statically_evaluates_string_append_in_const_functions", "emit::statically_evaluates_float_rounding_builtin", "emit::float_to_string_constant_contributes_its_exact_append_bound", "emit::emits_a_static_string_const_as_a_view"],
+      "requirement_ids": ["const_identity"],
+      "note": "P4 baseline rejected eight normal polymorphic const programs. Canonical dependency fixed point, source family identity, typed getter bridges, single initialization/defect cache, managed roots and Handle[A] const sharing are backend-owned. Runtime validation cannot be inferred from preserved fixture bytes or a concrete-root object check.",
+      "candidate_evidence": [
+        {"path": "crates/emela-emb-compiler/tests/p2_consts.rs", "kind": "source_test"},
+        {"path": "crates/emela-emb-compiler/src/backend/lower/tests.rs", "symbol": "static_const_and_aggregate_runtime_const_execute", "kind": "ir_test"}
+      ]
+    },
+    {
+      "id": "P7-C-ABI-and-bindings",
+      "owner": "root",
+      "state": "owner-checkpoints-await-integration",
+      "record_prefixes": ["emela_core::External", "emela_core::ExternalBinding", "emela_core::HostModule", "emela_core::HostRef"],
+      "test_prefixes": ["emit::binding_metadata::"],
+      "test_ids": ["lib::compiler::separation_tests::common_entries_supply_dynamic_string_output_buffers", "lib::compiler::separation_tests::string_plans_preserve_aliases_while_other_buffers_and_calls_are_live"],
+      "requirement_ids": ["c_abi_isr_services"],
+      "note": "Review Emela names versus C aliases, direct-exported external wrapper normalization, Unit/Never positions, caller buffers, Borrowed/Owned success/error boundaries and named/file/bundled binding metadata. Bare external type constructor/pattern/field rejection is a separate source obligation.",
+      "candidate_evidence": [
+        {"revision": "0bc2668", "path": "crates/emela-emb-compiler/tests/p7_external_values.rs", "kind": "source_test"},
+        {"revision": "c0f351d", "path": "crates/emela-emb-compiler/tests/p7_external_types.rs", "kind": "source_test"},
+        {"path": "crates/emela-emb-compiler/tests/p3_bytes.rs", "kind": "source_test"}
+      ]
+    },
+    {
+      "id": "P7-ISR-input-and-reachability",
+      "owner": "root",
+      "state": "owner-checkpoint-await-integration",
+      "record_ids": ["emela_lir::RuntimeOp::Hold", "emela_lir::RuntimeOp::Unhold"],
+      "test_ids": ["flow::isr_entries_reject_reachable_hold_and_unhold_in_direct_and_nested_calls"],
+      "requirement_ids": ["c_abi_isr_services"],
+      "note": "The source checkpoint checks aliases, actual adapter allowlist symbols, reachable heap/dynamic/recursive/runtime-const rejection and static/borrowed values. Raw CellNew/Get/Set and Hold/Unhold need their own input evidence; a source language capability is not made N/A by a rejected raw operation.",
+      "candidate_evidence": [
+        {"revision": "ac756a7", "path": "crates/emela-emb-compiler/tests/p7_isr.rs", "kind": "source_test"},
+        {"revision": "ac756a7", "path": "crates/emela-emb-compiler/src/backend/lower/isr_tests.rs", "kind": "ir_test"}
+      ]
+    },
+    {
+      "id": "P7-Embedded-services",
+      "owner": "root",
+      "state": "owner-checkpoint-await-integration",
+      "requirement_ids": ["standard_library", "c_abi_isr_services"],
+      "note": "Root provides six Embedded modules and 23 Board service symbols. Source/C checkpoint covers capacity/length/element bounds, owned receive lists, failure, Clock scheduling and Console NUL. The five legacy normal Embedded source cases still require explicit semantic correspondence in the source corpus manifest.",
+      "candidate_evidence": [
+        {"revision": "2f2dc53", "path": "crates/emela-emb-compiler/tests/p7_services.rs", "kind": "source_test"},
+        {"revision": "2f2dc53", "path": "crates/emela-emb-compiler/tests/compat/p7/embedded-harness.c", "kind": "C_harness"}
+      ]
+    },
+    {
+      "id": "eight-source-builtins-and-residual-rejection",
+      "owner": "root",
+      "state": "owner-checkpoint-await-integration",
+      "record_ids": ["emela_core::Builtin::AssertFail", "emela_core::Builtin::Dbg", "emela_core::Builtin::DebugPrint", "emela_core::Builtin::Inspect", "emela_core::Builtin::Panic", "emela_core::Builtin::ShowNested", "emela_core::Builtin::ShowString", "emela_core::Builtin::Todo", "emela_lir::RuntimeOp::DebugPrint", "emela_lir::RuntimeOp::ShowString", "emela_lir::RuntimeOp::Defect"],
+      "test_ids": ["flow::rejects_source_builtins_that_must_lower_to_flow_control_or_runtime", "emit::debug_print_calls_the_board_hook_with_the_string_view", "emit::builtin_audit::discarded_runtime_show_string_keeps_its_capacity_check", "emit::sends_dynamic_defect_string_views_to_the_board_hook"],
+      "note": "All eight old rejected source builtins require source lowering plus C observation and raw residual rejection. None may be excluded as N/A. Check discarded results, bounded output and hook text separately from name discovery.",
+      "candidate_evidence": [
+        {"revision": "40f34c0", "path": "crates/emela-emb-compiler/src/backend/lower/source_builtin_tests.rs", "kind": "source_and_ir_test"},
+        {"path": "crates/emela-emb-compiler/tests/p2_debug.rs", "kind": "source_test"}
+      ]
+    },
+    {
+      "id": "legacy-stage-and-heap-input-representation",
+      "owner": "root/audit",
+      "state": "input-contract-review-required",
+      "record_prefixes": ["emela_lir::Stage"],
+      "record_ids": ["emela_lir::Stmt::Drop", "emela_lir::Stmt::Dup", "emela_lir::Value::EnvGet", "emela_lir::Value::MakeClosure", "emela_lir::OnFail::Handle", "emela_lir::Term::Unwind", "emela_lir::RuntimeOp::DefectAt", "emela_lir::RuntimeOp::DefectTake", "emela_lir::RuntimeOp::Yield", "emela_lir::RuntimeOp::YieldPerform"],
+      "test_prefixes": ["flow::rejects_every_heap_stage", "flow::rejects_heap_only_"],
+      "test_ids": ["flow::lowers_and_verifies_core_as_flow_ir"],
+      "note": "The new compiler has no old Stage field or Heap-stage input API. Review only that removed representation for possible N/A, and name the replacement for required ownership, closures, error landing, cleanup and source locations. Keep each old test/context decision explicit; no automatic propagation from a parent schema.",
+      "candidate_evidence": [
+        {"path": "crates/emela-emb-compiler/src/contract/ir.rs", "kind": "implementation"},
+        {"path": "crates/emela-emb-compiler/src/frontend/lower.rs", "kind": "implementation"},
+        {"path": "crates/emela-emb-compiler/src/backend/lower/tests.rs", "symbol": "rejects_invalid_ids_types_and_sequence_cycles_before_planning", "kind": "ir_test"},
+        {"path": "crates/emela-emb-compiler/tests/coverage_ledger.rs", "kind": "structural_test"}
+      ]
+    },
+    {
+      "id": "control-flow-and-scalar-IR-observations",
+      "owner": "audit",
+      "state": "existing-tests-need-observation-mapping",
+      "record_prefixes": ["emela_lir::Case", "emela_lir::CaseKey", "emela_lir::Const", "emela_lir::Operand", "emela_lir::PrimOp", "emela_lir::PrimTy", "emela_lir::SwitchOn"],
+      "record_ids": ["emela_lir::Stmt::Block", "emela_lir::Stmt::If", "emela_lir::Stmt::Let", "emela_lir::Stmt::Loop", "emela_lir::Stmt::Switch", "emela_lir::Term::Break", "emela_lir::Term::Defect", "emela_lir::Term::Recur", "emela_lir::Term::Return", "emela_lir::Term::Unreachable", "emela_lir::Term::Yield", "emela_lir::Value::Const", "emela_lir::Value::Prim"],
+      "test_prefixes": ["emit::emits_and_runs_", "emit::emits_c_for_", "emit::emits_int32_", "emit::int32_", "emit::int64_", "emit::int_bitwise_", "emit::int_shift_", "emit::compiles_", "emit::float_"],
+      "test_ids": ["emit::builtin_audit::discarded_float_rounding_preserves_the_out_of_range_defect", "emit::synchronous_exhaustive_matches_and_list_loops_accept_unreachable_terminators", "emit::dynamic_float_formatting_uses_a_bounded_runtime_and_float_parse_uses_the_bounded_parser"],
+      "note": "Many old IR observations already have independent IR C tests and P1/P2 source tests, but ledger pending/mapped is retained until the old assertions are compared. Sync success does not establish suspend contexts; switch tags, Unit positions, invalid tags and unreachable blocks need explicit matches.",
+      "candidate_evidence": [
+        {"path": "crates/emela-emb-compiler/src/backend/lower/tests.rs", "kind": "ir_test"},
+        {"path": "crates/emela-emb-compiler/tests/p1.rs", "kind": "source_test"},
+        {"path": "crates/emela-emb-compiler/tests/p2_compat.rs", "kind": "source_test"},
+        {"path": "crates/emela-emb-compiler/tests/p5_suspend.rs", "kind": "source_test"}
+      ]
+    },
+    {
+      "id": "data-strings-lists-and-owned-values",
+      "owner": "audit",
+      "state": "existing-tests-need-observation-mapping",
+      "record_prefixes": ["emela_core::CtorRef", "emela_core::EnumDef", "emela_core::VariantDef", "emela_core::VariantFields", "emela_core::Type::Enum", "emela_core::Type::Tuple", "emela_core::Type::List", "emela_core::Type::String", "emela_core::Type::Bytes"],
+      "record_ids": ["emela_core::Builtin::StringJoin", "emela_core::Builtin::StringSplit", "emela_lir::Value::Make", "emela_lir::Value::Field", "emela_lir::Value::Tag", "emela_lir::Value::Tuple", "emela_lir::Value::TupleGet", "emela_lir::Value::List", "emela_lir::Value::ListHead", "emela_lir::Value::ListTail", "emela_lir::Value::ListIsEmpty"],
+      "test_prefixes": ["emit::constructs_", "emit::reads_", "emit::string_", "emit::string_append::", "emit::bytes::"],
+      "test_ids": ["emit::emits_empty_list_and_checks_list_emptiness", "emit::requires_fixed_heap_capacity_for_returned_list_aliases", "emit::int_checked_add_returns_some_or_none_at_int_boundaries", "emit::int_parse_accepts_decimal_signs_and_rejects_invalid_or_overflowing_text", "emit::binding_metadata::named_enum_fields_preserve_payload_order_in_generated_c", "emit::allocates_and_releases_lists_in_the_fixed_heap", "emit::stores_and_releases_list_references_inside_tuples_and_list_elements", "emit::builtin_audit::discarded_string_chars_still_builds_and_releases_its_owned_list", "emit::completion_types::finite_changing_recursive_enum_arguments_run_with_owned_back_edges"],
+      "requirement_ids": ["memory_ownership", "numeric_unicode"],
+      "note": "Match generic data, named/positional/Unit layout, String/List views and returned owners against old observations. Include P5 suspend and discarded-value paths where required. Record update adds product/enum discrimination, generic argument changes and source-order construction without new typed IR variants.",
+      "candidate_evidence": [
+        {"path": "crates/emela-emb-compiler/tests/p2_data.rs", "kind": "source_test"},
+        {"path": "crates/emela-emb-compiler/tests/p4_standard_callbacks.rs", "kind": "source_test"},
+        {"path": "crates/emela-emb-compiler/tests/p3_ownership.rs", "kind": "source_test"},
+        {"path": "crates/emela-emb-compiler/src/backend/lower/memory_tests.rs", "kind": "ir_test"},
+        {"revision": "70f2a13", "path": "crates/emela-emb-compiler/tests/p7_record_updates.rs", "kind": "source_test"}
+      ]
+    },
+    {
+      "id": "internal-schema-and-generic-operation-entries",
+      "owner": "audit/root",
+      "state": "schema-field-review-required",
+      "record_ids": ["emela_core::Builtin", "emela_core::Type", "emela_lir::FnId", "emela_lir::Function", "emela_lir::LabelData", "emela_lir::LabelId", "emela_lir::Module", "emela_lir::OnFail", "emela_lir::Repr", "emela_lir::RuntimeOp", "emela_lir::Seq", "emela_lir::SeqId", "emela_lir::Stmt", "emela_lir::StmtId", "emela_lir::Suspend", "emela_lir::Term", "emela_lir::Value", "emela_lir::VarData", "emela_lir::VarId", "emela_lir::Value::Builtin", "emela_lir::Value::Runtime"],
+      "note": "Review each schema/field against the independent contract, frontend lowering and backend validation. Shared declarations are not additional language operations. Generic Builtin/Runtime entry coverage must point to the specific source/IR paths and rejection rules, not a blanket statement that the copied emitter exists. Grouping members here does not promote their status or decide N/A.",
+      "candidate_evidence": [
+        {"path": "crates/emela-emb-compiler/src/contract/ir.rs", "kind": "implementation"},
+        {"path": "crates/emela-emb-compiler/src/frontend/lower.rs", "kind": "implementation"},
+        {"path": "crates/emela-emb-compiler/src/backend/lower/values.rs", "kind": "implementation"},
+        {"path": "crates/emela-emb-compiler/src/backend/lower/tests.rs", "kind": "ir_test"}
+      ]
+    },
+    {
+      "id": "Cell-Any-and-cycle-semantics",
+      "owner": "audit/backend",
+      "state": "IR-only-versus-source-review-required",
+      "record_ids": ["emela_core::Type::Any", "emela_core::Type::Cell", "emela_lir::Repr::Ref"],
+      "requirement_ids": ["memory_ownership"],
+      "note": "The fixed old public library has no Cell API. Keep raw Cell/Any IR tests separate from the source Std.State shared-cell implementation, including a closure returned by State.run (no retiring With boundary), erased cycles, captures, errors and cancellation. Do not invent a public source API to satisfy an IR record.",
+      "candidate_evidence": [
+        {"path": "crates/emela-emb-compiler/src/backend/lower/cell_tests.rs", "kind": "ir_test"},
+        {"path": "crates/emela-emb-compiler/src/backend/lower/handler_tests.rs", "kind": "ir_test"},
+        {"path": "crates/emela-emb-compiler/tests/p4_state.rs", "kind": "source_test"}
+      ]
+    },
+    {
+      "id": "failure-cleanup-and-retirement",
+      "owner": "frontend/backend/audit",
+      "state": "P5-evidence-with-P6-cancellation-remainder",
+      "record_ids": ["emela_lir::Stmt::Protect", "emela_lir::OnFail::Break", "emela_lir::OnFail::Propagate", "emela_lir::Term::Fail", "emela_lir::Value::AsError", "emela_lir::Value::IsError", "emela_lir::RuntimeOp::DefectResume"],
+      "test_prefixes": ["emit::builtin_audit::retire::", "emit::value_audit::"],
+      "note": "P5 covers success/failure delivery only after suspended cleanup. P6 must add cancellation and child/Cause behavior; P7 must account for old residual DefectResume input and discarded evidence/retirement checks. Match failure payload and active-owner lifetimes per old observation.",
+      "candidate_evidence": [
+        {"path": "crates/emela-emb-compiler/src/backend/lower/suspend_tests.rs", "kind": "ir_test"},
+        {"path": "crates/emela-emb-compiler/src/backend/lower/handler_tests.rs", "kind": "ir_test"},
+        {"path": "crates/emela-emb-compiler/tests/p4_handlers.rs", "kind": "source_test"},
+        {"path": "crates/emela-emb-compiler/tests/p5_task_failures.rs", "kind": "source_test"}
+      ]
+    },
+    {
+      "id": "all-source-corpus-and-known-differences",
+      "owner": "audit/root",
+      "state": "C-execution-obligations-open",
+      "requirement_ids": ["source_corpus", "known_differences"],
+      "note": "The 115 ledger tests are not the complete old corpus. The saved index covers 488 tests and independent fixtures cover all 174 normal-source tests as 169 programs. P4 reach survey: raw compile 49, backend rejection after typecheck 2, other rejection 118; concrete root C emission 81/95 and C objects 80/95; no link/runtime execution was claimed. Re-run after P5/P6/P7 integration and migrate each original C expectation/Options/Flow adapter explicitly.",
+      "candidate_evidence": [
+        {"revision": "41cff76", "path": "docs/compiler-legacy-source-reach.json", "kind": "reach_survey"},
+        {"revision": "5eeace7", "path": "crates/emela-emb-compiler/tests/compat/legacy-corpus/manifest.json", "kind": "fixture_manifest"},
+        {"revision": "41cff76", "path": "docs/reports/compiler-p7-corpus.md", "kind": "review"}
+      ]
+    },
+    {
+      "id": "frontend-and-standard-source-validation",
+      "owner": "frontend/audit/root",
+      "state": "P6-P7-source-remainder",
+      "requirement_ids": ["frontend_validation", "standard_library"],
+      "note": "Retain parse/name/type/trait/error/effect/capability rejection coverage and old legal source. Complete P6 intrinsic synthesis and P7 const/external/record updates, then use the complete corpus rather than feature availability alone to decide the requirement.",
+      "candidate_evidence": [
+        {"path": "crates/emela-emb-compiler/tests/p4_capabilities.rs", "kind": "diagnostic_test"},
+        {"path": "crates/emela-emb-compiler/tests/p4_rows.rs", "kind": "source_test"},
+        {"path": "crates/emela-emb-compiler/tests/p4_standard_callbacks.rs", "kind": "source_test"},
+        {"path": "docs/reports/compiler-p5.md", "kind": "run_report"}
+      ]
+    },
+    {
+      "id": "standalone-final-execution",
+      "owner": "root",
+      "state": "final-P6-P7-snapshot-required",
+      "requirement_ids": ["standalone_execution"],
+      "note": "P5 d7e8538 passed the isolated full 365-test snapshot, strict Clippy and actual Rust 1.85. P6/P7 changes require a new isolated final run. Existing snapshot evidence cannot silently cover later source/ABI/const changes or unexecuted legacy corpus harnesses.",
+      "candidate_evidence": [
+        {"path": "docs/reports/compiler-p4.md", "kind": "run_report"},
+        {"path": "docs/reports/compiler-p5.md", "kind": "run_report"}
+      ]
+    }
+  ]
+}
