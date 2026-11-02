@@ -16,12 +16,6 @@ mod handlers;
 mod isr;
 #[path = "memory_tests.rs"]
 mod memory;
-#[path = "service_tests.rs"]
-mod services;
-#[path = "source_builtin_tests.rs"]
-mod source_builtins;
-#[path = "suspend_tests.rs"]
-mod suspend;
 #[path = "p7_binding_tests.rs"]
 mod p7_bindings;
 #[path = "p7_data_tests.rs"]
@@ -30,6 +24,12 @@ mod p7_data;
 mod p7_discarded;
 #[path = "p7_input_tests.rs"]
 mod p7_input;
+#[path = "service_tests.rs"]
+mod services;
+#[path = "source_builtin_tests.rs"]
+mod source_builtins;
+#[path = "suspend_tests.rs"]
+mod suspend;
 
 fn lower_program(program: Program) -> Result<LoweredModule> {
     super::lower_program(program, &Options::default())
