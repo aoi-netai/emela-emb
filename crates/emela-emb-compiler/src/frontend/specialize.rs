@@ -307,13 +307,22 @@ impl Specializer {
                 self.core.types.intern(b::Type::Fn(signature))
             }
             b::Type::Set(mut summary) => {
-                summary.params = summary
+                let members = summary
                     .params
                     .into_iter()
                     .map(|param| {
                         self.substitute(function, param, args, span, memo, active, depth + 1)
                     })
-                    .collect::<Result<_>>()?;
+                    .collect::<Result<Vec<_>>>()?;
+                summary.params = Vec::new();
+                for member in members {
+                    match &self.core.types[member] {
+                        b::Type::Set(nested) => summary.merge(nested),
+                        _ => summary.params.push(member),
+                    }
+                }
+                summary.params.sort();
+                summary.params.dedup();
                 self.core.types.intern(b::Type::Set(summary))
             }
             _ => ty,
