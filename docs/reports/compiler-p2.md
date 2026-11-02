@@ -45,7 +45,8 @@ String引数を持つ自己tail recurで、loop cleanupが未宣言の所有flag
 | --- | --- | --- |
 | Prelude | Bool、Option（Some→Noneの順）、Ordering（Less/Equal/Greater）、Eq/Ord/Show primitive/tuple、ParseError(input:String)、panic/todo/dbg/inspect | dbgの任意closure表示等はP4以降の値型にも依存 |
 | Option | `or`, `is_some`, `is_none`, `or_fail`、Eq/Ord（None<Some）/Show（Some(String)は引用） | `map`/`and_then` はcallback引数があるためP4 |
-| Int / Int64 / Float / Bool | parseは公開sourceで`fails ParseError`（private parse_or_noneがOptionを返す）、checked_add、数値変換/表記、Float.compare/min/maxのNaN total-orderとsigned zero | constでの静的評価も別途確認 |
+| Int / Float | parseは公開sourceで`fails ParseError`（private parse_or_noneがOptionを返す）、Int.checked_add、数値変換/表記、Float.compare/min/maxのNaN total-orderとsigned zero | constでの静的評価も別途確認 |
+| Int64 / Bool | Int64は数値変換/表記・bit操作・min/max/abs。Bool.parseは文字列matchと`fails ParseError`の純粋body | 固定版Int64にparse APIはない |
 | String | length/byte_size/append/contains/starts_with/ends_with/trim、from_code_point→Option[String]、show_nested | split/chars/code_points/concat/joinはList依存。ASCII caseの旧bodyはList/内部closureにも依存 |
 | List | P3 data API: length/is_empty/get/head/tail/reverse/append/join/flatten/range/zip/take/drop/last/enumerate/unzip/sort、Eq/Ord/Show | map/filter/fold/partition/any/all/find/flat_map/filter_map/find_index/sort_by等のcallback APIはP4 |
 | Std.Map / Std.Set | P3 data API: empty/from_list/insert/remove/get/contains/size/is_empty/to_list/keys/values/union（Setは対応する集合操作）、Eq/Show | update/fold/map_values/filter等はcallback API。旧data API内部のfold/map lambdaは段階に合わせた実装適応が必要 |
@@ -62,6 +63,14 @@ String引数を持つ自己tail recurで、loop cleanupが未宣言の所有flag
 - `cargo test --workspace --locked --offline`: 120 pass、失敗/skip 0、終了0（`2a6ec0e` のcode tree）。
 - `cargo fmt --all --check` と `cargo clippy --workspace --all-targets --locked --offline -- -D warnings`: 終了0。
 - trait registryと独立型solverの単体試験も含むが、traitのsource接続完了とは数えない。未確定戻り型の自動汎化は引き続き実装対象。
+
+## 単相constとtrait具体化の先行統合
+
+`264410a` の `tests/p2_consts.rs` は3 source/C試験を両最適化で通過した。generic helperを含む静的const、runtime constの初期化順・一度だけの初期化・未使用constの非初期化、division defectと自己参照defectのcache、値構文と位置付き拒否を観測する。constは単一の元宣言IDを保持したinitializerへ展開し、値参照をその呼出しへ接続する。静的評価により呼ばれなくなったinitializer専用helperがCに残る問題は `859503a` で修正し、IR/C回帰も追加した。
+
+`838d1c3` のtrait具体化は、構造の各fieldをregistry経由の通常関数呼出しへ展開する。custom Eq/Ord/Showを持つKeyをEnvelope・enum・Some・tupleへ入れた場合と、default methodからcustom methodを呼ぶ場合をtyped IR/Cで観測した。`frontend::specialize` の8試験とClippyが通過。trait/impl宣言のsource接続自体は残る。
+
+const導入後にも実際のRust 1.85.0で `cargo check --workspace --all-targets --locked --offline` が終了0。準備済みのFail/Escape ASTをcheckerへ接続する途中のため、その未読field警告は残る。警告を抑制してP2完了とはせず、接続後の最終Clippyで解消を確認する。
 
 ## P2の残りの確認
 
