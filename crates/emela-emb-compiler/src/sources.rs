@@ -16,6 +16,8 @@ pub(crate) const CORE_MODULES: &[(&str, &str)] = &[
     ("Prelude", include_str!("../lib/core/prelude.emel")),
     ("Option", include_str!("../lib/core/option.emel")),
     ("List", include_str!("../lib/core/list.emel")),
+    ("Std.Duration", include_str!("../lib/std/duration.emel")),
+    ("Std.Instant", include_str!("../lib/std/instant.emel")),
     ("Std.Console", include_str!("../lib/std/console.emel")),
     ("Std.State", include_str!("../lib/std/state.emel")),
     ("Std.Map", include_str!("../lib/std/map.emel")),
