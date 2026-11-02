@@ -65,7 +65,7 @@ pub(super) fn prepare<'a>(
             message: "peripheral_buffer_capacity must be positive (uint16_t words)".into(),
         }]);
     }
-    if !(1..=512).contains(&options.string_capacity()) {
+    if !(1..=Options::MAX_STRING_CAPACITY).contains(&options.string_capacity()) {
         return Err(vec![Error {
             kind: ErrorKind::InvalidOptions,
             message: format!(

@@ -73,20 +73,32 @@ pub(in crate::backend::emit) fn emit_string_append_helper(writer: &mut Writer) {
     writer.begin_block(
         "static inline EMELA_UNUSED EmelaString emela_emb_string_append(EmelaString left, EmelaString right, char *buffer, uint16_t capacity, int copy_left)",
     );
-    writer.begin_block(
-        "if (left.length > capacity || right.length > (uint16_t)(capacity - left.length))",
-    );
+    writer.begin_block(&format!(
+        "if (capacity == 0 || capacity > UINT16_C({}) || left.length > capacity || right.length > (uint16_t)(capacity - left.length))",
+        Options::MAX_STRING_CAPACITY,
+    ));
     writer.line(
         "emela_board_defect(EMELA_DEFECT_STRING_CAPACITY, \"string capacity exceeded\", UINT16_C(24));",
     );
     writer.end_block();
-    writer.begin_block("if (copy_left)");
+    // Loop-carried views may alias this output, and either input can overlap the
+    // other's destination. Freeze both inputs before writing any output byte.
+    // The shared Options bound keeps scratch fixed, including in tail-recursive loops.
+    writer.line("(void)copy_left;");
+    writer.line(&format!(
+        "char emela_append_snapshot[{}];",
+        Options::MAX_STRING_CAPACITY
+    ));
     writer.begin_block("for (uint32_t i = UINT32_C(0); i < (uint32_t)left.length; ++i)");
-    writer.line("buffer[i] = left.data[i];");
-    writer.end_block();
+    writer.line("emela_append_snapshot[i] = left.data[i];");
     writer.end_block();
     writer.begin_block("for (uint32_t i = UINT32_C(0); i < (uint32_t)right.length; ++i)");
-    writer.line("buffer[(uint32_t)left.length + i] = right.data[i];");
+    writer.line("emela_append_snapshot[(uint32_t)left.length + i] = right.data[i];");
+    writer.end_block();
+    writer.begin_block(
+        "for (uint32_t i = UINT32_C(0); i < (uint32_t)left.length + (uint32_t)right.length; ++i)",
+    );
+    writer.line("buffer[i] = emela_append_snapshot[i];");
     writer.end_block();
     writer.line(
         "return (EmelaString){ .data = buffer, .length = (uint16_t)(left.length + right.length) };",
