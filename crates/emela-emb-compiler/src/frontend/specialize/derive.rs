@@ -19,6 +19,13 @@ impl Specializer {
         span: Span,
         depth: usize,
     ) -> Result<ir::DefinitionId> {
+        if nested
+            && ty == b::TypeId::STRING
+            && method == "show"
+            && self.registry.builtin_id(BuiltinTrait::Show) == Some(trait_id)
+        {
+            return self.builtin_helper(caller, BuiltinTrait::Show, ty, true, span, depth);
+        }
         let resolved = self
             .registry
             .resolve(&self.core, ty, trait_id, method, &ParamBounds::new())

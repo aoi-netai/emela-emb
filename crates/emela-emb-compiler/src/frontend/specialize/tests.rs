@@ -1585,3 +1585,88 @@ fn never_returning_constant_getters_terminate_before_pattern_comparison() {
         "#include <stdlib.h>\n#include \"emela_embedded.h\"\n#include \"emela_board.h\"\n_Noreturn void stop(void){exit(0);}\n_Noreturn void emela_board_defect(EmelaDefectKind k,const char*m,uint16_t n){(void)k;(void)m;(void)n;exit(9);}\nint main(void){(void)answer();return 1;}\n",
     );
 }
+
+#[test]
+fn nested_string_show_uses_quoting_even_when_a_builtin_method_stub_is_registered() {
+    use crate::frontend::traits::{BuiltinTrait, Method, Registry, Trait};
+    let mut core = b::Definitions::default();
+    let parameter = core.types.intern(b::Type::Param(0));
+    let signature = core.types.intern(b::Type::Fn(b::FnType {
+        params: vec![parameter],
+        ret: b::TypeId::STRING,
+        fails: false,
+        suspends: false,
+        ev: false,
+        sets: None,
+    }));
+    let mut registry = Registry::new();
+    let show = registry
+        .add_trait(Trait {
+            name: "Show".into(),
+            owner_module: 0,
+            supers: vec![],
+            methods: vec![Method {
+                name: "show".into(),
+                signature,
+                default_function: None,
+            }],
+        })
+        .unwrap();
+    registry.set_builtin(show, BuiltinTrait::Show).unwrap();
+    registry.register_builtin_method(BuiltinTrait::Show, "show", ir::DefinitionId(0));
+    let mut stub = function(
+        0,
+        "builtin_show",
+        vec![local(0, frontend_type(parameter))],
+        ValueType::String,
+        integer(0),
+    );
+    stub.type_parameters = 1;
+    stub.body = None;
+    stub.derivation = Some(BuiltinTrait::Show);
+    let show = expression(
+        ir::ExprKind::TraitCall {
+            trait_id: show,
+            method: "show".into(),
+            self_type: b::TypeId::STRING,
+            args: vec![expression(
+                ir::ExprKind::Literal(ir::Literal::String("x".into())),
+                ValueType::String,
+            )],
+            order: vec![0],
+            nested_show: true,
+        },
+        ValueType::String,
+    );
+    let expected = expression(
+        ir::ExprKind::Literal(ir::Literal::String("\"x\"".into())),
+        ValueType::String,
+    );
+    let condition = expression(
+        ir::ExprKind::Binary {
+            op: Binary::Eq,
+            left: Box::new(show),
+            right: Box::new(expected),
+        },
+        ValueType::Bool,
+    );
+    let answer = exported(function(
+        1,
+        "answer",
+        vec![],
+        ValueType::Int,
+        expression(
+            ir::ExprKind::If {
+                condition: Box::new(condition),
+                then: block(integer(42)),
+                else_: block(integer(0)),
+            },
+            ValueType::Int,
+        ),
+    ));
+    execute(ir::Program {
+        core,
+        registry,
+        functions: vec![stub, answer],
+    });
+}
