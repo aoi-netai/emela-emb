@@ -282,3 +282,30 @@ pub fn first()->String{(_,values)=VALUE
         "#include <stdlib.h>\n#include \"emela_embedded.h\"\n#include \"emela_board.h\"\n_Noreturn void emela_board_defect(EmelaDefectKind k,const char*m,uint16_t n){(void)k;(void)m;(void)n;abort();}\nint main(void){return 0;}\n",
     );
 }
+
+#[test]
+fn const_callback_families_keep_concrete_error_and_effect_rows() {
+    let source = r#"
+error Boom
+effect Read{fn read()->Int}
+handler Fixed:Read{fn read(){21}}
+const APPLY=(fn(callback){callback()},())
+fn may_fail()->Int fails Boom{fail Boom}
+@export(c,"answer")
+pub fn answer()->Int{(apply_read,_)=APPLY
+ left=with Fixed{apply_read(fn(){(use Read).read()})}
+ (apply_error,_)=APPLY
+ right=apply_error(fn(){may_fail()}) escape{Boom->21}
+ left+right}
+"#;
+    let output = compile_sources(
+        &[Source::new("main.emel", source)],
+        "main.emel",
+        &Options::default().with_heap_bytes(32768),
+    )
+    .unwrap();
+    support::compile_and_run(
+        &output,
+        "#include <stdlib.h>\n#include \"emela_embedded.h\"\n#include \"emela_board.h\"\n_Noreturn void emela_board_defect(EmelaDefectKind k,const char*m,uint16_t n){(void)k;(void)m;(void)n;abort();}\nint main(void){for(int i=0;i<1000;i++)if(answer()!=42)return 1;return 0;}\n",
+    );
+}

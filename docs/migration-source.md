@@ -453,7 +453,7 @@ child数と取消flagの観測、および弱child link・cycleの直接検査�
 
 外部generic関数は具体化後のC署名を検査する。Handle[Int]/Handle[String]のような同じpointer ABIは共有し、Int/Int64のような同一C symbolの不適合署名はbackendで拒否する。generic関数自体のC exportは引き続き具体wrapperを必要とする。
 
-`tests/p7_external_types.rs`ではBorrowed/Owned adapter両方でpointer identity・NULL・phantom type引数・constの一度だけの初期化をheapなし・1000回・C両最適化で確認する。Emelaからhost objectを解放・検査する処理は追加しない。汎化const HANDLEそのものの共有はgeneric constの実装単位へ残す。
+`tests/p7_external_types.rs`ではBorrowed/Owned adapter両方でpointer identity・NULL・phantom type引数・constの一度だけの初期化をheapなし・1000回・C両最適化で確認する。Emelaからhost objectを解放・検査する処理は追加しない。汎化const HANDLEそのものの共有は、後述のgeneric const回帰で検証する。
 
 | 固定参照 | SHA-256 |
 | --- | --- |
@@ -485,3 +485,5 @@ child数と取消flagの観測、および弱child link・cycleの直接検査�
 上記2ファイルのroot固定点・bridge保持の契約を独立frontend/backendの明示metadataへ適応した。新規依存と旧checkoutへのビルド時参照はない。Apache-2.0、repository rootのLICENSEに従う。
 
 `tests/p7_generic_consts.rs`はList[Int]/List[String]の共有、通常のgeneric FnRef、依存rootの固定点、入れ子capture・高階callbackのerror/effect行、source名が一度だけ付く共有defect、自己参照後の再試行、96byte heapでのbridge失敗のキャッシュをC両最適化で確認する。外部Handle[Int]/Handle[String]の共有ではBorrowed/Owned・NULL/非NULLをheapなしで各1000回確認する。`compat/p7/polymorphic-consts.emel`は固定旧`source_polymorphic_consts_share_initialization_and_specialize_callable_families`の入力（元SHA-256 `c9f0f411c6dcdc3595139fa3e214523be9e023c3b2f44b16b16a07f32cdf0953`）にC exportを加えた。未使用constから生成されたcontext helperのstrict C警告も独立回帰に含める。
+
+固定旧generic constの8入力は`tests/compat/p7/generic-consts/`へ本文をhash一致のまま保存した。`tests/p7_legacy_generic_consts.rs`はpub関数の直前へ明示C exportだけを加え、全8入力をsourceから生成しC両最適化で各1000回実行する。initializer回数、関数参照、nested capture、高階callback、失敗キャッシュ、毎回再試行する自己参照とheap解放を観測する。`docs/reports/p7-generic-const-compat.json`には元program ID/source hash・source検査/C生成/strict C object/runtimeを別々に記録する。元corpusの凍結baselineの判定は書き換えない。

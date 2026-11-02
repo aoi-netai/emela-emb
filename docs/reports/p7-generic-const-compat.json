@@ -1,0 +1,226 @@
+{
+  "fixed_revision": "c34c0aeefdd966d854371b3110db00a47798751d",
+  "compiler_checkpoint": "b551365",
+  "implementation_commit": "2508999",
+  "input_transform": "Insert @export(c,\"name\") before each original pub fn line; retain every original body.",
+  "heap_bytes": 32768,
+  "strict_c_flags": [
+    "-std=c11",
+    "-Wall",
+    "-Werror"
+  ],
+  "runtime_iterations_per_optimization": 1000,
+  "runtime_test": "crates/emela-emb-compiler/tests/p7_legacy_generic_consts.rs",
+  "separate_derived_runtime_test": "crates/emela-emb-compiler/tests/p7_generic_consts.rs",
+  "programs": [
+    {
+      "id": "program:090d8d1bc5a5b8ddd694",
+      "files": [
+        {
+          "name": "main.emel",
+          "fixture": "crates/emela-emb-compiler/tests/compat/p7/generic-consts/090d8d1bc5a5b8ddd694.emel",
+          "sha256": "8390bd800c6070a0b68164ddec005d4af36073bf8487c68ee1da26b9383082f5"
+        }
+      ],
+      "legacy_tests": [
+        "emit::const_runtime::polymorphic_empty_list_const_keeps_the_heapless_representation"
+      ],
+      "observations": {
+        "source_check": "passed",
+        "c_generation": "passed",
+        "strict_c_object": {
+          "O0": "passed",
+          "O2": "passed"
+        },
+        "runtime": {
+          "O0": "passed",
+          "O2": "passed"
+        }
+      },
+      "runtime_assertions": "work returns 42; no live heap blocks after each call"
+    },
+    {
+      "id": "program:0e55f902c5bac78b6187",
+      "files": [
+        {
+          "name": "main.emel",
+          "fixture": "crates/emela-emb-compiler/tests/compat/p7/generic-consts/0e55f902c5bac78b6187.emel",
+          "sha256": "5f7efbeaef62d31c1e1f46eaad6e92bcd39f6d285327b6245e4c93ba70c54b4c"
+        }
+      ],
+      "legacy_tests": [
+        "emit::const_runtime::canonical_const_roots_include_dependency_specializations_until_they_reach_a_fixed_point",
+        "emit::const_runtime::canonical_dependency_consts_initialize_once_across_nested_specializations"
+      ],
+      "observations": {
+        "source_check": "passed",
+        "c_generation": "passed",
+        "strict_c_object": {
+          "O0": "passed",
+          "O2": "passed"
+        },
+        "runtime": {
+          "O0": "passed",
+          "O2": "passed"
+        }
+      },
+      "runtime_assertions": "integer/text both return 42; BASE and PAIR initialization log count is exactly two total"
+    },
+    {
+      "id": "program:1e18a161ce360199a21e",
+      "files": [
+        {
+          "name": "main.emel",
+          "fixture": "crates/emela-emb-compiler/tests/compat/p7/generic-consts/1e18a161ce360199a21e.emel",
+          "sha256": "267ecea81443467d0abeecdbe3a9226b9453747c353cc442957d562d46dcb1a5"
+        }
+      ],
+      "legacy_tests": [
+        "emit::const_runtime::generic_function_references_returned_by_consts_keep_their_source_family"
+      ],
+      "observations": {
+        "source_check": "passed",
+        "c_generation": "passed",
+        "strict_c_object": {
+          "O0": "passed",
+          "O2": "passed"
+        },
+        "runtime": {
+          "O0": "passed",
+          "O2": "passed"
+        }
+      },
+      "runtime_assertions": "integer returns 42; text returns the two bytes 42 through the shared generic FnRef family"
+    },
+    {
+      "id": "program:4ec3db5b593e7e155054",
+      "files": [
+        {
+          "name": "main.emel",
+          "fixture": "crates/emela-emb-compiler/tests/compat/p7/generic-consts/4ec3db5b593e7e155054.emel",
+          "sha256": "823e637e97a0dbeb7ea04e02088af922b3433413c10b0a79c4211b2a7046493d"
+        }
+      ],
+      "legacy_tests": [
+        "emit::const_runtime::polymorphic_const_defects_have_one_source_context_and_self_reference_retries"
+      ],
+      "observations": {
+        "source_check": "passed",
+        "c_generation": "passed",
+        "strict_c_object": {
+          "O0": "passed",
+          "O2": "passed"
+        },
+        "runtime": {
+          "O0": "passed",
+          "O2": "passed"
+        }
+      },
+      "runtime_assertions": "integer/text both replay the same cached defect with one source context; trigger/log once; no live heap blocks"
+    },
+    {
+      "id": "program:6509a26b86dc042348d0",
+      "files": [
+        {
+          "name": "main.emel",
+          "fixture": "crates/emela-emb-compiler/tests/compat/p7/generic-consts/6509a26b86dc042348d0.emel",
+          "sha256": "c986b4c8e5754de0a2f9b2fe0109553e9bd049a3528d9a8aec33ba2b0bce6bfb"
+        }
+      ],
+      "legacy_tests": [
+        "emit::const_runtime::polymorphic_const_defects_have_one_source_context_and_self_reference_retries"
+      ],
+      "observations": {
+        "source_check": "passed",
+        "c_generation": "passed",
+        "strict_c_object": {
+          "O0": "passed",
+          "O2": "passed"
+        },
+        "runtime": {
+          "O0": "passed",
+          "O2": "passed"
+        }
+      },
+      "runtime_assertions": "integer/text both retry self-reference; trigger/log 2000 times; no source context prefix or live heap blocks"
+    },
+    {
+      "id": "program:82d224825b4fecc59779",
+      "files": [
+        {
+          "name": "main.emel",
+          "fixture": "crates/emela-emb-compiler/tests/compat/p7/generic-consts/82d224825b4fecc59779.emel",
+          "sha256": "fa1ee5cc165e68a73803369872071c65b263140058becc944b02fd1a8c54e56b"
+        }
+      ],
+      "legacy_tests": [
+        "emit::const_runtime::polymorphic_const_bridge_capacity_defects_use_the_source_name_once_and_are_cached"
+      ],
+      "observations": {
+        "source_check": "passed",
+        "c_generation": "passed",
+        "strict_c_object": {
+          "O0": "passed",
+          "O2": "passed"
+        },
+        "runtime": {
+          "O0": "passed",
+          "O2": "passed"
+        }
+      },
+      "runtime_assertions": "integer/text return 42; nested list const initializes once with sufficient heap; separate derived test covers cached bridge exhaustion at 96 bytes"
+    },
+    {
+      "id": "program:9d483cae98bfe8662280",
+      "files": [
+        {
+          "name": "main.emel",
+          "fixture": "crates/emela-emb-compiler/tests/compat/p7/generic-consts/9d483cae98bfe8662280.emel",
+          "sha256": "a958e5ba357850a0c4de5cbfeca3159b8894275fc1bba1b25fafd2a0b8d9c187"
+        }
+      ],
+      "legacy_tests": [
+        "emit::const_runtime::source_polymorphic_const_origins_keep_a_canonical_value_and_typed_members_in_verified_flow"
+      ],
+      "observations": {
+        "source_check": "passed",
+        "c_generation": "passed",
+        "strict_c_object": {
+          "O0": "passed",
+          "O2": "passed"
+        },
+        "runtime": {
+          "O0": "passed",
+          "O2": "passed"
+        }
+      },
+      "runtime_assertions": "read returns zero; shared empty list logs once; no live heap blocks after each call"
+    },
+    {
+      "id": "program:cd203f34d6ed62e80e19",
+      "files": [
+        {
+          "name": "main.emel",
+          "fixture": "crates/emela-emb-compiler/tests/compat/p7/generic-consts/cd203f34d6ed62e80e19.emel",
+          "sha256": "c9f0f411c6dcdc3595139fa3e214523be9e023c3b2f44b16b16a07f32cdf0953"
+        }
+      ],
+      "legacy_tests": [
+        "emit::const_runtime::source_polymorphic_consts_share_initialization_and_specialize_callable_families"
+      ],
+      "observations": {
+        "source_check": "passed",
+        "c_generation": "passed",
+        "strict_c_object": {
+          "O0": "passed",
+          "O2": "passed"
+        },
+        "runtime": {
+          "O0": "passed",
+          "O2": "passed"
+        }
+      },
+      "runtime_assertions": "integer/text return 42; six const initialization logs total; two tick calls total; selected closure marks branch two on each call"
+    }
+  ]
+}
