@@ -25,11 +25,12 @@
     "own_library_tests": "240 passed with Rust test profile opt1; mandatory C11 -Wall -Werror -O0/-O2",
     "own_compatibility_tests": "P7 concurrency32 and cleanup source24 passed; original budgets retained",
     "stage2_IR_evidence": "Committed aeb7c53; execution reported in its proposal and to be repeated by root exact-head full run",
-    "all_path_and_symbol_references_checked": true
+    "all_path_and_symbol_references_checked": true,
+    "direct_unreachable_evidence": "Committed 931c3ce; backend104/strictClippy/MSRV1.85 passed according to its author; root final integrated run remains required."
   },
   "counts": {
-    "verified": 84,
-    "pending": 1
+    "verified": 85,
+    "pending": 0
   },
   "records": [
     {
@@ -2496,8 +2497,8 @@
       "relation": "variant_entry",
       "baseline_status": "mapped",
       "legacy_role": "emit",
-      "proposed_status": "pending",
-      "behavior": "awaiting_direct_C_witness",
+      "proposed_status": "verified",
+      "behavior": "emitted",
       "new_implementation": [
         {
           "kind": "implementation",
@@ -2531,9 +2532,16 @@
           "path": "crates/emela-emb-compiler/tests/p1.rs",
           "symbol": "never_returning_external_preserves_the_unreachable_contract",
           "observation": "Never external hook terminates and generated continuation does not execute."
+        },
+        {
+          "kind": "IR_C_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/p7_misc_value_tests.rs",
+          "symbol": "unreachable_terms_raise_the_native_or_scheduler_defect_when_reached",
+          "revision": "931c3ce",
+          "observation": "Native ASSERT/unreachable code; suspend ASSERT/invalid scheduler state. Both optimization modes execute the terminal directly."
         }
       ],
-      "review_reason": "Implementation and emitted tails exist, but direct entry into native/suspend unreachable-defect paths was not witnessed in reviewed committed tests. Backend agent is adding the narrow direct C regression.",
+      "review_reason": "Direct entry into both native and suspending unreachable terminals observes their exact ASSERT defect messages; generated C compiles in both optimizations, including a minimal suspend-only entry.",
       "final_integrated_verification": "required",
       "context_product_not_inferred_from_this_entry": true
     },
