@@ -73,6 +73,7 @@ pub(crate) fn lower_program(
         validate_function(&program, function)?;
     }
     let (mut program, closures) = closure::lower(&program, options)?;
+    suspend::normalize_handlers(&mut program);
     handler::lower(&mut program, options);
     let mut const_outcomes = HashMap::new();
     let mut runtime_consts = HashSet::new();
