@@ -1,6 +1,6 @@
 # 独立コンパイラーが対応するEmelaの範囲
 
-P1〜P6の基盤・型システム・固定heap・関数値・effect・中断・構造化並行処理を記録する。P6は398試験・独立環境での検証を完了。字句解析、構文解析、module・名前解決、型検査、独自IR、C生成をこのrepoが所有し、Emela本体のcrate・CLI・checkout・core/std・Pomeを要求しない。[実装計画](compiler-parity-plan.md) と [終了条件](compiler-coverage.md) に従い、後続段階の機能を追加する。
+P1〜P7の基盤・型システム・固定heap・関数値・effect・中断・構造化並行処理・汎化const・C境界を記録する。字句解析、構文解析、module・名前解決、型検査、独自IR、C生成をこのrepoが所有し、Emela本体のcrate・CLI・checkout・core/std・Pomeを要求しない。[実装計画](compiler-parity-plan.md) と [終了条件](compiler-coverage.md) に従い、検証の完了状態は各段階の報告と台帳で示す。
 
 基準仕様は旧forkの `c34c0aeefdd966d854371b3110db00a47798751d`。`spec/language/02-lexical.md`、`03-keywords.md`、`12-external.md`、`spec/grammar.md`、`spec/targets/16-targets.md`、`spec/targets/c.md` を参照する。これは仕様・採用コードの出自であり、取得する依存ではない。全Emela仕様・全target契約への適合を表明しない。
 
@@ -57,6 +57,7 @@ compilerが所有する `lib/core/` の宣言と型registryで、基本型・数
 ## データ型・型推論・trait
 
 - tuple、`type`・`enum`・`error`・`opaque`、型引数、名前付きfieldの構築と読取りに対応する。opaqueの構築・field参照は定義module内に限定する。
+- record updateの `Record(field: value, ..base)` は更新値とbaseをソース順に一度だけ評価する。更新するfieldの型引数を変えられるが、引き継ぐfieldとの整合を検査する。enum・handler・外部opaque値をrecord updateとして扱わない。
 - pattern束縛、constructor/tuple pattern、後置 `match`、guard、網羅性検査を扱う。const patternは静的な値による網羅性とruntime constの一度評価を分ける。
 - 引数の型は明示し、戻り型は推論できる。明示型パラメーターに加え、相互再帰群の検査後に未確定の戻り型を汎化する。具体化は呼出し先と型引数ごとに共有する。
 - `trait`・`impl`・default・supertrait・derive、Eq/Ord/Show、method固有の型パラメーターと制約を扱う。deriveはfieldのcustom implを呼び、構造比較で置き換えない。FloatにOrdは供給しない。
@@ -71,7 +72,7 @@ String literal、補間、view比較、append、検索・trim、byte数・Unicod
 
 動的Stringの容量は明示した設定で計画し、超過時はboard defect hookへ渡す。戻り値の保存先は生成headerのcaller buffer契約に従う。Stringを保持する失敗payloadやOption等が所有化を要求するときは固定heap容量を指定する。システムmallocは使用しない。
 
-単相constを静的評価し、静的に確定できないものは遅延初期化・cacheする。未使用constは初期化せず、初期化順・一度だけの実行・defect cacheを維持する。汎化constの型別bridgeはP7の対象。
+constを静的評価し、静的に確定できないものは遅延初期化・cacheする。未使用constは初期化せず、初期化順・一度だけの実行・defect cacheを維持する。汎化constは具体化をまたいでcanonical initializerを共有し、型別bridgeを通して関数値・failure/effect集合・外部opaque値・managed rootを接続する。依存するconstの具体化を固定点まで集め、型ごとに副作用を繰り返さない。
 
 `panic`・`todo`・`assert` はdefect hookで即時停止する。`inspect` はShowを要求し、Stringを引用する。`dbg` は入力を一度だけ評価し、custom Showを優先して残りのfieldを再帰表示し、元の値を返す。defect時のcleanup unwindは組み込みtargetの契約に含めない。
 
@@ -109,11 +110,23 @@ Std.Fiber/Scope/Deferred/Causeを供給する。Scope地点のevidenceをchild�
 
 Scope終了時は子を取消し、逆順cleanupと中断するreleaseの完了を待つ。FIFO待機・一度だけの完了・古いtask通知の拒否・完了child回収を検証する。Causeは成功/失敗/取消を区別し、所有payloadと失敗noteを保持して表示・再送出する。Scope/Fiber/Deferredを可視戻り型でScope外へ返す操作と、不適合な集合kindを拒否する。
 
+closureやStateに隠れたhandleは旧仕様のruntime guardで寿命を検査する。可視型のsource拒否とは分け、終了済みScopeのhandleを呼ぶとdefectになる。[固定旧契約との照合](reports/p7-scope-capture-contract.md) を参照。
+
+## 外部値とEmbeddedサービス
+
+bodyを持たない `@external type Token` はC pointerの名義型として扱い、constructor・field・patternを公開しない。generic external関数は具体化して呼べるが、同一C symbolの具体署名が一致しない場合は拒否する。export付きexternalには独立した公開wrapperを生成する。
+
+複合値を返す同期externalは `Options::with_external_adapter` と `ExternalResult::{Borrowed, Owned, StringBuffer}` で所有権を明示する。必要な借用snapshot・返却owner・caller bufferは生成headerの契約に従う。外部taskの型付きproducerはqueueからmain側で呼び、成功・失敗・取消・破棄の各経路でcontextを一度だけ解放する。
+
+`Embedded.Peripheral`、`Embedded.Gpio`、`Embedded.Uart`、`Embedded.I2c`、`Embedded.Spi`、`Embedded.Board` をcompilerが供給する。BoardのGPIO/UART/I2C/SPI/Clock/Console操作は生成Cのboard hookへ接続し、必要なサービスのheader・manifestを出力する。周辺機器buffer容量は `Options::with_peripheral_buffer_capacity` で指定する。compiler所有moduleの上書き・予約C symbolの偽装・旧 `Std.Embedded` namespaceは拒否する。`Embedded.Local` 等、予約されていないproject moduleは利用できる。
+
 ## C公開境界と生成物
 
 **`pub` はEmela内の可視性、`@export(c, "名前")` はC公開を指定する。** `pub` だけでCの公開関数にはならない。内部関数にはexport属性を付ける必要はない。到達したimport先の明示exportも保持する。exportとexternalの衝突、重複export、不正なC公開名を拒否する。C公開関数と起動entryへ未供給のeffectを持ち出すことも拒否する。
 
-`Options::with_entry` / CLIの `--entry-function` は起動用関数を選ぶ。これはC公開属性とは別の指定で、非公開関数も通常の起動経路から呼べる。`@export` はISR安全性を保証せず、割り込みvectorへの接続も行わない。ISR制約のsource側接続はP7で確認する。
+`Options::with_entry` / CLIの `--entry-function` は起動用関数を選ぶ。これはC公開属性とは別の指定で、非公開関数も通常の起動経路から呼べる。`@export` はISR安全性を保証せず、割り込みvectorへの接続も行わない。
+
+ISR入口は `Options::with_isr_entry` にEmela関数名を渡して指定する。到達するheap・参照管理・再帰・動的call・中断・runtime const初期化等を検査する。外部呼出しは `Options::with_isr_safe_external` で実際のadapter C symbolに保証を与える。静的const、借用String比較、Bytes.size等のheapless操作を許可し、保証を付けても所有権を伴う複合値adapterをISR安全とは扱わない。
 
 C11のソース、公開・board用header、artifact schema 2のmanifestとexports情報をメモリ上の `Output.files` で返す。`Output.c_source` / `header` も便利な参照として維持する。公開署名は生成headerを正本にし、内部symbol・整形・出力順の過去版とのbyte一致は約束しない。停止・起動等で要求するhookは生成headerとmanifestに従い、host試験ではC mockを接続する。
 
@@ -129,10 +142,10 @@ emela-emb build main.emel math.emel --entry main.emel --out-dir generated
 
 `--entry-function`、`--heap-bytes`、`--string-capacity`、`--task-adapter C名=adapter名`、`--fiber-capacity`、`--frame-capacity`、`--frame-bytes`、`--task-capacity`、`--event-capacity` で明示した設定を渡せる。新規または空の出力先に全生成物を一時ディレクトリから公開し、既存の非空ディレクトリ・ファイル・symlinkを保護する。終了コードは成功/helpが0、入力・生成・保存失敗が1、引数エラーが2。
 
-[P1検証報告](reports/compiler-p1.md)、[P2検証報告](reports/compiler-p2.md)、[P3検証報告](reports/compiler-p3.md)、[P4検証報告](reports/compiler-p4.md)、[P5検証報告](reports/compiler-p5.md)、[P6検証報告](reports/compiler-p6.md) にsource/C・CLI・独立環境の確認を記録する。生成Cは `-O0` / `-O2` の両方でコンパイル・リンク・実行する。試験環境のC compiler不在を成功として扱わない。
+[P1検証報告](reports/compiler-p1.md)、[P2検証報告](reports/compiler-p2.md)、[P3検証報告](reports/compiler-p3.md)、[P4検証報告](reports/compiler-p4.md)、[P5検証報告](reports/compiler-p5.md)、[P6検証報告](reports/compiler-p6.md)、[P7検証報告](reports/compiler-p7.md) にsource/C・CLI・独立環境の確認を記録する。生成Cは `-O0` / `-O2` の両方でコンパイル・リンク・実行する。試験環境のC compiler不在を成功として扱わない。
 
-## 後続段階
+## 比較範囲
 
-P7の残るABI・ISR・標準bridge・汎化constと旧試験の全件照合は、ここで記録した完了範囲には含めない。backendのコードが採用済みでも、sourceからの接続・拒否試験・C実行を確認するまでは未完了として台帳へ記録する。
+[固定旧forkとの違い](compiler-known-differences.md) に、明示export、独立IR、旧試験の後処理、組み込みtargetの制約を記録する。完了はbackendのコード採用だけで判定せず、sourceからの接続・拒否試験・C実行と旧観測の照合を台帳へ登録する。
 
 Pomeによる取得、物理BSP、firmware build/flash、実機確認、LSP・formatterは今回のcompiler移行の範囲外。
