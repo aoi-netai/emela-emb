@@ -550,3 +550,7 @@ completeの一度だけの格納、空/Unit/Bool/tuple/Int64/Floatのpoll/await�
 固定旧 `tests/fiber/integration.rs` と `examples/support/phase7_integration_flow.rs` の2試験を独立frontendへ接続した。原本文と旧managed String置換、request外部化、任意のGC anchorを保持し、C公開名だけを適応する。[対応と観測](reports/p7-integration-corpus-compat.json) を参照。旧4096byte heap等の容量のまま、GC有無・成功/失敗/取消/NULL出力・1000反復・全heap回収をC両最適化で確認した。
 
 この入力でclosure変換時のFiber失敗辺の収集・ID再割当て漏れを検出した。Callと同じくFiberのHandle/Breakを新arenaへ移し、親SeqIdを誤って再利用して走査が循環する不具合を修正する。試験用の旧checkout・旧compiler依存は追加しない。
+
+## P7: 元sourceによる外部scalar・String・aggregate・taskの所有権
+
+固定旧 `tests/external_scalar/mod.rs`、`tests/sync_external/{mod,values}.rs`、`tests/task_values/managed.rs` の正常source5試験を `tests/p7_legacy_externals.rs` へ移した。元本文は既存corpusを参照し、明示C exportだけを追加する。旧1024/4096byte heapとframe/pool容量を保ち、mixed Int64/Float bits、board側で保持するString、tuple/Listのfield所有、型付きtaskのproducer/release・取消・NULL出力をC両最適化・1000反復で確認した。[対応表](reports/p7-external-source-compat.json) に入力hashと各観測を記録する。

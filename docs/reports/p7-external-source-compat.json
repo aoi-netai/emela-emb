@@ -1,0 +1,143 @@
+{
+  "schema_version": 1,
+  "baseline_revision": "c34c0aeefdd966d854371b3110db00a47798751d",
+  "entries": [
+    {
+      "program": "program:7e82f10b73354f97dfeb",
+      "legacy_tests": [
+        "emit::external_scalar::source_handler_can_call_native_external_int64_and_float_with_mixed_arguments"
+      ],
+      "files": [
+        {
+          "name": "main.emel",
+          "fixture": "sources/bc210d5804c41bf6cdb42d590c11d39f690e77177f8e47511fcf00690a86e8b8.emel",
+          "source_id": "source:bc210d5804c41bf6cdb4",
+          "sha256": "bc210d5804c41bf6cdb42d590c11d39f690e77177f8e47511fcf00690a86e8b8"
+        }
+      ],
+      "route": "original-source",
+      "new_test": {
+        "kind": "source_test",
+        "path": "crates/emela-emb-compiler/tests/p7_legacy_externals.rs",
+        "symbol": "source_handler_can_call_native_external_int64_and_float_with_mixed_arguments"
+      },
+      "adaptation": "Original body with explicit public C export annotations; C symbol/type IDs follow generated headers. No post-lowering IR edits. Private C cancel/heap probes match legacy tests.",
+      "observations": [
+        "Int64.MIN and exact negative NaN payload through the ordinary effect handler, 1000 rounds, old heap1024 option; no heap emitted."
+      ]
+    },
+    {
+      "program": "program:092ecc4b39a71f6fe329",
+      "legacy_tests": [
+        "emit::sync_external::source_string_adapters_snapshot_borrowed_results_and_board_held_arguments"
+      ],
+      "files": [
+        {
+          "name": "main.emel",
+          "fixture": "sources/5b95ad4781764f3526b371629863ca1271698e574ddc705ebf5ddaf197310c1c.emel",
+          "source_id": "source:5b95ad4781764f3526b3",
+          "sha256": "5b95ad4781764f3526b371629863ca1271698e574ddc705ebf5ddaf197310c1c"
+        }
+      ],
+      "route": "original-source",
+      "new_test": {
+        "kind": "source_test",
+        "path": "crates/emela-emb-compiler/tests/p7_legacy_externals.rs",
+        "symbol": "source_string_adapters_snapshot_borrowed_results_and_board_held_arguments"
+      },
+      "adaptation": "Original body with explicit public C export annotations; C symbol/type IDs follow generated headers. No post-lowering IR edits. Private C cancel/heap probes match legacy tests.",
+      "observations": [
+        "Borrowed String result and board-held argument independently snapshot embedded NUL before input overwrite; direct/indirect/discard paths release all heap at old1024 bytes."
+      ]
+    },
+    {
+      "program": "program:729d56d2f2d29fef4139",
+      "legacy_tests": [
+        "emit::sync_external::values::source_tuple_and_list_external_values_keep_all_managed_fields_alive"
+      ],
+      "files": [
+        {
+          "name": "main.emel",
+          "fixture": "sources/602421897359f3e255b2fbd9027a19ac6a2d135eccd44dad0a4b6207b2dc2d11.emel",
+          "source_id": "source:602421897359f3e255b2",
+          "sha256": "602421897359f3e255b2fbd9027a19ac6a2d135eccd44dad0a4b6207b2dc2d11"
+        }
+      ],
+      "route": "original-source",
+      "new_test": {
+        "kind": "source_test",
+        "path": "crates/emela-emb-compiler/tests/p7_legacy_externals.rs",
+        "symbol": "source_tuple_and_list_external_values_keep_all_managed_fields_alive"
+      },
+      "adaptation": "Original body with explicit public C export annotations; C symbol/type IDs follow generated headers. No post-lowering IR edits. Private C cancel/heap probes match legacy tests.",
+      "observations": [
+        "Borrowed tuple(String,List[String]) fields survive caller input overwrite and tuple release; extracted String remains owned; 1000 rounds at old1024 bytes."
+      ]
+    },
+    {
+      "program": "program:efd3c3bdb37863da1c8f",
+      "legacy_tests": [
+        "emit::task_values::managed::source_tasks_own_packet_arguments_and_successes_through_scope_deferred_cancel_and_null_results"
+      ],
+      "files": [
+        {
+          "name": "main.emel",
+          "fixture": "sources/2fdb21c7c71a35d0a7ae7d0284dc245be6d377057157d5322b7812de0a8cc4ed.emel",
+          "source_id": "source:2fdb21c7c71a35d0a7ae",
+          "sha256": "2fdb21c7c71a35d0a7ae7d0284dc245be6d377057157d5322b7812de0a8cc4ed"
+        }
+      ],
+      "route": "original-source",
+      "new_test": {
+        "kind": "source_test",
+        "path": "crates/emela-emb-compiler/tests/p7_legacy_externals.rs",
+        "symbol": "source_tasks_own_packet_arguments_and_successes_through_scope_deferred_cancel_and_null_results"
+      },
+      "adaptation": "Original body with explicit public C export annotations; C symbol/type IDs follow generated headers. No post-lowering IR edits. Private C cancel/heap probes match legacy tests.",
+      "observations": [
+        "Original exchange/Scope/Deferred paths preserve nested packet fields and typed completion owners, producer/release outside ISR/lock, queued cancellation/NULL output/wrong-kind/duplicate completion.",
+        "String task captures caller input before mutation, snapshots NUL bytes before context poison, runs release exactly once and skips producer when cancelled.",
+        "Old heap4096/String64/fiber8/frame24x1024/task2/event2/deferred2; 1000 outer iterations, all heap reclaimed."
+      ]
+    },
+    {
+      "program": "program:efd3c3bdb37863da1c8f",
+      "legacy_tests": [
+        "emit::task_values::managed::string_successes_snapshot_nul_bytes_before_the_context_is_released"
+      ],
+      "files": [
+        {
+          "name": "main.emel",
+          "fixture": "sources/2fdb21c7c71a35d0a7ae7d0284dc245be6d377057157d5322b7812de0a8cc4ed.emel",
+          "source_id": "source:2fdb21c7c71a35d0a7ae",
+          "sha256": "2fdb21c7c71a35d0a7ae7d0284dc245be6d377057157d5322b7812de0a8cc4ed"
+        }
+      ],
+      "route": "original-source",
+      "new_test": {
+        "kind": "source_test",
+        "path": "crates/emela-emb-compiler/tests/p7_legacy_externals.rs",
+        "symbol": "string_successes_snapshot_nul_bytes_before_the_context_is_released"
+      },
+      "adaptation": "Original body with explicit public C export annotations; C symbol/type IDs follow generated headers. No post-lowering IR edits. Private C cancel/heap probes match legacy tests.",
+      "observations": [
+        "Original exchange/Scope/Deferred paths preserve nested packet fields and typed completion owners, producer/release outside ISR/lock, queued cancellation/NULL output/wrong-kind/duplicate completion.",
+        "String task captures caller input before mutation, snapshots NUL bytes before context poison, runs release exactly once and skips producer when cancelled.",
+        "Old heap4096/String64/fiber8/frame24x1024/task2/event2/deferred2; 1000 outer iterations, all heap reclaimed."
+      ]
+    }
+  ],
+  "validation": {
+    "tests": 5,
+    "status": "passed",
+    "C_optimizations": [
+      "-O0",
+      "-O2"
+    ],
+    "flags": [
+      "-std=c11",
+      "-Wall",
+      "-Werror"
+    ]
+  }
+}
