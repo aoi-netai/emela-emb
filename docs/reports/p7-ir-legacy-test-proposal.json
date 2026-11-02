@@ -14,11 +14,7 @@
     "strict generated C compilation and runtime at -O0/-O2; no compiler-absent skip"
   ],
   "status_counts": {
-    "proposed_verified": 76,
-    "pending_direct_budget_case": 1,
-    "pending_direct_boundary_case": 1,
-    "pending_direct_case": 3,
-    "pending_direct_rejection": 1,
+    "proposed_verified": 82,
     "proposed_verified_representation_replaced": 2,
     "proposed_not_applicable_absent_selector": 1,
     "proposed_verified_policy_replacement": 1
@@ -47,15 +43,20 @@
       "legacy_key": "emit::allocates_and_releases_lists_in_the_fixed_heap",
       "legacy_ledger_index": 1,
       "expected_observation": "Return List[Int](4,5), release it externally 1000 times in heap1024 without exhaustion.",
-      "proposed_status": "pending_direct_budget_case",
+      "proposed_status": "proposed_verified",
       "evidence": [
         {
           "path": "crates/emela-emb-compiler/src/backend/lower/memory_tests.rs",
           "symbol": "list_string_bytes_and_any_release_owned_values_after_repeated_calls",
           "layer": "IR/C runtime"
+        },
+        {
+          "path": "crates/emela-emb-compiler/src/backend/lower/p7_list_alias_tests.rs",
+          "symbol": "returned_lists_shared_tails_and_inline_list_owners_reuse_the_old_1024_byte_heap",
+          "layer": "IR/C runtime"
         }
       ],
-      "reason": "Related managed-list evidence exists; root is adding the exact returned-list/heap1024 boundary together with the List alias cases."
+      "reason": "Direct fixed-old shape and original budget are preserved in the dedicated List/captured-failure module. Normal C calls repeat1000 times; owned paths verify all heap blocks free after each call. The expected fatal indirect failure is invoked once after the successful loop; heap0 refusal is an input diagnostic assertion."
     },
     {
       "target": "emit",
@@ -612,9 +613,15 @@
       "legacy_key": "emit::emits_empty_list_and_checks_list_emptiness",
       "legacy_ledger_index": 51,
       "expected_observation": "Empty List returns NULL; ListIsEmpty is True for NULL and False for a non-null borrowed pointer.",
-      "proposed_status": "pending_direct_boundary_case",
-      "evidence": [],
-      "reason": "Root is adding the literal/NULL/nonnull/returned-empty C boundary matrix to its independent List module."
+      "proposed_status": "proposed_verified",
+      "evidence": [
+        {
+          "path": "crates/emela-emb-compiler/src/backend/lower/p7_list_alias_tests.rs",
+          "symbol": "empty_lists_keep_the_null_c_boundary_without_requiring_a_heap",
+          "layer": "IR/C runtime"
+        }
+      ],
+      "reason": "Direct fixed-old shape and original budget are preserved in the dedicated List/captured-failure module. Normal C calls repeat1000 times; owned paths verify all heap blocks free after each call. The expected fatal indirect failure is invoked once after the successful loop; heap0 refusal is an input diagnostic assertion."
     },
     {
       "target": "emit",
@@ -934,15 +941,20 @@
       "legacy_key": "emit::propagates_failure_from_a_captured_closure_through_its_indirect_call",
       "legacy_ledger_index": 79,
       "expected_observation": "Captured failing closure: capture40 plus argument2 returns42; argument0 propagates ClosureError73 to the unhandled-error hook.",
-      "proposed_status": "pending_direct_case",
+      "proposed_status": "proposed_verified",
       "evidence": [
         {
           "path": "crates/emela-emb-compiler/src/backend/lower/function_tests.rs",
           "symbol": "function_coercion_adapts_unit_erasure_evidence_and_failure_abi",
           "layer": "IR/C runtime"
+        },
+        {
+          "path": "crates/emela-emb-compiler/src/backend/lower/p7_list_alias_tests.rs",
+          "symbol": "captured_closure_success_and_propagated_failure_use_the_original_indirect_call_abi",
+          "layer": "IR/C runtime"
         }
       ],
-      "reason": "Root owns the exact capture+failure+indirect-call conjunction; related adapters alone do not close it."
+      "reason": "Direct fixed-old shape and original budget are preserved in the dedicated List/captured-failure module. Normal C calls repeat1000 times; owned paths verify all heap blocks free after each call. The expected fatal indirect failure is invoked once after the successful loop; heap0 refusal is an input diagnostic assertion."
     },
     {
       "target": "emit",
@@ -967,15 +979,20 @@
       "legacy_key": "emit::reads_list_heads_and_keeps_shared_tails_alive",
       "legacy_ledger_index": 81,
       "expected_observation": "List10/20/30 survives a returned identity alias/shared tail; first+second=30; discarded Unit head is valid, heap1024.",
-      "proposed_status": "pending_direct_case",
+      "proposed_status": "proposed_verified",
       "evidence": [
         {
           "path": "crates/emela-emb-compiler/src/backend/lower/memory_tests.rs",
           "symbol": "list_string_bytes_and_any_release_owned_values_after_repeated_calls",
           "layer": "IR/C runtime"
+        },
+        {
+          "path": "crates/emela-emb-compiler/src/backend/lower/p7_list_alias_tests.rs",
+          "symbol": "returned_lists_shared_tails_and_inline_list_owners_reuse_the_old_1024_byte_heap",
+          "layer": "IR/C runtime"
         }
       ],
-      "reason": "Root owns the exact scalar/Unit alias matrix at the old budget."
+      "reason": "Direct fixed-old shape and original budget are preserved in the dedicated List/captured-failure module. Normal C calls repeat1000 times; owned paths verify all heap blocks free after each call. The expected fatal indirect failure is invoked once after the successful loop; heap0 refusal is an input diagnostic assertion."
     },
     {
       "target": "emit",
@@ -1016,9 +1033,15 @@
       "legacy_key": "emit::requires_fixed_heap_capacity_for_returned_list_aliases",
       "legacy_ledger_index": 84,
       "expected_observation": "Returning a borrowed List alias with heap_bytes0 is rejected Unsupported before C planning.",
-      "proposed_status": "pending_direct_rejection",
-      "evidence": [],
-      "reason": "Root owns an exact returned List[Int] identity rejection; managed allocating-list rejections are related but not this no-allocation shape."
+      "proposed_status": "proposed_verified",
+      "evidence": [
+        {
+          "path": "crates/emela-emb-compiler/src/backend/lower/p7_list_alias_tests.rs",
+          "symbol": "returning_a_borrowed_list_alias_requires_reference_management_capacity",
+          "layer": "IR input rejection"
+        }
+      ],
+      "reason": "Direct fixed-old shape and original budget are preserved in the dedicated List/captured-failure module. Normal C calls repeat1000 times; owned paths verify all heap blocks free after each call. The expected fatal indirect failure is invoked once after the successful loop; heap0 refusal is an input diagnostic assertion."
     },
     {
       "target": "emit",
@@ -1075,15 +1098,20 @@
       "legacy_key": "emit::stores_and_releases_list_references_inside_tuples_and_list_elements",
       "legacy_ledger_index": 88,
       "expected_observation": "List references nested in tuples and list elements yield42/73, and externally returned tuple(List5) releases1000 times, heap1024.",
-      "proposed_status": "pending_direct_case",
+      "proposed_status": "proposed_verified",
       "evidence": [
         {
           "path": "crates/emela-emb-compiler/tests/p3_ownership.rs",
           "symbol": "strings_in_nested_lists_and_error_payloads_outlive_their_original_owners",
           "layer": "source/C runtime"
+        },
+        {
+          "path": "crates/emela-emb-compiler/src/backend/lower/p7_list_alias_tests.rs",
+          "symbol": "returned_lists_shared_tails_and_inline_list_owners_reuse_the_old_1024_byte_heap",
+          "layer": "IR/C runtime"
         }
       ],
-      "reason": "Root owns the exact inline List-reference layouts and exported tuple release at the old budget."
+      "reason": "Direct fixed-old shape and original budget are preserved in the dedicated List/captured-failure module. Normal C calls repeat1000 times; owned paths verify all heap blocks free after each call. The expected fatal indirect failure is invoked once after the successful loop; heap0 refusal is an input diagnostic assertion."
     },
     {
       "target": "emit",
@@ -1665,7 +1693,27 @@
     }
   ],
   "remaining_work": [
-    "Root owns exact List budget/NULL/alias/aggregate and captured-failing-closure cases listed pending.",
-    "Cleanup12 post-source IR seams and remaining structured127contexts are separate work, not asserted complete by this86-test proposal."
-  ]
+    "Canonical115 legacy-test ledger promotion remains root-owned: this report covers only86 IR tests; the29 source tests have a separate review.",
+    "Post-source cleanup12 is complete in separate commit88677b6 and report docs/reports/p7-cleanup-ir-seam-compat.json. It is source→IR seam→C evidence, not pure source.",
+    "The structured122 context audit is delegated to frontend; Stage5 is root-owned. The86-test proposal does not itself claim all226 contexts complete."
+  ],
+  "validation": {
+    "backend_tests_passed": 115,
+    "backend_tests_failed": 0,
+    "backend_tests_ignored": 0,
+    "focused_new_list_tests_passed": 4,
+    "strict_clippy_workspace_all_targets": "passed",
+    "actual_rust_1_85_workspace_all_targets": "passed",
+    "fmt_diff": "passed",
+    "C_flags": [
+      "-std=c11",
+      "-Wall",
+      "-Wextra",
+      "-Werror"
+    ],
+    "optimizations": [
+      "-O0",
+      "-O2"
+    ]
+  }
 }

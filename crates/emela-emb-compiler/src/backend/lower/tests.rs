@@ -36,6 +36,8 @@ mod p7_input;
 mod p7_integration;
 #[path = "p7_recursive_source_tests.rs"]
 mod p7_recursive_source;
+#[path = "p7_list_alias_tests.rs"]
+mod p7_list_aliases;
 #[path = "p7_misc_value_tests.rs"]
 mod p7_misc_values;
 #[path = "p7_string_frame_tests.rs"]
