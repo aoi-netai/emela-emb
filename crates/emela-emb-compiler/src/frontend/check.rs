@@ -2,6 +2,7 @@ mod effect_calls;
 mod functions;
 mod methods;
 mod references;
+mod suspend;
 mod trait_methods;
 mod with;
 use super::{
@@ -260,7 +261,9 @@ pub(crate) fn check(mut modules: Modules) -> Result<ir::Program, Vec<Diagnostic>
         .collect();
     super::effects::infer(&mut program, &effect_modes, &mut checker.catalog)?;
     for function in &program.functions {
-        if function.exported && !function.signature.sets.effects.is_empty() {
+        if function.exported
+            && super::function_abi::effects_abi(&program.core, &function.signature.sets.effects).0
+        {
             return Err(vec![
                 Diagnostic::new(
                     DK::Export,
@@ -299,13 +302,6 @@ impl Checker {
             let module = self.modules.modules[module_index].clone();
             for function in &module.ast.functions {
                 let result = (|| -> Result<(), Diagnostic> {
-                    if function.suspends {
-                        return Err(Diagnostic::new(
-                            DK::Unsupported,
-                            function.name.span,
-                            "suspend functions await continuation lowering",
-                        ));
-                    }
                     let effect_method = self
                         .effects
                         .methods
@@ -519,6 +515,13 @@ impl Checker {
                             }
                         }
                     }
+                    if function.suspends && external.is_none() {
+                        return Err(Diagnostic::new(
+                            DK::Type,
+                            function.name.span,
+                            "a top-level suspend fn must be external",
+                        ));
+                    }
                     if external.is_some() || intrinsic.is_some() {
                         if function.body.is_some() {
                             return Err(Diagnostic::new(
@@ -596,6 +599,9 @@ impl Checker {
                         None
                     };
                     let mut written_effects = Vec::new();
+                    if function.suspends {
+                        written_effects.push(self.async_type(module_index, function.name.span)?);
+                    }
                     if let Some(effects) = &function.effects {
                         for effect in effects {
                             let ty = self.catalog.effect_member(
@@ -1870,6 +1876,7 @@ impl Checker {
                         "a const value cannot be called",
                     ));
                 }
+                self.validate_external_reference(module, id, span)?;
                 let (signature, type_arguments) = self.function_instance(module, id, span)?;
                 if let (Some(ret), Some(expected)) = (signature.ret, expected) {
                     self.expect_type(module, ret, expected, span)?;

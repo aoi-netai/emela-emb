@@ -206,7 +206,7 @@ impl Solver {
                 (
                     nominal,
                     effect.args.clone(),
-                    effect.ops.iter().all(|operation| !operation.suspend),
+                    !super::function_abi::effect_flags(core, id).1,
                 ),
             );
         }

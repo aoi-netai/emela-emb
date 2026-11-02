@@ -6,6 +6,55 @@ use crate::{
 };
 use std::collections::HashSet;
 
+pub(crate) fn is_async(core: &Definitions, effect: crate::contract::ir::EffectId) -> bool {
+    let effect = &core.effects[effect];
+    effect.decl == "Async" && effect.args.is_empty() && effect.label_of.is_none()
+}
+pub(crate) fn effect_flags(
+    core: &Definitions,
+    effect: crate::contract::ir::EffectId,
+) -> (bool, bool) {
+    if is_async(core, effect) {
+        (false, true)
+    } else {
+        (
+            true,
+            core.effects[effect]
+                .ops
+                .iter()
+                .any(|operation| operation.suspend),
+        )
+    }
+}
+pub(crate) fn effects_abi(core: &Definitions, members: &[TypeId]) -> (bool, bool) {
+    let mut pending = members.to_vec();
+    let mut seen = HashSet::new();
+    let (mut evidence, mut suspends) = (false, false);
+    while let Some(member) = pending.pop() {
+        if !seen.insert(member) {
+            continue;
+        }
+        match core.ty(member) {
+            Type::Handler(effect) => {
+                let flags = effect_flags(core, *effect);
+                evidence |= flags.0;
+                suspends |= flags.1;
+            }
+            Type::Set(row) => {
+                evidence |= row.ev;
+                suspends |= row.suspends;
+                pending.extend(&row.params);
+            }
+            Type::Param(_) => {
+                evidence = true;
+                suspends = true;
+            }
+            _ => {}
+        }
+    }
+    (evidence, suspends)
+}
+
 pub(crate) fn project(program: &mut ir::Program) -> Result<(), Vec<Diagnostic>> {
     let mut updates = Vec::new();
     let initial = program.core.types.types.len();
@@ -82,11 +131,9 @@ fn summary(
             Type::Set(_) => result.merge(&summary(core, parameter, effect, active)?),
             Type::Enum(id, _) if !effect && core.enums[*id].error => result.fails = true,
             Type::Handler(id) if effect => {
-                result.ev = true;
-                result.suspends |= core.effects[*id]
-                    .ops
-                    .iter()
-                    .any(|operation| operation.suspend);
+                let (ev, suspends) = effect_flags(core, *id);
+                result.ev |= ev;
+                result.suspends |= suspends;
             }
             _ => return Err("invalid member in a function invocation set".into()),
         }

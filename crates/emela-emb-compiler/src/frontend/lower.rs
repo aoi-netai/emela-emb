@@ -30,6 +30,8 @@ pub(crate) fn lower(input: &ir::Program) -> b::Program {
             let mut target = b::Function::new(&function.name);
             target.constant = function.constant;
             target.fails = !function.signature.sets.errors.is_empty();
+            target.suspends =
+                super::function_abi::effects_abi(&input.core, &function.signature.sets.effects).1;
             target.exported = function.exported;
             target.export_symbol = function
                 .exported
@@ -57,7 +59,20 @@ pub(crate) fn lower(input: &ir::Program) -> b::Program {
     let effectful: HashSet<_> = input
         .functions
         .iter()
-        .filter_map(|function| (!function.signature.sets.effects.is_empty()).then_some(function.id))
+        .filter_map(|function| {
+            super::function_abi::effects_abi(&input.core, &function.signature.sets.effects)
+                .0
+                .then_some(function.id)
+        })
+        .collect();
+    let suspending = input
+        .functions
+        .iter()
+        .filter_map(|function| {
+            super::function_abi::effects_abi(&input.core, &function.signature.sets.effects)
+                .1
+                .then_some(function.id)
+        })
         .collect();
     let intrinsics = input
         .functions
@@ -70,6 +85,7 @@ pub(crate) fn lower(input: &ir::Program) -> b::Program {
         }
         let id = ids[&function.id];
         let target = &mut program.functions[id];
+        let current_suspends = target.suspends;
         let mut context = Context {
             function: target,
             current: function.id,
@@ -79,6 +95,8 @@ pub(crate) fn lower(input: &ir::Program) -> b::Program {
             core: &program.core,
             failing: &failing,
             effectful: &effectful,
+            suspending: &suspending,
+            current_suspends,
             evidence: None,
             raises: &raises,
             structural_equality: &structural_equality,
@@ -125,6 +143,8 @@ struct Context<'a> {
     core: &'a b::Definitions,
     failing: &'a HashSet<DefinitionId>,
     effectful: &'a HashSet<DefinitionId>,
+    suspending: &'a HashSet<DefinitionId>,
+    current_suspends: bool,
     evidence: Option<b::VarId>,
     raises: &'a HashMap<b::TypeId, b::FnId>,
     structural_equality: &'a HashMap<b::TypeId, b::FnId>,
@@ -305,6 +325,7 @@ impl Context<'_> {
                     unreachable!("checked lambda type")
                 };
                 let ft = ft.clone();
+                let saved_suspends = std::mem::replace(&mut self.current_suspends, ft.suspends);
                 // Ordinary effectful closures receive the caller's table. Handler operation
                 // closures keep the table of the surrounding acquisition instead.
                 if !ft.ev {
@@ -332,6 +353,7 @@ impl Context<'_> {
                     self.evidence = Some(evidence);
                 }
                 let body = self.block(body, true);
+                self.current_suspends = saved_suspends;
                 self.evidence = saved_evidence;
                 self.closure_depth -= 1;
                 self.locals = saved_locals;
@@ -706,7 +728,7 @@ impl Context<'_> {
                     None => b::Value::Call {
                         callee: b::Callee::Direct(self.ids[target]),
                         args: operands,
-                        suspends: false,
+                        suspends: self.suspending.contains(target),
                         on_fail: self.failing.contains(target).then(|| self.failure_edge()),
                     },
                 };
