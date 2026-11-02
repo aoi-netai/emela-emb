@@ -536,3 +536,9 @@ P7統合では、external opaque宣言のconstructorを消去するときにreco
 P7の`tests/p7_legacy_traits.rs`は固定旧`release_0_24/traits.emel`全体（corpus program `dc3d2de098f1b7e80a21`、source SHA-256 `c2cacb8eb0a458543a2c75f44e74015be514f14c24db2ca938af34204d514b74`）を本文変更なしで読み、7個のpub関数に明示exportだけを加える。P2の同期抽出に含めなかったFiber/Cause・debug・通常/derived/未定義Showを同じ入力で確認する。旧`release_0_24/mod.rs`（SHA-256 `306126db1413bac6f4dc96aff3ccb64cade5f2407f84ab5ae7048ba49971377b`）の3試験を、通常1000回の全heap回収と公開failure即時defectの2試験へ統合した。C両最適化で旧の値・NUL/Unicode escape・debug順序・Cause文字列・停止hook文言を維持する。
 
 P7の`backend/lower/p7_const_source_tests.rs`は保存済み旧sourceのconst残件を本文のまま読み、明示exportだけを加える。旧recursive/aggregate const、初回破棄、nested defect/self retry、heap/adapter容量defect、巨大static String fallback、ISR static/runtime差を検証する。GC試験は固定旧`examples/support/gc_anchor.rs`（SHA-256 `01c076eb48367d0df62f57175e2fadf2e16b8cc4dadd7e7950b7c4a7211fa708`）と同じCell[Any]のtest専用IR functionを通常source pipeline後へ加える。旧heap容量、外部String3policy・aggregateのboard解放、1000回の所有値保持とGC後baselineを維持する。旧14試験の入力・新試験・差分は`docs/reports/p7-const-corpus-compat.json`に記録し、純sourceとGC後処理を区別する。
+
+## P7 Deferredの旧source観測
+
+固定revisionの`crates/emela-codegen-emb/tests/deferred/mod.rs`（SHA-256 `0e343dcede15b37c59d08286561faeff8a3fb534b23f2c6f601ae0e1c0d52616`）の13旧source試験を、`p7_deferred_compat.rs`の14実C入力と1つのartifact-only入力へ移植する。保存済みcorpus本文をbyte単位で保ち、public関数へC export属性だけを挿入する。C harnessは公開名と型番号を生成headerへ対応付け、event lock hookとheap観測を加える。旧heap/frame 512 byte・frame/fiber/Deferred容量・String容量の指定を維持する。
+
+completeの一度だけの格納、空/Unit/Bool/tuple/Int64/Floatのpoll/await、String/List所有とscope/frame再使用、FIFO、取消時のDeferred待機列、再利用slotへ向くleaked callbackのscope終了診断、cycle回収、resume後operation tailの破棄を観測する。成功系は1000回の全heap回収を確認し、旧のterminal defect系は同じ停止hookと文言を確認する。constructorの容量0拒否・pool省略macroは旧artifact検査として残す。C両最適化を必須実行し、source後のIR変更は行わない。旧assertと入力hash、resource budget、実行結果の対応は`docs/reports/p7-concurrency-corpus-compat.json`へ記録する。
