@@ -60,8 +60,7 @@ int main(void){for(int i=1;i<=1000;i++){assert(intrinsic_values()==42);assert(re
 
 #[test]
 fn never_returning_intrinsic_values_coerce_without_running_the_continuation() {
-    let output = compile(
-        r#"
+    let source = r#"
 @external(c,"should_not_run")
 fn should_not_run() -> Int
 @export(c,"placeholder_value")
@@ -76,7 +75,11 @@ pub fn panic_value() -> Int {
   f("halt42")
   should_not_run()
 }
-"#,
+"#;
+    let output = compile_sources(
+        &[Source::new("main.emel", source)],
+        "main.emel",
+        &Options::default().with_heap_bytes(8192),
     )
     .unwrap_or_else(|errors| panic!("Never function value rejected: {errors:#?}"));
     support::compile_and_run(
