@@ -1,5 +1,8 @@
 use super::*;
 
+#[path = "expanding.rs"]
+mod expanding;
+
 pub(super) fn validate_catalog(program: &Program) -> Result<()> {
     let canonical = [
         Type::Int,
@@ -106,6 +109,7 @@ fn validate_declared_type(
 /// Materialize substituted field types before any stage indexes the shared catalog.
 /// IDs already supplied by the frontend remain stable because interning only appends.
 pub(super) fn normalize_catalog(program: &mut Program) -> Result<()> {
+    program.core.expanding_enums = expanding::classify(program);
     let mut pending: Vec<_> = program
         .functions
         .iter()
@@ -166,11 +170,17 @@ pub(super) fn normalize_catalog(program: &mut Program) -> Result<()> {
                     .flat_map(|variant| variant.tys.iter().copied())
                     .collect();
                 pending.extend(args.iter().copied());
-                pending.extend(
-                    fields
-                        .into_iter()
-                        .map(|field| program.core.types.subst(field, &args)),
-                );
+                let fields: Vec<_> = fields
+                    .into_iter()
+                    .map(|field| program.core.types.subst(field, &args))
+                    .collect();
+                for field in fields {
+                    if !program.core.expanding_enums.contains(&id)
+                        || !is_reference_type(program, field)
+                    {
+                        pending.push(field);
+                    }
+                }
             }
             Type::List(element) | Type::Cell(element) => pending.push(element),
             _ => {}
@@ -239,6 +249,11 @@ pub(super) fn validate_type(program: &Program, function: &str, ty: TypeId) -> Re
                 }
                 for variant in 0..definition.variants.len() {
                     for field in enum_fields(program, function, ty, variant)? {
+                        if program.core.expanding_enums.contains(id)
+                            && is_reference_type(program, field)
+                        {
+                            continue;
+                        }
                         visit(program, function, field, seen, active, indirections + 1)?;
                     }
                 }
@@ -260,6 +275,29 @@ pub(super) fn validate_type(program: &Program, function: &str, ty: TypeId) -> Re
         &mut HashMap::new(),
         0,
     )
+}
+
+fn is_reference_type(program: &Program, ty: TypeId) -> bool {
+    match program.core.ty(ty) {
+        Type::Int
+        | Type::Int64
+        | Type::Float
+        | Type::Bool
+        | Type::Unit
+        | Type::Never
+        | Type::Set(_) => false,
+        Type::Enum(id, _) => {
+            let definition = &program.core.enums[*id];
+            definition.error
+                || definition.external
+                || definition.variants.is_empty()
+                || definition
+                    .variants
+                    .iter()
+                    .any(|variant| !variant.tys.is_empty())
+        }
+        _ => true,
+    }
 }
 
 pub(super) fn enum_fields(

@@ -582,8 +582,181 @@ fn discarded_list_construction_keeps_fixed_heap_exhaustion() {
 _Noreturn void emela_board_defect(EmelaDefectKind k, const char *m, uint16_t n) {
   (void)m; (void)n; exit(k==EMELA_DEFECT_HEAP_EXHAUSTED ? 0 : 1);
 }
+
 int main(void) { answer(); return 2; }
 "#,
         0,
+    );
+}
+
+fn generic_enum(p: &mut Program, name: &str, params: usize) -> EnumId {
+    p.core.enums.alloc(EnumDef {
+        name: name.into(),
+        params,
+        error: false,
+        external: false,
+        variants: vec![VariantDef {
+            name: "End".into(),
+            fields: VariantFields::Unit,
+            tys: vec![],
+        }],
+    })
+}
+fn next_variant(p: &mut Program, id: EnumId, field: TypeId) {
+    p.core.enums[id].variants.push(VariantDef {
+        name: "Next".into(),
+        fields: VariantFields::Positional(1),
+        tys: vec![field],
+    });
+}
+fn enum_tag_function(p: &mut Program, id: EnumId, args: Vec<TypeId>) {
+    let ty = p.core.types.intern(Type::Enum(id, args));
+    let mut f = simple();
+    let mut statements = vec![];
+    let value = assign(
+        &mut f,
+        &mut statements,
+        ty,
+        Value::Make {
+            ctor: CtorRef {
+                enum_id: id,
+                variant: 0,
+            },
+            args: vec![],
+        },
+    );
+    let tag = assign(&mut f, &mut statements, TypeId::INT, Value::Tag(value));
+    f.seqs[f.body.unwrap()] = Seq {
+        stmts: statements,
+        term: Term::Return(Some(tag.into())),
+    };
+    p.functions.alloc(f);
+}
+
+#[test]
+fn unused_growing_recursive_payloads_remain_opaque_without_expansion() {
+    // Mirrors the positive fixed-old emit.rs growing-enum fixture, with C execution added.
+    let mut p = program(vec![]);
+    let id = generic_enum(&mut p, "Growing", 1);
+    let parameter = p.core.types.intern(Type::Param(0));
+    let nested = p.core.types.intern(Type::List(parameter));
+    let recursive = p.core.types.intern(Type::Enum(id, vec![nested]));
+    next_variant(&mut p, id, recursive);
+    enum_tag_function(&mut p, id, vec![TypeId::INT]);
+    let lowered = lower_program(p.clone()).unwrap();
+    assert!(lowered.lowered.core.expanding_enums.contains(&id));
+    assert!(lowered.lowered.core.types.len() < 32);
+    let output =
+        crate::backend::compile_program(p, &Options::default().with_heap_bytes(1024)).unwrap();
+    execute_repeatedly(
+        output,
+        "for(int i=0;i<1000;++i) { assert(answer()==0); assert(test_heap_empty()); }",
+    );
+}
+
+#[test]
+fn parameter_flow_distinguishes_mutual_growth_from_permutation_and_reset() {
+    let mut p = program(vec![]);
+    let first = generic_enum(&mut p, "First", 1);
+    let second = generic_enum(&mut p, "Second", 1);
+    let parameter = p.core.types.intern(Type::Param(0));
+    let list = p.core.types.intern(Type::List(parameter));
+    let to_second = p.core.types.intern(Type::Enum(second, vec![list]));
+    let to_first = p.core.types.intern(Type::Enum(first, vec![parameter]));
+    next_variant(&mut p, first, to_second);
+    next_variant(&mut p, second, to_first);
+    enum_tag_function(&mut p, first, vec![TypeId::INT]);
+    let lowered = lower_program(p.clone()).unwrap();
+    assert_eq!(
+        lowered.lowered.core.expanding_enums,
+        HashSet::from([first, second])
+    );
+    let reset = p.core.types.intern(Type::Enum(first, vec![TypeId::INT]));
+    p.core.enums[second].variants[1].tys = vec![reset];
+    let lowered = lower_program(p).unwrap();
+    assert!(lowered.lowered.core.expanding_enums.is_empty());
+
+    let mut p = program(vec![]);
+    let id = generic_enum(&mut p, "Permuted", 2);
+    let a = p.core.types.intern(Type::Param(0));
+    let b = p.core.types.intern(Type::Param(1));
+    let recursive = p.core.types.intern(Type::Enum(id, vec![b, a]));
+    next_variant(&mut p, id, recursive);
+    enum_tag_function(&mut p, id, vec![TypeId::INT, TypeId::STRING]);
+    let lowered = lower_program(p).unwrap();
+    assert!(lowered.lowered.core.expanding_enums.is_empty());
+}
+
+#[test]
+fn recursive_enum_edges_inside_tuples_are_boxed_and_released() {
+    let mut p = program(vec![]);
+    let id = generic_enum(&mut p, "TupleChain", 0);
+    let chain = p.core.types.intern(Type::Enum(id, vec![]));
+    let tuple = p.core.types.intern(Type::Tuple(vec![TypeId::INT, chain]));
+    next_variant(&mut p, id, tuple);
+    let mut f = simple();
+    let mut statements = vec![];
+    let end = assign(
+        &mut f,
+        &mut statements,
+        chain,
+        Value::Make {
+            ctor: CtorRef {
+                enum_id: id,
+                variant: 0,
+            },
+            args: vec![],
+        },
+    );
+    let fields = assign(
+        &mut f,
+        &mut statements,
+        tuple,
+        Value::Tuple(vec![Const::Int(7).into(), end.into()]),
+    );
+    let node = assign(
+        &mut f,
+        &mut statements,
+        chain,
+        Value::Make {
+            ctor: CtorRef {
+                enum_id: id,
+                variant: 1,
+            },
+            args: vec![fields.into()],
+        },
+    );
+    let fields = assign(
+        &mut f,
+        &mut statements,
+        tuple,
+        Value::Field {
+            base: node,
+            ctor: CtorRef {
+                enum_id: id,
+                variant: 1,
+            },
+            index: 0,
+        },
+    );
+    let head = assign(
+        &mut f,
+        &mut statements,
+        TypeId::INT,
+        Value::TupleGet {
+            base: fields,
+            index: 0,
+        },
+    );
+    f.seqs[f.body.unwrap()] = Seq {
+        stmts: statements,
+        term: Term::Return(Some(head.into())),
+    };
+    p.functions.alloc(f);
+    let output =
+        crate::backend::compile_program(p, &Options::default().with_heap_bytes(4096)).unwrap();
+    execute_repeatedly(
+        output,
+        "for(int i=0;i<1000;++i) { assert(answer()==7); assert(test_heap_empty()); }",
     );
 }
