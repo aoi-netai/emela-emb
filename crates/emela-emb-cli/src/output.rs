@@ -1,14 +1,14 @@
 use std::ffi::OsStr;
 use std::fs;
 use std::io;
-use std::path::{Path, PathBuf};
+use std::path::{Component, Path, PathBuf};
 use std::sync::atomic::{AtomicU64, Ordering};
 
 use emela_emb_compiler::Output;
 
 static NEXT_STAGING_ID: AtomicU64 = AtomicU64::new(0);
 
-/// Prepare both files before making the directory visible at its final path.
+/// Prepare every generated file before making the directory visible at its final path.
 pub fn publish(output: &Output, destination: &Path) -> io::Result<()> {
     let destination_name = destination.file_name().ok_or_else(|| {
         io::Error::new(
@@ -40,8 +40,26 @@ pub fn publish(output: &Output, destination: &Path) -> io::Result<()> {
         .unwrap_or_else(|| Path::new("."));
     fs::create_dir_all(parent)?;
     let mut staging = StagingDirectory::create(parent, destination_name)?;
-    fs::write(staging.path.join("emela_embedded.c"), &output.c_source)?;
-    fs::write(staging.path.join("emela_embedded.h"), &output.header)?;
+    let mut paths = std::collections::HashSet::new();
+    for file in &output.files {
+        let path = Path::new(&file.path);
+        if path.as_os_str().is_empty()
+            || !path
+                .components()
+                .all(|component| matches!(component, Component::Normal(_)))
+            || !paths.insert(path)
+        {
+            return Err(io::Error::new(
+                io::ErrorKind::InvalidInput,
+                "invalid or duplicate generated file path",
+            ));
+        }
+        let destination = staging.path.join(path);
+        if let Some(parent) = destination.parent() {
+            fs::create_dir_all(parent)?;
+        }
+        fs::write(destination, &file.contents)?;
+    }
     // A directory rename cannot replace a nonempty directory, file, or symlink.
     // This also preserves a destination that became nonempty after the check.
     fs::rename(&staging.path, destination)?;
@@ -104,5 +122,37 @@ mod tests {
         assert!(!destination.exists(), "partial output became visible");
         drop(staging);
         assert_eq!(fs::read_dir(&temp.path).unwrap().count(), 0);
+    }
+
+    #[test]
+    fn generated_paths_cannot_escape_or_publish_partial_output() {
+        for invalid in [
+            "../escape.c",
+            "/escape.c",
+            "nested/../escape.c",
+            ".",
+            "valid.c",
+        ] {
+            let temp =
+                StagingDirectory::create(&std::env::temp_dir(), OsStr::new("unused")).unwrap();
+            let destination = temp.path.join("generated");
+            let output = Output {
+                files: vec![
+                    emela_emb_compiler::GeneratedFile {
+                        path: "valid.c".into(),
+                        contents: "complete".into(),
+                    },
+                    emela_emb_compiler::GeneratedFile {
+                        path: invalid.into(),
+                        contents: "invalid".into(),
+                    },
+                ],
+                ..Output::default()
+            };
+            let error = publish(&output, &destination).unwrap_err();
+            assert_eq!(error.kind(), io::ErrorKind::InvalidInput);
+            assert!(!destination.exists());
+            assert_eq!(fs::read_dir(&temp.path).unwrap().count(), 0);
+        }
     }
 }
