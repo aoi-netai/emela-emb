@@ -1,0 +1,378 @@
+{
+  "fixed_revision": "c34c0aeefdd966d854371b3110db00a47798751d",
+  "compiler_checkpoint": "ed13e45087bca39145518426dcc590135d76f0ea",
+  "programs": [
+    {
+      "id": "program:151d66237ba9b27b858e",
+      "files": [
+        {
+          "name": "main.emel",
+          "fixture": "crates/emela-emb-compiler/tests/compat/legacy-corpus/sources/8ea142e4bf88263cbcba03ddba8878f871ffa8d04f469bb959618188c7ffbd93.emel",
+          "source_id": "source:8ea142e4bf88263cbcba",
+          "sha256": "8ea142e4bf88263cbcba03ddba8878f871ffa8d04f469bb959618188c7ffbd93"
+        }
+      ],
+      "legacy_tests": [
+        "emit::fiber::attempt::attempt_keeps_the_embedded_policy_of_stopping_immediately_on_defect"
+      ],
+      "new_test": {
+        "kind": "source_test",
+        "path": "crates/emela-emb-compiler/tests/p7_cause_compat.rs",
+        "symbol": "attempt_keeps_the_embedded_policy_of_stopping_immediately_on_defect"
+      },
+      "source_adaptation": "Original fixture bytes preserved; only explicit C exports added. Old public C symbol suffixes adapted, no post-source IR mutation.",
+      "options": {
+        "heap_bytes": 8192,
+        "fiber_capacity": 8,
+        "frame_capacity": 24,
+        "frame_bytes": 512,
+        "task_capacity": 2,
+        "event_capacity": 2,
+        "task_adapter": {
+          "host_wait": "board_wait_start"
+        }
+      },
+      "observations": {
+        "source_check": "passed",
+        "C_generation": "passed",
+        "C_runtime_O0": "passed",
+        "C_runtime_O2": "passed",
+        "iterations": 1,
+        "terminal_defect": true,
+        "heap_empty_after_each_fully_released_route": false
+      },
+      "C_harness": "crates/emela-emb-compiler/tests/compat/p7/cause/attempt_keeps_the_embedded_policy_of_stopping_immediately_on_defect.c",
+      "runtime_assertions": [
+        "Panic test defect exact11byte message stops immediately; release mark99 never runs. Old process-stop observation retained, no artificial repeated-defect recovery."
+      ]
+    },
+    {
+      "id": "program:22fce5f6553a191ca752",
+      "files": [
+        {
+          "name": "main.emel",
+          "fixture": "crates/emela-emb-compiler/tests/compat/legacy-corpus/sources/7387dae863e7f1a97c4f3874ddadc150f412b5e7dde9a2a70c157a1265377003.emel",
+          "source_id": "source:7387dae863e7f1a97c4f",
+          "sha256": "7387dae863e7f1a97c4f3874ddadc150f412b5e7dde9a2a70c157a1265377003"
+        }
+      ],
+      "legacy_tests": [
+        "emit::fiber::cause::cause_to_string_uses_error_show_and_caller_output_buffer"
+      ],
+      "new_test": {
+        "kind": "source_test",
+        "path": "crates/emela-emb-compiler/tests/p7_cause_compat.rs",
+        "symbol": "cause_to_string_uses_error_show_and_caller_output_buffer"
+      },
+      "source_adaptation": "Original fixture bytes preserved; only explicit C exports added. Old public C symbol suffixes adapted, no post-source IR mutation.",
+      "options": {
+        "heap_bytes": 2048,
+        "fiber_capacity": 8,
+        "frame_capacity": 24,
+        "frame_bytes": 512,
+        "task_capacity": 2,
+        "event_capacity": 2,
+        "task_adapter": {
+          "host_wait": "board_wait_start"
+        }
+      },
+      "observations": {
+        "source_check": "passed",
+        "C_generation": "passed",
+        "C_runtime_O0": "passed",
+        "C_runtime_O2": "passed",
+        "iterations": 1000,
+        "terminal_defect": false,
+        "heap_empty_after_each_fully_released_route": true
+      },
+      "C_harness": "crates/emela-emb-compiler/tests/compat/p7/cause/cause_to_string_uses_error_show_and_caller_output_buffer.c",
+      "runtime_assertions": [
+        "Owned Cause contains Int32MIN; exact error: Boom(n: -2147483648) is returned in the caller256byte buffer."
+      ]
+    },
+    {
+      "id": "program:487a37e912618d251aaf",
+      "files": [
+        {
+          "name": "main.emel",
+          "fixture": "crates/emela-emb-compiler/tests/compat/legacy-corpus/sources/a3c77db970a93187f73e1acda5dac41f5237626da01f82b47e11e396411bcf28.emel",
+          "source_id": "source:a3c77db970a93187f73e",
+          "sha256": "a3c77db970a93187f73e1acda5dac41f5237626da01f82b47e11e396411bcf28"
+        }
+      ],
+      "legacy_tests": [
+        "emit::fiber::attempt::attempt_captures_sync_failure_and_returns_owned_cause"
+      ],
+      "new_test": {
+        "kind": "source_test",
+        "path": "crates/emela-emb-compiler/tests/p7_cause_compat.rs",
+        "symbol": "attempt_captures_sync_failure_and_returns_owned_cause"
+      },
+      "source_adaptation": "Original fixture bytes preserved; only explicit C exports added. Old public C symbol suffixes adapted, no post-source IR mutation.",
+      "options": {
+        "heap_bytes": 1024,
+        "fiber_capacity": 8,
+        "frame_capacity": 24,
+        "frame_bytes": 512,
+        "task_capacity": 2,
+        "event_capacity": 2,
+        "task_adapter": {
+          "host_wait": "board_wait_start"
+        }
+      },
+      "observations": {
+        "source_check": "passed",
+        "C_generation": "passed",
+        "C_runtime_O0": "passed",
+        "C_runtime_O2": "passed",
+        "iterations": 1000,
+        "terminal_defect": false,
+        "heap_empty_after_each_fully_released_route": true
+      },
+      "C_harness": "crates/emela-emb-compiler/tests/compat/p7/cause/attempt_captures_sync_failure_and_returns_owned_cause.c",
+      "runtime_assertions": [
+        "Alternating success41+1 and typed Boom failure both return42."
+      ]
+    },
+    {
+      "id": "program:895a9eae3b9139e79bf7",
+      "files": [
+        {
+          "name": "main.emel",
+          "fixture": "crates/emela-emb-compiler/tests/compat/legacy-corpus/sources/159a654c1a344468d5e3a70f248efd5f3b53929258ef0967a3b514643ea985af.emel",
+          "source_id": "source:159a654c1a344468d5e3",
+          "sha256": "159a654c1a344468d5e3a70f248efd5f3b53929258ef0967a3b514643ea985af"
+        }
+      ],
+      "legacy_tests": [
+        "emit::fiber::cause::raised_interruption_crosses_sync_calls_and_attempt_without_becoming_a_value"
+      ],
+      "new_test": {
+        "kind": "source_test",
+        "path": "crates/emela-emb-compiler/tests/p7_cause_compat.rs",
+        "symbol": "raised_interruption_crosses_sync_calls_and_attempt_without_becoming_a_value"
+      },
+      "source_adaptation": "Original fixture bytes preserved; only explicit C exports added. Old public C symbol suffixes adapted, no post-source IR mutation.",
+      "options": {
+        "heap_bytes": 8192,
+        "fiber_capacity": 10,
+        "frame_capacity": 24,
+        "frame_bytes": 512,
+        "task_capacity": 2,
+        "event_capacity": 2,
+        "task_adapter": {
+          "host_wait": "board_wait_start"
+        }
+      },
+      "observations": {
+        "source_check": "passed",
+        "C_generation": "passed",
+        "C_runtime_O0": "passed",
+        "C_runtime_O2": "passed",
+        "iterations": 1000,
+        "terminal_defect": false,
+        "heap_empty_after_each_fully_released_route": true
+      },
+      "C_harness": "crates/emela-emb-compiler/tests/compat/p7/cause/raised_interruption_crosses_sync_calls_and_attempt_without_becoming_a_value.c",
+      "runtime_assertions": [
+        "Make owns emptyrow Interrupt Cause across scope/fiber recycling; display is exact interrupted.",
+        "Sync and asyncbounce through Attempt preserve interruption control, skipmark99, run Inner/Outer releases1/2 then3; return42 and reject stale task completion."
+      ]
+    },
+    {
+      "id": "program:902e83bb72b886983dd2",
+      "files": [
+        {
+          "name": "main.emel",
+          "fixture": "crates/emela-emb-compiler/tests/compat/legacy-corpus/sources/bb9a5869439d8f10967ceb3997ec8ac8a9bcbedcc97962e79d1254ae734d58cf.emel",
+          "source_id": "source:bb9a5869439d8f10967c",
+          "sha256": "bb9a5869439d8f10967ceb3997ec8ac8a9bcbedcc97962e79d1254ae734d58cf"
+        }
+      ],
+      "legacy_tests": [
+        "emit::fiber::cause::cause_kind_reads_failure_without_consuming_the_cause"
+      ],
+      "new_test": {
+        "kind": "source_test",
+        "path": "crates/emela-emb-compiler/tests/p7_cause_compat.rs",
+        "symbol": "cause_kind_reads_failure_without_consuming_the_cause"
+      },
+      "source_adaptation": "Original fixture bytes preserved; only explicit C exports added. Old public C symbol suffixes adapted, no post-source IR mutation.",
+      "options": {
+        "heap_bytes": 1024,
+        "fiber_capacity": 8,
+        "frame_capacity": 24,
+        "frame_bytes": 512,
+        "task_capacity": 2,
+        "event_capacity": 2,
+        "task_adapter": {
+          "host_wait": "board_wait_start"
+        }
+      },
+      "observations": {
+        "source_check": "passed",
+        "C_generation": "passed",
+        "C_runtime_O0": "passed",
+        "C_runtime_O2": "passed",
+        "iterations": 1000,
+        "terminal_defect": false,
+        "heap_empty_after_each_fully_released_route": true
+      },
+      "C_harness": "crates/emela-emb-compiler/tests/compat/p7/cause/cause_kind_reads_failure_without_consuming_the_cause.c",
+      "runtime_assertions": [
+        "Discarded first Cause.kind leaves cause alive for second Fail kind match returning42."
+      ]
+    },
+    {
+      "id": "program:e2cf3f9e45106522dedf",
+      "files": [
+        {
+          "name": "main.emel",
+          "fixture": "crates/emela-emb-compiler/tests/compat/legacy-corpus/sources/faada42706e33db2b04fb40b0c4d59c6fa0653ef73fe0c3a1286503445153ca2.emel",
+          "source_id": "source:faada42706e33db2b04f",
+          "sha256": "faada42706e33db2b04fb40b0c4d59c6fa0653ef73fe0c3a1286503445153ca2"
+        }
+      ],
+      "legacy_tests": [
+        "emit::fiber::attempt::attempt_owns_managed_success_and_releases_discarded_results"
+      ],
+      "new_test": {
+        "kind": "source_test",
+        "path": "crates/emela-emb-compiler/tests/p7_cause_compat.rs",
+        "symbol": "attempt_owns_managed_success_and_releases_discarded_results"
+      },
+      "source_adaptation": "Original fixture bytes preserved; only explicit C exports added. Old public C symbol suffixes adapted, no post-source IR mutation.",
+      "options": {
+        "heap_bytes": 2048,
+        "fiber_capacity": 8,
+        "frame_capacity": 24,
+        "frame_bytes": 512,
+        "task_capacity": 2,
+        "event_capacity": 2,
+        "task_adapter": {
+          "host_wait": "board_wait_start"
+        }
+      },
+      "observations": {
+        "source_check": "passed",
+        "C_generation": "passed",
+        "C_runtime_O0": "passed",
+        "C_runtime_O2": "passed",
+        "iterations": 1000,
+        "terminal_defect": false,
+        "heap_empty_after_each_fully_released_route": true
+      },
+      "C_harness": "crates/emela-emb-compiler/tests/compat/p7/cause/attempt_owns_managed_success_and_releases_discarded_results.c",
+      "runtime_assertions": [
+        "Discarded failure and two owning List successes reclaim every allocation; keptsuccess length2+40==42."
+      ]
+    },
+    {
+      "id": "program:fb2aa71c1044bb6ef15e",
+      "files": [
+        {
+          "name": "main.emel",
+          "fixture": "crates/emela-emb-compiler/tests/compat/legacy-corpus/sources/b29b5560fc869cb93fe7731f35fb1c3eb743761c02d8249ddf9b46a36c2e3ee1.emel",
+          "source_id": "source:b29b5560fc869cb93fe7",
+          "sha256": "b29b5560fc869cb93fe7731f35fb1c3eb743761c02d8249ddf9b46a36c2e3ee1"
+        }
+      ],
+      "legacy_tests": [
+        "emit::fiber::cause::cause_raise_preserves_the_error_and_runs_native_cleanup_before_escape"
+      ],
+      "new_test": {
+        "kind": "source_test",
+        "path": "crates/emela-emb-compiler/tests/p7_cause_compat.rs",
+        "symbol": "cause_raise_preserves_the_error_and_runs_native_cleanup_before_escape"
+      },
+      "source_adaptation": "Original fixture bytes preserved; only explicit C exports added. Old public C symbol suffixes adapted, no post-source IR mutation.",
+      "options": {
+        "heap_bytes": 1024,
+        "fiber_capacity": 8,
+        "frame_capacity": 24,
+        "frame_bytes": 512,
+        "task_capacity": 2,
+        "event_capacity": 2,
+        "task_adapter": {
+          "host_wait": "board_wait_start"
+        }
+      },
+      "observations": {
+        "source_check": "passed",
+        "C_generation": "passed",
+        "C_runtime_O0": "passed",
+        "C_runtime_O2": "passed",
+        "iterations": 1000,
+        "terminal_defect": false,
+        "heap_empty_after_each_fully_released_route": true
+      },
+      "C_harness": "crates/emela-emb-compiler/tests/compat/p7/cause/cause_raise_preserves_the_error_and_runs_native_cleanup_before_escape.c",
+      "runtime_assertions": [
+        "Rethrow preserves typed Boom42 and invokes native resource release exactly once before outerescape."
+      ]
+    },
+    {
+      "id": "program:fc4001cbeeb0256ac68c",
+      "files": [
+        {
+          "name": "main.emel",
+          "fixture": "crates/emela-emb-compiler/tests/compat/legacy-corpus/sources/8ccb3f0827c9846e83e7b1833d02e2a2e206626fb074cb4cd05d8ac64b6be0d4.emel",
+          "source_id": "source:8ccb3f0827c9846e83e7",
+          "sha256": "8ccb3f0827c9846e83e7b1833d02e2a2e206626fb074cb4cd05d8ac64b6be0d4"
+        }
+      ],
+      "legacy_tests": [
+        "emit::fiber::attempt::attempt_waits_for_async_cleanup_before_catching_failure"
+      ],
+      "new_test": {
+        "kind": "source_test",
+        "path": "crates/emela-emb-compiler/tests/p7_cause_compat.rs",
+        "symbol": "attempt_waits_for_async_cleanup_before_catching_failure"
+      },
+      "source_adaptation": "Original fixture bytes preserved; only explicit C exports added. Old public C symbol suffixes adapted, no post-source IR mutation.",
+      "options": {
+        "heap_bytes": 4096,
+        "fiber_capacity": 8,
+        "frame_capacity": 24,
+        "frame_bytes": 512,
+        "task_capacity": 2,
+        "event_capacity": 2,
+        "task_adapter": {
+          "host_wait": "board_wait_start"
+        }
+      },
+      "observations": {
+        "source_check": "passed",
+        "C_generation": "passed",
+        "C_runtime_O0": "passed",
+        "C_runtime_O2": "passed",
+        "iterations": 1000,
+        "terminal_defect": false,
+        "heap_empty_after_each_fully_released_route": true
+      },
+      "C_harness": "crates/emela-emb-compiler/tests/compat/p7/cause/attempt_waits_for_async_cleanup_before_catching_failure.c",
+      "runtime_assertions": [
+        "Source marks1/2/3 and waits1/2; both success and typedfailure wait for asynchronous release before publishing42."
+      ]
+    }
+  ],
+  "test_file_sha256": "135edeeea07703d1f0c506beb51cd39d1cbdd41a04fedde6ae842efa64195c30",
+  "run": {
+    "command": "CARGO_PROFILE_TEST_OPT_LEVEL=1 cargo test -p emela-emb-compiler --test p7_cause_compat --locked --offline",
+    "passed": 8,
+    "failed": 0,
+    "ignored": 0,
+    "C_flags": [
+      "-std=c11",
+      "-Wall",
+      "-Werror"
+    ],
+    "C_optimizations": [
+      "-O0",
+      "-O2"
+    ],
+    "strict_clippy_all_targets": "passed",
+    "MSRV_1_85_all_targets": "passed",
+    "fmt_diff": "passed"
+  }
+}
