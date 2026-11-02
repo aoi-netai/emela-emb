@@ -77,7 +77,12 @@
     "reference_paths": 867,
     "missing_reference_paths": 0,
     "symbol_components_missing": 0,
-    "fmt_and_diff": "passed"
+    "fmt_and_diff": "passed",
+    "fresh_single_branch_clone": {
+      "passed": true,
+      "snapshot_revision": "552f28a",
+      "method": "git bundle of feat/compiler-07-completion only, then a fresh git clone; both audit --check commands succeeded without orphaned feature commits or upstream checkout"
+    }
   },
   "scope": {
     "records": 428,
