@@ -230,7 +230,16 @@ impl Checker {
     }
     fn receiver_module(&self, ty: TypeId) -> Option<usize> {
         let name = match self.catalog.core.ty(ty) {
-            Type::Enum(id, _) => return Some(self.catalog.declaration(*id).module),
+            Type::Enum(id, _) => {
+                let declaration = self.catalog.declaration(*id);
+                if self.modules.modules[declaration.module].builtin
+                    && declaration.ast.name.value == "Option"
+                {
+                    "Option"
+                } else {
+                    return Some(declaration.module);
+                }
+            }
             Type::Int => "Int",
             Type::Int64 => "Int64",
             Type::Float => "Float",

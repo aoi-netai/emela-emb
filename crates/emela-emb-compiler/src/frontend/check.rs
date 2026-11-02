@@ -262,7 +262,8 @@ impl Checker {
                                 .intern(crate::contract::ir::Type::Param(index));
                             bounds.entry(ty).or_default().extend(constraints);
                         }
-                        if !parameter.name.value.as_bytes()[0].is_ascii_uppercase()
+                        if !(parameter.name.value.as_bytes()[0].is_ascii_uppercase()
+                            || (method.is_some() && parameter.name.value.starts_with('$')))
                             || type_parameters
                                 .insert(parameter.name.value.clone(), index)
                                 .is_some()
@@ -1382,7 +1383,44 @@ impl Checker {
                         ),
                     ));
                 }
-                let id = match self.resolve(module, path)? {
+                let symbol = match self.resolve(module, path) {
+                    Ok(symbol) => symbol,
+                    Err(error) => {
+                        if path.len() > 1 {
+                            let prefix = &path[..path.len() - 1];
+                            let value = match self.resolve(module, prefix) {
+                                Ok(Symbol::Constructor(ctor)) => {
+                                    self.catalog.core.enums[ctor.enum_id].variants[ctor.variant]
+                                        .tys
+                                        .is_empty()
+                                }
+                                Ok(Symbol::Function(id)) => self.definitions[id.0].ast.constant,
+                                Ok(Symbol::Constant(_)) => true,
+                                Err(_) => false,
+                            };
+                            if value {
+                                let base = ast::Expr {
+                                    kind: A::Name(prefix.to_vec()),
+                                    span: Span::new(
+                                        callee.span.start,
+                                        prefix.last().unwrap().span.end,
+                                    ),
+                                };
+                                return self.method_call(
+                                    module,
+                                    &base,
+                                    path.last().unwrap(),
+                                    args,
+                                    locals,
+                                    expected,
+                                    span,
+                                );
+                            }
+                        }
+                        return Err(error);
+                    }
+                };
+                let id = match symbol {
                     Symbol::Function(id) => id,
                     Symbol::Constructor(ctor) => {
                         return self.construct(module, ctor, args, locals, expected, span);

@@ -17,6 +17,9 @@ pub fn run()->Int {
   assert generic(Model.Point(value:4))==5
   assert "  x  ".trim()=="x"
   assert True.show()=="True"
+  assert None.or(7)==7
+  assert Some(7).is_some()
+  assert Int.MIN.to_string()=="-2147483648"
   answer
 }
 "#;

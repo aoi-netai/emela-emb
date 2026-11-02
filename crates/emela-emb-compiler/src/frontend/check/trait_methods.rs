@@ -180,7 +180,7 @@ impl Checker {
         expected: Option<Ty>,
         span: Span,
     ) -> Result<ir::Expr, Diagnostic> {
-        let (_, signature, names) = self.trait_method(module, trait_id, method, span)?;
+        let (owner, signature, names) = self.trait_method(module, trait_id, method, span)?;
         let self_type = self
             .solver
             .try_fresh(
@@ -188,12 +188,36 @@ impl Checker {
                 super::super::infer::Constraint::Any,
             )
             .map_err(|e| self.error(module, DK::Type, span, e.message))?;
+        let method_parameters = self
+            .traits
+            .registry
+            .trait_data(owner)
+            .map_err(|e| self.error(module, DK::Type, span, e.message))?
+            .methods
+            .iter()
+            .find(|item| item.name == method)
+            .unwrap()
+            .type_parameters
+            .len();
+        let method_type_arguments = (0..method_parameters)
+            .map(|_| {
+                self.solver.try_fresh(
+                    &mut self.catalog.core.types,
+                    super::super::infer::Constraint::Any,
+                )
+            })
+            .collect::<Result<Vec<_>, _>>()
+            .map_err(|e| self.error(module, DK::Type, span, e.message))?;
+        let substitutions = [self_type]
+            .into_iter()
+            .chain(method_type_arguments.iter().copied())
+            .collect::<Vec<_>>();
         let params = signature
             .params
             .iter()
-            .map(|&ty| data::frontend_type(self.catalog.core.types.subst(ty, &[self_type])))
+            .map(|&ty| data::frontend_type(self.catalog.core.types.subst(ty, &substitutions)))
             .collect::<Vec<_>>();
-        let ret = data::frontend_type(self.catalog.core.types.subst(signature.ret, &[self_type]));
+        let ret = data::frontend_type(self.catalog.core.types.subst(signature.ret, &substitutions));
         if let Some(expected) = expected {
             self.expect_type(module, ret, expected, span)?;
         }
@@ -241,8 +265,22 @@ impl Checker {
             .solver
             .resolve(&mut self.catalog.core.types, self_type)
             .map_err(|e| self.error(module, DK::Type, span, e.message))?;
-        self.checked_trait_call(
-            module, trait_id, method, receiver, checked, order, false, ret, span,
+        let method_type_arguments = method_type_arguments
+            .into_iter()
+            .map(|ty| self.solver.resolve(&mut self.catalog.core.types, ty))
+            .collect::<Result<Vec<_>, _>>()
+            .map_err(|e| self.error(module, DK::Type, span, e.message))?;
+        self.checked_generic_trait_call(
+            module,
+            trait_id,
+            method,
+            receiver,
+            method_type_arguments,
+            checked,
+            order,
+            false,
+            ret,
+            span,
         )
     }
     #[allow(clippy::too_many_arguments)]
@@ -258,13 +296,41 @@ impl Checker {
         ret: Ty,
         span: Span,
     ) -> Result<ir::Expr, Diagnostic> {
+        self.checked_generic_trait_call(
+            module,
+            trait_id,
+            method,
+            self_type,
+            vec![],
+            args,
+            order,
+            nested_show,
+            ret,
+            span,
+        )
+    }
+    #[allow(clippy::too_many_arguments)]
+    fn checked_generic_trait_call(
+        &mut self,
+        module: usize,
+        trait_id: TraitId,
+        method: &str,
+        self_type: b::TypeId,
+        method_type_arguments: Vec<b::TypeId>,
+        args: Vec<ir::Expr>,
+        order: Vec<usize>,
+        nested_show: bool,
+        ret: Ty,
+        span: Span,
+    ) -> Result<ir::Expr, Diagnostic> {
         self.traits
             .registry
-            .resolve(
+            .resolve_generic(
                 &self.catalog.core,
                 self_type,
                 trait_id,
                 method,
+                &method_type_arguments,
                 &self.current_bounds,
             )
             .map_err(|e| self.error(module, DK::Type, span, e.message))?;
@@ -275,7 +341,7 @@ impl Checker {
                 self_type,
                 args,
                 order,
-                method_type_arguments: vec![],
+                method_type_arguments,
                 nested_show,
             },
             ty: ret,

@@ -34,6 +34,7 @@ struct Scope {
 #[derive(Clone)]
 struct MethodTemplate {
     name: String,
+    type_parameters: Vec<Vec<TraitId>>,
     signature: Signature,
     function: Option<(usize, String)>,
 }
@@ -105,25 +106,32 @@ fn substitute_signature(
     original: &Signature,
     self_type: b::TypeId,
 ) -> Signature {
+    substitute_signature_arguments(core, original, &[self_type])
+}
+fn substitute_signature_arguments(
+    core: &mut b::Definitions,
+    original: &Signature,
+    arguments: &[b::TypeId],
+) -> Signature {
     let params = original
         .params
         .iter()
-        .map(|ty| data::frontend_type(core.types.subst(data::backend_type(*ty), &[self_type])))
+        .map(|ty| data::frontend_type(core.types.subst(data::backend_type(*ty), arguments)))
         .collect();
     let ret = original
         .ret
-        .map(|ty| data::frontend_type(core.types.subst(data::backend_type(ty), &[self_type])));
+        .map(|ty| data::frontend_type(core.types.subst(data::backend_type(ty), arguments)));
     let errors = original
         .sets
         .errors
         .iter()
-        .map(|ty| core.types.subst(*ty, &[self_type]))
+        .map(|ty| core.types.subst(*ty, arguments))
         .collect::<Vec<_>>();
     let constraints = original
         .sets
         .error_constraints
         .iter()
-        .map(|ty| core.types.subst(*ty, &[self_type]))
+        .map(|ty| core.types.subst(*ty, arguments))
         .collect();
     Signature {
         params,
@@ -297,7 +305,7 @@ impl TraitCollection {
                 .map(|method| Method {
                     name: method.name.clone(),
                     signature: function_type(core, &method.signature),
-                    type_parameters: vec![],
+                    type_parameters: method.type_parameters.clone(),
                     default_function: method.function.as_ref().map(|_| DefinitionId(0)),
                 })
                 .collect();
@@ -424,7 +432,7 @@ impl TraitCollection {
                 methods.push(Method {
                     name: method.name.clone(),
                     signature: function_type(core, &method.signature),
-                    type_parameters: vec![],
+                    type_parameters: method.type_parameters.clone(),
                     default_function,
                 });
             }
@@ -769,14 +777,6 @@ fn prepare_inner(
                     "duplicate trait method",
                 ));
             }
-            if !method.type_params.is_empty() {
-                return Err(Diagnostic::new(
-                    DK::Unsupported,
-                    method.name.span,
-                    "generic trait methods require method type arguments in specialization",
-                )
-                .in_source(&collection.scopes[module].source_name));
-            }
             if !method.attributes.is_empty() {
                 return Err(diagnostic(
                     &collection.scopes[module],
@@ -785,6 +785,7 @@ fn prepare_inner(
                 ));
             }
             let signature = method_signature(modules, catalog, module, &method)?;
+            let type_parameters = collection.bounds(module, &method.type_params)?;
             let errors = signature.sets.errors.clone();
             let function = if method.body.is_some() {
                 let mut default = method.clone();
@@ -792,15 +793,21 @@ fn prepare_inner(
                     name: ast::Text::new("Self", method.name.span),
                     bounds: vec![declaration.name.clone()],
                 }];
+                default.type_params.extend(method.type_params.clone());
+                let required = [vec![id]]
+                    .into_iter()
+                    .chain(type_parameters.clone())
+                    .collect::<Vec<_>>();
+                let bounds = parameter_bounds(&mut catalog.core, &required);
                 Some(collection.add_function(
                     modules,
                     module,
                     default,
                     MethodInfo {
                         signature: signature.clone(),
-                        type_parameters: 1,
+                        type_parameters: 1 + method.type_params.len(),
                         derivation: None,
-                        bounds: HashMap::from([(self_type, vec![id])]),
+                        bounds,
                         errors_allowed: errors.clone(),
                         self_type: Some(self_type),
                     },
@@ -810,6 +817,7 @@ fn prepare_inner(
             };
             methods.push(MethodTemplate {
                 name: method.name.value,
+                type_parameters,
                 signature,
                 function,
             });
@@ -819,7 +827,7 @@ fn prepare_inner(
             .map(|method| Method {
                 name: method.name.clone(),
                 signature: function_type(&mut catalog.core, &method.signature),
-                type_parameters: vec![],
+                type_parameters: method.type_parameters.clone(),
                 default_function: None,
             })
             .collect();
@@ -960,19 +968,47 @@ fn prepare_inner(
                 ));
             }
             let original = signature_from_type(&catalog.core, expected.signature);
-            let signature = substitute_signature(&mut catalog.core, &original, target);
+            let method_arguments = (0..expected.type_parameters.len())
+                .map(|index| {
+                    catalog
+                        .core
+                        .types
+                        .intern(b::Type::Param(implementation.params.len() + index))
+                })
+                .collect::<Vec<_>>();
+            let signature_arguments = [target]
+                .into_iter()
+                .chain(method_arguments.iter().copied())
+                .collect::<Vec<_>>();
+            let signature =
+                substitute_signature_arguments(&mut catalog.core, &original, &signature_arguments);
             let errors = signature.sets.errors.clone();
             let mut generated = method.clone();
             generated.type_params = implementation.params.clone();
+            generated
+                .type_params
+                .extend(
+                    method_arguments
+                        .iter()
+                        .enumerate()
+                        .map(|(index, _)| ast::TypeParameter {
+                            name: ast::Text::new(format!("$MethodT{index}"), method.name.span),
+                            bounds: vec![],
+                        }),
+                );
+            let mut method_bounds = bounds.clone();
+            for (&argument, required) in method_arguments.iter().zip(&expected.type_parameters) {
+                method_bounds.insert(argument, required.clone());
+            }
             let key = collection.add_function(
                 modules,
                 module,
                 generated,
                 MethodInfo {
                     signature,
-                    type_parameters: implementation.params.len(),
+                    type_parameters: implementation.params.len() + method_arguments.len(),
                     derivation: None,
-                    bounds: bounds.clone(),
+                    bounds: method_bounds,
                     errors_allowed: errors,
                     self_type: Some(target),
                 },
@@ -1106,7 +1142,21 @@ fn method_signature(
             .in_source(&modules.modules[module].source_name));
         }
     }
-    let parameters = HashMap::from([("Self".into(), 0)]);
+    let mut parameters = HashMap::from([("Self".into(), 0)]);
+    for (index, parameter) in method.type_params.iter().enumerate() {
+        if !parameter.name.value.as_bytes()[0].is_ascii_uppercase()
+            || parameters
+                .insert(parameter.name.value.clone(), index + 1)
+                .is_some()
+        {
+            return Err(Diagnostic::new(
+                DK::Name,
+                parameter.name.span,
+                "invalid or duplicate trait method type parameter",
+            )
+            .in_source(&modules.modules[module].source_name));
+        }
+    }
     let params = method
         .params
         .iter()
