@@ -202,18 +202,14 @@ impl TraitCollection {
                 .scopes
                 .iter()
                 .position(|scope| scope.name == import.path.value)?;
-            if let Some(item) = self.scopes[target]
+            let item = self.scopes[target]
                 .names
                 .get(path)
-                .filter(|item| item.public)
-            {
-                if found.is_some_and(|previous| previous != item.id) {
-                    return None;
-                }
-                found = Some(item.id);
-            } else {
+                .filter(|item| item.public)?;
+            if found.is_some_and(|previous| previous != item.id) {
                 return None;
             }
+            found = Some(item.id);
         }
         if explicitly_imported {
             return found;

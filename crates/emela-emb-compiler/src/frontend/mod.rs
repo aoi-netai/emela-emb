@@ -15,5 +15,6 @@ pub(crate) mod patterns;
 pub(crate) mod schemes;
 pub(crate) mod specialize;
 pub(crate) mod strings;
+pub(crate) mod trait_collect;
 pub(crate) mod traits;
 pub(crate) mod types;

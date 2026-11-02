@@ -254,6 +254,16 @@ impl Context<'_> {
                     }
                     values.push(value.unwrap_or(b::Operand::Const(b::Const::Unit)));
                 }
+                if *op == b::Builtin::Panic {
+                    builder.term = Some(b::Term::Defect(values[0].clone()));
+                    return None;
+                }
+                if *op == b::Builtin::Todo {
+                    builder.term = Some(b::Term::Defect(b::Operand::Const(b::Const::String(
+                        "not yet implemented".into(),
+                    ))));
+                    return None;
+                }
                 let value = match op {
                     b::Builtin::ShowNested | b::Builtin::ShowString => b::Value::Runtime {
                         op: b::RuntimeOp::ShowString,
@@ -856,6 +866,10 @@ fn literal(value: &ir::Literal) -> b::Const {
 }
 fn builtin(op: Intrinsic) -> b::Builtin {
     match op {
+        Intrinsic::Panic => b::Builtin::Panic,
+        Intrinsic::Todo => b::Builtin::Todo,
+        Intrinsic::Dbg => b::Builtin::Dbg,
+        Intrinsic::Inspect | Intrinsic::ShowNested => b::Builtin::ShowNested,
         Intrinsic::IntBitAnd => b::Builtin::IntBitAnd,
         Intrinsic::IntBitOr => b::Builtin::IntBitOr,
         Intrinsic::IntBitXor => b::Builtin::IntBitXor,
@@ -887,5 +901,9 @@ fn builtin(op: Intrinsic) -> b::Builtin {
         Intrinsic::StringStartsWith => b::Builtin::StringStartsWith,
         Intrinsic::StringEndsWith => b::Builtin::StringEndsWith,
         Intrinsic::StringTrim => b::Builtin::StringTrim,
+        Intrinsic::IntParse => b::Builtin::IntParse,
+        Intrinsic::IntCheckedAdd => b::Builtin::IntCheckedAdd,
+        Intrinsic::FloatParse => b::Builtin::FloatParse,
+        Intrinsic::StringFromCodePoint => b::Builtin::StringFromCodePoint,
     }
 }

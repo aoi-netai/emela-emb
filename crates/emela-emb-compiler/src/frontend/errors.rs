@@ -49,6 +49,7 @@ pub(crate) fn infer(
                 functions: &program.functions,
                 index: &index,
                 source: &function.source_name,
+                registry: &program.registry,
             };
             let analysis = match &function.body {
                 Some(body) => context.block(body, &HashSet::new()),
@@ -86,6 +87,7 @@ pub(crate) fn infer(
             functions: &program.functions,
             index: &index,
             source: &function.source_name,
+            registry: &program.registry,
         };
         let analysis = match &function.body {
             Some(body) => context.block(body, &HashSet::new()),
@@ -115,6 +117,7 @@ struct Context<'a> {
     functions: &'a [ir::Function],
     index: &'a HashMap<ir::DefinitionId, usize>,
     source: &'a str,
+    registry: &'a super::traits::Registry,
 }
 impl Context<'_> {
     fn error(&self, span: Span, message: &str) -> Diagnostic {
@@ -154,11 +157,7 @@ impl Context<'_> {
         let mut analysis = Analysis::default();
         match &expression.kind {
             E::Literal(_) | E::Local(_) => {}
-            E::Concat(args)
-            | E::Tuple(args)
-            | E::Make { args, .. }
-            | E::Builtin { args, .. }
-            | E::TraitCall { args, .. } => {
+            E::Concat(args) | E::Tuple(args) | E::Make { args, .. } | E::Builtin { args, .. } => {
                 for arg in args {
                     analysis.merge(self.expression(arg, dynamic)?);
                 }
@@ -170,6 +169,47 @@ impl Context<'_> {
             E::Binary { left, right, .. } => {
                 analysis.merge(self.expression(left, dynamic)?);
                 analysis.merge(self.expression(right, dynamic)?);
+            }
+            E::TraitCall {
+                trait_id,
+                method,
+                self_type,
+                args,
+                ..
+            } => {
+                for arg in args {
+                    analysis.merge(self.expression(arg, dynamic)?);
+                }
+                let mut owners = vec![*trait_id];
+                owners.extend(
+                    self.registry
+                        .supertraits(*trait_id)
+                        .map_err(|e| self.error(expression.span, &e.message))?,
+                );
+                for owner in owners {
+                    let data = self
+                        .registry
+                        .trait_data(owner)
+                        .map_err(|e| self.error(expression.span, &e.message))?;
+                    if let Some(method) = data.methods.iter().find(|m| m.name == *method) {
+                        let Type::Fn(signature) = self.catalog.core.ty(method.signature).clone()
+                        else {
+                            return Err(self
+                                .error(expression.span, "trait method signature is not callable"));
+                        };
+                        if let Some(sets) = signature.sets {
+                            if let Type::Set(summary) = self.catalog.core.ty(sets.errors).clone() {
+                                for error in summary.params {
+                                    let error = self.catalog.core.types.subst(error, &[*self_type]);
+                                    self.require_error(error, expression.span)?;
+                                    analysis.errors.insert(error);
+                                    analysis.constraints.insert(error);
+                                }
+                            }
+                        }
+                        break;
+                    }
+                }
             }
             E::Call {
                 target,

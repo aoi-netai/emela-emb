@@ -1,0 +1,31 @@
+type Key(value: Int)
+impl Key: Eq { fn eq(self, other) { self.value % 10 == other.value % 10 } }
+impl Key: Ord { fn compare(self, other) { Ord.compare(self.value % 10, other.value % 10) } }
+impl Key: Show { fn show(self) { "K#{self.value}" } }
+type Envelope(key: Key, text: String) derive Eq, Ord, Show
+enum Signal { Missing, Present(Key, String) } derive Eq, Ord, Show
+trait Score {
+  fn score(self) -> Int
+  fn next(self) -> Int { Score.score(self) + 1 }
+}
+impl Key: Score { fn score(self) { self.value + 1 } }
+fn get_score[A: Score](value: A) -> Int { Score.score(value) }
+fn larger[A: Ord](a: A, b: A) -> A { if Ord.compare(a, b) == Less { b } else { a } }
+@export(c, "sync_traits")
+pub fn traits(n: Int, text: String) -> String {
+  a = Envelope(key: Key(value: n), text: text)
+  b = Envelope(key: Key(value: n + 10), text: text)
+  assert a == b
+  assert Ord.compare(a, b) == Equal
+  assert Missing < Present(Key(value: n), text)
+  assert Present(Key(value: n), text) == Present(Key(value: n + 10), text)
+  assert Ord.compare(Present(Key(value: n), text), Present(Key(value: n + 10), text)) == Equal
+  assert Some(Key(value: n)) == Some(Key(value: n + 10))
+  assert (Key(value: n), text) == (Key(value: n + 10), text)
+  assert larger(Key(value: 2), Key(value: 11)).value == 2
+  assert get_score(Key(value: n)) == n + 1
+  assert Score.next(Key(value: n)) == n + 2
+  inspect((a, Some(Key(value: n)), Present(Key(value: n), text)))
+}
+@export(c, "quoted")
+pub fn quoted(text: String) -> String { inspect(text) }

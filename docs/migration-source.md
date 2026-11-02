@@ -289,3 +289,30 @@
 ## P2の追加採用
 
 `src/input/upstream/const_eval.rs`を`backend/lower/const_eval.rs`へ移し、入力を所有backend IRへ付け替えた。上流adapterやcrateは採用しない。4096 step/64 call深さの静的評価制限を維持し、静的評価できない単相constはこのrepoのlowerがruntime lazy cacheへ切り替える。元ファイルのSHA-256は `43ca4f814e79f2babb621e2778fb403f362bd28f9834adaba6485cb6e598ee33`（同一基準revision）。数値・Unicodeの意味関数と公式vectorの出自は上表と同じ。
+
+## P2の標準宣言・純粋body
+
+同じ固定revision `c34c0aeefdd966d854371b3110db00a47798751d` の `crates/emela-core/lib/core/` から必要な宣言・純粋Emela bodyだけを採用した。ライセンスはApache-2.0（rootのLICENSE）。旧frontend crate、checkout参照、bundle取得への依存は追加しない。
+
+| 固定旧source | 元SHA-256 | 新sourceと適応 |
+| --- | --- | --- |
+| `crates/emela-core/lib/core/prelude.emel` | `8cae91acd9123bd730aa3190f8c178cb64415e6c7872ddec7a8c19bfeff57178` | `lib/core/prelude.emel`: OptionのSome→None順、Ordering、ParseError、panic/todo/dbg/inspectを維持。Boolは既存compiler-owned primitiveとの二重定義を避け、同じFalse/True・Eq/Ord/Show契約をcompilerが供給 |
+| `crates/emela-core/lib/core/option.emel` | `6fe5e4eede2cc017eac5cde9b206107b843062bf9cc7d55134967417ab561e9d` | `lib/core/option.emel`: or/is_some/is_none/or_failとEq/Ord/Show implの純粋bodyを維持。callback引数を取るmap/and_thenはP4の接続対象に残す |
+| `crates/emela-core/lib/core/float.emel` | `5d2ffc4aad22fb3d6280f87a88000ad78430b09eeb8a7ca9e9e9cb18060b0678` | `lib/core/float.emel`: compare/min/maxを追加。NaN total-order、片側NaN、signed-zeroの引数同一性を旧bodyのまま維持 |
+
+新sourceのpathは `crates/emela-emb-compiler/` からの相対path。ライブラリsourceを置いたことだけでは完了判定にせず、frontend登録とsource→Cの試験を対応付ける。
+
+## P2数値・Boolの標準API
+
+固定revisionの `crates/emela-core/lib/core/{int,int64,float,bool}.emel` の宣言と純粋bodyをcompiler所有の同名libへ採用する。型検査・IR・trait解決は独自frontendを通し、本体のcrateやbundleには依存しない。公開parameter名も固定版と一致させ、named argumentを維持する。Int64の固定標準APIにはparseはない。
+
+| 元path | SHA-256（固定版、採用内容も一致） |
+| --- | --- |
+| `crates/emela-core/lib/core/int.emel` | `54ccf521b9f54d359cb63612796211103637501b689162bc53dd31c4412af48b` |
+| `crates/emela-core/lib/core/int64.emel` | `af052d87df6ebc38e98c4fe0f393b85328d2984a76060885de0bca2d7b43b094` |
+| `crates/emela-core/lib/core/float.emel` | `5d2ffc4aad22fb3d6280f87a88000ad78430b09eeb8a7ca9e9e9cb18060b0678` |
+| `crates/emela-core/lib/core/bool.emel` | `68e9dbe8f427a55fc622130b3bd6e70dc09d2235dd84439e96aa75a2584d9354` |
+
+数値parseの比較値は固定 `crates/emela-codegen-emb/tests/emit.rs` の `dynamic_float_formatting_uses_a_bounded_runtime_and_float_parse_uses_the_bounded_parser` からvectorとdecimal generatorを抽出し、`tests/compat/p2/float_parse_cases.rs` に保持する。元ファイルSHA-256: `cfa41127455bb5c5e8ce0c2f02c674286686b12814a9bcec60e56de3a263b2da`。旧IR構築は採用せず、公開Float.parse・Int.parse・Bool.parseとescapeを通すsource試験へ接続する。
+
+採用した標準宣言は `sources.rs` の信頼済みmoduleからだけ登録する。Stringの既存APIのparameter名を固定版の `s/sub/a/b` に合わせ、`from_code_point` と `show_nested` を登録した。後者は型付きShow呼出しへ変換する。Preludeのprimitive trait宣言は独自registryが供給し、source impl/default/deriveは独自collector・checker・具体化を通す。`p2_traits`、`p2_standard_api`、`p2_parse`、`p2_const_patterns`、`p2_debug` で正常・拒否入力と生成Cの `-O0`/`-O2` 実行を確認した。

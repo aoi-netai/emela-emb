@@ -413,6 +413,13 @@ impl<'t, 's> Parser<'t, 's> {
         self.newlines();
         while self.current().kind != K::RBracket {
             let name = self.name("expected type parameter name")?;
+            if reserved(&name.value) {
+                return Err(Diagnostic::new(
+                    DiagnosticKind::Syntax,
+                    name.span,
+                    "reserved word cannot name a type parameter",
+                ));
+            }
             self.newlines();
             let mut bounds = Vec::new();
             if self.take(K::Colon) {

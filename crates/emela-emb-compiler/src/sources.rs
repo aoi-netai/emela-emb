@@ -13,6 +13,8 @@ impl<'a> Source<'a> {
 }
 
 pub(crate) const CORE_MODULES: &[(&str, &str)] = &[
+    ("Prelude", include_str!("../lib/core/prelude.emel")),
+    ("Option", include_str!("../lib/core/option.emel")),
     ("Int", include_str!("../lib/core/int.emel")),
     ("Int64", include_str!("../lib/core/int64.emel")),
     ("Float", include_str!("../lib/core/float.emel")),
@@ -25,6 +27,11 @@ pub(crate) const CORE_MODULES: &[(&str, &str)] = &[
 /// source modules above. User function spellings never select an intrinsic implementation.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub(crate) enum Intrinsic {
+    Panic,
+    Todo,
+    Dbg,
+    Inspect,
+    ShowNested,
     IntBitAnd,
     IntBitOr,
     IntBitXor,
@@ -56,9 +63,18 @@ pub(crate) enum Intrinsic {
     StringStartsWith,
     StringEndsWith,
     StringTrim,
+    IntParse,
+    IntCheckedAdd,
+    FloatParse,
+    StringFromCodePoint,
 }
 pub(crate) fn intrinsic(module: &str, name: &str) -> Option<Intrinsic> {
     Some(match (module, name) {
+        ("Prelude", "panic") => Intrinsic::Panic,
+        ("Prelude", "todo") => Intrinsic::Todo,
+        ("Prelude", "dbg") => Intrinsic::Dbg,
+        ("Prelude", "inspect") => Intrinsic::Inspect,
+        ("String", "show_nested") => Intrinsic::ShowNested,
         ("Int", "bit_and") => Intrinsic::IntBitAnd,
         ("Int", "bit_or") => Intrinsic::IntBitOr,
         ("Int", "bit_xor") => Intrinsic::IntBitXor,
@@ -90,6 +106,10 @@ pub(crate) fn intrinsic(module: &str, name: &str) -> Option<Intrinsic> {
         ("String", "starts_with") => Intrinsic::StringStartsWith,
         ("String", "ends_with") => Intrinsic::StringEndsWith,
         ("String", "trim") => Intrinsic::StringTrim,
+        ("Int", "parse_or_none") => Intrinsic::IntParse,
+        ("Int", "checked_add") => Intrinsic::IntCheckedAdd,
+        ("Float", "parse_or_none") => Intrinsic::FloatParse,
+        ("String", "from_code_point") => Intrinsic::StringFromCodePoint,
         _ => return None,
     })
 }

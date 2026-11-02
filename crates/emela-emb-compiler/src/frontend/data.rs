@@ -40,13 +40,6 @@ impl Catalog {
                             "data declarations require a type name",
                         ));
                     }
-                    if !data.derives.is_empty() {
-                        return Err(Diagnostic::new(
-                            DK::Unsupported,
-                            data.derives[0].span,
-                            "derive implementations are connected with trait checking",
-                        ));
-                    }
                     let mut params = HashSet::new();
                     for param in &data.params {
                         if !params.insert(&param.name.value) {
@@ -54,13 +47,6 @@ impl Catalog {
                                 DK::Name,
                                 param.name.span,
                                 "duplicate type parameter",
-                            ));
-                        }
-                        if !param.bounds.is_empty() {
-                            return Err(Diagnostic::new(
-                                DK::Unsupported,
-                                param.name.span,
-                                "data type parameter constraints are connected with trait checking",
                             ));
                         }
                     }
@@ -188,8 +174,19 @@ impl Catalog {
         text: &ast::Text,
         params: &HashMap<String, usize>,
     ) -> Result<Ty, Diagnostic> {
-        self.type_text(modules, module, &text.value, text.span, params)
+        self.type_text(modules, module, &text.value, text.span, params, None)
     }
+    pub fn resolve_type_with_self(
+        &mut self,
+        modules: &Modules,
+        module: usize,
+        text: &ast::Text,
+        params: &HashMap<String, usize>,
+        self_type: Option<Ty>,
+    ) -> Result<Ty, Diagnostic> {
+        self.type_text(modules, module, &text.value, text.span, params, self_type)
+    }
+
     fn type_text(
         &mut self,
         modules: &Modules,
@@ -197,7 +194,13 @@ impl Catalog {
         text: &str,
         span: Span,
         params: &HashMap<String, usize>,
+        self_type: Option<Ty>,
     ) -> Result<Ty, Diagnostic> {
+        if text == "Self" {
+            if let Some(ty) = self_type {
+                return Ok(ty);
+            }
+        }
         if let Some(&parameter) = params.get(text) {
             return Ok(Ty::Compound(
                 self.core.types.intern(b::Type::Param(parameter)),
@@ -220,7 +223,7 @@ impl Catalog {
             let mut fields = Vec::new();
             for element in split(&text[1..text.len() - 1]) {
                 fields.push(backend_type(
-                    self.type_text(modules, module, element, span, params)?,
+                    self.type_text(modules, module, element, span, params, self_type)?,
                 ));
             }
             return Ok(Ty::Compound(self.core.types.intern(b::Type::Tuple(fields))));
@@ -255,7 +258,7 @@ impl Catalog {
         let mut args = Vec::new();
         for argument in arguments {
             args.push(backend_type(
-                self.type_text(modules, module, argument, span, params)?,
+                self.type_text(modules, module, argument, span, params, self_type)?,
             ));
         }
         Ok(Ty::Compound(self.core.types.enum_type(id, args)))

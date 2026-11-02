@@ -1,15 +1,20 @@
 @intrinsic
-pub fn length(text: String) -> Int
+pub fn length(s: String) -> Int
 @intrinsic
-pub fn byte_size(text: String) -> Int
+pub fn byte_size(s: String) -> Int
 @intrinsic
-pub fn append(left: String, right: String) -> String
+pub fn append(a: String, b: String) -> String
 @intrinsic
-pub fn contains(text: String, needle: String) -> Bool
+pub fn contains(s: String, sub: String) -> Bool
 @intrinsic
-pub fn starts_with(text: String, prefix: String) -> Bool
+pub fn starts_with(s: String, prefix: String) -> Bool
 @intrinsic
-pub fn ends_with(text: String, suffix: String) -> Bool
+pub fn ends_with(s: String, suffix: String) -> Bool
 @intrinsic
-pub fn trim(text: String) -> String
-pub fn is_empty(text: String) -> Bool { byte_size(text) == 0 }
+pub fn trim(s: String) -> String
+pub fn is_empty(s: String) -> Bool { byte_size(s) == 0 }
+@intrinsic
+pub fn from_code_point(n: Int) -> Option[String]
+
+@intrinsic
+pub fn show_nested[A: Show](value: A) -> String
