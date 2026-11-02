@@ -1,0 +1,5 @@
+# Scalar declarations supplied directly by the P1 type registry:
+# Int, Int64, Float, Bool (True, False), (), Never.
+# Numeric limits are resolved constant declaration identities:
+# Int.MIN, Int.MAX, Int64.MIN, Int64.MAX.
+# Rich data declarations and polymorphic traits are connected in P2.
