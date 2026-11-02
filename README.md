@@ -28,6 +28,8 @@ cargo run --locked -p emela-emb-cli -- build examples/minimal/main.emel --out-di
 
 今回の実験の到達点はCとヘッダーの生成です。Cのコンパイル・リンク・実行は後続の実験で扱います。
 
+実施した試験と独立した環境での生成確認は [実験結果](docs/minimal-c-experiment.md) に記録しています。
+
 ## 開発
 
 ```sh
