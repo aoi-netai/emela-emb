@@ -207,6 +207,30 @@ mod tests {
         }))
     }
     #[test]
+    fn aliasing_nominal_row_arguments_keeps_their_existing_failure_constraints() {
+        let mut types = TypeTable::default();
+        let mut solver = Solver::new();
+        let id = la_arena::Idx::from_raw(la_arena::RawIdx::from_u32(0));
+        let error = types.intern(Type::Enum(id, vec![]));
+        let actual = set(&mut types, vec![error]);
+        let first = solver
+            .fresh_row(&mut types, SetKind::Error, Origin::Inferred)
+            .unwrap();
+        let second = solver
+            .fresh_row(&mut types, SetKind::Error, Origin::Inferred)
+            .unwrap();
+        solver
+            .include_sets(&mut types, actual, first, SetKind::Error)
+            .unwrap();
+        let wrapper = la_arena::Idx::from_raw(la_arena::RawIdx::from_u32(1));
+        let left = types.intern(Type::Enum(wrapper, vec![first]));
+        let right = types.intern(Type::Enum(wrapper, vec![second]));
+        solver.unify(&mut types, left, right).unwrap();
+        solver.finish_unused(&mut types).unwrap();
+        assert_eq!(solver.resolve(&mut types, first).unwrap(), actual);
+        assert_eq!(solver.resolve(&mut types, second).unwrap(), actual);
+    }
+    #[test]
     fn concrete_generic_errors_stay_distinct_while_unknown_arguments_are_inferred() {
         let mut types = TypeTable::default();
         let mut solver = Solver::new();

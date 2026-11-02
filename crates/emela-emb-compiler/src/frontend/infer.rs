@@ -598,6 +598,27 @@ impl Solver {
         if variable == target {
             return Ok(());
         }
+        if let Some(kind) = self.row_kind(variable) {
+            if self.is_meta(target) && self.row_kind(target).is_none() {
+                self.register_row(target, kind, Origin::Inferred)?;
+            }
+            let left = self.rows.row(types, variable, kind, &self.metas)?;
+            let right = self.rows.row(types, target, kind, &self.metas)?;
+            // Nominal arguments such as Cause[E] are invariant. Aliasing their
+            // value metas must preserve both rows' existing inclusion constraints.
+            self.rows
+                .solver
+                .equal(left, right)
+                .map_err(rows::set_error)?;
+        } else if let Some(kind) = self.row_kind(target) {
+            self.register_row(variable, kind, Origin::Inferred)?;
+            let left = self.rows.row(types, variable, kind, &self.metas)?;
+            let right = self.rows.row(types, target, kind, &self.metas)?;
+            self.rows
+                .solver
+                .equal(left, right)
+                .map_err(rows::set_error)?;
+        }
         let constraint = self.constraint(variable).expect("registered variable");
         if let Some(other) = self.metas.get_mut(&target) {
             other.constraint = other.constraint.merge(constraint);

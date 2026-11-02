@@ -177,7 +177,6 @@ impl Solver {
         Ok(())
     }
 
-    #[cfg(test)]
     pub(crate) fn equal(&mut self, left: Row, right: Row) -> Result<()> {
         self.includes(left.clone(), right.clone())?;
         self.includes(right, left)
