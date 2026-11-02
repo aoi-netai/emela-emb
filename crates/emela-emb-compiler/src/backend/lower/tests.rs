@@ -26,6 +26,8 @@ mod suspend;
 mod p7_bindings;
 #[path = "p7_data_tests.rs"]
 mod p7_data;
+#[path = "p7_input_tests.rs"]
+mod p7_input;
 
 fn lower_program(program: Program) -> Result<LoweredModule> {
     super::lower_program(program, &Options::default())
