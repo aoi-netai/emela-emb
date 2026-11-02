@@ -14,6 +14,8 @@ mod functions;
 mod handlers;
 #[path = "memory_tests.rs"]
 mod memory;
+#[path = "service_tests.rs"]
+mod services;
 #[path = "suspend_tests.rs"]
 mod suspend;
 
