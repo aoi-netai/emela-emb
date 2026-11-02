@@ -236,6 +236,20 @@ fn validate_function(program: &Program, f: &Function) -> Result<()> {
             Type::Int64 => Repr::I64,
             Type::Float => Repr::F64,
             Type::Unit | Type::Never => Repr::Void,
+            Type::Enum(id, _)
+                if {
+                    let definition = &program.core.enums[*id];
+                    !definition.error
+                        && !definition.external
+                        && !definition.variants.is_empty()
+                        && definition
+                            .variants
+                            .iter()
+                            .all(|variant| variant.fields.is_empty())
+                } =>
+            {
+                Repr::I32
+            }
             _ => Repr::Ref,
         };
         if var.repr != expected {

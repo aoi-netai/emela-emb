@@ -1280,3 +1280,75 @@ fn structural_equality_and_show_use_materialized_tuple_layouts() {
         0,
     );
 }
+
+#[test]
+fn unit_enum_uses_the_scalar_tag_representation() {
+    let mut p = program(vec![]);
+    let enum_id = p.core.enums.alloc(EnumDef {
+        name: "Marker".into(),
+        params: 0,
+        variants: vec![
+            VariantDef {
+                name: "First".into(),
+                fields: VariantFields::Unit,
+                tys: vec![],
+            },
+            VariantDef {
+                name: "Second".into(),
+                fields: VariantFields::Unit,
+                tys: vec![],
+            },
+        ],
+        error: false,
+        external: false,
+    });
+    let ty = p.core.types.intern(Type::Enum(enum_id, vec![]));
+    let mut f = simple();
+    let tag = f.vars.alloc(VarData {
+        hint: "tag".into(),
+        ty,
+        repr: Repr::I32,
+    });
+    let result = variable(&mut f, TypeId::INT);
+    let make = binding(
+        &mut f,
+        Some(tag),
+        Value::Make {
+            ctor: CtorRef {
+                enum_id,
+                variant: 1,
+            },
+            args: vec![],
+        },
+    );
+    let first = f.seqs.alloc(Seq {
+        stmts: vec![],
+        term: Term::Yield(Some(Const::Int(0).into())),
+    });
+    let second = f.seqs.alloc(Seq {
+        stmts: vec![],
+        term: Term::Yield(Some(Const::Int(42).into())),
+    });
+    let switch = f.stmts.alloc(Stmt::Switch {
+        dst: Some(result),
+        on: SwitchOn::Tag(tag),
+        cases: vec![
+            Case {
+                key: CaseKey::Variant(0),
+                body: first,
+            },
+            Case {
+                key: CaseKey::Variant(1),
+                body: second,
+            },
+        ],
+        default: None,
+    });
+    f.seqs[f.body.unwrap()] = Seq {
+        stmts: vec![make, switch],
+        term: Term::Return(Some(result.into())),
+    };
+    p.functions.alloc(f);
+    let output = crate::backend::compile_program(p, &Options::default()).unwrap();
+    execute(&output, DEFECT_HARNESS, 0);
+}
