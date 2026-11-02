@@ -30,10 +30,10 @@ pub(crate) fn lower_program(
     options: &crate::Options,
 ) -> Result<LoweredModule> {
     let mut symbols = HashSet::new();
-    for (_, function) in program.functions.iter() {
+    for (id, function) in program.functions.iter() {
         if function.exported {
-            let symbol = function.export_symbol.as_deref().unwrap_or(&function.name);
-            if !symbols.insert(symbol) {
+            let symbol = crate::semantics::c::function_name(id, function);
+            if !symbols.insert(symbol.clone()) {
                 return Err(invalid(
                     &function.name,
                     format!("duplicate export `{symbol}`"),
@@ -106,11 +106,7 @@ pub(crate) fn lower_program(
     for (_, function) in program.functions.iter_mut() {
         // A self tail call is represented by a loop over the original parameters. Recur's
         // emitter copies all arguments to temporaries before replacing the parameter values.
-        if function
-            .seqs
-            .iter()
-            .any(|(_, seq)| matches!(seq.term, Term::Recur(_)))
-        {
+        if has_function_recur(function) {
             let body = function
                 .body
                 .expect("validated function with a Recur has a body");
@@ -565,6 +561,27 @@ fn value_type(
         }
         _ => Err(unsupported(&f.name, "value variant")),
     }
+}
+
+fn has_function_recur(f: &Function) -> bool {
+    let mut pending: Vec<_> = f.body.into_iter().map(|body| (body, false)).collect();
+    while let Some((id, in_loop)) = pending.pop() {
+        let sequence = &f.seqs[id];
+        if !in_loop && matches!(sequence.term, Term::Recur(_)) {
+            return true;
+        }
+        for &id in &sequence.stmts {
+            match &f.stmts[id] {
+                Stmt::If { then, else_, .. } => {
+                    pending.extend([(*then, in_loop), (*else_, in_loop)]);
+                }
+                Stmt::Block { body, .. } => pending.push((*body, in_loop)),
+                Stmt::Loop { body, .. } => pending.push((*body, true)),
+                _ => {}
+            }
+        }
+    }
+    false
 }
 
 fn positions(f: &Function) -> (HashMap<StmtId, usize>, HashMap<SeqId, usize>) {

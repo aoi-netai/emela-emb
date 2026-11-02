@@ -1,4 +1,4 @@
-//! Output of upstream adaptation. All identifiers refer to the owned backend program.
+//! Output of independent typed-IR lowering. All identifiers refer to the owned backend program.
 use crate::contract::ir::{Const, FnId, Function, LabelId, Program, TypeId, VarId};
 use std::collections::{HashMap, HashSet};
 

@@ -474,3 +474,57 @@ fn private_entry_remains_reachable_beside_an_export() {
         Some("emela_embedded_start")
     );
 }
+
+#[test]
+fn unreachable_external_sequences_do_not_trigger_function_recur_wrapping() {
+    let mut external = Function::new("external");
+    external.external = Some(External {
+        bindings: vec![ExternalBinding {
+            target: "c".into(),
+            host: HostRef::Global("external".into()),
+        }],
+    });
+    external.seqs.alloc(Seq {
+        stmts: vec![],
+        term: Term::Recur(vec![]),
+    });
+    let module = lower_program(program(vec![simple(), external])).unwrap();
+    assert_eq!(module.emitted_functions.len(), 1);
+}
+
+#[test]
+fn rejects_explicit_export_and_external_symbol_collisions() {
+    let mut external = Function::new("foreign_answer");
+    external.ret = TypeId::INT;
+    external.external = Some(External {
+        bindings: vec![ExternalBinding {
+            target: "c".into(),
+            host: HostRef::Global("answer".into()),
+        }],
+    });
+    let mut p = program(vec![external]);
+    let callee = p.functions.iter().next().unwrap().0;
+    let mut answer = simple();
+    let dst = variable(&mut answer, TypeId::INT);
+    let call = binding(
+        &mut answer,
+        Some(dst),
+        Value::Call {
+            callee: Callee::Direct(callee),
+            args: vec![],
+            suspends: false,
+            on_fail: None,
+        },
+    );
+    answer.seqs[answer.body.unwrap()] = Seq {
+        stmts: vec![call],
+        term: Term::Return(Some(dst.into())),
+    };
+    p.functions.alloc(answer);
+    let errors = crate::backend::compile_program(p, &Options::default()).unwrap_err();
+    assert!(
+        errors[0]
+            .message
+            .contains("conflicts with a generated function")
+    );
+}

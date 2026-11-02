@@ -121,6 +121,12 @@ pub(in crate::backend::plan) fn resolve(
                 target_owned: false,
             }
         };
+        if !binding.adapted && generated.contains(&binding.symbol) {
+            return Err(unsupported(
+                &f.name,
+                "external symbol conflicts with a generated function",
+            ));
+        }
         let mut abi = vec![layouts.c_type(f.ret)];
         abi.extend(f.params.iter().map(|&p| layouts.c_type(f.vars[p].ty)));
         if f.fails {

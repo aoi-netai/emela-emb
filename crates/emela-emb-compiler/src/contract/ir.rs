@@ -1,6 +1,6 @@
 //! Canonical backend values and definitions, owned independently of Core and Flow IR.
 //! Frontend function bodies, name-resolution state, source files, and Heap-IR stages are absent.
-//! The upstream adapter maps every input variant explicitly; downstream code uses these IDs only.
+//! The independent frontend constructs these owned definitions; downstream stages use these IDs only.
 use crate::contract::DerivedOperation;
 use la_arena::{Arena, Idx};
 use std::collections::{HashMap, HashSet};
