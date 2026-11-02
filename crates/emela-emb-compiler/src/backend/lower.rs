@@ -6,6 +6,7 @@ use crate::contract::lowered::LoweredModule;
 use crate::{Error, ErrorKind};
 use std::collections::{HashMap, HashSet};
 
+mod const_eval;
 mod failures;
 mod types;
 mod values;
@@ -62,6 +63,45 @@ pub(crate) fn lower_program(
             ));
         }
         validate_function(&program, function)?;
+    }
+    let mut const_outcomes = HashMap::new();
+    let mut runtime_consts = HashSet::new();
+    for (id, function) in program.functions.iter() {
+        if !function.constant {
+            continue;
+        }
+        if !function.params.is_empty()
+            || function.fails
+            || function.suspends
+            || function.external.is_some()
+        {
+            return Err(invalid(
+                &function.name,
+                "const must be a zero-argument, infallible synchronous definition",
+            ));
+        }
+        match const_eval::evaluate(&program, id) {
+            Ok(outcome) => {
+                let outcome = match outcome {
+                    const_eval::Outcome::Value(value) => {
+                        crate::contract::lowered::ConstOutcome::Value(value)
+                    }
+                    const_eval::Outcome::Defect { kind, message } => {
+                        crate::contract::lowered::ConstOutcome::Defect { kind, message }
+                    }
+                    const_eval::Outcome::SelfReference { message } => {
+                        crate::contract::lowered::ConstOutcome::SelfReference { message }
+                    }
+                };
+                const_outcomes.insert(id, Ok(outcome));
+            }
+            Err(_) => {
+                runtime_consts.insert(id);
+            }
+        }
+    }
+    for &id in &runtime_consts {
+        program.functions[id].constant = false;
     }
     failures::normalize(&mut program);
     // Numeric builtins still execute their checks when their result is unused. Their
@@ -171,16 +211,16 @@ pub(crate) fn lower_program(
         suspensions: HashMap::new(),
         closures: Default::default(),
         const_groups: vec![],
-        runtime_consts: HashSet::new(),
+        runtime_consts,
         deferred_pool: false,
         emitted_functions,
         discarded_results,
-        const_outcomes: HashMap::new(),
+        const_outcomes,
     })
 }
 
 fn validate_function(program: &Program, f: &Function) -> Result<()> {
-    if f.constant || f.suspends || f.env.is_some() || f.infallible_cause_fail {
+    if f.suspends || f.env.is_some() || f.infallible_cause_fail {
         return Err(unsupported(
             &f.name,
             "const, failure, suspension, closure or derived function",

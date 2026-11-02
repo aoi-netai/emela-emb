@@ -285,3 +285,7 @@
 | `src/semantics/variants.rs` | `7cae473c9ac8017efe10a862c3f5e67bbf57c4c16f0974ea3aa91884ad20ecfd` |
 | `src/writer.rs` | `a462d3e365191cb862c608c5ffbd1a50f344688e7fbf3e0f14e37d2e92e47f55` |
 | `tests/data/GraphemeBreakTest-18.0.0.txt` | `42045da24db676334a73916c203e0645107170466c658f476b40aac0c261a379` |
+
+## P2の追加採用
+
+`src/input/upstream/const_eval.rs`を`backend/lower/const_eval.rs`へ移し、入力を所有backend IRへ付け替えた。上流adapterやcrateは採用しない。4096 step/64 call深さの静的評価制限を維持し、静的評価できない単相constはこのrepoのlowerがruntime lazy cacheへ切り替える。元ファイルのSHA-256は `43ca4f814e79f2babb621e2778fb403f362bd28f9834adaba6485cb6e598ee33`（同一基準revision）。数値・Unicodeの意味関数と公式vectorの出自は上表と同じ。
