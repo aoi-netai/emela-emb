@@ -34,6 +34,7 @@ pub(crate) enum TokenKind<'a> {
     AndAnd,
     OrOr,
     Pipe,
+    Bar,
     Newline,
     Eof,
 }
@@ -118,6 +119,7 @@ pub(crate) fn lex(source: &str) -> Result<Vec<Token<'_>>, Diagnostic> {
                 pos += 1;
                 Some(TokenKind::Pipe)
             }
+            b'|' => Some(TokenKind::Bar),
             _ => None,
         };
         if let Some(kind) = single {

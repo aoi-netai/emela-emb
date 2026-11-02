@@ -22,10 +22,11 @@ impl<'t, 's> Parser<'t, 's> {
         let mut imports = Vec::new();
         let mut functions = Vec::new();
         let mut data = Vec::new();
+        let mut consts = Vec::new();
         self.newlines();
         while self.current().kind != K::Eof {
             if self.word("import") {
-                if !functions.is_empty() || !data.is_empty() {
+                if !functions.is_empty() || !data.is_empty() || !consts.is_empty() {
                     return Err(
                         self.error(DiagnosticKind::Syntax, "imports must precede declarations")
                     );
@@ -37,7 +38,9 @@ impl<'t, 's> Parser<'t, 's> {
                 } else {
                     self.current().kind
                 };
-                if matches!(declaration, K::Name("type" | "enum" | "error" | "opaque")) {
+                if declaration == K::Name("const") {
+                    consts.push(self.constant()?);
+                } else if matches!(declaration, K::Name("type" | "enum" | "error" | "opaque")) {
                     data.push(self.data()?);
                 } else {
                     functions.push(self.function()?);
@@ -55,6 +58,38 @@ impl<'t, 's> Parser<'t, 's> {
             imports,
             functions,
             data,
+            consts,
+        })
+    }
+    fn constant(&mut self) -> Result<ConstDeclaration, Diagnostic> {
+        let public = self.take_word("pub");
+        self.expect(K::Name("const"), "expected const declaration")?;
+        let name = self.name("expected constant name")?;
+        if !name.value.as_bytes()[0].is_ascii_uppercase()
+            || !name
+                .value
+                .bytes()
+                .all(|byte| byte.is_ascii_uppercase() || byte.is_ascii_digit() || byte == b'_')
+        {
+            return Err(Diagnostic::new(
+                DiagnosticKind::Syntax,
+                name.span,
+                "constant names require UPPER_SNAKE_CASE",
+            ));
+        }
+        let annotation = if self.take(K::Colon) {
+            self.newlines();
+            Some(self.type_name()?)
+        } else {
+            None
+        };
+        self.expect(K::Eq, "expected '=' after constant name or annotation")?;
+        let value = self.expr(0, false)?;
+        Ok(ConstDeclaration {
+            name,
+            public,
+            annotation,
+            value,
         })
     }
     fn import(&mut self) -> Result<Import, Diagnostic> {
@@ -172,7 +207,45 @@ impl<'t, 's> Parser<'t, 's> {
             None
         };
         self.continue_word("fails");
+        let fails = if self.take_word("fails") {
+            if self.take(K::LBrace) {
+                self.newlines();
+                self.expect(
+                    K::RBrace,
+                    "an explicit empty failure set is written 'fails {}'",
+                )?;
+                Some(Vec::new())
+            } else {
+                let mut errors = vec![self.type_name()?];
+                while self.take(K::Bar) {
+                    self.newlines();
+                    errors.push(self.type_name()?);
+                }
+                Some(errors)
+            }
+        } else {
+            None
+        };
         self.continue_word("use");
+        if self.take_word("use") {
+            if !self.take(K::LBrace) {
+                return Err(self.error(
+                    DiagnosticKind::Unsupported,
+                    "nonempty effect signatures require a later phase",
+                ));
+            }
+            self.newlines();
+            if !matches!(self.current().kind, K::RBrace | K::Eof) {
+                return Err(self.error(
+                    DiagnosticKind::Unsupported,
+                    "only the pure effect signature 'use {}' is connected in P2",
+                ));
+            }
+            self.expect(
+                K::RBrace,
+                "only the pure effect signature 'use {}' is connected in P2",
+            )?;
+        }
         if self.word("fails") || self.word("use") || self.word("suspend") {
             return Err(self.error(
                 DiagnosticKind::Unsupported,
@@ -197,9 +270,11 @@ impl<'t, 's> Parser<'t, 's> {
         Ok(Function {
             name,
             public,
+            constant: false,
             type_params,
             params,
             return_type,
+            fails,
             attributes,
             body,
         })
@@ -470,6 +545,14 @@ impl<'t, 's> Parser<'t, 's> {
                     kind: ExprKind::Assert(Box::new(value)),
                 }
             }
+            K::Name("fail") if min == 0 => {
+                self.advance();
+                let value = self.expr(0, multiline)?;
+                Expr {
+                    span: Span::new(token.span.start, value.span.end),
+                    kind: ExprKind::Fail(Box::new(value)),
+                }
+            }
             K::Name(name) if !reserved(name) => {
                 self.advance();
                 Expr {
@@ -544,6 +627,7 @@ impl<'t, 's> Parser<'t, 's> {
                 if matches!(
                     self.tokens[next].kind,
                     K::Name("match")
+                        | K::Name("escape")
                         | K::Dot
                         | K::Plus
                         | K::Star
@@ -562,10 +646,11 @@ impl<'t, 's> Parser<'t, 's> {
                     self.cursor = next;
                 }
             }
-            if self.word("match") && min == 0 {
+            if (self.word("match") || self.word("escape")) && min == 0 {
                 let start = left.span.start;
+                let escape = self.word("escape");
                 self.advance();
-                self.expect(K::LBrace, "expected '{' after postfix match")?;
+                self.expect(K::LBrace, "expected '{' after postfix match or escape")?;
                 self.newlines();
                 let mut arms = Vec::new();
                 while self.current().kind != K::RBrace {
@@ -575,7 +660,7 @@ impl<'t, 's> Parser<'t, 's> {
                     } else {
                         None
                     };
-                    self.expect(K::Arrow, "expected '->' after match pattern")?;
+                    self.expect(K::Arrow, "expected '->' after arm pattern")?;
                     let value = self.expr(0, false)?;
                     arms.push(Arm {
                         pattern,
@@ -588,11 +673,18 @@ impl<'t, 's> Parser<'t, 's> {
                         break;
                     }
                 }
-                self.expect(K::RBrace, "expected '}' after match arms")?;
+                self.expect(K::RBrace, "expected '}' after match or escape arms")?;
                 left = Expr {
-                    kind: ExprKind::Match {
-                        value: Box::new(left),
-                        arms,
+                    kind: if escape {
+                        ExprKind::Escape {
+                            value: Box::new(left),
+                            arms,
+                        }
+                    } else {
+                        ExprKind::Match {
+                            value: Box::new(left),
+                            arms,
+                        }
                     },
                     span: Span::new(start, self.previous_end()),
                 };
@@ -1079,5 +1171,108 @@ mod tests {
         }
         assert!(parse(&lex("fn f() { (1 +\n2) }").unwrap()).is_ok());
         assert!(parse(&lex("fn f() { 1\n-2 }").unwrap()).is_ok());
+    }
+
+    #[test]
+    fn constants_and_failure_signatures_keep_declared_spans() {
+        let source = "const MAX_RETRY = 30_000\npub const TEXT: String = \"é\"\n@external(c, \"seed\")\nfn seed() -> Int use {}\nfn load(n: Int) -> Int\n fails Missing | Invalid\n use {} { fail Missing(value: n) }\nfn pure() -> Int fails {} { 42 }";
+        let module = parse(&lex(source).unwrap()).unwrap();
+        assert_eq!(module.consts.len(), 2);
+        let first = &module.consts[0];
+        assert_eq!(first.name.value, "MAX_RETRY");
+        assert!(!first.public);
+        assert!(first.annotation.is_none());
+        assert_eq!(
+            &source[first.value.span.start..first.value.span.end],
+            "30_000"
+        );
+        let text = &module.consts[1];
+        assert!(text.public);
+        assert_eq!(text.annotation.as_ref().unwrap().value, "String");
+        assert_eq!(&source[text.name.span.start..text.name.span.end], "TEXT");
+        assert_eq!(&source[text.value.span.start..text.value.span.end], "\"é\"");
+        assert!(module.functions.iter().all(|function| !function.constant));
+        assert!(module.functions[0].fails.is_none());
+        let failures = module.functions[1].fails.as_ref().unwrap();
+        assert_eq!(
+            failures
+                .iter()
+                .map(|ty| ty.value.as_str())
+                .collect::<Vec<_>>(),
+            ["Missing", "Invalid"]
+        );
+        for failure in failures {
+            assert_eq!(&source[failure.span.start..failure.span.end], failure.value);
+        }
+        assert!(module.functions[2].fails.as_ref().unwrap().is_empty());
+        let Statement::Expr(value) = &module.functions[1].body.as_ref().unwrap().statements[0]
+        else {
+            panic!("expected failure expression")
+        };
+        assert!(matches!(value.kind, ExprKind::Fail(_)));
+    }
+
+    #[test]
+    fn escape_arms_share_patterns_guards_and_postfix_precedence() {
+        let source = "fn recover() -> Int { work()\n escape { Missing(value) if value < 0 -> -value\n Other -> 0 } match { 0 -> 1\n _ -> 2 } }";
+        let module = parse(&lex(source).unwrap()).unwrap();
+        let Statement::Expr(value) = &module.functions[0].body.as_ref().unwrap().statements[0]
+        else {
+            panic!("expected result")
+        };
+        let ExprKind::Match { value, .. } = &value.kind else {
+            panic!("match must wrap the escape result")
+        };
+        let ExprKind::Escape { arms, .. } = &value.kind else {
+            panic!("expected escape")
+        };
+        assert_eq!(arms.len(), 2);
+        assert!(arms[0].guard.is_some());
+        assert!(arms[1].guard.is_none());
+        assert!(
+            matches!(&arms[0].pattern.kind, PatternKind::Constructor { path, .. } if path[0].value == "Missing")
+        );
+
+        // As in the legacy grammar, fail recursively consumes an expression;
+        // catching that failure requires an enclosing block or parentheses.
+        let module =
+            parse(&lex("fn f() { fail Missing escape { Missing -> 0 } }").unwrap()).unwrap();
+        let Statement::Expr(value) = &module.functions[0].body.as_ref().unwrap().statements[0]
+        else {
+            panic!("expected fail")
+        };
+        let ExprKind::Fail(value) = &value.kind else {
+            panic!("expected outer fail")
+        };
+        assert!(matches!(value.kind, ExprKind::Escape { .. }));
+        assert!(parse(&lex("fn f() { work() escape {} }").unwrap()).is_ok());
+    }
+
+    #[test]
+    fn malformed_constants_failure_sets_and_escape_arms_are_positioned_errors() {
+        for source in [
+            "const value = 1",
+            "const VALUE: Int",
+            "const VALUE =",
+            "const VALUE = 1\nimport Other",
+            "fn f() fails {Missing} { 0 }",
+            "fn f() fails Missing | { 0 }",
+            "fn f() use {} use {} { 0 }",
+            "fn f() { fail }",
+            "fn f() { work() escape Missing -> 0 }",
+            "fn f() { work() escape { Missing 0 } }",
+            "fn f() { work() escape { Missing -> } }",
+            "fn f() { work() escape { Missing if -> 0 } }",
+        ] {
+            let error = parse(&lex(source).unwrap()).expect_err(source);
+            assert!(
+                error.span.start <= error.span.end && error.span.end <= source.len(),
+                "{source}: {error:?}"
+            );
+            assert!(
+                source.is_char_boundary(error.span.start)
+                    && source.is_char_boundary(error.span.end)
+            );
+        }
     }
 }

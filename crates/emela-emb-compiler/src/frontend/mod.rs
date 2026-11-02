@@ -9,9 +9,9 @@ pub(crate) mod parser;
 pub(crate) mod strings;
 pub(crate) mod types;
 
+pub(crate) mod consts;
 pub(crate) mod infer;
-pub(crate) mod patterns;
-pub(crate) mod traits;
-
 pub(crate) mod normalize;
+pub(crate) mod patterns;
 pub(crate) mod specialize;
+pub(crate) mod traits;

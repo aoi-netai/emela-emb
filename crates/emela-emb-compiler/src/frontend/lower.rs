@@ -461,7 +461,7 @@ impl Context<'_> {
                     .iter()
                     .filter_map(|&index| evaluated[index].clone())
                     .collect();
-                if tail && *target == self.current {
+                if tail && *target == self.current && !self.function.constant {
                     builder.term = Some(b::Term::Recur(operands));
                     return None;
                 }

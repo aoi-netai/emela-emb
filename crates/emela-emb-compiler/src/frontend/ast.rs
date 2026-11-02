@@ -19,6 +19,14 @@ pub(crate) struct Module {
     pub imports: Vec<Import>,
     pub functions: Vec<Function>,
     pub data: Vec<Data>,
+    pub consts: Vec<ConstDeclaration>,
+}
+#[derive(Clone, Debug)]
+pub(crate) struct ConstDeclaration {
+    pub name: Text,
+    pub public: bool,
+    pub annotation: Option<Text>,
+    pub value: Expr,
 }
 #[derive(Clone, Debug)]
 pub(crate) struct Import {
@@ -29,9 +37,12 @@ pub(crate) struct Import {
 pub(crate) struct Function {
     pub name: Text,
     pub public: bool,
+    pub constant: bool,
     pub type_params: Vec<TypeParameter>,
     pub params: Vec<Parameter>,
     pub return_type: Option<Text>,
+    /// None infers the failure set; Some(empty) explicitly excludes failures.
+    pub fails: Option<Vec<Text>>,
     pub attributes: Vec<Attribute>,
     pub body: Option<Block>,
 }
@@ -73,6 +84,11 @@ pub(crate) enum ExprKind {
     Interpolate(Vec<Expr>),
     Tuple(Vec<Expr>),
     Match {
+        value: Box<Expr>,
+        arms: Vec<Arm>,
+    },
+    Fail(Box<Expr>),
+    Escape {
         value: Box<Expr>,
         arms: Vec<Arm>,
     },

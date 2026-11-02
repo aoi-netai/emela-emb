@@ -144,6 +144,17 @@ impl Checker {
             let module = self.modules.modules[module_index].clone();
             for function in &module.ast.functions {
                 let result = (|| -> Result<(), Diagnostic> {
+                    if function
+                        .fails
+                        .as_ref()
+                        .is_some_and(|errors| !errors.is_empty())
+                    {
+                        return Err(Diagnostic::new(
+                            DK::Unsupported,
+                            function.name.span,
+                            "failure signatures are connected with failure checking",
+                        ));
+                    }
                     let mut type_parameters = HashMap::new();
                     for (index, parameter) in function.type_params.iter().enumerate() {
                         if !parameter.bounds.is_empty() {
@@ -548,8 +559,8 @@ impl Checker {
         self.checked[id.0] = Some(ir::Function {
             id,
             type_parameters: definition.ast.type_params.len(),
-            constant: false,
-            origin: None,
+            constant: definition.ast.constant,
+            origin: definition.ast.constant.then_some(id),
             derivation: None,
             name: definition.name,
             source_name: self.modules.modules[definition.module].source_name.clone(),
@@ -787,6 +798,14 @@ impl Checker {
                     result.unwrap_or(Ty::Never),
                 )
             }
+            A::Fail(_) | A::Escape { .. } => {
+                return Err(self.error(
+                    module,
+                    DK::Unsupported,
+                    span,
+                    "failure expressions are connected with failure checking",
+                ));
+            }
             A::Tuple(elements) => {
                 let hints =
                     expected.and_then(|ty| match self.catalog.core.ty(data::backend_type(ty)) {
@@ -890,6 +909,29 @@ impl Checker {
                         Symbol::Constant(id) => (ir::ExprKind::Literal(id.literal()), id.ty()),
                         Symbol::Constructor(ctor) => {
                             return self.construct(module, ctor, &[], locals, expected, span);
+                        }
+                        Symbol::Function(id) if self.definitions[id.0].ast.constant => {
+                            if self.states[id.0] == 0 {
+                                self.function(id)?;
+                            }
+                            let ret = self.definitions[id.0]
+                                .signature
+                                .ret
+                                .expect("const inference return type");
+                            if let Some(expected) = expected {
+                                self.expect_type(module, ret, expected, span)?;
+                            }
+                            let ret = self.resolve_type(module, ret, span)?;
+                            return Ok(ir::Expr {
+                                kind: ir::ExprKind::Call {
+                                    target: id,
+                                    type_arguments: vec![],
+                                    args: vec![],
+                                    order: vec![],
+                                },
+                                ty: ret,
+                                span,
+                            });
                         }
                         Symbol::Function(_) => {
                             return Err(self.error(
@@ -1067,6 +1109,14 @@ impl Checker {
                         ));
                     }
                 };
+                if self.definitions[id.0].ast.constant {
+                    return Err(self.error(
+                        module,
+                        DK::Type,
+                        callee.span,
+                        "a const value cannot be called",
+                    ));
+                }
                 if self.states[id.0] == 0 {
                     self.function(id)?;
                 }
