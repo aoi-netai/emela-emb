@@ -1,0 +1,2765 @@
+{
+  "kind": "proposal_only_no_canonical_ledger_changes",
+  "fixed_revision": "c34c0aeefdd966d854371b3110db00a47798751d",
+  "source_checkpoint": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+  "scope": {
+    "legacy_tests": 115,
+    "source_reviewed": 29,
+    "IR_tests_owned_elsewhere": 86,
+    "source_crosswalk_normal": 174,
+    "source_crosswalk_additional": 3,
+    "canonical_ledger_modified": false
+  },
+  "policy": [
+    "Exact29 target::name set delegated by p7-ir-legacy-test-proposal.json; no new tests or runtime executions in this documentation-only review.",
+    "Source bodies/Options/C assertions and ownership/cancel seams read from fixed git objects and existing new test/report bodies. The dirty old checkout is not compiled or edited.",
+    "Original source/API execution is separate from post-source IR seam replacements. None of these29 requires a post-lowering IR mutation; private generated-C root cancellation remains explicitly identified.",
+    "Nine existing broader-test replacements preserve all observations but do not claim their whole new source fixture is byte-identical to the old program.",
+    "The old private canonical-origin prefix is a replaced representation; Stage7 schema N/A does not exempt source ownership, cleanup, consts or ABI observations.",
+    "No successful-return or heap-empty claim is made for terminal HeapExhausted routes; persistent const baseline is not mislabeled as empty heap."
+  ],
+  "crosswalk": {
+    "path": "docs/compiler-legacy-runtime-crosswalk.json",
+    "sha256": "c5a0a6f37762ac1347cef6cdb64ec7351403f887ead6ec88f6972fea14c12456",
+    "all177_observations_closed": {
+      "normal_legacy_tests": 174,
+      "programs": 169,
+      "additional_nonruntime_legacy_cases": 3,
+      "normal_cases_with_open_observations": 0
+    },
+    "snapshot_policy": "This immutable b0a367b crosswalk hash identifies the reviewed input. Root owns the final runtime revision refresh; all proposal evidence uses b0a367b paths so replay does not require historical cherry-pick objects.",
+    "excluded_runtime_basis": "The frozen raw reach139/30 probe is not execution evidence and is not copied here."
+  },
+  "counts": {
+    "source_tests": 29,
+    "proposed_replaced": 29,
+    "pending": 0,
+    "previous_replaced_strengthened": 7,
+    "original_body_plus_export": 20,
+    "broader_observation_replacements": 9,
+    "new_test_cases_added": 0
+  },
+  "small_budget_updates": {
+    "source_commits": [
+      "6409b64",
+      "8a6a585"
+    ],
+    "report": "docs/reports/p7-bytes-small-budget-compat.json",
+    "seven_previously_replaced_Bytes": true,
+    "ISR_size_followup": "1b4ca67",
+    "checks": "Old heap8192/4096/256/128 and String1 are independently present in current runners. The large70000byte source retains262144 as in the old test. 6409 also strengthens owned String1024 outside these29.",
+    "source_commits_kind": "Historical feature provenance only; executable report/test references use the published integration ancestor b0a367b."
+  },
+  "source_tests": [
+    {
+      "target": "emit",
+      "name": "bytes::bytes_captured_in_closures_and_state_keep_their_owners",
+      "legacy_path": "tests/bytes/mod.rs",
+      "legacy_key": "emit::bytes::bytes_captured_in_closures_and_state_keep_their_owners",
+      "legacy_ledger_index": 9,
+      "previous_status": "replaced",
+      "proposed_status": "replaced",
+      "new_tests": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p4_state.rs",
+          "symbol": "state_shares_owned_values_with_escaped_closures_and_reclaims_every_run"
+        }
+      ],
+      "reason": "capturedBytes/sharedBytesと同じ関数本体でa/NUL/bを保持し、入力上書きと元owner解放後も6byteの二重化結果を読み、1000回全解放。旧8192byte heapへ戻したState試験を採用。",
+      "evidence": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p4_state.rs",
+          "symbol": "state_shares_owned_values_with_escaped_closures_and_reclaims_every_run"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/p7-bytes-small-budget-compat.json",
+          "original_report_revision": "8a6a585",
+          "revision": "b0a367b"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/p7-backend-proof-integration.json",
+          "revision": "b0a367b"
+        }
+      ],
+      "verification_path": "existing-source-C-observation-replacement",
+      "whole_body_review": {
+        "legacy_Rust_file": "crates/emela-codegen-emb/tests/bytes/mod.rs",
+        "legacy_Rust_file_sha256": "3c5b207c1122a453662293dbfdb1fed7d162266f7fbe7f3da94c33184a4178b5",
+        "legacy_line": 302,
+        "saved_sources": [
+          {
+            "program": "program:545fcfac2473e3be10a5",
+            "name": "main.emel",
+            "path": "crates/emela-emb-compiler/tests/compat/legacy-corpus/sources/46fb4b235a62d634127604b9022151cb4216168e84908f7a5a5c85dc286ac0c0.emel",
+            "sha256": "46fb4b235a62d634127604b9022151cb4216168e84908f7a5a5c85dc286ac0c0",
+            "byte_preserved_saved_legacy_fixture": true
+          }
+        ],
+        "original_body_executed": false,
+        "basis": "Broader existing source test contains corresponding functions and all old observable assertions. Provenance SHA is not an original-body runtime claim."
+      },
+      "Options_review": "heap8192; all other Options default",
+      "observations": [
+        "Same capturedBytes and sharedBytes source bodies preservea/NUL/b after caller overwrite, then6byte doubledBytes after sourceowner release.",
+        "Existing larger State corpus is now tested at old8192heap for1000rounds, allheapfree."
+      ],
+      "observation_and_Options_details": [
+        {
+          "report": "docs/reports/p7-bytes-small-budget-compat.json",
+          "program": "program:545fcfac2473e3be10a5",
+          "source_adaptation": "Existing broader source/C observations encompass the old input APIs and exact assertions. Original fixture hash retained for provenance; this is not an original-body runtime claim.",
+          "observations": {
+            "source_check": "passed",
+            "C_generation": "passed",
+            "C_runtime_O0": "passed",
+            "C_runtime_O2": "passed",
+            "heap_empty_after_each_fully_released_route": true
+          },
+          "reviewed_at_revision": "b0a367b",
+          "saved_legacy_fixture_hash_verified": true
+        }
+      ],
+      "seams_and_harness_adaptations": [],
+      "direct_source_API_execution": true,
+      "post_source_IR_mutation": false,
+      "runtime_status": "strict C -std=c11 -Wall -Werror -O0/-O2 passed at referenced feature checkpoints and final single fresh workspace607; no compiler-absent skips",
+      "previous_replaced_evidence_preserved": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p4_state.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p4.md"
+        }
+      ],
+      "source_scope": "source"
+    },
+    {
+      "target": "emit",
+      "name": "bytes::bytes_dynamic_capacity_is_independent_of_string_capacity",
+      "legacy_path": "tests/bytes/mod.rs",
+      "legacy_key": "emit::bytes::bytes_dynamic_capacity_is_independent_of_string_capacity",
+      "legacy_ledger_index": 11,
+      "previous_status": "replaced",
+      "proposed_status": "replaced",
+      "new_tests": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p3_bytes.rs",
+          "symbol": "bytes_ownership_snapshots_aliases_and_invalid_list_elements_release_every_allocation"
+        }
+      ],
+      "reason": "旧と同じ70000byte入力をBytes.slice(-1,100000)で全量コピーし、String容量1でも長さ・全byteを保持。旧3回の呼出しと各回全解放を保持。",
+      "evidence": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p3_bytes.rs",
+          "symbol": "bytes_ownership_snapshots_aliases_and_invalid_list_elements_release_every_allocation"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/p7-bytes-small-budget-compat.json",
+          "original_report_revision": "8a6a585",
+          "revision": "b0a367b"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/p7-backend-proof-integration.json",
+          "revision": "b0a367b"
+        }
+      ],
+      "verification_path": "existing-source-C-observation-replacement",
+      "whole_body_review": {
+        "legacy_Rust_file": "crates/emela-codegen-emb/tests/bytes/mod.rs",
+        "legacy_Rust_file_sha256": "3c5b207c1122a453662293dbfdb1fed7d162266f7fbe7f3da94c33184a4178b5",
+        "legacy_line": 220,
+        "saved_sources": [
+          {
+            "program": "program:e7a338aa5771b67698db",
+            "name": "main.emel",
+            "path": "crates/emela-emb-compiler/tests/compat/legacy-corpus/sources/c506ba1caba04956c992ea5305f2c676188e80e2026734b8772091d2d5162fb4.emel",
+            "sha256": "c506ba1caba04956c992ea5305f2c676188e80e2026734b8772091d2d5162fb4",
+            "byte_preserved_saved_legacy_fixture": true
+          }
+        ],
+        "original_body_executed": false,
+        "basis": "Broader existing source test contains corresponding functions and all old observable assertions. Provenance SHA is not an original-body runtime claim."
+      },
+      "Options_review": "heap262144, string_capacity1",
+      "observations": [
+        "Old262144heap/String1, Bytes.slice(-1,100000) copiesfull70000byte view independent of Stringcapacity;3rounds exactly asold, fullheapfree."
+      ],
+      "observation_and_Options_details": [
+        {
+          "report": "docs/reports/p7-bytes-small-budget-compat.json",
+          "program": "program:e7a338aa5771b67698db",
+          "source_adaptation": "Existing broader source/C observations encompass the old input APIs and exact assertions. Original fixture hash retained for provenance; this is not an original-body runtime claim.",
+          "observations": {
+            "source_check": "passed",
+            "C_generation": "passed",
+            "C_runtime_O0": "passed",
+            "C_runtime_O2": "passed",
+            "heap_empty_after_each_fully_released_route": true
+          },
+          "reviewed_at_revision": "b0a367b",
+          "saved_legacy_fixture_hash_verified": true
+        }
+      ],
+      "seams_and_harness_adaptations": [],
+      "direct_source_API_execution": true,
+      "post_source_IR_mutation": false,
+      "runtime_status": "strict C -std=c11 -Wall -Werror -O0/-O2 passed at referenced feature checkpoints and final single fresh workspace607; no compiler-absent skips",
+      "previous_replaced_evidence_preserved": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p3_bytes.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p3.md"
+        }
+      ],
+      "source_scope": "source"
+    },
+    {
+      "target": "emit",
+      "name": "bytes::bytes_external_adapters_snapshot_borrowed_data_and_transfer_owned_data",
+      "legacy_path": "tests/bytes/mod.rs",
+      "legacy_key": "emit::bytes::bytes_external_adapters_snapshot_borrowed_data_and_transfer_owned_data",
+      "legacy_ledger_index": 12,
+      "previous_status": "replaced",
+      "proposed_status": "replaced",
+      "new_tests": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p3_bytes.rs",
+          "symbol": "bytes_external_adapters_snapshot_borrowed_data_and_transfer_owned_data"
+        }
+      ],
+      "reason": "Borrowed/Ownedをそれぞれ500回、静的bufferの連続結果1/2と255/NULを保持して全解放。Owned入力の作成は旧private emela_external_ownから公開Bytes exporterへ置換し、所有権移譲・戻り値の観測を保持。",
+      "evidence": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p3_bytes.rs",
+          "symbol": "bytes_external_adapters_snapshot_borrowed_data_and_transfer_owned_data"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/p7-bytes-small-budget-compat.json",
+          "original_report_revision": "8a6a585",
+          "revision": "b0a367b"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/p7-backend-proof-integration.json",
+          "revision": "b0a367b"
+        }
+      ],
+      "verification_path": "existing-source-C-observation-replacement",
+      "whole_body_review": {
+        "legacy_Rust_file": "crates/emela-codegen-emb/tests/bytes/mod.rs",
+        "legacy_Rust_file_sha256": "3c5b207c1122a453662293dbfdb1fed7d162266f7fbe7f3da94c33184a4178b5",
+        "legacy_line": 417,
+        "saved_sources": [
+          {
+            "program": "program:738c3317d1a9dca5984d",
+            "name": "main.emel",
+            "path": "crates/emela-emb-compiler/tests/compat/legacy-corpus/sources/acf6256009e2b7a22dc4d7ad89bfcb556e7a2e776c83729efcc201af94500fc8.emel",
+            "sha256": "acf6256009e2b7a22dc4d7ad89bfcb556e7a2e776c83729efcc201af94500fc8",
+            "byte_preserved_saved_legacy_fixture": true
+          }
+        ],
+        "original_body_executed": false,
+        "basis": "Broader existing source test contains corresponding functions and all old observable assertions. Provenance SHA is not an original-body runtime claim."
+      },
+      "Options_review": "heap4096, external adapter native_raw/raw_bytes: Borrowed and Owned",
+      "observations": [
+        "Old4096heap, Borrowed+Owned both preserve two sequentialstatic-buffer results1/2 and unsigned255/NUL with500repetitions each and fullheapfree.",
+        "NewOwned fixture creates its already-ownedBytes through the public exporter rather than the old private emela_external_own helper; ownership/byte observations are identical."
+      ],
+      "observation_and_Options_details": [
+        {
+          "report": "docs/reports/p7-bytes-small-budget-compat.json",
+          "program": "program:738c3317d1a9dca5984d",
+          "source_adaptation": "Existing broader source/C observations encompass the old input APIs and exact assertions. Original fixture hash retained for provenance; this is not an original-body runtime claim.",
+          "observations": {
+            "source_check": "passed",
+            "C_generation": "passed",
+            "C_runtime_O0": "passed",
+            "C_runtime_O2": "passed",
+            "heap_empty_after_each_fully_released_route": true
+          },
+          "reviewed_at_revision": "b0a367b",
+          "saved_legacy_fixture_hash_verified": true
+        }
+      ],
+      "seams_and_harness_adaptations": [],
+      "direct_source_API_execution": true,
+      "post_source_IR_mutation": false,
+      "runtime_status": "strict C -std=c11 -Wall -Werror -O0/-O2 passed at referenced feature checkpoints and final single fresh workspace607; no compiler-absent skips",
+      "previous_replaced_evidence_preserved": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p3_bytes.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p3.md"
+        }
+      ],
+      "source_scope": "source"
+    },
+    {
+      "target": "emit",
+      "name": "bytes::bytes_external_tasks_snapshot_arguments_and_results_and_release_cancelled_contexts",
+      "legacy_path": "tests/bytes/mod.rs",
+      "legacy_key": "emit::bytes::bytes_external_tasks_snapshot_arguments_and_results_and_release_cancelled_contexts",
+      "legacy_ledger_index": 13,
+      "previous_status": "pending",
+      "proposed_status": "replaced",
+      "new_tests": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p7_legacy_bytes.rs",
+          "symbol": "legacy_bytes_tasks_release_contexts_after_queued_completion_or_cancellation"
+        }
+      ],
+      "reason": "原本文+exportで0/128/255の借用入力をsnapshotし、wrong-kind/重複通知を拒否。producer/releaseはISR・lock外でのみ実行、cancel時producerを抑止しcontextを1回解放。NULL戻り先・所有結果・各回heap全解放も1000回確認。",
+      "evidence": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p7_legacy_bytes.rs",
+          "symbol": "legacy_bytes_tasks_release_contexts_after_queued_completion_or_cancellation"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/p7-legacy-bytes-compat.json",
+          "original_report_revision": "31bc997",
+          "revision": "b0a367b"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/p7-backend-proof-integration.json",
+          "revision": "b0a367b"
+        }
+      ],
+      "verification_path": "original-source-plus-explicit-C-export",
+      "whole_body_review": {
+        "legacy_Rust_file": "crates/emela-codegen-emb/tests/bytes/mod.rs",
+        "legacy_Rust_file_sha256": "3c5b207c1122a453662293dbfdb1fed7d162266f7fbe7f3da94c33184a4178b5",
+        "legacy_line": 623,
+        "saved_sources": [
+          {
+            "program": "program:b2f1d9d68d3fa5696d8c",
+            "name": "main.emel",
+            "path": "crates/emela-emb-compiler/tests/compat/legacy-corpus/sources/fcd6d29ec6ec8b5b668b3e8966a27dc8f2bf9884648a9e35390c8ea75f814a04.emel",
+            "sha256": "fcd6d29ec6ec8b5b668b3e8966a27dc8f2bf9884648a9e35390c8ea75f814a04",
+            "byte_preserved_saved_legacy_fixture": true
+          }
+        ],
+        "original_body_executed": true,
+        "basis": "Original saved source consumed directly by the new runner; export metadata only."
+      },
+      "Options_review": "heap4096, frame_bytes1024, task adapter host_bytes -> board_bytes_start; other Options default",
+      "observations": [
+        "QueuedBytes completion snapshots borrowed source0/128/255 before caller overwrite.",
+        "Wrong scalar kind and duplicate completion rejected; producer and release run outside lock/ISR.",
+        "Cancellation suppresses producer yet releases context exactly once; NULLoutput, owned returnedBytes and full heap reclamation."
+      ],
+      "observation_and_Options_details": [
+        {
+          "report": "docs/reports/p7-legacy-bytes-compat.json",
+          "program": "program:b2f1d9d68d3fa5696d8c",
+          "source_adaptation": null,
+          "observations": {
+            "source_check": "passed",
+            "C_generation": "passed",
+            "C_runtime_O0": "passed",
+            "C_runtime_O2": "passed",
+            "iterations": 1000,
+            "heap_empty_after_each": true
+          },
+          "reviewed_at_revision": "b0a367b",
+          "saved_legacy_fixture_hash_verified": true
+        }
+      ],
+      "seams_and_harness_adaptations": [
+        {
+          "private_C_seam": "test_cancel directly sets emela_fiber_get(handle)->cancelled, as in the fixed-old harness."
+        }
+      ],
+      "direct_source_API_execution": true,
+      "post_source_IR_mutation": false,
+      "runtime_status": "strict C -std=c11 -Wall -Werror -O0/-O2 passed at referenced feature checkpoints and final single fresh workspace607; no compiler-absent skips",
+      "previous_replaced_evidence_preserved": [],
+      "source_scope": "source"
+    },
+    {
+      "target": "emit",
+      "name": "bytes::bytes_list_round_trips_and_invalid_elements_reclaim_every_allocation",
+      "legacy_path": "tests/bytes/mod.rs",
+      "legacy_key": "emit::bytes::bytes_list_round_trips_and_invalid_elements_reclaim_every_allocation",
+      "legacy_ledger_index": 15,
+      "previous_status": "replaced",
+      "proposed_status": "replaced",
+      "new_tests": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p3_bytes.rs",
+          "symbol": "bytes_ownership_snapshots_aliases_and_invalid_list_elements_release_every_allocation"
+        }
+      ],
+      "reason": "旧4096byte heapで0/128/255/-1/256を各500回通し、正常List/Bytesと途中失敗の割当を全解放。大容量262144byte実行だけを小容量根拠にはしない。",
+      "evidence": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p3_bytes.rs",
+          "symbol": "bytes_ownership_snapshots_aliases_and_invalid_list_elements_release_every_allocation"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/p7-bytes-small-budget-compat.json",
+          "original_report_revision": "8a6a585",
+          "revision": "b0a367b"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/p7-backend-proof-integration.json",
+          "revision": "b0a367b"
+        }
+      ],
+      "verification_path": "existing-source-C-observation-replacement",
+      "whole_body_review": {
+        "legacy_Rust_file": "crates/emela-codegen-emb/tests/bytes/mod.rs",
+        "legacy_Rust_file_sha256": "3c5b207c1122a453662293dbfdb1fed7d162266f7fbe7f3da94c33184a4178b5",
+        "legacy_line": 553,
+        "saved_sources": [
+          {
+            "program": "program:ee5ba136321c839df89e",
+            "name": "main.emel",
+            "path": "crates/emela-emb-compiler/tests/compat/legacy-corpus/sources/17515e0687dd97fa74b8c3ad7f3f37977a9ec69e858c784f9d87ea60fa1f7e39.emel",
+            "sha256": "17515e0687dd97fa74b8c3ad7f3f37977a9ec69e858c784f9d87ea60fa1f7e39",
+            "byte_preserved_saved_legacy_fixture": true
+          }
+        ],
+        "original_body_executed": false,
+        "basis": "Broader existing source test contains corresponding functions and all old observable assertions. Provenance SHA is not an original-body runtime claim."
+      },
+      "Options_review": "heap4096; all other Options default",
+      "observations": [
+        "Old4096heap is now directly executed in addition tolarge-output262144corpus.",
+        "Allold0/128/255/-1/256 produceTrue and reclaim partial/full List/Byte allocations500times."
+      ],
+      "observation_and_Options_details": [
+        {
+          "report": "docs/reports/p7-bytes-small-budget-compat.json",
+          "program": "program:ee5ba136321c839df89e",
+          "source_adaptation": "Existing broader source/C observations encompass the old input APIs and exact assertions. Original fixture hash retained for provenance; this is not an original-body runtime claim.",
+          "observations": {
+            "source_check": "passed",
+            "C_generation": "passed",
+            "C_runtime_O0": "passed",
+            "C_runtime_O2": "passed",
+            "heap_empty_after_each_fully_released_route": true
+          },
+          "reviewed_at_revision": "b0a367b",
+          "saved_legacy_fixture_hash_verified": true
+        }
+      ],
+      "seams_and_harness_adaptations": [],
+      "direct_source_API_execution": true,
+      "post_source_IR_mutation": false,
+      "runtime_status": "strict C -std=c11 -Wall -Werror -O0/-O2 passed at referenced feature checkpoints and final single fresh workspace607; no compiler-absent skips",
+      "previous_replaced_evidence_preserved": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p3_bytes.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p3.md"
+        }
+      ],
+      "source_scope": "source"
+    },
+    {
+      "target": "emit",
+      "name": "bytes::bytes_require_a_fixed_heap_and_defect_when_its_capacity_is_exhausted",
+      "legacy_path": "tests/bytes/mod.rs",
+      "legacy_key": "emit::bytes::bytes_require_a_fixed_heap_and_defect_when_its_capacity_is_exhausted",
+      "legacy_ledger_index": 16,
+      "previous_status": "replaced",
+      "proposed_status": "replaced",
+      "new_tests": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p3_bytes.rs",
+          "symbol": "bytes_owned_results_require_a_heap_even_when_the_result_is_discarded"
+        }
+      ],
+      "reason": "Bytes.encode_utf8のheap0拒否と、heap128/1024byte入力のHeapExhaustedを確認。既存discard sourceも割当を省かず同defectとなる。致命停止経路の正常returnや全解放は主張しない。",
+      "evidence": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p3_bytes.rs",
+          "symbol": "bytes_owned_results_require_a_heap_even_when_the_result_is_discarded"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/p7-bytes-small-budget-compat.json",
+          "original_report_revision": "8a6a585",
+          "revision": "b0a367b"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/p7-backend-proof-integration.json",
+          "revision": "b0a367b"
+        }
+      ],
+      "verification_path": "existing-source-C-observation-replacement",
+      "whole_body_review": {
+        "legacy_Rust_file": "crates/emela-codegen-emb/tests/bytes/mod.rs",
+        "legacy_Rust_file_sha256": "3c5b207c1122a453662293dbfdb1fed7d162266f7fbe7f3da94c33184a4178b5",
+        "legacy_line": 463,
+        "saved_sources": [
+          {
+            "program": "program:36dfa29b6881b628bddb",
+            "name": "main.emel",
+            "path": "crates/emela-emb-compiler/tests/compat/legacy-corpus/sources/da3390d21542d59b21e579b4e85127c50ec7587fe49ae975e040b50f70fbc110.emel",
+            "sha256": "da3390d21542d59b21e579b4e85127c50ec7587fe49ae975e040b50f70fbc110",
+            "byte_preserved_saved_legacy_fixture": true
+          }
+        ],
+        "original_body_executed": false,
+        "basis": "Broader existing source test contains corresponding functions and all old observable assertions. Provenance SHA is not an original-body runtime claim."
+      },
+      "Options_review": "heap0 input rejection; heap128 terminal run, 1024byte input",
+      "observations": [
+        "Equivalent Bytes.encode_utf8 source allocation rejects heap0 before emission.",
+        "Old128heap plus1024byte input terminates in HeapExhausted; newexistingdiscard source also proves discardedallocation retains that check. OldC discards make return; no owningvalue is expected after terminaldefect."
+      ],
+      "observation_and_Options_details": [
+        {
+          "report": "docs/reports/p7-bytes-small-budget-compat.json",
+          "program": "program:36dfa29b6881b628bddb",
+          "source_adaptation": "Existing broader source/C observations encompass the old input APIs and exact assertions. Original fixture hash retained for provenance; this is not an original-body runtime claim.",
+          "observations": {
+            "source_check": "passed",
+            "C_generation": "passed",
+            "C_runtime_O0": "passed",
+            "C_runtime_O2": "passed",
+            "terminal_defect_observed": true,
+            "heap_observation": "Old terminal HeapExhausted observation; no successful return or reclamation claim for this route."
+          },
+          "reviewed_at_revision": "b0a367b",
+          "saved_legacy_fixture_hash_verified": true
+        }
+      ],
+      "seams_and_harness_adaptations": [],
+      "direct_source_API_execution": true,
+      "post_source_IR_mutation": false,
+      "runtime_status": "strict C -std=c11 -Wall -Werror -O0/-O2 passed at referenced feature checkpoints and final single fresh workspace607; no compiler-absent skips",
+      "previous_replaced_evidence_preserved": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p3_bytes.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p3.md"
+        }
+      ],
+      "source_scope": "source"
+    },
+    {
+      "target": "emit",
+      "name": "bytes::bytes_returns_lists_and_aliases_preserve_ownership_and_release_the_heap",
+      "legacy_path": "tests/bytes/mod.rs",
+      "legacy_key": "emit::bytes::bytes_returns_lists_and_aliases_preserve_ownership_and_release_the_heap",
+      "legacy_ledger_index": 17,
+      "previous_status": "replaced",
+      "proposed_status": "replaced",
+      "new_tests": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p3_bytes.rs",
+          "symbol": "bytes_ownership_snapshots_aliases_and_invalid_list_elements_release_every_allocation"
+        }
+      ],
+      "reason": "旧4096byte heap/String容量1でmake/copy/slice/concat/List aliasを500回確認。呼出元入力上書き、元owner解放、0/128/255の借用snapshot後も戻り値を保持し全解放。",
+      "evidence": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p3_bytes.rs",
+          "symbol": "bytes_ownership_snapshots_aliases_and_invalid_list_elements_release_every_allocation"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/p7-bytes-small-budget-compat.json",
+          "original_report_revision": "8a6a585",
+          "revision": "b0a367b"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/p7-backend-proof-integration.json",
+          "revision": "b0a367b"
+        }
+      ],
+      "verification_path": "existing-source-C-observation-replacement",
+      "whole_body_review": {
+        "legacy_Rust_file": "crates/emela-codegen-emb/tests/bytes/mod.rs",
+        "legacy_Rust_file_sha256": "3c5b207c1122a453662293dbfdb1fed7d162266f7fbe7f3da94c33184a4178b5",
+        "legacy_line": 178,
+        "saved_sources": [
+          {
+            "program": "program:831e8ca3bfd2e879fe38",
+            "name": "main.emel",
+            "path": "crates/emela-emb-compiler/tests/compat/legacy-corpus/sources/dac039194f9149e72917cea044b5d1ae70b34ee11628e0e893b37ab6a506c2bd.emel",
+            "sha256": "dac039194f9149e72917cea044b5d1ae70b34ee11628e0e893b37ab6a506c2bd",
+            "byte_preserved_saved_legacy_fixture": true
+          }
+        ],
+        "original_body_executed": false,
+        "basis": "Broader existing source test contains corresponding functions and all old observable assertions. Provenance SHA is not an original-body runtime claim."
+      },
+      "Options_review": "heap4096, string_capacity1",
+      "observations": [
+        "Old4096heap/String1 is now directly executed in addition tolarge-output262144corpus.",
+        "Alloldmake/copy/slice/concat/List aliases, callerinput overwrite, returnedvalues surviving sourceownerrelease and borrowed0/128/255 snapshot match;500fullheapfree rounds.",
+        "BroaderexistingC additionallyreads retainedList head andchecksowning return."
+      ],
+      "observation_and_Options_details": [
+        {
+          "report": "docs/reports/p7-bytes-small-budget-compat.json",
+          "program": "program:831e8ca3bfd2e879fe38",
+          "source_adaptation": "Existing broader source/C observations encompass the old input APIs and exact assertions. Original fixture hash retained for provenance; this is not an original-body runtime claim.",
+          "observations": {
+            "source_check": "passed",
+            "C_generation": "passed",
+            "C_runtime_O0": "passed",
+            "C_runtime_O2": "passed",
+            "heap_empty_after_each_fully_released_route": true
+          },
+          "reviewed_at_revision": "b0a367b",
+          "saved_legacy_fixture_hash_verified": true
+        }
+      ],
+      "seams_and_harness_adaptations": [],
+      "direct_source_API_execution": true,
+      "post_source_IR_mutation": false,
+      "runtime_status": "strict C -std=c11 -Wall -Werror -O0/-O2 passed at referenced feature checkpoints and final single fresh workspace607; no compiler-absent skips",
+      "previous_replaced_evidence_preserved": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p3_bytes.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p3.md"
+        }
+      ],
+      "source_scope": "source"
+    },
+    {
+      "target": "emit",
+      "name": "bytes::bytes_size_and_get_are_heapless_and_keep_lengths_above_u16",
+      "legacy_path": "tests/bytes/mod.rs",
+      "legacy_key": "emit::bytes::bytes_size_and_get_are_heapless_and_keep_lengths_above_u16",
+      "legacy_ledger_index": 18,
+      "previous_status": "mapped",
+      "proposed_status": "replaced",
+      "new_tests": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p3_bytes.rs",
+          "symbol": "bytes_views_keep_u32_lengths_and_unsigned_elements_without_a_heap"
+        }
+      ],
+      "reason": "同じsize/get関数本体の70000byte view、先頭128/末尾255、負/70000indexのNone、NULL空view長0を確認。生成heapなしと旧ISR size指定を1b4ca67で補完。",
+      "evidence": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p3_bytes.rs",
+          "symbol": "bytes_views_keep_u32_lengths_and_unsigned_elements_without_a_heap"
+        },
+        {
+          "kind": "source_fixture",
+          "path": "crates/emela-emb-compiler/tests/compat/p3/bytes-views.emel"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/compiler-legacy-runtime-crosswalk.json",
+          "original_report_revision": "1b4ca67",
+          "revision": "b0a367b"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/p7-backend-proof-integration.json",
+          "revision": "b0a367b"
+        }
+      ],
+      "verification_path": "existing-source-C-observation-replacement",
+      "whole_body_review": {
+        "legacy_Rust_file": "crates/emela-codegen-emb/tests/bytes/mod.rs",
+        "legacy_Rust_file_sha256": "3c5b207c1122a453662293dbfdb1fed7d162266f7fbe7f3da94c33184a4178b5",
+        "legacy_line": 140,
+        "saved_sources": [
+          {
+            "program": "program:bb4cfa4d0a45d9128d84",
+            "name": "main.emel",
+            "path": "crates/emela-emb-compiler/tests/compat/legacy-corpus/sources/ea4da70cf3e5c3d3704ef6b410088f31076c8d6e1187e5286f632136436fdae8.emel",
+            "sha256": "ea4da70cf3e5c3d3704ef6b410088f31076c8d6e1187e5286f632136436fdae8",
+            "byte_preserved_saved_legacy_fixture": true
+          }
+        ],
+        "original_body_executed": false,
+        "basis": "Broader existing source test contains corresponding functions and all old observable assertions. Provenance SHA is not an original-body runtime claim."
+      },
+      "Options_review": "heap0, ISR entry size",
+      "observations": [
+        "70000-byte view, element0=128 and69999=255",
+        "negative and70000 index return None/-1",
+        "empty NULL view size0",
+        "no generated heap storage",
+        "Emela source size function is an ISR entry (C alias byte_size)"
+      ],
+      "observation_and_Options_details": [
+        {
+          "manual_review": {
+            "assessment": "existing-source-C-observations-match",
+            "evidence_revision": "1b4ca67",
+            "evidence": [
+              "tests/p3_bytes.rs::bytes_views_keep_u32_lengths_and_unsigned_elements_without_a_heap",
+              "tests/compat/p3/bytes-views.emel"
+            ],
+            "observations": [
+              "70000-byte view, element0=128 and69999=255",
+              "negative and70000 index return None/-1",
+              "empty NULL view size0",
+              "no generated heap storage",
+              "Emela source size function is an ISR entry (C alias byte_size)"
+            ],
+            "note": "Fixed-old size/get C assertions and source APIs match. 1b4ca67 adds the missing old ISR option to the existing test; strict C O0/O2 compile/link/runtime passed. No duplicate test was needed."
+          },
+          "reviewed_at_revision": "b0a367b"
+        }
+      ],
+      "seams_and_harness_adaptations": [],
+      "direct_source_API_execution": true,
+      "post_source_IR_mutation": false,
+      "runtime_status": "strict C -std=c11 -Wall -Werror -O0/-O2 passed at referenced feature checkpoints and final single fresh workspace607; no compiler-absent skips",
+      "previous_replaced_evidence_preserved": [],
+      "source_scope": "source"
+    },
+    {
+      "target": "emit",
+      "name": "bytes::bytes_std_corpus_matches_other_targets_including_const_traits_and_invalid_utf8",
+      "legacy_path": "tests/bytes/mod.rs",
+      "legacy_key": "emit::bytes::bytes_std_corpus_matches_other_targets_including_const_traits_and_invalid_utf8",
+      "legacy_ledger_index": 19,
+      "previous_status": "mapped",
+      "proposed_status": "replaced",
+      "new_tests": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p7_legacy_bytes.rs",
+          "symbol": "full_legacy_bytes_corpus_preserves_const_traits_and_every_debug_observation"
+        }
+      ],
+      "reason": "原本文は旧embedded自身のpub main化・20000→128適応済みfixtureを使い、明示exportだけ追加。hex/List/slice/UTF8正常不正/unsigned Eq Ord Show/Packet deriveEq/PNG const/128要素loopの全573byte debug出力を1000回照合。PNG constの永続割当を初回後baselineとして保持し、heap 空とは主張しない。",
+      "evidence": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p7_legacy_bytes.rs",
+          "symbol": "full_legacy_bytes_corpus_preserves_const_traits_and_every_debug_observation"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/p7-legacy-bytes-compat.json",
+          "original_report_revision": "31bc997",
+          "revision": "b0a367b"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/p7-backend-proof-integration.json",
+          "revision": "b0a367b"
+        }
+      ],
+      "verification_path": "original-source-plus-explicit-C-export",
+      "whole_body_review": {
+        "legacy_Rust_file": "crates/emela-codegen-emb/tests/bytes/mod.rs",
+        "legacy_Rust_file_sha256": "3c5b207c1122a453662293dbfdb1fed7d162266f7fbe7f3da94c33184a4178b5",
+        "legacy_line": 108,
+        "saved_sources": [
+          {
+            "program": "program:0e4c492fa71240d47260",
+            "name": "main.emel",
+            "path": "crates/emela-emb-compiler/tests/compat/legacy-corpus/sources/1ad66c9f12980347b7e4a5d94fa35ad1c5c0f96b6e13e7f48e96e431d5119936.emel",
+            "sha256": "1ad66c9f12980347b7e4a5d94fa35ad1c5c0f96b6e13e7f48e96e431d5119936",
+            "byte_preserved_saved_legacy_fixture": true
+          }
+        ],
+        "original_body_executed": true,
+        "basis": "Original saved source consumed directly by the new runner; export metadata only."
+      },
+      "Options_review": "heap131072, string_capacity512",
+      "observations": [
+        "Full old573byte debug stream exactly matches: hex/list/slice/UTF8valid and invalid/unsigned EqOrdShow/Packet derivedEq/PNGconst/128byte loop.",
+        "1000 executions retain only the persistent PNG const allocation; heap used after each call equals the first run.",
+        "Old embedded input already changes fn main to pubfn and20000 to128. New adaptation adds explicit C alias legacy_bytes only."
+      ],
+      "observation_and_Options_details": [
+        {
+          "report": "docs/reports/p7-legacy-bytes-compat.json",
+          "program": "program:0e4c492fa71240d47260",
+          "source_adaptation": null,
+          "observations": {
+            "source_check": "passed",
+            "C_generation": "passed",
+            "C_runtime_O0": "passed",
+            "C_runtime_O2": "passed",
+            "iterations": 1000
+          },
+          "reviewed_at_revision": "b0a367b",
+          "saved_legacy_fixture_hash_verified": true
+        }
+      ],
+      "seams_and_harness_adaptations": [],
+      "direct_source_API_execution": true,
+      "post_source_IR_mutation": false,
+      "runtime_status": "strict C -std=c11 -Wall -Werror -O0/-O2 passed at referenced feature checkpoints and final single fresh workspace607; no compiler-absent skips",
+      "previous_replaced_evidence_preserved": [],
+      "source_scope": "source"
+    },
+    {
+      "target": "emit",
+      "name": "bytes::bytes_survive_suspension_and_release_on_completion_and_cancellation",
+      "legacy_path": "tests/bytes/mod.rs",
+      "legacy_key": "emit::bytes::bytes_survive_suspension_and_release_on_completion_and_cancellation",
+      "legacy_ledger_index": 20,
+      "previous_status": "pending",
+      "proposed_status": "replaced",
+      "new_tests": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p7_legacy_bytes.rs",
+          "symbol": "legacy_bytes_keep_owned_snapshots_across_suspend_null_output_and_cancellation"
+        }
+      ],
+      "reason": "原本文+exportで入力1/NUL/255を上書き前にsnapshot。通常result256・NULL戻り先・旧と同じprivate root-cancel C seamの3経路を各1000回実行し、frame/task/Bytesの全解放を確認。source後IR変更はない。",
+      "evidence": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p7_legacy_bytes.rs",
+          "symbol": "legacy_bytes_keep_owned_snapshots_across_suspend_null_output_and_cancellation"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/p7-legacy-bytes-compat.json",
+          "original_report_revision": "31bc997",
+          "revision": "b0a367b"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/p7-backend-proof-integration.json",
+          "revision": "b0a367b"
+        }
+      ],
+      "verification_path": "original-source-plus-explicit-C-export",
+      "whole_body_review": {
+        "legacy_Rust_file": "crates/emela-codegen-emb/tests/bytes/mod.rs",
+        "legacy_Rust_file_sha256": "3c5b207c1122a453662293dbfdb1fed7d162266f7fbe7f3da94c33184a4178b5",
+        "legacy_line": 250,
+        "saved_sources": [
+          {
+            "program": "program:896c718072ff9a14cba6",
+            "name": "main.emel",
+            "path": "crates/emela-emb-compiler/tests/compat/legacy-corpus/sources/94571daa8fcda4685ef21d04748964f732075d256ab472559d3595abcec69f41.emel",
+            "sha256": "94571daa8fcda4685ef21d04748964f732075d256ab472559d3595abcec69f41",
+            "byte_preserved_saved_legacy_fixture": true
+          }
+        ],
+        "original_body_executed": true,
+        "basis": "Original saved source consumed directly by the new runner; export metadata only."
+      },
+      "Options_review": "heap4096, fibers2, frames8, frame_bytes512, tasks1, events1, deferred0, host_wait -> board_wait_start",
+      "observations": [
+        "All3 routes×1000: sourceBytes{1,0,255} is snapshotted before caller overwrites input; completion returns256.",
+        "NULL result and private root cancellation both release every owned byte/frame/task allocation."
+      ],
+      "observation_and_Options_details": [
+        {
+          "report": "docs/reports/p7-legacy-bytes-compat.json",
+          "program": "program:896c718072ff9a14cba6",
+          "source_adaptation": null,
+          "observations": {
+            "source_check": "passed",
+            "C_generation": "passed",
+            "C_runtime_O0": "passed",
+            "C_runtime_O2": "passed",
+            "iterations": 1000,
+            "heap_empty_after_each": true
+          },
+          "reviewed_at_revision": "b0a367b",
+          "saved_legacy_fixture_hash_verified": true
+        }
+      ],
+      "seams_and_harness_adaptations": [
+        {
+          "private_C_seam": "test_cancel directly sets emela_fiber_get(handle)->cancelled, as in the fixed-old harness."
+        }
+      ],
+      "direct_source_API_execution": true,
+      "post_source_IR_mutation": false,
+      "runtime_status": "strict C -std=c11 -Wall -Werror -O0/-O2 passed at referenced feature checkpoints and final single fresh workspace607; no compiler-absent skips",
+      "previous_replaced_evidence_preserved": [],
+      "source_scope": "source"
+    },
+    {
+      "target": "emit",
+      "name": "bytes::discarded_bytes_still_check_capacity_and_release_owned_results",
+      "legacy_path": "tests/bytes/mod.rs",
+      "legacy_key": "emit::bytes::discarded_bytes_still_check_capacity_and_release_owned_results",
+      "legacy_ledger_index": 21,
+      "previous_status": "replaced",
+      "proposed_status": "replaced",
+      "new_tests": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p3_bytes.rs",
+          "symbol": "bytes_ownership_snapshots_aliases_and_invalid_list_elements_release_every_allocation"
+        }
+      ],
+      "reason": "未使用encode結果も旧heap128でHeapExhaustedを維持。旧heap256ではabcを1000回実行して都度全解放する小容量経路を追加。",
+      "evidence": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p3_bytes.rs",
+          "symbol": "bytes_ownership_snapshots_aliases_and_invalid_list_elements_release_every_allocation"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/p7-bytes-small-budget-compat.json",
+          "original_report_revision": "8a6a585",
+          "revision": "b0a367b"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/p7-backend-proof-integration.json",
+          "revision": "b0a367b"
+        }
+      ],
+      "verification_path": "existing-source-C-observation-replacement",
+      "whole_body_review": {
+        "legacy_Rust_file": "crates/emela-codegen-emb/tests/bytes/mod.rs",
+        "legacy_Rust_file_sha256": "3c5b207c1122a453662293dbfdb1fed7d162266f7fbe7f3da94c33184a4178b5",
+        "legacy_line": 584,
+        "saved_sources": [
+          {
+            "program": "program:e002041e4a426285da18",
+            "name": "main.emel",
+            "path": "crates/emela-emb-compiler/tests/compat/legacy-corpus/sources/f3d342101359f4d5eab67a0a64585f0c4af4901600e6bae3f9f9d5b3e89a8bba.emel",
+            "sha256": "f3d342101359f4d5eab67a0a64585f0c4af4901600e6bae3f9f9d5b3e89a8bba",
+            "byte_preserved_saved_legacy_fixture": true
+          }
+        ],
+        "original_body_executed": false,
+        "basis": "Broader existing source test contains corresponding functions and all old observable assertions. Provenance SHA is not an original-body runtime claim."
+      },
+      "Options_review": "heap128/1024byte terminal input; heap256/abc successful loop",
+      "observations": [
+        "Discarded Bytes.encode_utf8 retains HeapExhausted atold128heap/1024byte input (existingterminaltest).",
+        "Newadditionalold256heap run checks1000abc inputs fullyreclaimed. Source body is the same unusedencode followed byUnit."
+      ],
+      "observation_and_Options_details": [
+        {
+          "report": "docs/reports/p7-bytes-small-budget-compat.json",
+          "program": "program:e002041e4a426285da18",
+          "source_adaptation": "Existing broader source/C observations encompass the old input APIs and exact assertions. Original fixture hash retained for provenance; this is not an original-body runtime claim.",
+          "observations": {
+            "source_check": "passed",
+            "C_generation": "passed",
+            "C_runtime_O0": "passed",
+            "C_runtime_O2": "passed",
+            "heap_empty_after_each_fully_released_route": true
+          },
+          "reviewed_at_revision": "b0a367b",
+          "saved_legacy_fixture_hash_verified": true
+        }
+      ],
+      "seams_and_harness_adaptations": [],
+      "direct_source_API_execution": true,
+      "post_source_IR_mutation": false,
+      "runtime_status": "strict C -std=c11 -Wall -Werror -O0/-O2 passed at referenced feature checkpoints and final single fresh workspace607; no compiler-absent skips",
+      "previous_replaced_evidence_preserved": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p3_bytes.rs"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/compiler-p3.md"
+        }
+      ],
+      "source_scope": "source"
+    },
+    {
+      "target": "emit",
+      "name": "completion_types::finite_changing_recursive_enum_arguments_run_with_owned_back_edges",
+      "legacy_path": "tests/completion_types/mod.rs",
+      "legacy_key": "emit::completion_types::finite_changing_recursive_enum_arguments_run_with_owned_back_edges",
+      "legacy_ledger_index": 27,
+      "previous_status": "mapped",
+      "proposed_status": "replaced",
+      "new_tests": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/p7_recursive_source_tests.rs",
+          "symbol": "finite_recursive_source_shapes_preserve_old_layout_and_heap_budgets"
+        }
+      ],
+      "reason": "原本文+exportのNest[Int]/Nest[Bool]でwork(0)=42/work(1)=3を各1000回実行し全解放。以前の4MiB広域試験だけで済ませず旧4096byte容量で直接確認。",
+      "evidence": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/src/backend/lower/p7_recursive_source_tests.rs",
+          "symbol": "finite_recursive_source_shapes_preserve_old_layout_and_heap_budgets"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/p7-recursive-source-compat.json",
+          "original_report_revision": "44666f9",
+          "revision": "b0a367b"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/p7-backend-proof-integration.json",
+          "revision": "b0a367b"
+        }
+      ],
+      "verification_path": "original-source-plus-explicit-C-export",
+      "whole_body_review": {
+        "legacy_Rust_file": "crates/emela-codegen-emb/tests/completion_types/mod.rs",
+        "legacy_Rust_file_sha256": "18ef38ccac04da7530758e1823f6c5d329fd4f0340ca86fe8a9fb92e6fabe139",
+        "legacy_line": 44,
+        "saved_sources": [
+          {
+            "program": "program:4bd3bbef2dbb773478d2",
+            "name": "main.emel",
+            "path": "crates/emela-emb-compiler/tests/compat/legacy-corpus/sources/31ff51508cbd03e7ee8068b0ea50b1e9d4fc758df770d7dc88d43b8e6489ff81.emel",
+            "sha256": "31ff51508cbd03e7ee8068b0ea50b1e9d4fc758df770d7dc88d43b8e6489ff81",
+            "byte_preserved_saved_legacy_fixture": true
+          }
+        ],
+        "original_body_executed": true,
+        "basis": "Original saved source consumed directly by the new runner; export metadata only."
+      },
+      "Options_review": "heap4096; all other Options default",
+      "observations": [
+        "Original finite-changing Nest[Int]/Nest[Bool] source: work(0)==42/work(1)==3, each fully reclaims heap.",
+        "Existing p3 recursive fixture covers the same values plus deeper release at4MiB; this extra run restores the fixed-old4096byte budget."
+      ],
+      "observation_and_Options_details": [
+        {
+          "report": "docs/reports/p7-recursive-source-compat.json",
+          "program": "program:4bd3bbef2dbb773478d2",
+          "source_adaptation": "Original source body unchanged; explicit C export only. Normal checker/normalization/specialization/ABI projection/lowering pipeline, no IR mutation.",
+          "observations": {
+            "source_check": "passed",
+            "C_generation": "passed",
+            "strict_C_objects": {
+              "-O0": "passed",
+              "-O2": "passed"
+            },
+            "C_runtime_O0": "passed",
+            "C_runtime_O2": "passed",
+            "iterations": 1000,
+            "heap_empty_after_each": true
+          },
+          "reviewed_at_revision": "b0a367b",
+          "saved_legacy_fixture_hash_verified": true
+        }
+      ],
+      "seams_and_harness_adaptations": [],
+      "direct_source_API_execution": true,
+      "post_source_IR_mutation": false,
+      "runtime_status": "strict C -std=c11 -Wall -Werror -O0/-O2 passed at referenced feature checkpoints and final single fresh workspace607; no compiler-absent skips",
+      "previous_replaced_evidence_preserved": [],
+      "source_scope": "source"
+    },
+    {
+      "target": "emit",
+      "name": "const_runtime::canonical_const_roots_include_dependency_specializations_until_they_reach_a_fixed_point",
+      "legacy_path": "tests/const_runtime/mod.rs",
+      "legacy_key": "emit::const_runtime::canonical_const_roots_include_dependency_specializations_until_they_reach_a_fixed_point",
+      "legacy_ledger_index": 28,
+      "previous_status": "pending",
+      "proposed_status": "replaced",
+      "new_tests": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p7_legacy_generic_consts.rs",
+          "symbol": "fixed_legacy_generic_const_inputs_execute_through_the_independent_compiler"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p7_generic_consts.rs",
+          "symbol": "canonical_const_dependencies_reach_a_fixed_point_and_initialize_once"
+        }
+      ],
+      "reason": "原本文+exportでinteger/textがともに42、依存constの初期化logが計2回で止まることを1000回確認。別試験はBASE/PAIR各1回を個別照合。旧$emb_const_origins$v1$のFnRef/name検査は独立canonical_const metadataと固定点生成へ置換し、旧私有prefixの残存は要求しない。",
+      "evidence": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p7_legacy_generic_consts.rs",
+          "symbol": "fixed_legacy_generic_const_inputs_execute_through_the_independent_compiler"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p7_generic_consts.rs",
+          "symbol": "canonical_const_dependencies_reach_a_fixed_point_and_initialize_once"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/p7-generic-const-compat.json",
+          "original_report_revision": "f8ac2aa",
+          "revision": "b0a367b"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/frontend/specialize/consts.rs",
+          "symbol": "canonical_constants"
+        },
+        {
+          "kind": "implementation",
+          "path": "crates/emela-emb-compiler/src/frontend/ir.rs",
+          "symbol": "canonical_const"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/p7-backend-proof-integration.json",
+          "revision": "b0a367b"
+        }
+      ],
+      "verification_path": "original-source-plus-explicit-C-export",
+      "whole_body_review": {
+        "legacy_Rust_file": "crates/emela-codegen-emb/tests/const_runtime/mod.rs",
+        "legacy_Rust_file_sha256": "ff5b61e9ed98cabfc8bb2212d2b310dbac026de0d4c9e17ee0bfbbb296d751a4",
+        "legacy_line": 952,
+        "saved_sources": [
+          {
+            "program": "program:0e55f902c5bac78b6187",
+            "name": "main.emel",
+            "path": "crates/emela-emb-compiler/tests/compat/legacy-corpus/sources/5f7efbeaef62d31c1e1f46eaad6e92bcd39f6d285327b6245e4c93ba70c54b4c.emel",
+            "sha256": "5f7efbeaef62d31c1e1f46eaad6e92bcd39f6d285327b6245e4c93ba70c54b4c",
+            "byte_preserved_saved_legacy_fixture": true
+          }
+        ],
+        "original_body_executed": true,
+        "basis": "Original saved source consumed directly by the new runner; export metadata only."
+      },
+      "Options_review": "old: frontend/flow structural check only, no C Options; replacement C: heap32768 (original body), heap16384 (BASE/PAIR individually counted)",
+      "observations": [
+        "integer/text both return 42; BASE and PAIR initialization log count is exactly two total"
+      ],
+      "observation_and_Options_details": [
+        {
+          "report": "docs/reports/p7-generic-const-compat.json",
+          "program": "program:0e55f902c5bac78b6187",
+          "source_adaptation": null,
+          "observations": {
+            "source_check": "passed",
+            "c_generation": "passed",
+            "strict_c_object": {
+              "O0": "passed",
+              "O2": "passed"
+            },
+            "runtime": {
+              "O0": "passed",
+              "O2": "passed"
+            }
+          },
+          "reviewed_at_revision": "b0a367b",
+          "saved_legacy_fixture_hash_verified": true
+        }
+      ],
+      "seams_and_harness_adaptations": [],
+      "direct_source_API_execution": true,
+      "post_source_IR_mutation": false,
+      "runtime_status": "strict C -std=c11 -Wall -Werror -O0/-O2 passed at referenced feature checkpoints and final single fresh workspace607; no compiler-absent skips",
+      "previous_replaced_evidence_preserved": [],
+      "source_scope": "source"
+    },
+    {
+      "target": "emit",
+      "name": "deferred::await_preserves_string_and_list_results_past_frame_and_scope_reuse",
+      "legacy_path": "tests/deferred/mod.rs",
+      "legacy_key": "emit::deferred::await_preserves_string_and_list_results_past_frame_and_scope_reuse",
+      "legacy_ledger_index": 32,
+      "previous_status": "pending",
+      "proposed_status": "replaced",
+      "new_tests": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p7_deferred_compat.rs",
+          "symbol": "await_preserves_string_and_list_results_past_frame_and_scope_reuse"
+        }
+      ],
+      "reason": "原本文+exportと旧C観測で、scope/frame再使用後もString 42と2要素Listを保持。旧heap8192/frame512/Deferred 1を維持し1000回全解放。",
+      "evidence": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p7_deferred_compat.rs",
+          "symbol": "await_preserves_string_and_list_results_past_frame_and_scope_reuse"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/p7-concurrency-corpus-compat.json",
+          "original_report_revision": "9998b3c",
+          "revision": "b0a367b"
+        },
+        {
+          "kind": "C_harness",
+          "path": "crates/emela-emb-compiler/tests/compat/p7/concurrency/await_preserves_string_and_list_results_past_frame_and_scope_reuse.c"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/p7-backend-proof-integration.json",
+          "revision": "b0a367b"
+        }
+      ],
+      "verification_path": "original-source-plus-explicit-C-export",
+      "whole_body_review": {
+        "legacy_Rust_file": "crates/emela-codegen-emb/tests/deferred/mod.rs",
+        "legacy_Rust_file_sha256": "0e343dcede15b37c59d08286561faeff8a3fb534b23f2c6f601ae0e1c0d52616",
+        "legacy_line": 442,
+        "saved_sources": [
+          {
+            "program": "program:d7d35bbc08500ea36416",
+            "name": "main.emel",
+            "path": "crates/emela-emb-compiler/tests/compat/legacy-corpus/sources/09d77fd35b21027246e2fcd97b6a040b1f6f67972dbf29294f0189b4e212408b.emel",
+            "sha256": "09d77fd35b21027246e2fcd97b6a040b1f6f67972dbf29294f0189b4e212408b",
+            "byte_preserved_saved_legacy_fixture": true
+          }
+        ],
+        "original_body_executed": true,
+        "basis": "Original saved source consumed directly by the new runner; export metadata only."
+      },
+      "Options_review": "heap8192, fibers8, frames24, frame_bytes512, deferred1 (old options helper default2 overridden to1)",
+      "observations": [
+        "emela_scheduler_run(1)",
+        "emela_scheduler_run(1)",
+        "text.owner && text.length == 2 && memcmp(text.data, \"42\", 2) == 0",
+        "emela_export_length_2(list) == 2"
+      ],
+      "observation_and_Options_details": [
+        {
+          "report": "docs/reports/p7-concurrency-corpus-compat.json",
+          "program": "program:d7d35bbc08500ea36416",
+          "source_adaptation": "explicit C export only; original source fixture is byte-preserved",
+          "observations": {
+            "program": "program:d7d35bbc08500ea36416",
+            "source_sha256": "09d77fd35b21027246e2fcd97b6a040b1f6f67972dbf29294f0189b4e212408b",
+            "new_test": "tests/p7_deferred_compat.rs::await_preserves_string_and_list_results_past_frame_and_scope_reuse",
+            "harness": "tests/compat/p7/concurrency/await_preserves_string_and_list_results_past_frame_and_scope_reuse.c",
+            "status": "runtime-passed",
+            "actual_options": {
+              "heap_bytes": 8192,
+              "fiber_capacity": 8,
+              "frame_capacity": 24,
+              "frame_bytes": 512,
+              "deferred_capacity": 1
+            },
+            "old_postprocessing": "none; generated C heap observer only",
+            "C_generation": "accepted",
+            "strict_C_objects": {
+              "-O0": "compiled-linked",
+              "-O2": "compiled-linked"
+            },
+            "C_runtime": {
+              "-O0": "passed",
+              "-O2": "passed"
+            },
+            "successful_iterations": 1000,
+            "terminal_defect_observed": false,
+            "heap_observation": "all fully released iterations assert heap empty",
+            "old_resource_budgets_preserved": true
+          },
+          "reviewed_at_revision": "b0a367b",
+          "saved_legacy_fixture_hash_verified": true
+        }
+      ],
+      "seams_and_harness_adaptations": [
+        {
+          "harness_adaptations": [
+            "stable explicit export names",
+            "function/aggregate ABI type numbers and release symbol resolved from generated public header",
+            "event lock hooks supplied when required",
+            "heap-empty audit after fully released successful iterations"
+          ]
+        }
+      ],
+      "direct_source_API_execution": true,
+      "post_source_IR_mutation": false,
+      "runtime_status": "strict C -std=c11 -Wall -Werror -O0/-O2 passed at referenced feature checkpoints and final single fresh workspace607; no compiler-absent skips",
+      "previous_replaced_evidence_preserved": [],
+      "source_scope": "source"
+    },
+    {
+      "target": "emit",
+      "name": "deferred::complete_copies_borrowed_string_and_poll_retains_it_past_scope_end",
+      "legacy_path": "tests/deferred/mod.rs",
+      "legacy_key": "emit::deferred::complete_copies_borrowed_string_and_poll_retains_it_past_scope_end",
+      "legacy_ledger_index": 33,
+      "previous_status": "pending",
+      "proposed_status": "replaced",
+      "new_tests": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p7_deferred_compat.rs",
+          "symbol": "complete_copies_borrowed_string_and_poll_retains_it_past_scope_end"
+        }
+      ],
+      "reason": "原本文+exportで借用String42のcopy、poll、scope終了と再使用後も所有Stringを保持。NULL出力を交互に使い、旧容量で1000回全解放。",
+      "evidence": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p7_deferred_compat.rs",
+          "symbol": "complete_copies_borrowed_string_and_poll_retains_it_past_scope_end"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/p7-concurrency-corpus-compat.json",
+          "original_report_revision": "9998b3c",
+          "revision": "b0a367b"
+        },
+        {
+          "kind": "C_harness",
+          "path": "crates/emela-emb-compiler/tests/compat/p7/concurrency/complete_copies_borrowed_string_and_poll_retains_it_past_scope_end.c"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/p7-backend-proof-integration.json",
+          "revision": "b0a367b"
+        }
+      ],
+      "verification_path": "original-source-plus-explicit-C-export",
+      "whole_body_review": {
+        "legacy_Rust_file": "crates/emela-codegen-emb/tests/deferred/mod.rs",
+        "legacy_Rust_file_sha256": "0e343dcede15b37c59d08286561faeff8a3fb534b23f2c6f601ae0e1c0d52616",
+        "legacy_line": 316,
+        "saved_sources": [
+          {
+            "program": "program:331a2c931ce2d58cc538",
+            "name": "main.emel",
+            "path": "crates/emela-emb-compiler/tests/compat/legacy-corpus/sources/acd7bf4e88d35dc246b9197dafb293a1321dbca20def9b883831224d407f65d6.emel",
+            "sha256": "acd7bf4e88d35dc246b9197dafb293a1321dbca20def9b883831224d407f65d6",
+            "byte_preserved_saved_legacy_fixture": true
+          }
+        ],
+        "original_body_executed": true,
+        "basis": "Original saved source consumed directly by the new runner; export metadata only."
+      },
+      "Options_review": "heap8192, fibers8, frames24, frame_bytes512, deferred1, string_capacity16",
+      "observations": [
+        "emela_scheduler_run(1)",
+        "value.owner && value.length == 2 && memcmp(value.data, \"42\", 2) == 0"
+      ],
+      "observation_and_Options_details": [
+        {
+          "report": "docs/reports/p7-concurrency-corpus-compat.json",
+          "program": "program:331a2c931ce2d58cc538",
+          "source_adaptation": "explicit C export only; original source fixture is byte-preserved",
+          "observations": {
+            "program": "program:331a2c931ce2d58cc538",
+            "source_sha256": "acd7bf4e88d35dc246b9197dafb293a1321dbca20def9b883831224d407f65d6",
+            "new_test": "tests/p7_deferred_compat.rs::complete_copies_borrowed_string_and_poll_retains_it_past_scope_end",
+            "harness": "tests/compat/p7/concurrency/complete_copies_borrowed_string_and_poll_retains_it_past_scope_end.c",
+            "status": "runtime-passed",
+            "actual_options": {
+              "heap_bytes": 8192,
+              "fiber_capacity": 8,
+              "frame_capacity": 24,
+              "frame_bytes": 512,
+              "deferred_capacity": 1,
+              "string_capacity": 16
+            },
+            "old_postprocessing": "none; generated C heap observer only",
+            "C_generation": "accepted",
+            "strict_C_objects": {
+              "-O0": "compiled-linked",
+              "-O2": "compiled-linked"
+            },
+            "C_runtime": {
+              "-O0": "passed",
+              "-O2": "passed"
+            },
+            "successful_iterations": 1000,
+            "terminal_defect_observed": false,
+            "heap_observation": "all fully released iterations assert heap empty",
+            "old_resource_budgets_preserved": true
+          },
+          "reviewed_at_revision": "b0a367b",
+          "saved_legacy_fixture_hash_verified": true
+        }
+      ],
+      "seams_and_harness_adaptations": [
+        {
+          "harness_adaptations": [
+            "stable explicit export names",
+            "function/aggregate ABI type numbers and release symbol resolved from generated public header",
+            "event lock hooks supplied when required",
+            "heap-empty audit after fully released successful iterations"
+          ]
+        }
+      ],
+      "direct_source_API_execution": true,
+      "post_source_IR_mutation": false,
+      "runtime_status": "strict C -std=c11 -Wall -Werror -O0/-O2 passed at referenced feature checkpoints and final single fresh workspace607; no compiler-absent skips",
+      "previous_replaced_evidence_preserved": [],
+      "source_scope": "source"
+    },
+    {
+      "target": "emit",
+      "name": "deferred::poll_observes_empty_and_first_value_for_scalar_and_unit_without_yielding",
+      "legacy_path": "tests/deferred/mod.rs",
+      "legacy_key": "emit::deferred::poll_observes_empty_and_first_value_for_scalar_and_unit_without_yielding",
+      "legacy_ledger_index": 35,
+      "previous_status": "pending",
+      "proposed_status": "replaced",
+      "new_tests": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p7_deferred_compat.rs",
+          "symbol": "poll_observes_empty_and_first_value_for_scalar_and_unit_without_yielding"
+        }
+      ],
+      "reason": "原本文+exportでInt/Unitのempty→first complete→重複complete拒否/pollを同じ順に実行。mark1が毎回1回、result=iを旧容量で1000回確認し全解放。",
+      "evidence": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p7_deferred_compat.rs",
+          "symbol": "poll_observes_empty_and_first_value_for_scalar_and_unit_without_yielding"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/p7-concurrency-corpus-compat.json",
+          "original_report_revision": "9998b3c",
+          "revision": "b0a367b"
+        },
+        {
+          "kind": "C_harness",
+          "path": "crates/emela-emb-compiler/tests/compat/p7/concurrency/poll_observes_empty_and_first_value_for_scalar_and_unit_without_yielding.c"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/p7-backend-proof-integration.json",
+          "revision": "b0a367b"
+        }
+      ],
+      "verification_path": "original-source-plus-explicit-C-export",
+      "whole_body_review": {
+        "legacy_Rust_file": "crates/emela-codegen-emb/tests/deferred/mod.rs",
+        "legacy_Rust_file_sha256": "0e343dcede15b37c59d08286561faeff8a3fb534b23f2c6f601ae0e1c0d52616",
+        "legacy_line": 254,
+        "saved_sources": [
+          {
+            "program": "program:f590f55865c7dd94150f",
+            "name": "main.emel",
+            "path": "crates/emela-emb-compiler/tests/compat/legacy-corpus/sources/a6b444b3e7a1aba4ba52ed9aac3547822f224887e093136ac4b78b07c0dae749.emel",
+            "sha256": "a6b444b3e7a1aba4ba52ed9aac3547822f224887e093136ac4b78b07c0dae749",
+            "byte_preserved_saved_legacy_fixture": true
+          }
+        ],
+        "original_body_executed": true,
+        "basis": "Original saved source consumed directly by the new runner; export metadata only."
+      },
+      "Options_review": "heap8192, fibers8, frames24, frame_bytes512, deferred2",
+      "observations": [
+        "n == 1",
+        "emela_scheduler_run(1)",
+        "result == i && marks == i + 1"
+      ],
+      "observation_and_Options_details": [
+        {
+          "report": "docs/reports/p7-concurrency-corpus-compat.json",
+          "program": "program:f590f55865c7dd94150f",
+          "source_adaptation": "explicit C export only; original source fixture is byte-preserved",
+          "observations": {
+            "program": "program:f590f55865c7dd94150f",
+            "source_sha256": "a6b444b3e7a1aba4ba52ed9aac3547822f224887e093136ac4b78b07c0dae749",
+            "new_test": "tests/p7_deferred_compat.rs::poll_observes_empty_and_first_value_for_scalar_and_unit_without_yielding",
+            "harness": "tests/compat/p7/concurrency/poll_observes_empty_and_first_value_for_scalar_and_unit_without_yielding.c",
+            "status": "runtime-passed",
+            "actual_options": {
+              "heap_bytes": 8192,
+              "fiber_capacity": 8,
+              "frame_capacity": 24,
+              "frame_bytes": 512,
+              "deferred_capacity": 2
+            },
+            "old_postprocessing": "none; generated C heap observer only",
+            "C_generation": "accepted",
+            "strict_C_objects": {
+              "-O0": "compiled-linked",
+              "-O2": "compiled-linked"
+            },
+            "C_runtime": {
+              "-O0": "passed",
+              "-O2": "passed"
+            },
+            "successful_iterations": 1000,
+            "terminal_defect_observed": false,
+            "heap_observation": "all fully released iterations assert heap empty",
+            "old_resource_budgets_preserved": true
+          },
+          "reviewed_at_revision": "b0a367b",
+          "saved_legacy_fixture_hash_verified": true
+        }
+      ],
+      "seams_and_harness_adaptations": [
+        {
+          "harness_adaptations": [
+            "stable explicit export names",
+            "function/aggregate ABI type numbers and release symbol resolved from generated public header",
+            "event lock hooks supplied when required",
+            "heap-empty audit after fully released successful iterations"
+          ]
+        }
+      ],
+      "direct_source_API_execution": true,
+      "post_source_IR_mutation": false,
+      "runtime_status": "strict C -std=c11 -Wall -Werror -O0/-O2 passed at referenced feature checkpoints and final single fresh workspace607; no compiler-absent skips",
+      "previous_replaced_evidence_preserved": [],
+      "source_scope": "source"
+    },
+    {
+      "target": "emit",
+      "name": "fiber::aggregate_abi::scope_returns_string_enum_exits_after_success_or_interruption_and_frame_reuse",
+      "legacy_path": "tests/fiber/aggregate_abi.rs",
+      "legacy_key": "emit::fiber::aggregate_abi::scope_returns_string_enum_exits_after_success_or_interruption_and_frame_reuse",
+      "legacy_ledger_index": 53,
+      "previous_status": "pending",
+      "proposed_status": "replaced",
+      "new_tests": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p7_aggregate_compat.rs",
+          "symbol": "scope_returns_string_enum_exits_after_success_or_interruption_and_frame_reuse"
+        }
+      ],
+      "reason": "原本文+exportと旧C harnessで子成功/中断、親cancel、NULL出力を交互に通し、task3/4の通知順を変えてframeを再使用。成功時はnested tagとowned String42、中断時はFailure causeを確認し、結果解放後heap 空を1000回確認。private C root-cancel seamのみ保持、IR変更なし。",
+      "evidence": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p7_aggregate_compat.rs",
+          "symbol": "scope_returns_string_enum_exits_after_success_or_interruption_and_frame_reuse"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/p7-aggregate-source-compat.json",
+          "original_report_revision": "c8ff094",
+          "revision": "b0a367b"
+        },
+        {
+          "kind": "C_harness",
+          "path": "crates/emela-emb-compiler/tests/compat/p7/concurrency/scope_returns_string_enum_exits_after_success_or_interruption_and_frame_reuse.c"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/p7-backend-proof-integration.json",
+          "revision": "b0a367b"
+        }
+      ],
+      "verification_path": "original-source-plus-explicit-C-export",
+      "whole_body_review": {
+        "legacy_Rust_file": "crates/emela-codegen-emb/tests/fiber/aggregate_abi.rs",
+        "legacy_Rust_file_sha256": "ee1f27c3013c4e0e39e806251a08d5393d8240eb74e580ce4937956d81d04392",
+        "legacy_line": 117,
+        "saved_sources": [
+          {
+            "program": "program:01353e00d829543bae73",
+            "name": "main.emel",
+            "path": "crates/emela-emb-compiler/tests/compat/legacy-corpus/sources/7710f3c6bd1e3c1edc220dbae0685309889da0c2f81f9b2a7d9ae8bdaf6bce75.emel",
+            "sha256": "7710f3c6bd1e3c1edc220dbae0685309889da0c2f81f9b2a7d9ae8bdaf6bce75",
+            "byte_preserved_saved_legacy_fixture": true
+          }
+        ],
+        "original_body_executed": true,
+        "basis": "Original saved source consumed directly by the new runner; export metadata only."
+      },
+      "Options_review": "heap4096, fibers8, frames24, frame_bytes1024, tasks2, events2, string_capacity64, host_wait -> board_wait_start",
+      "observations": [
+        "原本文+exportと旧C harnessで子成功/中断、親cancel、NULL出力を交互に通し、task3/4の通知順を変えてframeを再使用。成功時はnested tagとowned String42、中断時はFailure causeを確認し、結果解放後heap空を1000回確認。private C root-cancel seamのみ保持、IR変更なし。"
+      ],
+      "observation_and_Options_details": [
+        {
+          "report": "docs/reports/p7-aggregate-source-compat.json",
+          "program": "program:01353e00d829543bae73",
+          "source_adaptation": "Original body with explicit C exports only. Original C observations and capacities preserved; C symbol/type/release IDs follow the generated header. No post-lowering IR mutation.",
+          "observations": null,
+          "reviewed_at_revision": "b0a367b",
+          "saved_legacy_fixture_hash_verified": true
+        }
+      ],
+      "seams_and_harness_adaptations": [],
+      "direct_source_API_execution": true,
+      "post_source_IR_mutation": false,
+      "runtime_status": "strict C -std=c11 -Wall -Werror -O0/-O2 passed at referenced feature checkpoints and final single fresh workspace607; no compiler-absent skips",
+      "previous_replaced_evidence_preserved": [],
+      "source_scope": "source"
+    },
+    {
+      "target": "emit",
+      "name": "fiber::attempt::attempt_captures_sync_failure_and_returns_owned_cause",
+      "legacy_path": "tests/fiber/attempt.rs",
+      "legacy_key": "emit::fiber::attempt::attempt_captures_sync_failure_and_returns_owned_cause",
+      "legacy_ledger_index": 54,
+      "previous_status": "pending",
+      "proposed_status": "replaced",
+      "new_tests": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p7_cause_compat.rs",
+          "symbol": "attempt_captures_sync_failure_and_returns_owned_cause"
+        }
+      ],
+      "reason": "原本文+exportで同期成功41+1とtyped Boom失敗を交互に通し、両方42。旧heap1024で1000回、結果causeを解放しheap 空を追加確認。",
+      "evidence": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p7_cause_compat.rs",
+          "symbol": "attempt_captures_sync_failure_and_returns_owned_cause"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/p7-cause-source-compat.json",
+          "original_report_revision": "2650f67",
+          "revision": "b0a367b"
+        },
+        {
+          "kind": "C_harness",
+          "path": "crates/emela-emb-compiler/tests/compat/p7/cause/attempt_captures_sync_failure_and_returns_owned_cause.c"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/p7-backend-proof-integration.json",
+          "revision": "b0a367b"
+        }
+      ],
+      "verification_path": "original-source-plus-explicit-C-export",
+      "whole_body_review": {
+        "legacy_Rust_file": "crates/emela-codegen-emb/tests/fiber/attempt.rs",
+        "legacy_Rust_file_sha256": "c3889dd23846b2998fa44d516cf2474ea15083604b06169df960eac23773cba8",
+        "legacy_line": 4,
+        "saved_sources": [
+          {
+            "program": "program:487a37e912618d251aaf",
+            "name": "main.emel",
+            "path": "crates/emela-emb-compiler/tests/compat/legacy-corpus/sources/a3c77db970a93187f73e1acda5dac41f5237626da01f82b47e11e396411bcf28.emel",
+            "sha256": "a3c77db970a93187f73e1acda5dac41f5237626da01f82b47e11e396411bcf28",
+            "byte_preserved_saved_legacy_fixture": true
+          }
+        ],
+        "original_body_executed": true,
+        "basis": "Original saved source consumed directly by the new runner; export metadata only."
+      },
+      "Options_review": "heap1024; shared old fiber options helper otherwise unchanged",
+      "observations": [
+        "Alternating success41+1 and typed Boom failure both return42."
+      ],
+      "observation_and_Options_details": [
+        {
+          "report": "docs/reports/p7-cause-source-compat.json",
+          "program": "program:487a37e912618d251aaf",
+          "source_adaptation": "Original fixture bytes preserved; only explicit C exports added. Old public C symbol suffixes adapted, no post-source IR mutation.",
+          "observations": {
+            "source_check": "passed",
+            "C_generation": "passed",
+            "C_runtime_O0": "passed",
+            "C_runtime_O2": "passed",
+            "iterations": 1000,
+            "terminal_defect": false,
+            "heap_empty_after_each_fully_released_route": true
+          },
+          "reviewed_at_revision": "b0a367b",
+          "saved_legacy_fixture_hash_verified": true
+        }
+      ],
+      "seams_and_harness_adaptations": [],
+      "direct_source_API_execution": true,
+      "post_source_IR_mutation": false,
+      "runtime_status": "strict C -std=c11 -Wall -Werror -O0/-O2 passed at referenced feature checkpoints and final single fresh workspace607; no compiler-absent skips",
+      "previous_replaced_evidence_preserved": [],
+      "source_scope": "source"
+    },
+    {
+      "target": "emit",
+      "name": "fiber::await_::await_returns_success_and_can_mix_with_repeated_join_without_yielding",
+      "legacy_path": "tests/fiber/await_.rs",
+      "legacy_key": "emit::fiber::await_::await_returns_success_and_can_mix_with_repeated_join_without_yielding",
+      "legacy_ledger_index": 55,
+      "previous_status": "pending",
+      "proposed_status": "replaced",
+      "new_tests": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p7_child_results_compat.rs",
+          "symbol": "await_returns_success_and_can_mix_with_repeated_join_without_yielding"
+        }
+      ],
+      "reason": "原本文+exportでawait success、反復joinとの混在、破棄Unitを旧mark順序とresult=3*i/order3、result1、Unit/order2で照合。旧容量1000回、heap全解放。",
+      "evidence": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p7_child_results_compat.rs",
+          "symbol": "await_returns_success_and_can_mix_with_repeated_join_without_yielding"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/p7-concurrency-corpus-compat.json",
+          "original_report_revision": "9998b3c",
+          "revision": "b0a367b"
+        },
+        {
+          "kind": "C_harness",
+          "path": "crates/emela-emb-compiler/tests/compat/p7/concurrency/await_returns_success_and_can_mix_with_repeated_join_without_yielding.c"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/p7-backend-proof-integration.json",
+          "revision": "b0a367b"
+        }
+      ],
+      "verification_path": "original-source-plus-explicit-C-export",
+      "whole_body_review": {
+        "legacy_Rust_file": "crates/emela-codegen-emb/tests/fiber/await_.rs",
+        "legacy_Rust_file_sha256": "118a273ac7f749dd9eaa294e56cfe913105a1b80ce5b6c8f760efdc6386f2bd0",
+        "legacy_line": 4,
+        "saved_sources": [
+          {
+            "program": "program:872b73526ae1cdeecd30",
+            "name": "main.emel",
+            "path": "crates/emela-emb-compiler/tests/compat/legacy-corpus/sources/c4618bb638c5ba2327260f2fd48651461c415839afd6ecb66bb686aa63ea585e.emel",
+            "sha256": "c4618bb638c5ba2327260f2fd48651461c415839afd6ecb66bb686aa63ea585e",
+            "byte_preserved_saved_legacy_fixture": true
+          }
+        ],
+        "original_body_executed": true,
+        "basis": "Original saved source consumed directly by the new runner; export metadata only."
+      },
+      "Options_review": "heap4096, fibers8, frames24, frame_bytes512, tasks2, events2, host_wait -> board_wait_start",
+      "observations": [
+        "n == ++order",
+        "emela_scheduler_run(1)",
+        "result == 3 * i && order == 3",
+        "emela_scheduler_run(1)",
+        "result == 1",
+        "emela_scheduler_run(1)",
+        "order == 2"
+      ],
+      "observation_and_Options_details": [
+        {
+          "report": "docs/reports/p7-concurrency-corpus-compat.json",
+          "program": "program:872b73526ae1cdeecd30",
+          "source_adaptation": "explicit C export only; original source fixture is byte-preserved",
+          "observations": {
+            "program": "program:872b73526ae1cdeecd30",
+            "source_sha256": "c4618bb638c5ba2327260f2fd48651461c415839afd6ecb66bb686aa63ea585e",
+            "new_test": "tests/p7_child_results_compat.rs::await_returns_success_and_can_mix_with_repeated_join_without_yielding",
+            "harness": "tests/compat/p7/concurrency/await_returns_success_and_can_mix_with_repeated_join_without_yielding.c",
+            "status": "runtime-passed",
+            "actual_options": {
+              "heap_bytes": 4096,
+              "fiber_capacity": 8,
+              "frame_capacity": 24,
+              "frame_bytes": 512,
+              "deferred_capacity": 8
+            },
+            "old_postprocessing": "none; generated C heap observer only",
+            "C_generation": "accepted",
+            "strict_C_objects": {
+              "-O0": "compiled-linked",
+              "-O2": "compiled-linked"
+            },
+            "C_runtime": {
+              "-O0": "passed",
+              "-O2": "passed"
+            },
+            "successful_iterations": 1000,
+            "terminal_defect_observed": false,
+            "heap_observation": "all fully released iterations assert heap empty",
+            "old_resource_budgets_preserved": true
+          },
+          "reviewed_at_revision": "b0a367b",
+          "saved_legacy_fixture_hash_verified": true
+        }
+      ],
+      "seams_and_harness_adaptations": [
+        {
+          "harness_adaptations": [
+            "stable explicit export names",
+            "function/aggregate ABI type numbers and release symbol resolved from generated public header",
+            "event lock hooks supplied when required",
+            "heap-empty audit after fully released successful iterations"
+          ]
+        }
+      ],
+      "direct_source_API_execution": true,
+      "post_source_IR_mutation": false,
+      "runtime_status": "strict C -std=c11 -Wall -Werror -O0/-O2 passed at referenced feature checkpoints and final single fresh workspace607; no compiler-absent skips",
+      "previous_replaced_evidence_preserved": [],
+      "source_scope": "source"
+    },
+    {
+      "target": "emit",
+      "name": "fiber::cause::cause_kind_reads_failure_without_consuming_the_cause",
+      "legacy_path": "tests/fiber/cause.rs",
+      "legacy_key": "emit::fiber::cause::cause_kind_reads_failure_without_consuming_the_cause",
+      "legacy_ledger_index": 56,
+      "previous_status": "pending",
+      "proposed_status": "replaced",
+      "new_tests": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p7_cause_compat.rs",
+          "symbol": "cause_kind_reads_failure_without_consuming_the_cause"
+        }
+      ],
+      "reason": "原本文+exportで最初のCause.kind結果を破棄してもcauseは生存し、2回目のFail matchが42。旧heap1024で1000回全解放。",
+      "evidence": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p7_cause_compat.rs",
+          "symbol": "cause_kind_reads_failure_without_consuming_the_cause"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/p7-cause-source-compat.json",
+          "original_report_revision": "2650f67",
+          "revision": "b0a367b"
+        },
+        {
+          "kind": "C_harness",
+          "path": "crates/emela-emb-compiler/tests/compat/p7/cause/cause_kind_reads_failure_without_consuming_the_cause.c"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/p7-backend-proof-integration.json",
+          "revision": "b0a367b"
+        }
+      ],
+      "verification_path": "original-source-plus-explicit-C-export",
+      "whole_body_review": {
+        "legacy_Rust_file": "crates/emela-codegen-emb/tests/fiber/cause.rs",
+        "legacy_Rust_file_sha256": "3ca0d07cff44cc4b9f004fc8452551e0c338c5e8521d97e4b62ccd53f9afe085",
+        "legacy_line": 4,
+        "saved_sources": [
+          {
+            "program": "program:902e83bb72b886983dd2",
+            "name": "main.emel",
+            "path": "crates/emela-emb-compiler/tests/compat/legacy-corpus/sources/bb9a5869439d8f10967ceb3997ec8ac8a9bcbedcc97962e79d1254ae734d58cf.emel",
+            "sha256": "bb9a5869439d8f10967ceb3997ec8ac8a9bcbedcc97962e79d1254ae734d58cf",
+            "byte_preserved_saved_legacy_fixture": true
+          }
+        ],
+        "original_body_executed": true,
+        "basis": "Original saved source consumed directly by the new runner; export metadata only."
+      },
+      "Options_review": "heap1024; shared old fiber options helper otherwise unchanged",
+      "observations": [
+        "Discarded first Cause.kind leaves cause alive for second Fail kind match returning42."
+      ],
+      "observation_and_Options_details": [
+        {
+          "report": "docs/reports/p7-cause-source-compat.json",
+          "program": "program:902e83bb72b886983dd2",
+          "source_adaptation": "Original fixture bytes preserved; only explicit C exports added. Old public C symbol suffixes adapted, no post-source IR mutation.",
+          "observations": {
+            "source_check": "passed",
+            "C_generation": "passed",
+            "C_runtime_O0": "passed",
+            "C_runtime_O2": "passed",
+            "iterations": 1000,
+            "terminal_defect": false,
+            "heap_empty_after_each_fully_released_route": true
+          },
+          "reviewed_at_revision": "b0a367b",
+          "saved_legacy_fixture_hash_verified": true
+        }
+      ],
+      "seams_and_harness_adaptations": [],
+      "direct_source_API_execution": true,
+      "post_source_IR_mutation": false,
+      "runtime_status": "strict C -std=c11 -Wall -Werror -O0/-O2 passed at referenced feature checkpoints and final single fresh workspace607; no compiler-absent skips",
+      "previous_replaced_evidence_preserved": [],
+      "source_scope": "source"
+    },
+    {
+      "target": "emit",
+      "name": "fiber::cause::cause_raise_preserves_the_error_and_runs_native_cleanup_before_escape",
+      "legacy_path": "tests/fiber/cause.rs",
+      "legacy_key": "emit::fiber::cause::cause_raise_preserves_the_error_and_runs_native_cleanup_before_escape",
+      "legacy_ledger_index": 57,
+      "previous_status": "pending",
+      "proposed_status": "replaced",
+      "new_tests": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p7_cause_compat.rs",
+          "symbol": "cause_raise_preserves_the_error_and_runs_native_cleanup_before_escape"
+        }
+      ],
+      "reason": "原本文+exportでBoom42をrethrowし、外側escapeへ到達する前にnative resource cleanupを必ず1回行う。旧heap1024でreleases=i+1、result42を1000回確認し全解放。",
+      "evidence": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p7_cause_compat.rs",
+          "symbol": "cause_raise_preserves_the_error_and_runs_native_cleanup_before_escape"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/p7-cause-source-compat.json",
+          "original_report_revision": "2650f67",
+          "revision": "b0a367b"
+        },
+        {
+          "kind": "C_harness",
+          "path": "crates/emela-emb-compiler/tests/compat/p7/cause/cause_raise_preserves_the_error_and_runs_native_cleanup_before_escape.c"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/p7-backend-proof-integration.json",
+          "revision": "b0a367b"
+        }
+      ],
+      "verification_path": "original-source-plus-explicit-C-export",
+      "whole_body_review": {
+        "legacy_Rust_file": "crates/emela-codegen-emb/tests/fiber/cause.rs",
+        "legacy_Rust_file_sha256": "3ca0d07cff44cc4b9f004fc8452551e0c338c5e8521d97e4b62ccd53f9afe085",
+        "legacy_line": 75,
+        "saved_sources": [
+          {
+            "program": "program:fb2aa71c1044bb6ef15e",
+            "name": "main.emel",
+            "path": "crates/emela-emb-compiler/tests/compat/legacy-corpus/sources/b29b5560fc869cb93fe7731f35fb1c3eb743761c02d8249ddf9b46a36c2e3ee1.emel",
+            "sha256": "b29b5560fc869cb93fe7731f35fb1c3eb743761c02d8249ddf9b46a36c2e3ee1",
+            "byte_preserved_saved_legacy_fixture": true
+          }
+        ],
+        "original_body_executed": true,
+        "basis": "Original saved source consumed directly by the new runner; export metadata only."
+      },
+      "Options_review": "heap1024; shared old fiber options helper otherwise unchanged",
+      "observations": [
+        "Rethrow preserves typed Boom42 and invokes native resource release exactly once before outerescape."
+      ],
+      "observation_and_Options_details": [
+        {
+          "report": "docs/reports/p7-cause-source-compat.json",
+          "program": "program:fb2aa71c1044bb6ef15e",
+          "source_adaptation": "Original fixture bytes preserved; only explicit C exports added. Old public C symbol suffixes adapted, no post-source IR mutation.",
+          "observations": {
+            "source_check": "passed",
+            "C_generation": "passed",
+            "C_runtime_O0": "passed",
+            "C_runtime_O2": "passed",
+            "iterations": 1000,
+            "terminal_defect": false,
+            "heap_empty_after_each_fully_released_route": true
+          },
+          "reviewed_at_revision": "b0a367b",
+          "saved_legacy_fixture_hash_verified": true
+        }
+      ],
+      "seams_and_harness_adaptations": [],
+      "direct_source_API_execution": true,
+      "post_source_IR_mutation": false,
+      "runtime_status": "strict C -std=c11 -Wall -Werror -O0/-O2 passed at referenced feature checkpoints and final single fresh workspace607; no compiler-absent skips",
+      "previous_replaced_evidence_preserved": [],
+      "source_scope": "source"
+    },
+    {
+      "target": "emit",
+      "name": "fiber::cause::cause_to_string_uses_error_show_and_caller_output_buffer",
+      "legacy_path": "tests/fiber/cause.rs",
+      "legacy_key": "emit::fiber::cause::cause_to_string_uses_error_show_and_caller_output_buffer",
+      "legacy_ledger_index": 58,
+      "previous_status": "pending",
+      "proposed_status": "replaced",
+      "new_tests": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p7_cause_compat.rs",
+          "symbol": "cause_to_string_uses_error_show_and_caller_output_buffer"
+        }
+      ],
+      "reason": "原本文+exportでInt32MINを含む所有Causeを表示し、caller256byte bufferへexact error: Boom(n: -2147483648)を返す。pointer/length/全byteを旧同様に照合し1000回全解放。",
+      "evidence": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p7_cause_compat.rs",
+          "symbol": "cause_to_string_uses_error_show_and_caller_output_buffer"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/p7-cause-source-compat.json",
+          "original_report_revision": "2650f67",
+          "revision": "b0a367b"
+        },
+        {
+          "kind": "C_harness",
+          "path": "crates/emela-emb-compiler/tests/compat/p7/cause/cause_to_string_uses_error_show_and_caller_output_buffer.c"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/p7-backend-proof-integration.json",
+          "revision": "b0a367b"
+        }
+      ],
+      "verification_path": "original-source-plus-explicit-C-export",
+      "whole_body_review": {
+        "legacy_Rust_file": "crates/emela-codegen-emb/tests/fiber/cause.rs",
+        "legacy_Rust_file_sha256": "3ca0d07cff44cc4b9f004fc8452551e0c338c5e8521d97e4b62ccd53f9afe085",
+        "legacy_line": 37,
+        "saved_sources": [
+          {
+            "program": "program:22fce5f6553a191ca752",
+            "name": "main.emel",
+            "path": "crates/emela-emb-compiler/tests/compat/legacy-corpus/sources/7387dae863e7f1a97c4f3874ddadc150f412b5e7dde9a2a70c157a1265377003.emel",
+            "sha256": "7387dae863e7f1a97c4f3874ddadc150f412b5e7dde9a2a70c157a1265377003",
+            "byte_preserved_saved_legacy_fixture": true
+          }
+        ],
+        "original_body_executed": true,
+        "basis": "Original saved source consumed directly by the new runner; export metadata only."
+      },
+      "Options_review": "heap2048; caller output buffer256; shared old fiber options helper otherwise unchanged",
+      "observations": [
+        "Owned Cause contains Int32MIN; exact error: Boom(n: -2147483648) is returned in the caller256byte buffer."
+      ],
+      "observation_and_Options_details": [
+        {
+          "report": "docs/reports/p7-cause-source-compat.json",
+          "program": "program:22fce5f6553a191ca752",
+          "source_adaptation": "Original fixture bytes preserved; only explicit C exports added. Old public C symbol suffixes adapted, no post-source IR mutation.",
+          "observations": {
+            "source_check": "passed",
+            "C_generation": "passed",
+            "C_runtime_O0": "passed",
+            "C_runtime_O2": "passed",
+            "iterations": 1000,
+            "terminal_defect": false,
+            "heap_empty_after_each_fully_released_route": true
+          },
+          "reviewed_at_revision": "b0a367b",
+          "saved_legacy_fixture_hash_verified": true
+        }
+      ],
+      "seams_and_harness_adaptations": [],
+      "direct_source_API_execution": true,
+      "post_source_IR_mutation": false,
+      "runtime_status": "strict C -std=c11 -Wall -Werror -O0/-O2 passed at referenced feature checkpoints and final single fresh workspace607; no compiler-absent skips",
+      "previous_replaced_evidence_preserved": [],
+      "source_scope": "source"
+    },
+    {
+      "target": "emit",
+      "name": "fiber::interrupt::interrupt_waits_for_suspending_cleanup_and_ignores_old_task_notifications",
+      "legacy_path": "tests/fiber/interrupt.rs",
+      "legacy_key": "emit::fiber::interrupt::interrupt_waits_for_suspending_cleanup_and_ignores_old_task_notifications",
+      "legacy_ledger_index": 63,
+      "previous_status": "pending",
+      "proposed_status": "replaced",
+      "new_tests": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p7_interrupt_compat.rs",
+          "symbol": "interrupt_waits_for_suspending_cleanup_and_ignores_old_task_notifications"
+        }
+      ],
+      "reason": "原本文+exportで子中断後のsuspend cleanupを待ち、cleanup中の旧task通知と再通知を拒否/無効化。count2→3、mark順order1→3→5、結果42を旧C assertionsのまま1000回照合し全解放。",
+      "evidence": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p7_interrupt_compat.rs",
+          "symbol": "interrupt_waits_for_suspending_cleanup_and_ignores_old_task_notifications"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/p7-cleanup-source-compat.json",
+          "original_report_revision": "89aa919",
+          "revision": "b0a367b"
+        },
+        {
+          "kind": "C_harness",
+          "path": "crates/emela-emb-compiler/tests/compat/p7/cleanup/interrupt_waits_for_suspending_cleanup_and_ignores_old_task_notifications.c"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/p7-backend-proof-integration.json",
+          "revision": "b0a367b"
+        }
+      ],
+      "verification_path": "original-source-plus-explicit-C-export",
+      "whole_body_review": {
+        "legacy_Rust_file": "crates/emela-codegen-emb/tests/fiber/interrupt.rs",
+        "legacy_Rust_file_sha256": "d1a4986536dc16b5fad6e2b5d67f1a81f2a3b059ec30cea3b43808ab38e152d7",
+        "legacy_line": 54,
+        "saved_sources": [
+          {
+            "program": "program:e80d4ff79a3c465f3729",
+            "name": "main.emel",
+            "path": "crates/emela-emb-compiler/tests/compat/legacy-corpus/sources/be2503778cb8c1e1d2e76ec65af0a0a5c79c73b3bd60355eb8c8efed7b5a79d2.emel",
+            "sha256": "be2503778cb8c1e1d2e76ec65af0a0a5c79c73b3bd60355eb8c8efed7b5a79d2",
+            "byte_preserved_saved_legacy_fixture": true
+          }
+        ],
+        "original_body_executed": true,
+        "basis": "Original saved source consumed directly by the new runner; export metadata only."
+      },
+      "Options_review": "heap8192, fibers8, frames24, frame_bytes512, tasks2, events2, host_wait -> board_wait_start",
+      "observations": [
+        "n == ++order",
+        "emela_task_complete_int(tasks[0], 99)",
+        "n >= 1 && n <= 3",
+        "count == 2 && order == 1",
+        "emela_task_complete_int(tasks[1], 42)",
+        "count == 3 && order == 3 && !emela_fiber_done(f)",
+        "!emela_task_complete_int(tasks[0], 0)",
+        "emela_task_complete_int(tasks[2], 3)",
+        "emela_scheduler_run(1)",
+        "value == 42 && order == 5"
+      ],
+      "observation_and_Options_details": [
+        {
+          "report": "docs/reports/p7-cleanup-source-compat.json",
+          "program": "program:e80d4ff79a3c465f3729",
+          "source_adaptation": "original corpus source bytes + explicit C exports only",
+          "observations": {
+            "C_generation": "accepted",
+            "strict_C_objects": {
+              "-O0": "compiled-linked",
+              "-O2": "compiled-linked"
+            },
+            "C_runtime": {
+              "-O0": "passed",
+              "-O2": "passed"
+            },
+            "successful_iterations": 1000,
+            "terminal_defect_observed": false,
+            "old_resource_budgets_preserved": true
+          },
+          "reviewed_at_revision": "b0a367b",
+          "saved_legacy_fixture_hash_verified": true
+        }
+      ],
+      "seams_and_harness_adaptations": [],
+      "direct_source_API_execution": true,
+      "post_source_IR_mutation": false,
+      "runtime_status": "strict C -std=c11 -Wall -Werror -O0/-O2 passed at referenced feature checkpoints and final single fresh workspace607; no compiler-absent skips",
+      "previous_replaced_evidence_preserved": [],
+      "source_scope": "source"
+    },
+    {
+      "target": "emit",
+      "name": "fiber::join::join_results_own_strings_and_lists_after_scope_and_frame_reuse",
+      "legacy_path": "tests/fiber/join.rs",
+      "legacy_key": "emit::fiber::join::join_results_own_strings_and_lists_after_scope_and_frame_reuse",
+      "legacy_ledger_index": 64,
+      "previous_status": "pending",
+      "proposed_status": "replaced",
+      "new_tests": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p7_child_results_compat.rs",
+          "symbol": "join_results_own_strings_and_lists_after_scope_and_frame_reuse"
+        }
+      ],
+      "reason": "原本文+exportでscope/frame再使用後もowned -2147483648の11byte StringとList結果を保持。List sum=2*i+1、NULL出力も旧同様に通し1000回全解放。",
+      "evidence": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p7_child_results_compat.rs",
+          "symbol": "join_results_own_strings_and_lists_after_scope_and_frame_reuse"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/p7-concurrency-corpus-compat.json",
+          "original_report_revision": "9998b3c",
+          "revision": "b0a367b"
+        },
+        {
+          "kind": "C_harness",
+          "path": "crates/emela-emb-compiler/tests/compat/p7/concurrency/join_results_own_strings_and_lists_after_scope_and_frame_reuse.c"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/p7-backend-proof-integration.json",
+          "revision": "b0a367b"
+        }
+      ],
+      "verification_path": "original-source-plus-explicit-C-export",
+      "whole_body_review": {
+        "legacy_Rust_file": "crates/emela-codegen-emb/tests/fiber/join.rs",
+        "legacy_Rust_file_sha256": "35367507790dd3584f346da32b4b855b048883e19360a02221212ec2a6740def",
+        "legacy_line": 148,
+        "saved_sources": [
+          {
+            "program": "program:ed616eb011fc05d6acbf",
+            "name": "main.emel",
+            "path": "crates/emela-emb-compiler/tests/compat/legacy-corpus/sources/1ad3549206b5ee0c2856da0ff8c4b72c2c1ef668cdc5d1a6af82debbafb5a48b.emel",
+            "sha256": "1ad3549206b5ee0c2856da0ff8c4b72c2c1ef668cdc5d1a6af82debbafb5a48b",
+            "byte_preserved_saved_legacy_fixture": true
+          }
+        ],
+        "original_body_executed": true,
+        "basis": "Original saved source consumed directly by the new runner; export metadata only."
+      },
+      "Options_review": "heap4096, fibers8, frames24, frame_bytes512, tasks2, events2, host_wait -> board_wait_start",
+      "observations": [
+        "emela_scheduler_run(1)",
+        "emela_scheduler_run(1)",
+        "text.owner && text.length == 11 && memcmp(text.data, \"-2147483648\", 11) == 0",
+        "emela_export_sum_2(list) == 2 * i + 1"
+      ],
+      "observation_and_Options_details": [
+        {
+          "report": "docs/reports/p7-concurrency-corpus-compat.json",
+          "program": "program:ed616eb011fc05d6acbf",
+          "source_adaptation": "explicit C export only; original source fixture is byte-preserved",
+          "observations": {
+            "program": "program:ed616eb011fc05d6acbf",
+            "source_sha256": "1ad3549206b5ee0c2856da0ff8c4b72c2c1ef668cdc5d1a6af82debbafb5a48b",
+            "new_test": "tests/p7_child_results_compat.rs::join_results_own_strings_and_lists_after_scope_and_frame_reuse",
+            "harness": "tests/compat/p7/concurrency/join_results_own_strings_and_lists_after_scope_and_frame_reuse.c",
+            "status": "runtime-passed",
+            "actual_options": {
+              "heap_bytes": 4096,
+              "fiber_capacity": 8,
+              "frame_capacity": 24,
+              "frame_bytes": 512,
+              "deferred_capacity": 8
+            },
+            "old_postprocessing": "none; generated C heap observer only",
+            "C_generation": "accepted",
+            "strict_C_objects": {
+              "-O0": "compiled-linked",
+              "-O2": "compiled-linked"
+            },
+            "C_runtime": {
+              "-O0": "passed",
+              "-O2": "passed"
+            },
+            "successful_iterations": 1000,
+            "terminal_defect_observed": false,
+            "heap_observation": "all fully released iterations assert heap empty",
+            "old_resource_budgets_preserved": true
+          },
+          "reviewed_at_revision": "b0a367b",
+          "saved_legacy_fixture_hash_verified": true
+        }
+      ],
+      "seams_and_harness_adaptations": [
+        {
+          "harness_adaptations": [
+            "stable explicit export names",
+            "function/aggregate ABI type numbers and release symbol resolved from generated public header",
+            "event lock hooks supplied when required",
+            "heap-empty audit after fully released successful iterations"
+          ]
+        }
+      ],
+      "direct_source_API_execution": true,
+      "post_source_IR_mutation": false,
+      "runtime_status": "strict C -std=c11 -Wall -Werror -O0/-O2 passed at referenced feature checkpoints and final single fresh workspace607; no compiler-absent skips",
+      "previous_replaced_evidence_preserved": [],
+      "source_scope": "source"
+    },
+    {
+      "target": "emit",
+      "name": "fiber::join::join_reuses_completed_results_without_yielding_and_waits_for_discarded_unit",
+      "legacy_path": "tests/fiber/join.rs",
+      "legacy_key": "emit::fiber::join::join_reuses_completed_results_without_yielding_and_waits_for_discarded_unit",
+      "legacy_ledger_index": 65,
+      "previous_status": "pending",
+      "proposed_status": "replaced",
+      "new_tests": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p7_child_results_compat.rs",
+          "symbol": "join_reuses_completed_results_without_yielding_and_waits_for_discarded_unit"
+        }
+      ],
+      "reason": "原本文+exportで同childの反復joinがyieldせず値を再利用し、破棄Unitもscope終了前に待機。result=2*(i+1)/order4とUnit/order2を1000回確認。旧EMELA_CHILD_WAIT_RUNTIME有/EMELA_DEFERRED_CAPACITY無の生成artifact検査も保持。",
+      "evidence": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p7_child_results_compat.rs",
+          "symbol": "join_reuses_completed_results_without_yielding_and_waits_for_discarded_unit"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/p7-concurrency-corpus-compat.json",
+          "original_report_revision": "9998b3c",
+          "revision": "b0a367b"
+        },
+        {
+          "kind": "C_harness",
+          "path": "crates/emela-emb-compiler/tests/compat/p7/concurrency/join_reuses_completed_results_without_yielding_and_waits_for_discarded_unit.c"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/p7-backend-proof-integration.json",
+          "revision": "b0a367b"
+        }
+      ],
+      "verification_path": "original-source-plus-explicit-C-export",
+      "whole_body_review": {
+        "legacy_Rust_file": "crates/emela-codegen-emb/tests/fiber/join.rs",
+        "legacy_Rust_file_sha256": "35367507790dd3584f346da32b4b855b048883e19360a02221212ec2a6740def",
+        "legacy_line": 4,
+        "saved_sources": [
+          {
+            "program": "program:5191e9bbbf54e34f3e94",
+            "name": "main.emel",
+            "path": "crates/emela-emb-compiler/tests/compat/legacy-corpus/sources/4e16d6fb423d21a9b45128415809cc4ecdc97f12ceb845216bb531dfc12a7619.emel",
+            "sha256": "4e16d6fb423d21a9b45128415809cc4ecdc97f12ceb845216bb531dfc12a7619",
+            "byte_preserved_saved_legacy_fixture": true
+          }
+        ],
+        "original_body_executed": true,
+        "basis": "Original saved source consumed directly by the new runner; export metadata only."
+      },
+      "Options_review": "heap4096, fibers8, frames24, frame_bytes512, tasks2, events2, host_wait -> board_wait_start",
+      "observations": [
+        "n == ++order",
+        "emela_scheduler_run(1)",
+        "result == 2 * (i + 1) && order == 4",
+        "emela_scheduler_run(1)",
+        "order == 2"
+      ],
+      "observation_and_Options_details": [
+        {
+          "report": "docs/reports/p7-concurrency-corpus-compat.json",
+          "program": "program:5191e9bbbf54e34f3e94",
+          "source_adaptation": "explicit C export only; original source fixture is byte-preserved",
+          "observations": {
+            "program": "program:5191e9bbbf54e34f3e94",
+            "source_sha256": "4e16d6fb423d21a9b45128415809cc4ecdc97f12ceb845216bb531dfc12a7619",
+            "new_test": "tests/p7_child_results_compat.rs::join_reuses_completed_results_without_yielding_and_waits_for_discarded_unit",
+            "harness": "tests/compat/p7/concurrency/join_reuses_completed_results_without_yielding_and_waits_for_discarded_unit.c",
+            "status": "runtime-passed",
+            "actual_options": {
+              "heap_bytes": 4096,
+              "fiber_capacity": 8,
+              "frame_capacity": 24,
+              "frame_bytes": 512,
+              "deferred_capacity": 8
+            },
+            "old_postprocessing": "none; generated C heap observer only",
+            "C_generation": "accepted",
+            "strict_C_objects": {
+              "-O0": "compiled-linked",
+              "-O2": "compiled-linked"
+            },
+            "C_runtime": {
+              "-O0": "passed",
+              "-O2": "passed"
+            },
+            "successful_iterations": 1000,
+            "terminal_defect_observed": false,
+            "heap_observation": "all fully released iterations assert heap empty",
+            "old_resource_budgets_preserved": true
+          },
+          "reviewed_at_revision": "b0a367b",
+          "saved_legacy_fixture_hash_verified": true
+        }
+      ],
+      "seams_and_harness_adaptations": [
+        {
+          "harness_adaptations": [
+            "stable explicit export names",
+            "function/aggregate ABI type numbers and release symbol resolved from generated public header",
+            "event lock hooks supplied when required",
+            "heap-empty audit after fully released successful iterations"
+          ]
+        }
+      ],
+      "direct_source_API_execution": true,
+      "post_source_IR_mutation": false,
+      "runtime_status": "strict C -std=c11 -Wall -Werror -O0/-O2 passed at referenced feature checkpoints and final single fresh workspace607; no compiler-absent skips",
+      "previous_replaced_evidence_preserved": [],
+      "source_scope": "source"
+    },
+    {
+      "target": "emit",
+      "name": "string_append::literal_prefixes_are_copied_without_treating_readonly_bytes_as_writable_output",
+      "legacy_path": "tests/string_append/mod.rs",
+      "legacy_key": "emit::string_append::literal_prefixes_are_copied_without_treating_readonly_bytes_as_writable_output",
+      "legacy_ledger_index": 89,
+      "previous_status": "pending",
+      "proposed_status": "replaced",
+      "new_tests": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p2_compat.rs",
+          "symbol": "legacy_string_views_comparisons_append_and_bounded_returns_execute"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_string_alias.rs",
+          "symbol": "append_handles_both_inputs_overlapping_the_output_and_the_capacity_limits"
+        }
+      ],
+      "reason": "同じMissing(text: prefix関数本体を含む既存source fixtureで、readonly literalとa/NUL/bからexact18byteをcaller bufferへ返しownerなしを1000回確認。旧appendのliteral-copy flag=1のartifact観点はreadonly prefixの実C観測と明示flag/overlap matrixで対応する。",
+      "evidence": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p2_compat.rs",
+          "symbol": "legacy_string_views_comparisons_append_and_bounded_returns_execute"
+        },
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p5_string_alias.rs",
+          "symbol": "append_handles_both_inputs_overlapping_the_output_and_the_capacity_limits"
+        },
+        {
+          "kind": "source_fixture",
+          "path": "crates/emela-emb-compiler/tests/compat/p2/strings.emel"
+        },
+        {
+          "kind": "C_harness",
+          "path": "crates/emela-emb-compiler/tests/compat/p2/strings-harness.c"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/compiler-legacy-runtime-crosswalk.json",
+          "original_report_revision": "13cd313",
+          "revision": "b0a367b"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/p7-backend-proof-integration.json",
+          "revision": "b0a367b"
+        }
+      ],
+      "verification_path": "existing-source-C-observation-replacement",
+      "whole_body_review": {
+        "legacy_Rust_file": "crates/emela-codegen-emb/tests/string_append/mod.rs",
+        "legacy_Rust_file_sha256": "ffa254c7d9b225fa5a434000115f65838251009e28c7ef5f1b45793d5d8ad4b2",
+        "legacy_line": 4,
+        "saved_sources": [
+          {
+            "program": "program:0024997995323a7d6563",
+            "name": "main.emel",
+            "path": "crates/emela-emb-compiler/tests/compat/legacy-corpus/sources/b2a6833624029496b4078075cb337280a9e3db09076b8a725305e9bbe374ddb2.emel",
+            "sha256": "b2a6833624029496b4078075cb337280a9e3db09076b8a725305e9bbe374ddb2",
+            "byte_preserved_saved_legacy_fixture": true
+          }
+        ],
+        "original_body_executed": false,
+        "basis": "Broader existing source test contains corresponding functions and all old observable assertions. Provenance SHA is not an original-body runtime claim."
+      },
+      "Options_review": "heap0, string_capacity64, caller output buffer64",
+      "observations": [
+        "same Missing(text: prefix body",
+        "input a/NUL/b, output length18 and exact bytes",
+        "output points at caller buffer and has no owner",
+        "1000 repetitions with readonly literal prefix"
+      ],
+      "observation_and_Options_details": [
+        {
+          "manual_review": {
+            "assessment": "existing-source-C-observations-match",
+            "evidence_revision": "13cd313",
+            "evidence": [
+              "tests/p2_compat.rs::legacy_string_views_comparisons_append_and_bounded_returns_execute",
+              "tests/compat/p2/strings.emel",
+              "tests/compat/p2/strings-harness.c",
+              "tests/p5_string_alias.rs::append_handles_both_inputs_overlapping_the_output_and_the_capacity_limits"
+            ],
+            "observations": [
+              "same Missing(text: prefix body",
+              "input a/NUL/b, output length18 and exact bytes",
+              "output points at caller buffer and has no owner",
+              "1000 repetitions with readonly literal prefix"
+            ],
+            "note": "The shared strings fixture contains the original message function with explicit export. The C harness preserves the old readonly-prefix observation; P5 additionally tests append alias flags directly. No duplicate test is needed."
+          },
+          "reviewed_at_revision": "b0a367b"
+        }
+      ],
+      "seams_and_harness_adaptations": [],
+      "direct_source_API_execution": true,
+      "post_source_IR_mutation": false,
+      "runtime_status": "strict C -std=c11 -Wall -Werror -O0/-O2 passed at referenced feature checkpoints and final single fresh workspace607; no compiler-absent skips",
+      "previous_replaced_evidence_preserved": [],
+      "source_scope": "source"
+    },
+    {
+      "target": "emit",
+      "name": "synchronous_exhaustive_matches_and_list_loops_accept_unreachable_terminators",
+      "legacy_path": "tests/emit.rs",
+      "legacy_key": "emit::synchronous_exhaustive_matches_and_list_loops_accept_unreachable_terminators",
+      "legacy_ledger_index": 100,
+      "previous_status": "pending",
+      "proposed_status": "replaced",
+      "new_tests": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p7_legacy_closures_state.rs",
+          "symbol": "legacy_scalar_closure_evidence_state_and_control_sources_keep_old_budgets"
+        }
+      ],
+      "reason": "原本文+exportでSome/Noneのexhaustive classify(i)がi+1または0、List.lengthが3を1000回確認。旧2048byte heapを保持し全解放を追加。",
+      "evidence": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p7_legacy_closures_state.rs",
+          "symbol": "legacy_scalar_closure_evidence_state_and_control_sources_keep_old_budgets"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/p7-closures-state-source-compat.json",
+          "original_report_revision": "301f76e",
+          "revision": "b0a367b"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/p7-backend-proof-integration.json",
+          "revision": "b0a367b"
+        }
+      ],
+      "verification_path": "original-source-plus-explicit-C-export",
+      "whole_body_review": {
+        "legacy_Rust_file": "crates/emela-codegen-emb/tests/emit.rs",
+        "legacy_Rust_file_sha256": "cfa41127455bb5c5e8ce0c2f02c674286686b12814a9bcec60e56de3a263b2da",
+        "legacy_line": 5985,
+        "saved_sources": [
+          {
+            "program": "program:09dfd633dcd1f95f6a18",
+            "name": "main.emel",
+            "path": "crates/emela-emb-compiler/tests/compat/legacy-corpus/sources/d9d8c32030891a0372b787291a80609d182174a9394eb4288660ca0d5d072e0a.emel",
+            "sha256": "d9d8c32030891a0372b787291a80609d182174a9394eb4288660ca0d5d072e0a",
+            "byte_preserved_saved_legacy_fixture": true
+          }
+        ],
+        "original_body_executed": true,
+        "basis": "Original saved source consumed directly by the new runner; export metadata only."
+      },
+      "Options_review": "heap2048; all other Options default",
+      "observations": [
+        "Exhaustive Some/None classify(i) gives i+1 or0; List.length3;1000iterations.",
+        "Old fixed heap budget preserved,1000fullheapreclamation."
+      ],
+      "observation_and_Options_details": [
+        {
+          "report": "docs/reports/p7-closures-state-source-compat.json",
+          "program": "program:09dfd633dcd1f95f6a18",
+          "source_adaptation": "Original manifest bytes unchanged; explicit C export attributes only. For original private fn main only, declaration also gains pub to match the already selected old concrete C root. Body unchanged; no generic public functions exported speculatively.",
+          "observations": {
+            "source_check": "passed",
+            "C_generation": "passed",
+            "C_runtime_O0": "passed",
+            "C_runtime_O2": "passed",
+            "iterations": 1000,
+            "heap_empty_after_each_fully_released_route": true
+          },
+          "reviewed_at_revision": "b0a367b",
+          "saved_legacy_fixture_hash_verified": true
+        }
+      ],
+      "seams_and_harness_adaptations": [],
+      "direct_source_API_execution": true,
+      "post_source_IR_mutation": false,
+      "runtime_status": "strict C -std=c11 -Wall -Werror -O0/-O2 passed at referenced feature checkpoints and final single fresh workspace607; no compiler-absent skips",
+      "previous_replaced_evidence_preserved": [],
+      "source_scope": "source"
+    },
+    {
+      "target": "lib",
+      "name": "compiler::separation_tests::common_closure_lowering_is_shared_and_native_managed_values_run",
+      "legacy_path": "src/compiler/tests/separation.rs",
+      "legacy_key": "lib::compiler::separation_tests::common_closure_lowering_is_shared_and_native_managed_values_run",
+      "legacy_ledger_index": 112,
+      "previous_status": "mapped",
+      "proposed_status": "replaced",
+      "new_tests": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p7_legacy_closures_state.rs",
+          "symbol": "legacy_scalar_closure_evidence_state_and_control_sources_keep_old_budgets"
+        }
+      ],
+      "reason": "原本文+exportのcapture closure calculate(40)=42を1000回実行し旧2048byte heapで全解放。旧source_flow→compile_flow入口を独立checker→normalize/specialize→closure loweringへ置換するが、source機能・所有値の観測は同じ。",
+      "evidence": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p7_legacy_closures_state.rs",
+          "symbol": "legacy_scalar_closure_evidence_state_and_control_sources_keep_old_budgets"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/p7-closures-state-source-compat.json",
+          "original_report_revision": "301f76e",
+          "revision": "b0a367b"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/p7-backend-proof-integration.json",
+          "revision": "b0a367b"
+        }
+      ],
+      "verification_path": "original-source-plus-explicit-C-export",
+      "whole_body_review": {
+        "legacy_Rust_file": "crates/emela-codegen-emb/src/compiler/tests/separation.rs",
+        "legacy_Rust_file_sha256": "fece3928622fd313d6ccc79673be61f7e9f07f75f61f0079644c440c57ee832a",
+        "legacy_line": 247,
+        "saved_sources": [
+          {
+            "program": "program:c587ef1e19686afdfe06",
+            "name": "main.emel",
+            "path": "crates/emela-emb-compiler/tests/compat/legacy-corpus/sources/9b845aa81a15d730223fde291ab2c0b11ecde36d3df5a6017518e5df66f4a51c.emel",
+            "sha256": "9b845aa81a15d730223fde291ab2c0b11ecde36d3df5a6017518e5df66f4a51c",
+            "byte_preserved_saved_legacy_fixture": true
+          }
+        ],
+        "original_body_executed": true,
+        "basis": "Original saved source consumed directly by the new runner; export metadata only."
+      },
+      "Options_review": "heap2048; old compile_flow(source_flow(...)) entry replaced by independent source pipeline",
+      "observations": [
+        "Shared lowering calculate40+2==42 from original source.",
+        "Old fixed heap budget preserved,1000fullheapreclamation."
+      ],
+      "observation_and_Options_details": [
+        {
+          "report": "docs/reports/p7-closures-state-source-compat.json",
+          "program": "program:c587ef1e19686afdfe06",
+          "source_adaptation": "Original manifest bytes unchanged; explicit C export attributes only. For original private fn main only, declaration also gains pub to match the already selected old concrete C root. Body unchanged; no generic public functions exported speculatively.",
+          "observations": {
+            "source_check": "passed",
+            "C_generation": "passed",
+            "C_runtime_O0": "passed",
+            "C_runtime_O2": "passed",
+            "iterations": 1000,
+            "heap_empty_after_each_fully_released_route": true
+          },
+          "reviewed_at_revision": "b0a367b",
+          "saved_legacy_fixture_hash_verified": true
+        }
+      ],
+      "seams_and_harness_adaptations": [],
+      "direct_source_API_execution": true,
+      "post_source_IR_mutation": false,
+      "runtime_status": "strict C -std=c11 -Wall -Werror -O0/-O2 passed at referenced feature checkpoints and final single fresh workspace607; no compiler-absent skips",
+      "previous_replaced_evidence_preserved": [],
+      "source_scope": "source"
+    },
+    {
+      "target": "lib",
+      "name": "compiler::separation_tests::string_plans_preserve_aliases_while_other_buffers_and_calls_are_live",
+      "legacy_path": "src/compiler/tests/separation.rs",
+      "legacy_key": "lib::compiler::separation_tests::string_plans_preserve_aliases_while_other_buffers_and_calls_are_live",
+      "legacy_ledger_index": 114,
+      "previous_status": "pending",
+      "proposed_status": "replaced",
+      "new_tests": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p7_legacy_closures_state.rs",
+          "symbol": "legacy_string_plans_preserve_alias_and_consumer_observations"
+        }
+      ],
+      "reason": "原本文+exportで0/41/-1/Int32MIN/MAXの5入力を各1000回、0:1/41:42/-1:0/-2147483648:-2147483647/2147483647:-2147483648と照合。caller pointer/length/全byte/owner NULL、他buffer/call生存中のaliasを保持しheapは生成しない。",
+      "evidence": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p7_legacy_closures_state.rs",
+          "symbol": "legacy_string_plans_preserve_alias_and_consumer_observations"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/p7-closures-state-source-compat.json",
+          "original_report_revision": "301f76e",
+          "revision": "b0a367b"
+        },
+        {
+          "kind": "run_report",
+          "path": "docs/reports/p7-backend-proof-integration.json",
+          "revision": "b0a367b"
+        }
+      ],
+      "verification_path": "original-source-plus-explicit-C-export",
+      "whole_body_review": {
+        "legacy_Rust_file": "crates/emela-codegen-emb/src/compiler/tests/separation.rs",
+        "legacy_Rust_file_sha256": "fece3928622fd313d6ccc79673be61f7e9f07f75f61f0079644c440c57ee832a",
+        "legacy_line": 168,
+        "saved_sources": [
+          {
+            "program": "program:8e7fb878276e03451814",
+            "name": "main.emel",
+            "path": "crates/emela-emb-compiler/tests/compat/legacy-corpus/sources/8b5c5d8f9f7c21c0650488a87616d0dff77342a5059bba6fe962eac6d1ce800c.emel",
+            "sha256": "8b5c5d8f9f7c21c0650488a87616d0dff77342a5059bba6fe962eac6d1ce800c",
+            "byte_preserved_saved_legacy_fixture": true
+          }
+        ],
+        "original_body_executed": true,
+        "basis": "Original saved source consumed directly by the new runner; export metadata only."
+      },
+      "Options_review": "heap0, string_capacity64, caller output buffer64",
+      "observations": [
+        "All5inputs0/41/-1/Int32MIN/MAX give0:1,41:42,-1:0,-2147483648:-2147483647,2147483647:-2147483648.",
+        "1000rounds, exact caller output pointer/length/bytes and NULLowner; heapnotemitted."
+      ],
+      "observation_and_Options_details": [
+        {
+          "report": "docs/reports/p7-closures-state-source-compat.json",
+          "program": "program:8e7fb878276e03451814",
+          "source_adaptation": "Original manifest bytes unchanged; explicit C export attributes only. For original private fn main only, declaration also gains pub to match the already selected old concrete C root. Body unchanged; no generic public functions exported speculatively.",
+          "observations": {
+            "source_check": "passed",
+            "C_generation": "passed",
+            "C_runtime_O0": "passed",
+            "C_runtime_O2": "passed",
+            "iterations": 1000,
+            "heap_empty_after_each_fully_released_route": true
+          },
+          "reviewed_at_revision": "b0a367b",
+          "saved_legacy_fixture_hash_verified": true
+        }
+      ],
+      "seams_and_harness_adaptations": [],
+      "direct_source_API_execution": true,
+      "post_source_IR_mutation": false,
+      "runtime_status": "strict C -std=c11 -Wall -Werror -O0/-O2 passed at referenced feature checkpoints and final single fresh workspace607; no compiler-absent skips",
+      "previous_replaced_evidence_preserved": [],
+      "source_scope": "source"
+    }
+  ],
+  "validation": {
+    "exact_delegated29_set": true,
+    "disjoint_with_IR86": true,
+    "original_fixture_files_hashed": 29,
+    "missing_original_fixture_hashes": 0,
+    "unique_exact_new_symbols_checked": 29,
+    "missing_paths_or_symbols": 0,
+    "baseline_canonical_test_records_unchanged": true,
+    "integrated_runtime_proof": "docs/reports/p7-backend-proof-integration.json::fresh_workspace_validation",
+    "integrated_runtime_source": "d67dd4a",
+    "integrated_tests_passed": 607,
+    "integrated_tests_failed": 0,
+    "integrated_tests_ignored": 0,
+    "C_optimizations": [
+      "-O0",
+      "-O2"
+    ],
+    "tests_run_during_this_review": 0
+  }
+}

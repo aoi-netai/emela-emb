@@ -1,0 +1,121 @@
+{
+  "review_scope": "Read-only P7 schema proposal 178 records; source and existing test bodies inspected, no tests executed or implementation/canonical ledger edited.",
+  "proposal": "Root-owned local p7-schema-proposal.json (178 records); not a published execution dependency.",
+  "new_tree": "/home/aoi_nemui/emela/emela-emb/.local/worktrees/frontend-p7-ledger",
+  "new_revision": "b0a367bc0a29227fae62cee2def75ed925a5218f",
+  "old_repository": "/home/aoi_nemui/emela/tmp_branch/ecosystem",
+  "old_revision": "c34c0aeefdd966d854371b3110db00a47798751d",
+  "counts": {
+    "records": 178,
+    "mapped": 171,
+    "not_applicable": 7,
+    "unique_paths": 53,
+    "unique_path_symbol_references": 89,
+    "duplicate_ids": 0,
+    "unknown_ids": 0,
+    "missing_paths": 0,
+    "missing_symbol_text": 0
+  },
+  "findings": [
+    {
+      "priority": "P2",
+      "record_id": "emela_lir::Term::Defect.1",
+      "problem": "Reason and schema review call the old second field a local landing. It is the optional assertion source location string. Stmt::Let.on_defect is the landing sequence.",
+      "evidence": [
+        {
+          "revision": "c34c0aeefdd966d854371b3110db00a47798751d",
+          "path": "crates/emela-lir/src/ir.rs",
+          "line": 215,
+          "detail": "Defect(Operand, Option<String>), second field documented as assertion path:line:column."
+        },
+        {
+          "revision": "c34c0aeefdd966d854371b3110db00a47798751d",
+          "path": "crates/emela-codegen-emb/src/compiler/lower/adapter.rs",
+          "line": 622,
+          "detail": "Embedded adapter already discards the source location via Term::Defect(value0, _)."
+        },
+        {
+          "path": "docs/reports/compiler-p7-schema.md",
+          "line": 50,
+          "detail": "Misidentifies second field as local landing."
+        },
+        {
+          "path": "crates/emela-emb-compiler/src/frontend/lower.rs",
+          "line": 823,
+          "detail": "New assert lowers to bare assertion failed literal; no source position metadata."
+        },
+        {
+          "path": "crates/emela-emb-compiler/src/contract/ir.rs",
+          "line": 92,
+          "detail": "New Defect has only the message operand."
+        },
+        {
+          "path": "/home/aoi_nemui/emela/emela-emb/.local/experiment/p7-schema-proposal.json",
+          "line": 5459,
+          "detail": "Proposal reason mislabels source-location metadata as a local landing."
+        }
+      ],
+      "required_change": "Proposal reason (line 5459) and docs/reports/compiler-p7-schema.md:50 only: replace the local-landing explanation with the actual optional assertion source location, and note that fixed-old embedded adapter.rs:622 already discards it. Keep this separate from Stmt::Let.on_defect rejection. No implementation change is required by this finding; it does not establish a new behavior regression."
+    }
+  ],
+  "accepted_boundaries": [
+    {
+      "records": [
+        "emela_lir::Module.stage",
+        "emela_lir::Stage",
+        "emela_lir::Stage::ClosuresConverted",
+        "emela_lir::Stage::DefectsExplicit",
+        "emela_lir::Stage::Flow",
+        "emela_lir::Stage::RefCounted",
+        "emela_lir::Stage::StateMachines"
+      ],
+      "conclusion": "Exactly 7 Stage representation/API records marked N/A. Old compile_flow accepted a Stage selector and rejected Heap stages; new compile_program owns typed Program -> LoweredModule -> PlannedModule. No source ownership/cleanup feature excluded by this boundary.",
+      "evidence": [
+        "old crates/emela-codegen-emb/src/compiler/lower/stages.rs:31",
+        "new crates/emela-emb-compiler/src/backend/mod.rs:6",
+        "new crates/emela-emb-compiler/src/contract/ir.rs:30",
+        "new crates/emela-emb-compiler/src/backend/lower/p7_input_tests.rs:5",
+        "new crates/emela-emb-compiler/src/backend/lower/p7_input_tests.rs:52",
+        "new crates/emela-emb-compiler/src/backend/lower/p7_contract_tests.rs:5"
+      ]
+    },
+    {
+      "records": [
+        "emela_lir::Function.defects"
+      ],
+      "conclusion": "Cached input flag removed; fixed-old adapter ignored it at line 414. New RuntimeRequirements recomputation has a concrete operation walk; immediate defect hook semantics have existing C observation tests.",
+      "evidence": [
+        "old crates/emela-codegen-emb/src/compiler/lower/adapter.rs:414",
+        "new crates/emela-emb-compiler/src/backend/plan/runtime.rs:31",
+        "new crates/emela-emb-compiler/src/backend/plan/operations/terms/defect.rs:18",
+        "new crates/emela-emb-compiler/tests/p6_defects.rs:5"
+      ]
+    },
+    {
+      "records": [
+        "Closure metadata",
+        "EffectDef metadata",
+        "EnumDef/VariantDef/CtorRef metadata",
+        "External/HostRef/HostModule metadata"
+      ],
+      "conclusion": "Compared old declarations, new normalization/validation/metadata generation, and existing tests. No additional concrete discrepancy found.",
+      "evidence": [
+        "new crates/emela-emb-compiler/src/backend/lower/closure.rs:78",
+        "new crates/emela-emb-compiler/src/backend/lower/closure.rs:438",
+        "new crates/emela-emb-compiler/src/backend/lower/effects.rs:85",
+        "new crates/emela-emb-compiler/src/backend/lower/effects.rs:119",
+        "new crates/emela-emb-compiler/src/backend/lower/types.rs:32",
+        "new crates/emela-emb-compiler/src/backend/lower/values.rs:131",
+        "new crates/emela-emb-compiler/src/backend/lower/p7_data_tests.rs:58",
+        "new crates/emela-emb-compiler/src/backend/lower/p7_data_tests.rs:323",
+        "new crates/emela-emb-compiler/src/backend/lower/p7_binding_tests.rs:5"
+      ]
+    }
+  ],
+  "limitations": [
+    "Path/symbol presence was checked as structural integrity only, never as execution evidence.",
+    "All proposal non-N/A rows remain mapped in this artifact; final verification and run-report attachment are the parent task."
+  ],
+  "finding_resolution": "Root confirmed the fixed-old definition/adapter and corrected its current proposal and compiler-p7-schema.md explanation. This review records the b0a367b finding; it changes neither implementation nor canonical schema.",
+  "reviewer": "Independent read-only schema subagent; exact symbols and old fixed objects, no new runtime execution."
+}
