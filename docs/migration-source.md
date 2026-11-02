@@ -447,3 +447,15 @@ P6のchild waiter/reclaim追加は`tests/p6_child_waiters.rs`で固定旧source�
 `tests/p6_scope_lifecycle.rs`は、この4 sourceのpublic関数へ明示C exportだけを追加し、固定旧`crates/emela-codegen-emb/tests/fiber/await_.rs`、`tests/deferred/mod.rs`、`tests/fiber/interrupt.rs`、`tests/fiber/child_reclaim.rs`のC観測を接続する。C harnessはexport名・明示task adapter・必要なevent lock hook・heap監査へ適応した。1024 byte/frame、128 frameを指定し、元のchild回収用heap 2048/4096 byte・fiber容量4を維持する。ready join/awaitのscope close、Deferred待機列のhead/middle/tail取消、release後のinterrupt FIFO、完了childの即時回収と保持handleの再join/awaitを、両最適化・各1000回で確認する。
 
 child数と取消flagの観測、および弱child link・cycleの直接検査は`completed-instrument.c`を生成Cへ追加する旧test由来のprivate C seamであり、公開source APIの保証と区別する。追加のsource差分回帰では既存child localの単独参照を挟み、その後もhandleを使用できることを検証する。未使用の新しい関数呼出し結果は既存の所有権passへ破棄を伝え、待機frameへ不要なchild handleを残さない。raw IRのDrop/Dup許可範囲は変更しない。
+## P7 external typeの独立frontend接続
+
+固定旧spec 12.3のbare `@external type`をopaqueなhost pointerとして受理する。同一のbare注釈の重複は許可し、属性引数・field・enum・構築・field参照・constructor pattern・型引数の不一致はsourceで拒否する。外部型にはconstructorを登録せず、既存backendのexternal enum表現へ渡す。
+
+外部generic関数は具体化後のC署名を検査する。Handle[Int]/Handle[String]のような同じpointer ABIは共有し、Int/Int64のような同一C symbolの不適合署名はbackendで拒否する。generic関数自体のC exportは引き続き具体wrapperを必要とする。
+
+`tests/p7_external_types.rs`ではBorrowed/Owned adapter両方でpointer identity・NULL・phantom type引数・constの一度だけの初期化をheapなし・1000回・C両最適化で確認する。Emelaからhost objectを解放・検査する処理は追加しない。汎化const HANDLEそのものの共有はgeneric constの実装単位へ残す。
+
+| 固定参照 | SHA-256 |
+| --- | --- |
+| `spec/language/12-external.md` | `ecc02ca3688fcb9d8e2edbb1dfc314ba0f4af43429d5382da5cb2e9126a376c8` |
+| `crates/emela-codegen-emb/tests/const_runtime/external.rs` | `989a731d161ea029a97df999869410fadaa0126cd970b0fa79083b483ef2e95c` |

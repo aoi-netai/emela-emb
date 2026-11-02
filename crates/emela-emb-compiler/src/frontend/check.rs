@@ -545,9 +545,7 @@ impl Checker {
                             ));
                         }
                     }
-                    if !type_parameters.is_empty()
-                        && (export_symbol.is_some() || external.is_some())
-                    {
+                    if !type_parameters.is_empty() && export_symbol.is_some() {
                         return Err(Diagnostic::new(
                             DK::Export,
                             function.name.span,
