@@ -149,6 +149,9 @@ pub(super) fn value_type(
                     return Err(fail("Poll result is not Option"));
                 };
                 let definition = &program.core.enums[*id];
+                if definition.name != "Option" || definition.variants.len() != 2 {
+                    return Err(fail("Poll result is not the runtime Option type"));
+                }
                 let none = definition
                     .variants
                     .iter()
