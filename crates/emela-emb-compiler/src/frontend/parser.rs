@@ -9,6 +9,7 @@ pub(crate) fn parse(tokens: &[Token<'_>]) -> Result<Module, Diagnostic> {
         tokens,
         cursor: 0,
         depth: 0,
+        method_context: false,
     }
     .module()
 }
@@ -16,6 +17,13 @@ struct Parser<'t, 's> {
     tokens: &'t [Token<'s>],
     cursor: usize,
     depth: usize,
+    method_context: bool,
+}
+#[derive(Clone, Copy, PartialEq, Eq)]
+enum FunctionMode {
+    Top,
+    Trait,
+    Impl,
 }
 impl<'t, 's> Parser<'t, 's> {
     fn module(mut self) -> Result<Module, Diagnostic> {
@@ -23,10 +31,17 @@ impl<'t, 's> Parser<'t, 's> {
         let mut functions = Vec::new();
         let mut data = Vec::new();
         let mut consts = Vec::new();
+        let mut traits = Vec::new();
+        let mut impls = Vec::new();
         self.newlines();
         while self.current().kind != K::Eof {
             if self.word("import") {
-                if !functions.is_empty() || !data.is_empty() || !consts.is_empty() {
+                if !functions.is_empty()
+                    || !data.is_empty()
+                    || !consts.is_empty()
+                    || !traits.is_empty()
+                    || !impls.is_empty()
+                {
                     return Err(
                         self.error(DiagnosticKind::Syntax, "imports must precede declarations")
                     );
@@ -40,6 +55,10 @@ impl<'t, 's> Parser<'t, 's> {
                 };
                 if declaration == K::Name("const") {
                     consts.push(self.constant()?);
+                } else if declaration == K::Name("trait") {
+                    traits.push(self.trait_declaration()?);
+                } else if declaration == K::Name("impl") {
+                    impls.push(self.implementation()?);
                 } else if matches!(declaration, K::Name("type" | "enum" | "error" | "opaque")) {
                     data.push(self.data()?);
                 } else {
@@ -59,6 +78,89 @@ impl<'t, 's> Parser<'t, 's> {
             functions,
             data,
             consts,
+            traits,
+            impls,
+        })
+    }
+    fn trait_declaration(&mut self) -> Result<TraitDeclaration, Diagnostic> {
+        let public = self.take_word("pub");
+        self.expect(K::Name("trait"), "expected trait declaration")?;
+        let name = self.name("expected trait name")?;
+        let mut supers = Vec::new();
+        if self.take(K::Colon) {
+            loop {
+                self.newlines();
+                supers.push(self.type_name()?);
+                if !self.take(K::Plus) {
+                    break;
+                }
+            }
+        }
+        self.expect(K::LBrace, "expected '{' after trait signature")?;
+        self.newlines();
+        let mut methods = Vec::new();
+        while !matches!(self.current().kind, K::RBrace | K::Eof) {
+            methods.push(self.function_mode(FunctionMode::Trait)?);
+            if !matches!(self.current().kind, K::Newline | K::RBrace) {
+                return Err(self.error(
+                    DiagnosticKind::Syntax,
+                    "expected a line break after trait method",
+                ));
+            }
+            self.newlines();
+        }
+        self.expect(K::RBrace, "expected '}' after trait methods")?;
+        Ok(TraitDeclaration {
+            name,
+            public,
+            supers,
+            methods,
+        })
+    }
+    fn implementation(&mut self) -> Result<Implementation, Diagnostic> {
+        let start = self.current().span.start;
+        self.expect(K::Name("impl"), "expected impl declaration")?;
+        let mut target = self.name("expected implementation target type")?;
+        while self.take(K::Dot) {
+            let segment = self.name("expected qualified implementation type")?;
+            target.value.push('.');
+            target.value.push_str(&segment.value);
+        }
+        let params = self.type_parameters()?;
+        if !params.is_empty() {
+            target.value.push('[');
+            target.value.push_str(
+                &params
+                    .iter()
+                    .map(|param| param.name.value.as_str())
+                    .collect::<Vec<_>>()
+                    .join(","),
+            );
+            target.value.push(']');
+        }
+        target.span.end = self.previous_end();
+        self.expect(K::Colon, "expected ':' before implemented trait")?;
+        let trait_name = self.type_name()?;
+        self.expect(K::LBrace, "expected '{' after implemented trait")?;
+        self.newlines();
+        let mut methods = Vec::new();
+        while !matches!(self.current().kind, K::RBrace | K::Eof) {
+            methods.push(self.function_mode(FunctionMode::Impl)?);
+            if !matches!(self.current().kind, K::Newline | K::RBrace) {
+                return Err(self.error(
+                    DiagnosticKind::Syntax,
+                    "expected a line break after impl method",
+                ));
+            }
+            self.newlines();
+        }
+        self.expect(K::RBrace, "expected '}' after impl methods")?;
+        Ok(Implementation {
+            target,
+            params,
+            trait_name,
+            methods,
+            span: Span::new(start, self.previous_end()),
         })
     }
     fn constant(&mut self) -> Result<ConstDeclaration, Diagnostic> {
@@ -121,6 +223,9 @@ impl<'t, 's> Parser<'t, 's> {
         Ok(Import { path, members })
     }
     fn function(&mut self) -> Result<Function, Diagnostic> {
+        self.function_mode(FunctionMode::Top)
+    }
+    fn function_mode(&mut self, mode: FunctionMode) -> Result<Function, Diagnostic> {
         let mut attributes = Vec::new();
         while self.take(K::At) {
             let attribute = self.name("expected attribute name")?;
@@ -136,7 +241,7 @@ impl<'t, 's> Parser<'t, 's> {
                     let K::String(value) = token.kind else {
                         return Err(self.error(DiagnosticKind::Syntax, "expected C symbol string"));
                     };
-                    let decoded = parse_string(value, token.span, false)?;
+                    let decoded = parse_string(value, token.span, false, false)?;
                     let ExprKind::String(value) = decoded.kind else {
                         return Err(Diagnostic::new(
                             DiagnosticKind::Syntax,
@@ -166,6 +271,12 @@ impl<'t, 's> Parser<'t, 's> {
             self.expect(K::Newline, "expected a line break after attribute")?;
             self.newlines();
         }
+        if mode != FunctionMode::Top && self.word("pub") {
+            return Err(self.error(
+                DiagnosticKind::Syntax,
+                "trait and impl methods do not use pub",
+            ));
+        }
         let public = self.take_word("pub");
         if !self.take_word("fn") {
             return Err(self.error(
@@ -182,16 +293,25 @@ impl<'t, 's> Parser<'t, 's> {
         self.newlines();
         let mut params = Vec::new();
         while self.current().kind != K::RParen {
-            let name = self.lower_name("expected parameter name")?;
+            let name = if mode != FunctionMode::Top && self.word("self") {
+                self.name("expected receiver")?
+            } else {
+                self.lower_name("expected parameter name")?
+            };
             self.newlines();
-            if !self.take(K::Colon) {
+            let ty = if self.take(K::Colon) {
+                self.newlines();
+                self.type_name()?
+            } else if mode != FunctionMode::Top && name.value == "self" {
+                Text::new("Self", name.span)
+            } else if mode == FunctionMode::Impl {
+                Text::new("", name.span)
+            } else {
                 return Err(self.error(
                     DiagnosticKind::Type,
-                    "top-level function parameters require a type annotation",
+                    "top-level and trait method parameters require a type annotation",
                 ));
-            }
-            self.newlines();
-            let ty = self.type_name()?;
+            };
             params.push(Parameter { name, ty });
             self.newlines();
             if !self.take(K::Comma) {
@@ -252,15 +372,21 @@ impl<'t, 's> Parser<'t, 's> {
                 "error and effect signatures require a later phase",
             ));
         }
+        let previous_context = self.method_context;
+        self.method_context = mode != FunctionMode::Top;
         let body = if self.current().kind == K::LBrace {
-            Some(self.block()?)
+            self.block().map(Some)
         } else {
-            None
+            Ok(None)
         };
+        self.method_context = previous_context;
+        let body = body?;
         if body.is_none()
-            && !attributes
-                .iter()
-                .any(|a| matches!(a, Attribute::External { .. } | Attribute::Intrinsic(_)))
+            && mode != FunctionMode::Trait
+            && (mode == FunctionMode::Impl
+                || !attributes
+                    .iter()
+                    .any(|a| matches!(a, Attribute::External { .. } | Attribute::Intrinsic(_))))
         {
             return Err(self.error(
                 DiagnosticKind::Syntax,
@@ -512,7 +638,12 @@ impl<'t, 's> Parser<'t, 's> {
             }
             K::String(raw) | K::MultilineString(raw) => {
                 self.advance();
-                parse_string(raw, token.span, matches!(token.kind, K::MultilineString(_)))?
+                parse_string(
+                    raw,
+                    token.span,
+                    matches!(token.kind, K::MultilineString(_)),
+                    self.method_context,
+                )?
             }
             K::Minus | K::Bang => {
                 self.advance();
@@ -553,7 +684,7 @@ impl<'t, 's> Parser<'t, 's> {
                     kind: ExprKind::Fail(Box::new(value)),
                 }
             }
-            K::Name(name) if !reserved(name) => {
+            K::Name(name) if !reserved(name) || (name == "self" && self.method_context) => {
                 self.advance();
                 Expr {
                     kind: ExprKind::Name(vec![Text::new(name, token.span)]),
@@ -1079,7 +1210,12 @@ fn binary(kind: K<'_>) -> Option<(Binary, u8)> {
     })
 }
 
-fn parse_string(raw: &str, span: Span, multiline: bool) -> Result<Expr, Diagnostic> {
+fn parse_string(
+    raw: &str,
+    span: Span,
+    multiline: bool,
+    method_context: bool,
+) -> Result<Expr, Diagnostic> {
     let (text, positions) = super::strings::content(raw, span, multiline)?;
     let mut cursor = 0;
     let mut literal = String::new();
@@ -1114,6 +1250,7 @@ fn parse_string(raw: &str, span: Span, multiline: bool) -> Result<Expr, Diagnost
                 tokens: &tokens,
                 cursor: 0,
                 depth: 0,
+                method_context,
             };
             let value = parser.expr(0, true)?;
             parser.newlines();
@@ -1272,6 +1409,72 @@ mod tests {
             assert!(
                 source.is_char_boundary(error.span.start)
                     && source.is_char_boundary(error.span.end)
+            );
+        }
+    }
+
+    #[test]
+    fn trait_and_impl_methods_keep_constraints_defaults_and_implicit_types() {
+        let source = "pub trait Score: Eq + Show {\n fn score(self) -> Int\n fn pick(self, other: Self) -> Self\n fn display(self) -> String { \"score=#{Score.score(self)}\" }\n}\nimpl Pair[A: Eq, B: Show]: Score {\n fn score(self) { 42 }\n fn pick(self, other) { other }\n}";
+        let module = parse(&lex(source).unwrap()).unwrap();
+        let definition = &module.traits[0];
+        assert!(definition.public);
+        assert_eq!(definition.name.value, "Score");
+        assert_eq!(
+            definition
+                .supers
+                .iter()
+                .map(|item| item.value.as_str())
+                .collect::<Vec<_>>(),
+            ["Eq", "Show"]
+        );
+        assert_eq!(definition.methods.len(), 3);
+        assert!(definition.methods[0].body.is_none());
+        assert!(definition.methods[2].body.is_some());
+        let receiver = &definition.methods[0].params[0];
+        assert_eq!(receiver.name.value, "self");
+        assert_eq!(receiver.ty.value, "Self");
+        assert_eq!(receiver.name.span, receiver.ty.span);
+        assert_eq!(definition.methods[1].params[1].ty.value, "Self");
+
+        let implementation = &module.impls[0];
+        assert_eq!(implementation.target.value, "Pair[A,B]");
+        assert_eq!(implementation.trait_name.value, "Score");
+        assert_eq!(implementation.params[0].name.value, "A");
+        assert_eq!(implementation.params[0].bounds[0].value, "Eq");
+        assert_eq!(implementation.params[1].bounds[0].value, "Show");
+        assert_eq!(implementation.methods[0].params[0].ty.value, "Self");
+        let omitted = &implementation.methods[1].params[1];
+        assert!(omitted.ty.value.is_empty());
+        assert_eq!(omitted.name.span, omitted.ty.span);
+        assert!(
+            source[implementation.span.start..implementation.span.end].starts_with("impl Pair")
+        );
+        assert_eq!(implementation.span.end, source.len());
+    }
+
+    #[test]
+    fn method_context_is_restored_and_malformed_traits_are_rejected() {
+        let source = "impl Key: Show { fn show(self) { \"K#{self.value}\" } }\nfn ordinary() { \"é#{self}\" }";
+        let error = parse(&lex(source).unwrap()).unwrap_err();
+        assert_eq!(&source[error.span.start..error.span.end], "self");
+        for source in [
+            "trait Score { fn score(value) -> Int }",
+            "trait Score { pub fn score(self) -> Int }",
+            "trait Score { fn score(self) -> Int fn next(self) -> Int }",
+            "trait Score: { fn score(self) -> Int }",
+            "trait Score { fn score(self) -> Int",
+            "impl Key: Score { fn score(self) }",
+            "impl Key Score { fn score(self) { 0 } }",
+            "pub impl Key: Score { fn score(self) { 0 } }",
+            "fn ordinary(value) { value }",
+            "fn ordinary(self: Self) { self }",
+            "impl Key: Show { fn show(self) { \"#{self}\" } }\nconst LEAK = self",
+        ] {
+            let error = parse(&lex(source).unwrap()).expect_err(source);
+            assert!(
+                error.span.start <= error.span.end && error.span.end <= source.len(),
+                "{source}: {error:?}"
             );
         }
     }

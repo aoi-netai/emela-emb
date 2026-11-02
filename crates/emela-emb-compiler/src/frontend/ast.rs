@@ -20,6 +20,23 @@ pub(crate) struct Module {
     pub functions: Vec<Function>,
     pub data: Vec<Data>,
     pub consts: Vec<ConstDeclaration>,
+    pub traits: Vec<TraitDeclaration>,
+    pub impls: Vec<Implementation>,
+}
+#[derive(Clone, Debug)]
+pub(crate) struct TraitDeclaration {
+    pub name: Text,
+    pub public: bool,
+    pub supers: Vec<Text>,
+    pub methods: Vec<Function>,
+}
+#[derive(Clone, Debug)]
+pub(crate) struct Implementation {
+    pub target: Text,
+    pub params: Vec<TypeParameter>,
+    pub trait_name: Text,
+    pub methods: Vec<Function>,
+    pub span: Span,
 }
 #[derive(Clone, Debug)]
 pub(crate) struct ConstDeclaration {
