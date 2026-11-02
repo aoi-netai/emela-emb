@@ -472,27 +472,13 @@ impl<'t, 's> Parser<'t, 's> {
             self.newlines();
         }
         self.expect(K::RParen, "expected ')' after anonymous parameters")?;
-        self.continue_before(K::Arrow);
-        let return_type = if self.take(K::Arrow) {
-            Some(self.type_name()?)
-        } else {
-            None
-        };
-        let fails = self.failure_clause()?;
-        let effects = self.effect_clause()?;
-        if self.word("fails") || self.word("use") {
-            return Err(self.error(
-                DiagnosticKind::Syntax,
-                "duplicate or misplaced anonymous function signature clause",
-            ));
-        }
         let body = self.block()?;
         Ok(Expr {
             kind: ExprKind::Lambda {
                 params,
-                return_type,
-                fails,
-                effects,
+                return_type: None,
+                fails: None,
+                effects: None,
                 body,
             },
             span: Span::new(start, self.previous_end()),
@@ -1748,8 +1734,7 @@ mod tests {
             "State[Int]"
         );
         assert!(module.functions[3].suspends);
-        let module =
-            parse(&lex("fn main() { fn(x) -> Int fails {} use Logger { x } }").unwrap()).unwrap();
+        let module = parse(&lex("fn main() { fn(x: Int) { x } }").unwrap()).unwrap();
         let Statement::Expr(Expr {
             kind:
                 ExprKind::Lambda {
@@ -1764,10 +1749,10 @@ mod tests {
         else {
             panic!("expected lambda")
         };
-        assert!(params[0].ty.is_none());
-        assert_eq!(return_type.as_ref().unwrap().value, "Int");
-        assert!(fails.as_ref().unwrap().is_empty());
-        assert_eq!(effects.as_ref().unwrap()[0].value, "Logger");
+        assert_eq!(params[0].ty.as_ref().unwrap().value, "Int");
+        assert!(return_type.is_none());
+        assert!(fails.is_none());
+        assert!(effects.is_none());
     }
     #[test]
     fn nested_function_types_and_set_arguments_preserve_canonical_boundaries() {
@@ -1813,6 +1798,8 @@ mod tests {
             "fn main(f:fn(Int)->Int use{} fails{}) { 0 }",
             "fn main() { fn named(x) { x } }",
             "fn main() { fn[A](x) { x } }",
+            "fn main() { fn(x) -> Int { x } }",
+            "fn main() { fn(x) fails {} { x } }",
             "fn main() { fn(x) use{} use{} { x } }",
             "fn main() { fn(x) x }",
             "suspend fn main() { () }",
