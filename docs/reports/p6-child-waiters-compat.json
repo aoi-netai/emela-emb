@@ -1,0 +1,199 @@
+{
+  "fixed_revision": "c34c0aeefdd966d854371b3110db00a47798751d",
+  "compiler_base": "dd5104e",
+  "frontend_dependency": "4c0df18",
+  "local_compiler_checkpoint": "6301e5c",
+  "rust_test_profile_opt_level": 1,
+  "C_flags": [
+    "-std=c11",
+    "-Wall",
+    "-Werror"
+  ],
+  "C_optimization_levels": [
+    "-O0",
+    "-O2"
+  ],
+  "extra_C_flags_for_internal_overlap_test": [
+    "-Wextra"
+  ],
+  "source_mode_note": "The overlap legacy test intentionally injects Hold after source lowering; it is not claimed as unmodified-source-only runtime evidence.",
+  "related_existing_IR_observations": [
+    {
+      "test": "backend::lower::tests::fibers::scope_fork_and_join_reclaim_children_and_their_erased_values",
+      "relationship": "Basic join/reclamation subset; new source cases additionally observe FIFO waiter queues and handleless failure records."
+    },
+    {
+      "test": "backend::lower::tests::fibers::deferred::deferred_wakes_fifo_waiters_with_owned_strings_and_releases_the_scope_value",
+      "relationship": "Related FIFO behavior through the separate Deferred wait queue; not equivalent to mixed child await/join."
+    },
+    {
+      "test": "backend::lower::tests::fibers::interruption_waits_for_nested_suspending_cleanup_before_await_reports_its_cause",
+      "relationship": "Related cancellation/cleanup behavior; new source cases add overlap notes and record counts while cleanup waits."
+    }
+  ],
+  "programs": [
+    {
+      "id": "program:87aa60141422b5f9141c",
+      "source": "crates/emela-emb-compiler/tests/compat/p6/fiber-handleless-failure.emel",
+      "sha256": "3d497118b6f1f8365af3cada8676e2b9fcf3e9e2b21a258a01000f210b90f9df",
+      "legacy_tests": [
+        "emit::fiber::child_reclaim::failed_handleless_children_release_records_while_scope_waits_for_sibling_cleanup"
+      ],
+      "source_transform": "Add explicit C export to work; also show for overlap. Preserve all original bodies.",
+      "pipeline": "public_source",
+      "post_lowering_ir_seam": null,
+      "test": "crates/emela-emb-compiler/tests/p6_child_waiters.rs",
+      "options": {
+        "heap_bytes": 4096,
+        "frame_capacity": 40,
+        "frame_bytes": 1024,
+        "fiber_capacity": 8,
+        "task_capacity": 3,
+        "event_capacity": 3,
+        "task_adapter": {
+          "host_wait": "board_wait_start"
+        }
+      },
+      "observations": {
+        "source_check": "passed",
+        "C_generation": "passed",
+        "C_runtime_O0": "passed",
+        "C_runtime_O2": "passed",
+        "iterations_per_optimization": 1000,
+        "heap_empty_after_each_iteration": true,
+        "pure_source_runtime": true,
+        "expected_result": null,
+        "assertions": [
+          "three tasks start before the scope waits for sibling cleanup",
+          "failed handleless child record is reclaimed while one sibling child record remains",
+          "root cancellation alternates; NULL output is passed every third iteration",
+          "cleanup completion reclaims all child records and invalidates the two earlier tasks",
+          "owned String 42 survives only a noncancelled call with a supplied output pointer"
+        ]
+      }
+    },
+    {
+      "id": "program:966e35a933bb50fec529",
+      "source": "crates/emela-emb-compiler/tests/compat/p6/fiber-await-join-fifo.emel",
+      "sha256": "1cb66d19500df0d547f7480e5d52bee20c1b15d63f1627246aee79ffc591e7a6",
+      "legacy_tests": [
+        "emit::fiber::await_::await_and_join_share_fifo_waiters_and_transfer_each_result"
+      ],
+      "source_transform": "Add explicit C export to work; also show for overlap. Preserve all original bodies.",
+      "pipeline": "public_source",
+      "post_lowering_ir_seam": null,
+      "test": "crates/emela-emb-compiler/tests/p6_child_waiters.rs",
+      "options": {
+        "heap_bytes": 8192,
+        "frame_capacity": 40,
+        "frame_bytes": 1024,
+        "fiber_capacity": 8,
+        "task_capacity": 2,
+        "event_capacity": 2,
+        "task_adapter": {
+          "host_wait": "board_wait_start"
+        }
+      },
+      "observations": {
+        "source_check": "passed",
+        "C_generation": "passed",
+        "C_runtime_O0": "passed",
+        "C_runtime_O2": "passed",
+        "iterations_per_optimization": 1000,
+        "heap_empty_after_each_iteration": true,
+        "pure_source_runtime": true,
+        "expected_result": 84,
+        "assertions": [
+          "marks 1/2/3 occur before child task completion",
+          "child mark 4 precedes FIFO waiter marks 5/6/7",
+          "mixed await/join result is 84",
+          "stale completion rejected after release"
+        ]
+      }
+    },
+    {
+      "id": "program:a90d0e707bff9fd0c0d9",
+      "source": "crates/emela-emb-compiler/tests/compat/p6/fiber-join-fifo.emel",
+      "sha256": "ee721482a151acf7e2dc7640812dcc4865b0942afffb9d80a97039673d65c54d",
+      "legacy_tests": [
+        "emit::fiber::join::join_wakes_multiple_waiters_in_fifo_after_the_childs_last_breath"
+      ],
+      "source_transform": "Add explicit C export to work; also show for overlap. Preserve all original bodies.",
+      "pipeline": "public_source",
+      "post_lowering_ir_seam": null,
+      "test": "crates/emela-emb-compiler/tests/p6_child_waiters.rs",
+      "options": {
+        "heap_bytes": 8192,
+        "frame_capacity": 40,
+        "frame_bytes": 1024,
+        "fiber_capacity": 8,
+        "task_capacity": 2,
+        "event_capacity": 2,
+        "task_adapter": {
+          "host_wait": "board_wait_start"
+        }
+      },
+      "observations": {
+        "source_check": "passed",
+        "C_generation": "passed",
+        "C_runtime_O0": "passed",
+        "C_runtime_O2": "passed",
+        "iterations_per_optimization": 1000,
+        "heap_empty_after_each_iteration": true,
+        "pure_source_runtime": true,
+        "expected_result": 126,
+        "assertions": [
+          "marks 1/2/3 occur before child task completion",
+          "child mark 4 precedes FIFO join waiter marks 5/6/7",
+          "three waiter results sum to 126",
+          "stale completion rejected after release"
+        ]
+      }
+    },
+    {
+      "id": "program:b351d40891e80eb8b8ec",
+      "source": "crates/emela-emb-compiler/tests/compat/p6/fiber-overlap-notes.emel",
+      "sha256": "6e6c14d15b01141c28b3b111af84d602b3fe7ca1aa1abcdb32a4254f249e2574",
+      "legacy_tests": [
+        "emit::fiber::overlap::failures_from_cancelled_nested_scopes_become_notes_of_the_outer_first_failure"
+      ],
+      "source_transform": "Add explicit C export to work; also show for overlap. Preserve all original bodies.",
+      "pipeline": "source_then_post_lowering_hold",
+      "post_lowering_ir_seam": {
+        "target": "late",
+        "operation": "RuntimeOp::Hold",
+        "position": "first statement of the function body",
+        "matches_fixed_legacy_test": true
+      },
+      "test": "crates/emela-emb-compiler/src/backend/lower/fiber_source_tests.rs::cancelled_nested_scope_failures_become_notes_of_the_first_failure",
+      "options": {
+        "heap_bytes": 8192,
+        "frame_capacity": 48,
+        "frame_bytes": 1024,
+        "fiber_capacity": 10,
+        "task_capacity": 4,
+        "event_capacity": 4,
+        "task_adapter": {
+          "host_wait": "board_wait_start"
+        }
+      },
+      "observations": {
+        "source_check": "passed",
+        "C_generation": "passed",
+        "C_runtime_O0": "passed",
+        "C_runtime_O2": "passed",
+        "iterations_per_optimization": 1000,
+        "heap_empty_after_each_iteration": true,
+        "pure_source_runtime": false,
+        "expected_result": null,
+        "assertions": [
+          "first failure alternates between Boom(1) and Boom(3)",
+          "root waits for second held child after first failure",
+          "late failure is rendered as another-fiber-failed note after the first error",
+          "cancelled task 2/4 completions are stale",
+          "returned cause is released after exact Show text comparison"
+        ]
+      }
+    }
+  ]
+}

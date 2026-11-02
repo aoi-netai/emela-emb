@@ -9,10 +9,48 @@ impl Checker {
         name: &ast::Text,
         span: Span,
     ) -> Result<ir::Expr, Diagnostic> {
-        let effect = self
-            .catalog
-            .resolve_effect(&self.modules, module, name, &self.current_parameters)
-            .map_err(|error| error.in_source(&self.modules.modules[module].source_name))?;
+        let inferred_scope = if !name.value.contains('[') {
+            self.catalog
+                .effects
+                .named_declaration(&self.modules, module, name)
+                .ok()
+                .filter(|declaration| {
+                    let source = &self.modules.modules[declaration.module];
+                    source.builtin
+                        && source.name == "Std.Fiber"
+                        && declaration.ast.name.value == "Scope"
+                })
+        } else {
+            None
+        };
+        let effect = if inferred_scope.is_some() {
+            let mut arguments = Vec::new();
+            for kind in [
+                super::super::sets::SetKind::Error,
+                super::super::sets::SetKind::Effect,
+            ] {
+                arguments.push(
+                    self.solver
+                        .fresh_row(
+                            &mut self.catalog.core.types,
+                            kind,
+                            super::super::sets::Origin::Inferred,
+                        )
+                        .map_err(|error| self.error(module, DK::Type, span, error.message))?,
+                );
+            }
+            self.catalog.effects.resolve_instance(
+                &self.modules,
+                &mut self.catalog.core,
+                module,
+                name,
+                arguments,
+            )?
+        } else {
+            self.catalog
+                .resolve_effect(&self.modules, module, name, &self.current_parameters)
+                .map_err(|error| error.in_source(&self.modules.modules[module].source_name))?
+        };
         let declaration = self.catalog.effects.declaration(effect).ok_or_else(|| {
             self.error(
                 module,
@@ -107,7 +145,7 @@ impl Checker {
                     .map_err(|error| self.error(module, DK::Type, name.span, error.message))?,
             );
         }
-        let parameters = operation
+        let mut parameters = operation
             .params
             .into_iter()
             .map(|ty| {
@@ -116,6 +154,27 @@ impl Checker {
                     .substitute_type(&mut self.catalog.core, ty, &substitutions)
             })
             .collect::<Vec<_>>();
+        let declaration_module = &self.modules.modules[declaration.module];
+        if declaration_module.builtin
+            && declaration_module.name == "Std.Fiber"
+            && declaration.ast.name.value == "Scope"
+            && name.value == "fork"
+        {
+            if let Some(parameter) = parameters.first_mut() {
+                if let Type::Fn(mut signature) = self.catalog.core.ty(*parameter).clone() {
+                    if let Some(sets) = &mut signature.sets {
+                        let capability = self.catalog.core.types.intern(Type::Handler(effect));
+                        sets.effects = self.catalog.core.types.intern(Type::Set(
+                            crate::contract::ir::SetSummary {
+                                params: vec![sets.effects, capability],
+                                ..Default::default()
+                            },
+                        ));
+                    }
+                    *parameter = self.catalog.core.types.intern(Type::Fn(signature));
+                }
+            }
+        }
         let ret = self.catalog.effects.substitute_type(
             &mut self.catalog.core,
             operation.ret,

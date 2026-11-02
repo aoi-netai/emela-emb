@@ -2,13 +2,15 @@
 
 作成日: 2026-11-02（JST）
 
-状態: P1〜P5完了。P6〜P7は未完了。各段階の完了は対応表と検証結果で判定する。最小C生成のS0〜S6は完了済み。
+状態: P1〜P6完了。P7実装・全件照合中。各段階の完了は対応表と検証結果で判定する。最小C生成のS0〜S6は完了済み。
 
 P1は [検証報告](reports/compiler-p1.md) の66試験、P2は [検証報告](reports/compiler-p2.md) の201試験、P3は [検証報告](reports/compiler-p3.md) の231試験、P4は [検証報告](reports/compiler-p4.md) の335試験・C両最適化実行・独立環境確認を完了。GitHubでは `gh stack` により段階ごとのPRを管理する。
 
 本書の旧試験名は移植対象の参照であり、今回の調査での実行結果ではない。今回は構成・コード・試験資産を読み、計画を作成した。
 
 2026-11-02追記: 旧Flow IR・実装対応表の取り込みと移行台帳の初期化を先行して実施した。[固定参照](reference/legacy-flow/README.md)、[終了条件](compiler-coverage.md)、[新repoの台帳](compiler-coverage.json) をGit管理対象に置く。台帳の初期状態は全件未判定。
+
+P6は [検証報告](reports/compiler-p6.md) の398試験・C両最適化・独立環境検証を完了した。旧全source/IR観測の照合はP7で判定する。
 
 ## 1. 目標と進め方
 

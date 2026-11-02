@@ -1,5 +1,185 @@
 use super::*;
 
+#[test]
+fn generic_attempt_values_cross_the_typed_fiber_schema_and_closure_lowering() {
+    let mut core = b::Definitions::default();
+    let parameter = core.types.intern(b::Type::Param(0));
+    let generic = frontend_type(parameter);
+    let cause = core.enums.alloc(b::EnumDef {
+        name: "Std.Cause.Cause".into(),
+        params: 0,
+        variants: vec![],
+        error: false,
+        external: true,
+    });
+    let cause_type = core.types.intern(b::Type::Enum(cause, vec![]));
+    let exit = core.enums.alloc(b::EnumDef {
+        name: "Exit".into(),
+        params: 1,
+        variants: vec![
+            b::VariantDef {
+                name: "Success".into(),
+                fields: b::VariantFields::Positional(1),
+                tys: vec![parameter],
+            },
+            b::VariantDef {
+                name: "Failure".into(),
+                fields: b::VariantFields::Positional(1),
+                tys: vec![cause_type],
+            },
+        ],
+        error: false,
+        external: false,
+    });
+    let exit_type = frontend_type(core.types.intern(b::Type::Enum(exit, vec![parameter])));
+    let callback_type = frontend_type(core.types.intern(b::Type::Fn(b::FnType {
+        params: vec![],
+        ret: parameter,
+        fails: false,
+        suspends: false,
+        ev: false,
+        sets: None,
+    })));
+    let callback = expression(
+        ir::ExprKind::Lambda {
+            params: vec![],
+            captures: vec![ir::LocalId(0)],
+            body: block(expression(ir::ExprKind::Local(ir::LocalId(0)), generic)),
+        },
+        callback_type,
+    );
+    let attempt = expression(
+        ir::ExprKind::Fiber {
+            op: b::FiberOp::Attempt {
+                exit,
+                suspends: false,
+            },
+            args: vec![callback],
+            errors: vec![],
+        },
+        exit_type,
+    );
+    let body = expression(
+        ir::ExprKind::Field {
+            base: Box::new(attempt),
+            ctor: b::CtorRef {
+                enum_id: exit,
+                variant: b::EXIT_SUCCESS,
+            },
+            index: 0,
+        },
+        generic,
+    );
+    let mut identity = function(0, "through_attempt", vec![local(0, generic)], generic, body);
+    identity.type_parameters = 1;
+    let answer = exported(function(
+        1,
+        "answer",
+        vec![],
+        ValueType::Int,
+        call(0, vec![integer(42)], vec![b::TypeId::INT], ValueType::Int),
+    ));
+    execute_with_options(
+        ir::Program {
+            core,
+            registry: Default::default(),
+            functions: vec![identity, answer],
+        },
+        "#include <stdlib.h>\n#include \"emela_embedded.h\"\n#include \"emela_board.h\"\nint test_heap_empty(void);\n_Noreturn void emela_board_defect(EmelaDefectKind k,const char*m,uint16_t n){(void)k;(void)m;(void)n;abort();}\nint main(void){for(int i=0;i<1000;i++)if(answer()!=42||!test_heap_empty())return 1;return 0;}\n",
+        &crate::Options::default().with_heap_bytes(4096),
+    );
+}
+
+#[test]
+fn empty_cause_raise_gets_a_private_landing_without_an_external_host_dependency() {
+    let mut core = b::Definitions::default();
+    let cause = core.enums.alloc(b::EnumDef {
+        name: "Std.Cause.Cause".into(),
+        params: 0,
+        variants: vec![],
+        error: false,
+        external: true,
+    });
+    let cause_type = frontend_type(core.types.intern(b::Type::Enum(cause, vec![])));
+    let source = exported(function(
+        0,
+        "answer",
+        vec![local(0, cause_type)],
+        ValueType::Never,
+        expression(
+            ir::ExprKind::Fiber {
+                op: b::FiberOp::CauseRaise,
+                args: vec![expression(ir::ExprKind::Local(ir::LocalId(0)), cause_type)],
+                errors: vec![],
+            },
+            ValueType::Never,
+        ),
+    ));
+    let concrete = specialize(ir::Program {
+        core,
+        registry: Default::default(),
+        functions: vec![source],
+    })
+    .unwrap();
+    let lowered = crate::frontend::lower::lower(&concrete);
+    assert_eq!(
+        lowered
+            .functions
+            .iter()
+            .filter(|(_, function)| function.infallible_cause_fail)
+            .count(),
+        1
+    );
+    let mut missing_edge = lowered.clone();
+    for (_, function) in missing_edge.functions.iter_mut() {
+        for (_, statement) in function.stmts.iter_mut() {
+            if let b::Stmt::Let {
+                value:
+                    b::Value::Fiber {
+                        op: b::FiberOp::CauseRaise,
+                        on_fail,
+                        ..
+                    },
+                ..
+            } = statement
+            {
+                *on_fail = None;
+            }
+        }
+    }
+    assert!(
+        crate::backend::compile_program(missing_edge, &crate::Options::default())
+            .unwrap_err()
+            .iter()
+            .any(|error| error.message.contains("explicit failure edge"))
+    );
+    let mut output =
+        crate::backend::compile_program(lowered, &crate::Options::default().with_heap_bytes(4096))
+            .unwrap();
+    assert!(
+        crate::artifact::Manifest::from_files(&output.files)
+            .unwrap()
+            .metadata
+            .external_symbols
+            .is_empty()
+    );
+    output
+        .files
+        .iter_mut()
+        .find(|file| file.path == "emela_embedded.c")
+        .unwrap()
+        .contents
+        .push_str("\nvoid *test_interrupt_cause(void){return emela_cause_interrupt();}\nvoid *test_failed_cause(void){return emela_cause_fail((EmelaError){.tag=UINT32_C(123)});}\n");
+    execute_output(
+        output.clone(),
+        "#include <stdlib.h>\n#include <string.h>\n#include \"emela_embedded.h\"\n#include \"emela_board.h\"\nvoid *test_interrupt_cause(void);\n_Noreturn void emela_board_defect(EmelaDefectKind k,const char*m,uint16_t n){exit(k==EMELA_DEFECT_PANIC&&n==21&&!memcmp(m,\"fiber was interrupted\",21)?0:7);}\nint main(void){answer(test_interrupt_cause());return 8;}\n",
+    );
+    execute_output(
+        output,
+        "#include <stdlib.h>\n#include <string.h>\n#include \"emela_embedded.h\"\n#include \"emela_board.h\"\nvoid *test_failed_cause(void);\n_Noreturn void emela_board_defect(EmelaDefectKind k,const char*m,uint16_t n){exit(k==EMELA_DEFECT_ASSERT&&n==34&&!memcmp(m,\"assertion failed: empty Cause failed\",34)?0:7);}\nint main(void){answer(test_failed_cause());return 8;}\n",
+    );
+}
+
 fn effect(core: &mut b::Definitions, name: &str) -> (b::EffectId, ValueType) {
     let effect = core.effects.alloc(b::EffectDef {
         name: name.into(),
@@ -68,6 +248,7 @@ fn provide(effect: b::EffectId, handler: ir::Expr, body: ir::Expr) -> ir::Expr {
     let ty = body.ty;
     expression(
         ir::ExprKind::Provide {
+            base: None,
             bindings: vec![(effect, handler)],
             body: block(body),
         },
@@ -83,6 +264,95 @@ fn apply(callee: ir::Expr) -> ir::Expr {
         },
         ValueType::Int,
     )
+}
+
+#[test]
+fn an_explicit_provide_base_restores_a_captured_table_inside_an_effectful_closure() {
+    let mut core = b::Definitions::default();
+    let (read, handler_type) = effect(&mut core, "Read");
+    let pure = fn_type(&mut core, false);
+    let effectful = fn_type(&mut core, true);
+    let saved = local(0, frontend_type(b::TypeId::EVIDENCE));
+    let mut callback = lambda(
+        expression(
+            ir::ExprKind::Provide {
+                base: Some(Box::new(reference(&saved))),
+                bindings: vec![],
+                body: block(operation(read, handler_type)),
+            },
+            ValueType::Int,
+        ),
+        effectful,
+    );
+    let ir::ExprKind::Lambda { captures, .. } = &mut callback.kind else {
+        unreachable!()
+    };
+    captures.push(saved.id);
+    let inner = expression(
+        ir::ExprKind::Binary {
+            op: Binary::Add,
+            left: Box::new(expression(
+                ir::ExprKind::Binary {
+                    op: Binary::Mul,
+                    left: Box::new(operation(read, handler_type)),
+                    right: Box::new(integer(10)),
+                },
+                ValueType::Int,
+            )),
+            right: Box::new(apply(callback)),
+        },
+        ValueType::Int,
+    );
+    let inner = provide(
+        read,
+        handler(read, handler_type, lambda(integer(2), pure)),
+        inner,
+    );
+    let outer = expression(
+        ir::ExprKind::Provide {
+            base: None,
+            bindings: vec![(read, handler(read, handler_type, lambda(integer(1), pure)))],
+            body: ir::Block {
+                ty: ValueType::Int,
+                span: span(),
+                statements: vec![
+                    ir::Statement::Pattern {
+                        pattern: ir::Pattern {
+                            kind: ir::PatternKind::Bind(saved.clone()),
+                            ty: saved.ty,
+                            span: span(),
+                        },
+                        value: expression(ir::ExprKind::Evidence, saved.ty),
+                    },
+                    ir::Statement::Expr(inner),
+                ],
+            },
+        },
+        ValueType::Int,
+    );
+    let answer = exported(function(
+        0,
+        "answer",
+        vec![],
+        ValueType::Int,
+        expression(
+            ir::ExprKind::Binary {
+                op: Binary::Mul,
+                left: Box::new(outer),
+                right: Box::new(integer(2)),
+            },
+            ValueType::Int,
+        ),
+    ));
+    execute_with_options(
+        ir::Program {
+            core,
+            registry: Default::default(),
+            functions: vec![answer],
+        },
+        "#include <stdlib.h>\n#include \"emela_embedded.h\"\n#include \"emela_board.h\"\nint test_heap_empty(void);\n_Noreturn void emela_board_defect(EmelaDefectKind k,const char*m,uint16_t n){(void)k;(void)m;(void)n;abort();}\nint main(void){for(int i=0;i<1000;i++)if(answer()!=42||!test_heap_empty())return 1;return 0;}\n",
+        &crate::Options::default().with_heap_bytes(8192),
+    );
 }
 
 #[test]

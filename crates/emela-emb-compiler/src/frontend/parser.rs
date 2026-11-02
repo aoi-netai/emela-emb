@@ -54,6 +54,7 @@ impl<'t, 's> Parser<'t, 's> {
                 }
                 imports.push(self.import()?);
             } else {
+                let external = self.external_type_attribute()?;
                 let intrinsic = self.intrinsic_declaration_attribute()?;
                 let declaration = if self.word("pub") {
                     self.peek(1).kind
@@ -75,6 +76,29 @@ impl<'t, 's> Parser<'t, 's> {
                 } else if matches!(declaration, K::Name("type" | "enum" | "error" | "opaque")) {
                     let mut declaration = self.data()?;
                     declaration.intrinsic = intrinsic;
+                    declaration.external = external;
+                    if let Some(span) = external {
+                        if declaration
+                            .variants
+                            .iter()
+                            .any(|variant| !variant.fields.is_empty())
+                        {
+                            return Err(Diagnostic::new(
+                                DiagnosticKind::Type,
+                                span,
+                                "an external type cannot declare fields",
+                            ));
+                        }
+                        if !declaration.derives.is_empty() {
+                            return Err(Diagnostic::new(
+                                DiagnosticKind::Type,
+                                span,
+                                "an external type cannot derive structural traits",
+                            ));
+                        }
+                        declaration.variants.clear();
+                        declaration.opaque = true;
+                    }
                     data.push(declaration);
                 } else {
                     functions.push(self.function()?);
@@ -99,6 +123,35 @@ impl<'t, 's> Parser<'t, 's> {
             handlers,
             layers,
         })
+    }
+    fn external_type_attribute(&mut self) -> Result<Option<Span>, Diagnostic> {
+        let checkpoint = self.cursor;
+        let mut span = None;
+        while self.current().kind == K::At && self.peek(1).kind == K::Name("external") {
+            self.advance();
+            span = Some(self.current().span);
+            self.advance();
+            if self.current().kind == K::LParen {
+                self.cursor = checkpoint;
+                return Ok(None);
+            }
+            self.expect(
+                K::Newline,
+                "expected a line break after external type attribute",
+            )?;
+            self.newlines();
+        }
+        let declaration = if self.word("pub") {
+            self.peek(1).kind
+        } else {
+            self.current().kind
+        };
+        if span.is_some() && declaration == K::Name("type") {
+            Ok(span)
+        } else {
+            self.cursor = checkpoint;
+            Ok(None)
+        }
     }
     fn intrinsic_declaration_attribute(&mut self) -> Result<Option<Span>, Diagnostic> {
         let checkpoint = self.cursor;
@@ -1116,6 +1169,7 @@ impl<'t, 's> Parser<'t, 's> {
         Ok(Data {
             name,
             intrinsic: None,
+            external: None,
             public,
             opaque,
             error,
@@ -1896,6 +1950,22 @@ fn parse_string(
 mod tests {
     use super::*;
     use crate::frontend::lexer::lex;
+    #[test]
+    fn external_handle_types_are_opaque_and_have_no_source_constructors() {
+        let source = "@external\npub type Fiber[A]";
+        let module = parse(&lex(source).unwrap()).unwrap();
+        let handle = &module.data[0];
+        assert!(handle.external.is_some() && handle.public && handle.opaque);
+        assert_eq!(handle.params.len(), 1);
+        assert!(handle.variants.is_empty());
+        for source in [
+            "@external\ntype Handle(value:Int)",
+            "@external\ntype Handle derive Show",
+        ] {
+            let error = parse(&lex(source).unwrap()).unwrap_err();
+            assert_eq!(error.kind, DiagnosticKind::Type);
+        }
+    }
     #[test]
     fn parses_real_bindings_multiple_functions_and_continuation() {
         let source = "import Math.{add}\nfn twice(n: Int) -> Int { n\n + n }\n@export(c, \"answer\")\npub fn answer() -> Int { x = add(20, 22)\n assert x == 42\n if True { twice(x) } else { 0 } }";

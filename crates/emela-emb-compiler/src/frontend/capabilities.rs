@@ -230,6 +230,13 @@ impl Context<'_> {
         let site = self.site;
         self.site += 1;
         let mut result = match &value.kind {
+            E::Evidence => {
+                let mut result = Flow::default();
+                for provider in providers.values() {
+                    result.merge(provider.clone());
+                }
+                result
+            }
             E::Use { effect } => {
                 let effect = self.effect(*effect);
                 providers
@@ -348,7 +355,14 @@ impl Context<'_> {
                 }
                 result
             }
-            E::Provide { bindings, body } => {
+            E::Provide {
+                base,
+                bindings,
+                body,
+            } => {
+                if let Some(base) = base {
+                    self.expression(base, locals, providers);
+                }
                 let mut provided = providers.clone();
                 for (effect, binding) in bindings {
                     let flow = self.expression(binding, locals, providers);
@@ -410,7 +424,7 @@ impl Context<'_> {
                 }
                 result
             }
-            E::TraitCall { args, .. } | E::Builtin { args, .. } => {
+            E::TraitCall { args, .. } | E::Builtin { args, .. } | E::Fiber { args, .. } => {
                 let mut result = Flow::default();
                 for argument in self.arguments(args, locals, providers, false) {
                     result.merge(argument);

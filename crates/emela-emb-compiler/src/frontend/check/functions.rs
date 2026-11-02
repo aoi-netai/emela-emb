@@ -118,17 +118,21 @@ impl Checker {
                         effects.insert(ty);
                     }
                 },
-                Type::Tuple(fields) | Type::Enum(_, fields) => {
-                    pending.extend(fields.iter().copied().map(|ty| (ty, None)))
-                }
-                Type::List(ty) | Type::Cell(ty) => pending.push((*ty, None)),
-                Type::Handler(id) => pending.extend(
-                    self.catalog.core.effects[*id]
-                        .args
+                Type::Tuple(fields) => pending.extend(fields.iter().copied().map(|ty| (ty, None))),
+                Type::Enum(id, fields) => pending.extend(
+                    fields
                         .iter()
-                        .copied()
-                        .map(|ty| (ty, None)),
+                        .enumerate()
+                        .map(|(index, &ty)| (ty, self.catalog.nominal_parameter_kind(*id, index))),
                 ),
+                Type::List(ty) | Type::Cell(ty) => pending.push((*ty, None)),
+                Type::Handler(id) => {
+                    pending.extend(
+                        self.catalog.core.effects[*id].args.iter().enumerate().map(
+                            |(index, &ty)| (ty, self.catalog.effect_parameter_kind(*id, index)),
+                        ),
+                    )
+                }
                 Type::Fn(function) => {
                     pending.extend(
                         function

@@ -153,10 +153,13 @@ fn push_block<'a>(block: &'a ir::Block, pending: &mut Vec<&'a ir::Expr>) {
         ir::Statement::Pattern { value, .. } | ir::Statement::Expr(value) => value,
     }));
 }
-fn push_children<'a>(expression: &'a ir::Expr, pending: &mut Vec<&'a ir::Expr>) {
+pub(in crate::frontend) fn push_children<'a>(
+    expression: &'a ir::Expr,
+    pending: &mut Vec<&'a ir::Expr>,
+) {
     use ir::ExprKind as E;
     match &expression.kind {
-        E::Literal(_) | E::Local(_) | E::FnRef { .. } | E::Use { .. } => {}
+        E::Literal(_) | E::Local(_) | E::FnRef { .. } | E::Use { .. } | E::Evidence => {}
         E::Lambda { body, .. } | E::Block(body) => push_block(body, pending),
         E::Apply { callee, args, .. }
         | E::OpCall {
@@ -171,6 +174,7 @@ fn push_children<'a>(expression: &'a ir::Expr, pending: &mut Vec<&'a ir::Expr>) 
         | E::Tuple(args)
         | E::Make { args, .. }
         | E::Builtin { args, .. }
+        | E::Fiber { args, .. }
         | E::Call { args, .. }
         | E::TraitCall { args, .. }
         | E::Handler {
@@ -180,7 +184,12 @@ fn push_children<'a>(expression: &'a ir::Expr, pending: &mut Vec<&'a ir::Expr>) 
             pending.extend(elements);
             pending.extend(tail.as_deref());
         }
-        E::Provide { bindings, body } => {
+        E::Provide {
+            base,
+            bindings,
+            body,
+        } => {
+            pending.extend(base.as_deref());
             pending.extend(bindings.iter().map(|(_, value)| value));
             push_block(body, pending);
         }

@@ -403,7 +403,27 @@ impl Context<'_> {
         use ir::ExprKind as E;
         let mut analysis = Analysis::default();
         match &expression.kind {
-            E::Use { .. } => {}
+            E::Fiber { args, errors, .. } => {
+                for argument in args {
+                    analysis.merge(self.expression(argument, dynamic)?);
+                }
+                let mut pending = errors.clone();
+                let mut visited = HashSet::new();
+                while let Some(error) = pending.pop() {
+                    let error = self.resolve(error, expression.span)?;
+                    if !visited.insert(error) {
+                        continue;
+                    }
+                    if let Type::Set(set) = self.catalog.core.ty(error) {
+                        pending.extend(set.params.iter().copied());
+                    } else {
+                        self.require_error(error, expression.span)?;
+                        analysis.errors.insert(error);
+                        analysis.constraints.insert(error);
+                    }
+                }
+            }
+            E::Evidence | E::Use { .. } => {}
             E::OpCall {
                 handler,
                 args,
@@ -425,7 +445,14 @@ impl Context<'_> {
                     analysis.merge(self.expression(operation, dynamic)?);
                 }
             }
-            E::Provide { bindings, body } => {
+            E::Provide {
+                base,
+                bindings,
+                body,
+            } => {
+                if let Some(base) = base {
+                    analysis.merge(self.expression(base, dynamic)?);
+                }
                 for (_, value) in bindings {
                     analysis.merge(self.expression(value, dynamic)?);
                 }

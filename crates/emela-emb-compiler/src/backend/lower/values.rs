@@ -529,6 +529,9 @@ pub(super) fn value_type(
             }
             Ok(ty)
         }
+        Value::Fiber { op, args, on_fail } => {
+            super::fibers::value_type(program, f, *op, args, *on_fail, available, expected)
+        }
         Value::Builtin { op, args } => builtin_type(program, f, *op, args, available, expected),
         Value::Runtime {
             op: RuntimeOp::ShowString,
@@ -542,6 +545,18 @@ pub(super) fn value_type(
             args,
         } => {
             arguments(f, args, &[TypeId::STRING], available)?;
+            Ok(TypeId::UNIT)
+        }
+        Value::Runtime {
+            op: RuntimeOp::Hold | RuntimeOp::Unhold,
+            args,
+        } => {
+            if expected.is_some() || !args.is_empty() {
+                return Err(invalid(
+                    &f.name,
+                    "Hold/Unhold require no arguments or destination",
+                ));
+            }
             Ok(TypeId::UNIT)
         }
         Value::Runtime {

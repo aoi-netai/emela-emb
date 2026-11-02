@@ -1,0 +1,14 @@
+
+import Std.Fiber.{Fiber, Success, Failure}
+@external(c, "mark")
+fn mark(n: Int) -> () use {}
+effect Resource { fn read() -> Int }
+handler Res: Resource { fn read() { 0 }
+ release { mark(99) }
+}
+pub fn stopped() -> Int {
+ Fiber.attempt(fn() { with Res { panic("test defect") } }) match {
+  Success(_) -> 1
+  Failure(_) -> 2
+ }
+}

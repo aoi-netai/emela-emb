@@ -657,7 +657,9 @@ impl LayoutEmission for CLayoutPlan<'_> {
             writer.line("  union {");
             writer.line("    uint8_t _empty;");
             for (index, &ty) in self.shapes.any_box_types.iter().enumerate() {
-                writer.line(&format!("    {} v{index};", self.c_type(ty)));
+                if self.type_repr(ty) != Repr::Void {
+                    writer.line(&format!("    {} v{index};", self.c_type(ty)));
+                }
             }
             writer.line("  } payload;");
             writer.line("} emela_any_box;");

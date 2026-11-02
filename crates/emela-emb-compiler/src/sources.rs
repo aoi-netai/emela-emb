@@ -21,6 +21,9 @@ pub(crate) const CORE_MODULES: &[(&str, &str)] = &[
     ("Std.Clock", include_str!("../lib/std/clock.emel")),
     ("Std.Console", include_str!("../lib/std/console.emel")),
     ("Std.State", include_str!("../lib/std/state.emel")),
+    ("Std.Cause", include_str!("../lib/std/cause.emel")),
+    ("Std.Deferred", include_str!("../lib/std/deferred.emel")),
+    ("Std.Fiber", include_str!("../lib/std/fiber.emel")),
     ("Std.Map", include_str!("../lib/std/map.emel")),
     ("Std.Set", include_str!("../lib/std/set.emel")),
     ("Int", include_str!("../lib/core/int.emel")),
@@ -38,6 +41,18 @@ pub(crate) const CORE_MODULES: &[(&str, &str)] = &[
 pub(crate) enum Intrinsic {
     /// Expands to a Cell, a handler, and a callback invocation during specialization.
     StateRun,
+    FiberScope,
+    FiberJoin,
+    FiberAwait,
+    FiberInterrupt,
+    FiberAttempt,
+    DeferredComplete,
+    DeferredAwait,
+    DeferredPoll,
+    CauseKind,
+    CauseToString,
+    CauseRaise,
+
     Panic,
     Todo,
     Dbg,
@@ -94,6 +109,18 @@ pub(crate) enum Intrinsic {
 pub(crate) fn intrinsic(module: &str, name: &str) -> Option<Intrinsic> {
     Some(match (module, name) {
         ("Std.State", "run") => Intrinsic::StateRun,
+        ("Std.Fiber", "scope") => Intrinsic::FiberScope,
+        ("Std.Fiber", "join") => Intrinsic::FiberJoin,
+        ("Std.Fiber", "await") => Intrinsic::FiberAwait,
+        ("Std.Fiber", "interrupt") => Intrinsic::FiberInterrupt,
+        ("Std.Fiber", "attempt") => Intrinsic::FiberAttempt,
+        ("Std.Deferred", "complete") => Intrinsic::DeferredComplete,
+        ("Std.Deferred", "await") => Intrinsic::DeferredAwait,
+        ("Std.Deferred", "poll") => Intrinsic::DeferredPoll,
+        ("Std.Cause", "kind") => Intrinsic::CauseKind,
+        ("Std.Cause", "to_string") => Intrinsic::CauseToString,
+        ("Std.Cause", "raise") => Intrinsic::CauseRaise,
+
         ("Prelude", "panic") => Intrinsic::Panic,
         ("Prelude", "todo") => Intrinsic::Todo,
         ("Prelude", "dbg") => Intrinsic::Dbg,
@@ -160,5 +187,24 @@ pub(crate) fn external_symbol(module: &str, name: &str) -> Option<&'static str> 
         ("Std.Console", "console_log") => Some("emela_console_print_line"),
         ("Std.Console", "console_error") => Some("emela_console_print_error_line"),
         _ => None,
+    }
+}
+
+impl Intrinsic {
+    pub(crate) fn is_concurrent(self) -> bool {
+        matches!(
+            self,
+            Self::FiberScope
+                | Self::FiberJoin
+                | Self::FiberAwait
+                | Self::FiberInterrupt
+                | Self::FiberAttempt
+                | Self::DeferredComplete
+                | Self::DeferredAwait
+                | Self::DeferredPoll
+                | Self::CauseKind
+                | Self::CauseToString
+                | Self::CauseRaise
+        )
     }
 }

@@ -11,7 +11,10 @@ mod const_eval;
 mod effects;
 mod error_types;
 mod failures;
+mod fiber_failures;
+mod fibers;
 mod handler;
+mod scope_abi;
 mod suspend;
 mod types;
 mod values;
@@ -44,6 +47,8 @@ pub(crate) fn lower_program(
     effects::normalize(&mut program)?;
     types::normalize_catalog(&mut program)?;
     error_types::normalize(&mut program)?;
+    scope_abi::normalize(&mut program)?;
+    scope_abi::normalize_calls(&mut program)?;
     let mut symbols = HashSet::new();
     for (id, function) in program.functions.iter() {
         if function.exported {
@@ -72,8 +77,11 @@ pub(crate) fn lower_program(
         }
         validate_function(&program, function)?;
     }
-    let (mut program, closures) = closure::lower(&program, options)?;
+    let (mut program, mut closures) = closure::lower(&program, options)?;
+    fiber_failures::erase(&mut program, &mut closures, options)?;
     suspend::normalize_handlers(&mut program);
+    fibers::normalize_values(&mut program);
+    let deferred_pool = fibers::needs_deferred_pool(&program, &closures, options);
     handler::lower(&mut program, options);
     let mut const_outcomes = HashMap::new();
     let mut runtime_consts = HashSet::new();
@@ -115,16 +123,22 @@ pub(crate) fn lower_program(
         program.functions[id].constant = false;
     }
     failures::normalize(&mut program);
-    // Checked builtins and List construction retain allocation/defect behavior even when
+    // Calls, checked builtins and List construction retain allocation/defect behavior even when
     // unused. A temporary destination also lets ownership planning release their results.
     let mut discarded_results: HashMap<FnId, HashSet<VarId>> = HashMap::new();
     let mut discarded = Vec::new();
     for (function_id, function) in program.functions.iter() {
+        // Lifted closure bodies remain in their original statement arena. Only the
+        // current function body has this caller's ABI and needs result disposal.
+        let (active, _) = positions(function);
         let available = function.vars.iter().map(|(id, _)| id).collect();
         for (statement, stmt) in function.stmts.iter() {
+            if !active.contains_key(&statement) {
+                continue;
+            }
             if let Stmt::Let {
                 dst: None,
-                value: Value::Builtin { .. } | Value::List { .. },
+                value: Value::Builtin { .. } | Value::List { .. } | Value::Call { .. },
                 ..
             } = stmt
             {
@@ -193,6 +207,8 @@ pub(crate) fn lower_program(
         .collect();
     let emitted_functions =
         closure::runtime_reachable_without_initializers(&program, options, &resolved_constants);
+    let has_scopes = fibers::runtime_metadata(&program, &emitted_functions);
+    program.has_scopes |= has_scopes;
     let suspensions = suspend::prepare(&program);
     Ok(LoweredModule {
         lowered: program,
@@ -200,7 +216,7 @@ pub(crate) fn lower_program(
         closures,
         const_groups: vec![],
         runtime_consts,
-        deferred_pool: false,
+        deferred_pool,
         emitted_functions,
         discarded_results,
         const_outcomes,
@@ -208,11 +224,20 @@ pub(crate) fn lower_program(
 }
 
 fn validate_function(program: &Program, f: &Function) -> Result<()> {
-    if f.env.is_some() || f.infallible_cause_fail {
-        return Err(unsupported(
-            &f.name,
-            "explicit closure environment or cause failure function",
-        ));
+    if f.env.is_some() {
+        return Err(unsupported(&f.name, "explicit closure environment"));
+    }
+    if f.infallible_cause_fail {
+        let internal = f
+            .external
+            .as_ref()
+            .and_then(|external| external.binding("emela_emb_internal"));
+        if f.name != "emela_infallible_cause_fail" || f.exported || f.constant || f.fails || f.suspends
+            || f.derivation.is_some() || f.body.is_some() || f.ret != TypeId::NEVER || f.params.len() != 1
+            || variable(f, f.params[0])? != TypeId::ANY
+            || !internal.is_some_and(|binding| matches!(&binding.host, HostRef::Global(name) if name == "emela_infallible_cause_fail")) {
+            return Err(invalid(&f.name, "invalid backend Cause landing binding"));
+        }
     }
     let check_type = |ty| types::validate_type(program, &f.name, ty);
     check_type(f.ret)?;
@@ -385,6 +410,10 @@ fn validate_sequence(
                     )?;
                 }
                 if let Value::Call {
+                    on_fail: Some(edge),
+                    ..
+                }
+                | Value::Fiber {
                     on_fail: Some(edge),
                     ..
                 } = value
@@ -715,11 +744,42 @@ fn positions(f: &Function) -> (HashMap<StmtId, usize>, HashMap<SeqId, usize>) {
                 }
                 Stmt::Protect { body, cleanup, .. } => {
                     visit(f, *body, next, stmts, seqs);
-                    visit(f, *cleanup, next, stmts, seqs);
+                    let stops_at_defect = !f.suspends
+                        && matches!(f.seqs[*body].term, Term::Defect(_))
+                        && f.seqs[*body].stmts.iter().all(|statement| {
+                            let Stmt::Let {
+                                value,
+                                on_defect: None,
+                                on_suspend: None,
+                                ..
+                            } = &f.stmts[*statement]
+                            else {
+                                return false;
+                            };
+                            !matches!(
+                                value,
+                                Value::Call {
+                                    on_fail: Some(_),
+                                    ..
+                                } | Value::Fiber {
+                                    on_fail: Some(_),
+                                    ..
+                                }
+                            )
+                        });
+                    // Embedded defects stop immediately. No synchronous exit above can
+                    // enter this cleanup; suspended frames retain cancellation cleanup.
+                    if !stops_at_defect {
+                        visit(f, *cleanup, next, stmts, seqs);
+                    }
                 }
                 Stmt::Let {
                     value:
                         Value::Call {
+                            on_fail: Some(OnFail::Handle { body, .. }),
+                            ..
+                        }
+                        | Value::Fiber {
                             on_fail: Some(OnFail::Handle { body, .. }),
                             ..
                         },

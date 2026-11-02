@@ -16,6 +16,7 @@ pub(in crate::backend::emit) fn emit(
                     writer.assign(&variable_name(*dst), &expression);
                 }
                 (None, None) => {}
+                (Some(dst), None) if function.vars[*dst].ty == TypeId::UNIT => {}
                 (Some(_), None) => {
                     return Err(vec![Error {
                         kind: ErrorKind::InvalidFlowIr,

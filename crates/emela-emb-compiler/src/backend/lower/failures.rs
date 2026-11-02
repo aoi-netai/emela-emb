@@ -14,14 +14,22 @@ pub(super) fn normalize(program: &mut Program) {
             else {
                 continue;
             };
-            let Value::Call {
+            let (Value::Call {
                 on_fail:
                     Some(OnFail::Handle {
                         error,
                         body: handler,
                     }),
                 ..
-            } = value
+            }
+            | Value::Fiber {
+                on_fail:
+                    Some(OnFail::Handle {
+                        error,
+                        body: handler,
+                    }),
+                ..
+            }) = value
             else {
                 continue;
             };
@@ -31,7 +39,7 @@ pub(super) fn normalize(program: &mut Program) {
             let failure_label = function.labels.alloc(LabelData {
                 hint: "call_failure".into(),
             });
-            let Value::Call { on_fail, .. } = &mut value else {
+            let (Value::Call { on_fail, .. } | Value::Fiber { on_fail, .. }) = &mut value else {
                 unreachable!()
             };
             *on_fail = Some(OnFail::Break(failure_label));

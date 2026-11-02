@@ -624,6 +624,7 @@ pub fn expand_handlers(modules: &mut Modules) -> Result<(), Vec<Diagnostic>> {
                     ast::Data {
                         name: handler.name.clone(),
                         intrinsic: None,
+                        external: None,
                         public: handler.public,
                         opaque: false,
                         error: false,

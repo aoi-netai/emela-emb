@@ -203,7 +203,7 @@ pub(super) fn maximum_local(function: &ir::Function) -> Option<usize> {
         use ir::ExprKind as E;
         match &value.kind {
             E::Local(id) => record(*id, maximum),
-            E::Use { .. } => {}
+            E::Evidence | E::Use { .. } => {}
             E::OpCall { handler, args, .. } => {
                 expression(handler, maximum);
                 for argument in args {
@@ -215,7 +215,14 @@ pub(super) fn maximum_local(function: &ir::Function) -> Option<usize> {
                     expression(operation, maximum);
                 }
             }
-            E::Provide { bindings, body } => {
+            E::Provide {
+                base,
+                bindings,
+                body,
+            } => {
+                if let Some(base) = base {
+                    expression(base, maximum);
+                }
                 for (_, value) in bindings {
                     expression(value, maximum);
                 }
@@ -260,6 +267,7 @@ pub(super) fn maximum_local(function: &ir::Function) -> Option<usize> {
                 }
             }
             E::Call { args, .. }
+            | E::Fiber { args, .. }
             | E::Make { args, .. }
             | E::TraitCall { args, .. }
             | E::Builtin { args, .. }

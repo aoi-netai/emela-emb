@@ -50,6 +50,7 @@ impl Checker {
                     let previous = body.clone();
                     let value = ir::Expr {
                         kind: E::Provide {
+                            base: None,
                             bindings: selected
                                 .iter()
                                 .map(|(effect, local)| {
@@ -96,12 +97,22 @@ impl Checker {
             }
             | E::Builtin {
                 args: operations, ..
+            }
+            | E::Fiber {
+                args: operations, ..
             } => {
                 for value in operations {
                     added.extend(self.with_lexical_expression(module, value, provided)?);
                 }
             }
-            E::Provide { bindings, body } => {
+            E::Provide {
+                base,
+                bindings,
+                body,
+            } => {
+                if let Some(base) = base {
+                    added.extend(self.with_lexical_expression(module, base, provided)?);
+                }
                 for (_, value) in bindings {
                     added.extend(self.with_lexical_expression(module, value, provided)?);
                 }
@@ -159,7 +170,7 @@ impl Checker {
                     added.extend(self.with_lexical_expression(module, &mut arm.value, provided)?);
                 }
             }
-            E::Literal(_) | E::Local(_) | E::FnRef { .. } | E::Use { .. } => {}
+            E::Literal(_) | E::Local(_) | E::FnRef { .. } | E::Use { .. } | E::Evidence => {}
         }
         Ok(added)
     }

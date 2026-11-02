@@ -179,6 +179,7 @@ impl Specializer {
                 // State has no release or retirement: returned closures may retain
                 // the shared cell through the handler, as in the fixed source contract.
                 kind: ir::ExprKind::Provide {
+                    base: None,
                     bindings: vec![(effect, local(&handler, span))],
                     body: block(body, span),
                 },
@@ -201,7 +202,7 @@ impl Specializer {
         })
     }
 
-    fn state_local(
+    pub(super) fn state_local(
         &mut self,
         caller: &ir::Function,
         name: &str,

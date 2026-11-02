@@ -201,6 +201,9 @@ impl Solver {
             let nominal = *declarations
                 .entry(effect.decl.clone())
                 .or_insert(id.into_raw().into_u32() as usize);
+            if effect.decl == "Std.Fiber.Scope" {
+                self.rows.scope_declarations.insert(nominal);
+            }
             self.rows.effects.insert(
                 id,
                 (
@@ -246,6 +249,9 @@ impl Solver {
         let expected_tags = self.rows.row(types, expected, kind, &self.metas)?.tags;
         for actual_tag in actual_tags {
             let nominal = self.rows.tags[actual_tag.head].nominal;
+            if kind == SetKind::Effect && self.rows.scope_declarations.contains(&nominal) {
+                continue;
+            }
             for expected_tag in &expected_tags {
                 if nominal != self.rows.tags[expected_tag.head].nominal
                     || actual_tag.args.len() != expected_tag.args.len()
@@ -279,8 +285,45 @@ impl Solver {
         }
         let actual = self.resolve(types, actual)?;
         let expected = self.resolve(types, expected)?;
-        let actual = self.rows.row(types, actual, kind, &self.metas)?;
+        let mut actual = self.rows.row(types, actual, kind, &self.metas)?;
         let expected = self.rows.row(types, expected, kind, &self.metas)?;
+        if kind == SetKind::Effect {
+            for tag in &mut actual.tags {
+                let nominal = self.rows.tags[tag.head].nominal;
+                if !self.rows.scope_declarations.contains(&nominal) || tag.args.len() != 2 {
+                    continue;
+                }
+                for wanted in &expected.tags {
+                    if self.rows.tags[wanted.head].nominal != nominal || wanted.args.len() != 2 {
+                        continue;
+                    }
+                    let mut trial = self.clone();
+                    let mut trial_types = types.clone();
+                    if trial
+                        .include_sets_inner(
+                            &mut trial_types,
+                            tag.args[0],
+                            wanted.args[0],
+                            SetKind::Error,
+                        )
+                        .is_ok()
+                        && trial
+                            .include_sets_inner(
+                                &mut trial_types,
+                                tag.args[1],
+                                wanted.args[1],
+                                SetKind::Effect,
+                            )
+                            .is_ok()
+                    {
+                        *self = trial;
+                        *types = trial_types;
+                        *tag = wanted.clone();
+                        break;
+                    }
+                }
+            }
+        }
         self.rows
             .solver
             .includes(actual, expected)
@@ -597,6 +640,27 @@ impl Solver {
     fn bind(&mut self, types: &mut TypeTable, variable: TypeId, target: TypeId) -> Result<()> {
         if variable == target {
             return Ok(());
+        }
+        if let Some(kind) = self.row_kind(variable) {
+            if self.is_meta(target) && self.row_kind(target).is_none() {
+                self.register_row(target, kind, Origin::Inferred)?;
+            }
+            let left = self.rows.row(types, variable, kind, &self.metas)?;
+            let right = self.rows.row(types, target, kind, &self.metas)?;
+            // Nominal arguments such as Cause[E] are invariant. Aliasing their
+            // value metas must preserve both rows' existing inclusion constraints.
+            self.rows
+                .solver
+                .equal(left, right)
+                .map_err(rows::set_error)?;
+        } else if let Some(kind) = self.row_kind(target) {
+            self.register_row(variable, kind, Origin::Inferred)?;
+            let left = self.rows.row(types, variable, kind, &self.metas)?;
+            let right = self.rows.row(types, target, kind, &self.metas)?;
+            self.rows
+                .solver
+                .equal(left, right)
+                .map_err(rows::set_error)?;
         }
         let constraint = self.constraint(variable).expect("registered variable");
         if let Some(other) = self.metas.get_mut(&target) {

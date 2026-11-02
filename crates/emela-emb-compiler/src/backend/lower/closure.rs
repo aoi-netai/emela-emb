@@ -700,7 +700,11 @@ pub(super) fn runtime_reachable_without_initializers(
                     }
             })
         });
-        if shows_causes {
+        if shows_causes
+            && reachable
+                .iter()
+                .any(|id| needs_error_abi(program, &program.functions[*id]))
+        {
             for &(error, show) in &program.error_shows {
                 if !reachable.contains(&show)
                     && reachable.iter().any(|id| {
@@ -718,4 +722,71 @@ pub(super) fn runtime_reachable_without_initializers(
         }
     }
     reachable
+}
+
+fn needs_error_abi(program: &Module, function: &Function) -> bool {
+    fn failing_type(
+        program: &Module,
+        ty: crate::contract::ir::TypeId,
+        seen: &mut HashSet<crate::contract::ir::TypeId>,
+    ) -> bool {
+        if !seen.insert(ty) {
+            return false;
+        }
+        match program.core.ty(ty) {
+            Type::Fn(ft) => {
+                ft.fails
+                    || ft
+                        .params
+                        .iter()
+                        .chain([&ft.ret])
+                        .any(|&ty| failing_type(program, ty, seen))
+            }
+            Type::Tuple(fields) | Type::Enum(_, fields) => {
+                fields.iter().any(|&ty| failing_type(program, ty, seen))
+                    || match program.core.ty(ty) {
+                        Type::Enum(id, _) => program.core.enums[*id]
+                            .variants
+                            .iter()
+                            .flat_map(|variant| &variant.tys)
+                            .any(|&ty| failing_type(program, ty, seen)),
+                        _ => false,
+                    }
+            }
+            Type::List(value) | Type::Cell(value) => failing_type(program, *value, seen),
+            Type::Handler(effect) => program.core.effects[*effect].ops.iter().any(|operation| {
+                operation.fails
+                    || operation
+                        .params
+                        .iter()
+                        .chain([&operation.ret])
+                        .any(|&ty| failing_type(program, ty, seen))
+            }),
+            _ => false,
+        }
+    }
+    function.fails
+        || function
+            .seqs
+            .iter()
+            .any(|(_, sequence)| matches!(sequence.term, Term::Fail(_)))
+        || function.stmts.iter().any(|(_, statement)| {
+            matches!(
+                statement,
+                Stmt::Let {
+                    value: Value::Call {
+                        on_fail: Some(_),
+                        ..
+                    } | Value::Fiber {
+                        on_fail: Some(_),
+                        ..
+                    } | Value::IsError { .. }
+                        | Value::AsError { .. },
+                    ..
+                }
+            )
+        })
+        || std::iter::once(function.ret)
+            .chain(function.vars.iter().map(|(_, var)| var.ty))
+            .any(|ty| failing_type(program, ty, &mut HashSet::new()))
 }

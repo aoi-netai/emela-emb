@@ -29,7 +29,7 @@ pub(super) fn allocate_structural_equality(
     fn expression(value: &ir::Expr, types: &mut HashSet<b::TypeId>) {
         use ir::ExprKind as E;
         match &value.kind {
-            E::Use { .. } => {}
+            E::Evidence | E::Use { .. } => {}
             E::OpCall { handler, args, .. } => {
                 expression(handler, types);
                 for argument in args {
@@ -41,7 +41,14 @@ pub(super) fn allocate_structural_equality(
                     expression(operation, types);
                 }
             }
-            E::Provide { bindings, body } => {
+            E::Provide {
+                base,
+                bindings,
+                body,
+            } => {
+                if let Some(base) = base {
+                    expression(base, types);
+                }
                 for (_, value) in bindings {
                     expression(value, types);
                 }
@@ -73,6 +80,7 @@ pub(super) fn allocate_structural_equality(
                 }
             }
             E::Call { args, .. }
+            | E::Fiber { args, .. }
             | E::Make { args, .. }
             | E::TraitCall { args, .. }
             | E::Builtin { args, .. }

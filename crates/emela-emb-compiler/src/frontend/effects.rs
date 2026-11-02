@@ -391,14 +391,18 @@ impl Context<'_> {
                 )
                 .map_err(|error| self.error(span, error.message));
         }
-        if needed.iter().any(|&actual| {
-            !allowed
-                .iter()
-                .any(|&expected| self.same_effect(actual, expected))
-        }) {
-            return Err(self.error(span, "function requires an undeclared effect; add a use annotation or provide its handler"));
-        }
-        Ok(())
+        let actual = self.catalog.core.types.intern(Type::Set(SetSummary {
+            params: sorted(needed.clone()),
+            ..Default::default()
+        }));
+        let expected = self.catalog.core.types.intern(Type::Set(SetSummary {
+            params: sorted(allowed),
+            ..Default::default()
+        }));
+        let mut solver = super::infer::Solver::new();
+        solver.register_effects(&self.catalog.core);
+        solver.include_sets(&mut self.catalog.core.types, actual, expected, super::sets::SetKind::Effect)
+            .map_err(|error| self.error(span, format!("function requires an undeclared effect; add a use annotation or provide its handler: {}", error.message)))
     }
     fn callback(&mut self, expression: &ir::Expr) -> Result<Requirements, Diagnostic> {
         let ty = self.resolve(backend_type(expression.ty), expression.span)?;
@@ -460,7 +464,7 @@ impl Context<'_> {
         use ir::ExprKind as E;
         let mut needed = HashSet::new();
         match &expression.kind {
-            E::Literal(_) | E::Local(_) | E::FnRef { .. } | E::Lambda { .. } => {}
+            E::Literal(_) | E::Local(_) | E::FnRef { .. } | E::Lambda { .. } | E::Evidence => {}
             E::Use { effect } => {
                 let ty = self.catalog.core.types.intern(Type::Handler(*effect));
                 needed.insert(self.resolve(ty, expression.span)?);
@@ -490,7 +494,14 @@ impl Context<'_> {
                     }
                 }
             }
-            E::Provide { bindings, body } => {
+            E::Provide {
+                base,
+                bindings,
+                body,
+            } => {
+                if let Some(base) = base {
+                    needed.extend(self.expression(base)?);
+                }
                 // Provide constructs all bound values in the incoming environment.
                 for (_, value) in bindings {
                     needed.extend(self.expression(value)?);
@@ -605,7 +616,8 @@ impl Context<'_> {
             E::Tuple(values)
             | E::Concat(values)
             | E::Make { args: values, .. }
-            | E::Builtin { args: values, .. } => {
+            | E::Builtin { args: values, .. }
+            | E::Fiber { args: values, .. } => {
                 for value in values {
                     needed.extend(self.expression(value)?);
                 }

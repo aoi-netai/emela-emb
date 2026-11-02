@@ -165,6 +165,16 @@ impl Context<'_> {
         self.ty(&mut expression.ty, expression.span)?;
         use ir::ExprKind as E;
         match &mut expression.kind {
+            E::Fiber { args, errors, .. } => {
+                for error in errors {
+                    let mut ty = frontend_type(*error);
+                    self.ty(&mut ty, expression.span)?;
+                    *error = backend_type(ty);
+                }
+                for argument in args {
+                    self.expression(argument)?;
+                }
+            }
             E::Use { effect } => {
                 *effect = self.effect(*effect, expression.span)?;
             }
@@ -194,7 +204,14 @@ impl Context<'_> {
                     self.expression(operation)?;
                 }
             }
-            E::Provide { bindings, body } => {
+            E::Provide {
+                base,
+                bindings,
+                body,
+            } => {
+                if let Some(base) = base {
+                    self.expression(base)?;
+                }
                 for (effect, value) in bindings {
                     *effect = self.effect(*effect, expression.span)?;
                     self.expression(value)?;
@@ -214,7 +231,7 @@ impl Context<'_> {
                 }
                 self.block(body)?;
             }
-            E::Literal(_) | E::Local(_) => {}
+            E::Evidence | E::Literal(_) | E::Local(_) => {}
             E::FnRef { type_arguments, .. } => {
                 for argument in type_arguments {
                     let mut ty = frontend_type(*argument);

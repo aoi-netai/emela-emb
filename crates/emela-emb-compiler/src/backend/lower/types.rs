@@ -308,7 +308,7 @@ pub(super) fn validate_type(program: &Program, function: &str, ty: TypeId) -> Re
                     visit(program, function, child, seen, active, indirections + 1)?;
                 }
             }
-            Type::Evidence => {}
+            Type::Evidence | Type::FiberScope => {}
             _ => return Err(unsupported(function, "value type")),
         }
         active.remove(&ty);

@@ -410,3 +410,40 @@ Stringの`@deprecated`・`@internal`は従来と同じmetadata適応として省
 `tests/p5_time.rs`はDurationのwrap/符号付き変換・opaque境界と、Instantのepoch、負のmillisecond、閏日、年0・拡張年・負年をheapなしのC両最適化で1000回確認する。負年のゼロ埋めから既存String appendの入力/output重複を検出したため、P5では両入力を最大512byteの固定scratchへ退避してから出力する。`tests/p5_string_alias.rs`で重複view・容量境界・10万回の末尾再帰におけるstack非増加を検証し、mallocやVLAは追加しない。
 
 Clockを通常sourceへ登録し、予約C symbolはcompiler所有のClock宣言だけに許可する。`tests/p5_clock.rs`ではSystemClockのnow/sleep、TestClockの負の待機時間のclampとState[Instant]の更新を明示task adapterへ接続する。List.mapのeffect多相callbackから順に中断・再開して時刻列を構築し、再帰する標準APIのframeと結果所有権も通す。nowだけを使う関数もClockの中断可能性を保持する。queue通知前の非完了、重複/stale通知、1000回のheap全回収をC両最適化で確認し、adapter未指定・予約名偽装・Immediate制約違反を拒否する。
+
+## P6のScope ABI正規化
+
+同じ固定revisionの `crates/emela-codegen-emb/src/compiler/lower/scope_abi.rs`（元SHA-256: `70918ea86a3fa50f2fbe9b566bbf386e4a779427f19e151666393355395d15ae`）と `fiber_normalize.rs`（元SHA-256: `0eb8b3a1d7f85503e15286de6b18579e9aeeb73dce478cb65685e75cc3bdb9b0`）から、Scope operationのcallback失敗ABI統一、fork引数と戻り値のAny正規化、未使用deferred constructorのpool省略を独自contractへ適応した。Core/LIR crate依存と旧checkout参照は追加しない。
+
+Scopeのrow引数を消したevidence keyはtrusted frontend合成側の契約とする。backendはそのkeyを共有する生成handlerのcallback ABIを揃え、scalar・String等の子戻り値を明示的にboxする。通常のeffectやlabelのkeyはこのpassで変更しない。正規化前の不正operation数・変数・型・生成bodyの循環も診断で拒否する。
+
+IR/C試験は、callback失敗flagの異なる同一Scope、typed childのJoin、deferred未使用時の容量0成功と使用時の容量0拒否・容量1成功、FIFO再開とString所有、取消時の中断可能cleanupを両最適化で確認する。source入力からScopeを合成する接続は、これらの成功と区別して追跡する。
+
+保守的failure flagは固定旧の閉鎖性検査に従って除去する。到達関数にFail・Unwind・Cause.raiseがある場合、失敗可能な外部関数、またはC境界から失敗可能関数値・Any・handler/evidenceを受け取る場合は適用しない。適用時は関数型graphを射影し、重複型を正規化した対応表でclosure環境も更新する。C境界の負例、failure runtimeの省略、通常値としてerrorを作るだけのScopeで不要Show関数を生成しないことを検証する。
+
+空Causeのlandingは、固定旧 `crates/emela-codegen-emb/src/input/upstream/cause.rs`（元SHA-256: `8bebbddcd06d60da5a296c5371e7bf6b8ce949433623364b2330f99ac5fcf4cd`）のsource検証後の契約に合わせた。typed Fiberの具体errorsが空の場合だけ、frontend lowerがlocal Breakと内部helperを合成する。通常のbackend IRは明示failure edgeを要求し、helperの署名・非公開性・内部bindingを検査する。外部host実装は追加しない。runtime Cause ABIの中断再送出と、空集合に矛盾するFail CauseのassertをC両最適化で検証する。source Cause/Fiber/Exitに残るphantom row型引数のABI射影は別のsource接続作業とする。
+
+## P6標準sourceとtrusted concurrency合成
+
+固定revision `c34c0aeefdd966d854371b3110db00a47798751d` の次の標準sourceを本文・metadataとも変更せず供給する。外部opaque型の構文と名義、Causeのphantom error row、Exitのerror rowはsource checkerで保持し、runtime ABIへ渡す直前にだけ消去する。
+
+| 元source | SHA-256 |
+| --- | --- |
+| `crates/emela-core/lib/std/fiber.emel` | `bbcd120a2c9fe07eed481b7bfa846f658484b19776107a1af583a4e7b1688c48` |
+| `crates/emela-core/lib/std/deferred.emel` | `bea5f3fa01a529f498c08014e80065643afbb3e63197ea2058e8ac2ec126aabf` |
+| `crates/emela-core/lib/std/cause.emel` | `d2bd541699bd82e34dc20e77caeef2b5aff2ab8a27aacd07ff3132154ea0df8d` |
+
+`crates/emela-core/src/lower/fiber.rs`（元SHA-256 `5811d25b3789ca14d68d96fff316600e7996a51798114429c687caeb77e65d33`）のScopeCall/ForkCall/AttemptCallを独立typed IRへ適応する。Scope handlerは呼出地点のevidenceを保持し、fork callbackへ明示的に渡す。子はfork元のScope capabilityだけをそのtableへ追加する。通常のeffect/label keyは保持し、Scopeだけを`Std.Fiber.Scope[_,_]`へ正規化する。実行時crate・旧checkout・本体compilerへの依存は加えない。
+
+`tests/p6_concurrency.rs`はsourceからScope/fork/join、Deferred、Unit結果、Attempt、Causeのkind/Show/raiseを生成し、C11の両最適化で各1000回のheap全解放を確認する。戻り型にFiber/Deferredを含むScope、Scopeの省略引数をuse clauseへ書く入力、集合kind不一致、user handlerによるScope実装をsource位置付きで拒否する。戻り型に見えないcaptureのscope逸出と取消・cleanupのsource統合は、この基盤回帰と区別して追跡する。
+
+P6のdefect停止は固定旧`emit::fiber::attempt::attempt_keeps_the_embedded_policy_of_stopping_immediately_on_defect`のsource（元SHA-256 `8ea142e4bf88263cbcba03ddba8878f871ffa8d04f469bb959618188c7ffbd93`）を`tests/compat/p6/attempt-defect.emel`へ保存して確認する。同期Protectの直線bodyがDefectで停止し、failure/defect/suspend転送を持たない場合は、出力されないcleanupをpositionsと到達集合から除外する。中断frameの取消cleanupは保持する。`tests/p6_defects.rs`では固定入力と動的panic messageの両方でdefect hookが即時停止しreleaseを呼ばないこと、先行するtyped failureではreleaseを実行してFailureを返すことをC両最適化で検証する。
+
+P6のScope要求は、通常effectの値引数の不変照合と分けて扱う。同一Scopeへ渡す各childのE/Rを提供ScopeのE/Rへ包含し、最初のpure childでRを空集合へ固定しない。既存のState等の具体instance identityは維持する。`tests/compat/p6/`のclosing-ready/nested-cancel/interrupt-waiters/completed-childrenは、旧corpus manifestのsource SHA-256（順に`90178b14fd7587b8ac7e63044a6378abc08f0d58fed107a8569454a34d434fd8`、`1eb66f065e0d3a0f1d63c3d4c1cbade1d68435d715e94bd746d06d1efa7187f6`、`6570121a20b232ff437847c3abe2efc1e8a8c6f7be07327d50c7982842f988de`、`80aeb97a49c6de058bc68bdc0a86d166af7ea26bdfbe935879af5586f1a577dd`）を本文変更なしで保存する。型検査のsource回帰と、後続の公開wrapper・host mock付き実C回帰は区別する。
+
+P6のchild waiter/reclaim追加は`tests/p6_child_waiters.rs`で固定旧sourceを本文変更なしに読み、C exportだけを加えて検証する。`fiber-await-join-fifo.emel`（元SHA-256 `1cb66d19500df0d547f7480e5d52bee20c1b15d63f1627246aee79ffc591e7a6`）と`fiber-join-fifo.emel`（`ee721482a151acf7e2dc7640812dcc4865b0942afffb9d80a97039673d65c54d`）ではtask完了前のmark 1/2/3、child終端mark 4、その後のFIFO mark 5/6/7と結果84/126を観測する。`fiber-handleless-failure.emel`（`3d497118b6f1f8365af3cada8676e2b9fcf3e9e2b21a258a01000f210b90f9df`）は旧4096byte heapで、sibling cleanup待機中のchild record 1個、完了後の0個、取消・NULL出力・所有String・stale task拒否を観測する。
+
+`fiber-overlap-notes.emel`（`6e6c14d15b01141c28b3b111af84d602b3fe7ca1aa1abcdb32a4254f249e2574`）は、固定旧`emit::fiber::overlap::failures_from_cancelled_nested_scopes_become_notes_of_the_outer_first_failure`と同じく、通常のsource検査・具体化・lowerの後に`late`先頭へ`RuntimeOp::Hold`を挿入する。`backend/lower/fiber_source_tests.rs`がこの明示IR seamを保持し、先着Boomと後着noteの順序を検証する。原sourceへ取消の意味を変える処理は書き加えない。この試験を純sourceのみの実行成功とは数えず、`docs/reports/p6-child-waiters-compat.json`で経路を区別する。4入力ともC両最適化で各1000回、各回のheap全解放を確認する。既存IRの基本join回収・Deferred FIFO・中断cleanupとの意味の重なりも同reportへ記録し、child await/join FIFOとhandleless failureの追加観測を分ける。
+`tests/p6_scope_lifecycle.rs`は、この4 sourceのpublic関数へ明示C exportだけを追加し、固定旧`crates/emela-codegen-emb/tests/fiber/await_.rs`、`tests/deferred/mod.rs`、`tests/fiber/interrupt.rs`、`tests/fiber/child_reclaim.rs`のC観測を接続する。C harnessはexport名・明示task adapter・必要なevent lock hook・heap監査へ適応した。1024 byte/frame、128 frameを指定し、元のchild回収用heap 2048/4096 byte・fiber容量4を維持する。ready join/awaitのscope close、Deferred待機列のhead/middle/tail取消、release後のinterrupt FIFO、完了childの即時回収と保持handleの再join/awaitを、両最適化・各1000回で確認する。
+
+child数と取消flagの観測、および弱child link・cycleの直接検査は`completed-instrument.c`を生成Cへ追加する旧test由来のprivate C seamであり、公開source APIの保証と区別する。追加のsource差分回帰では既存child localの単独参照を挟み、その後もhandleを使用できることを検証する。未使用の新しい関数呼出し結果は既存の所有権passへ破棄を伝え、待機frameへ不要なchild handleを残さない。raw IRのDrop/Dup許可範囲は変更しない。

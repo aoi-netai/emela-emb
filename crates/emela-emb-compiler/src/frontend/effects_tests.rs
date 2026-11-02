@@ -275,6 +275,7 @@ fn different_instances_are_not_removed_by_the_same_effect_declaration() {
     );
     let body = expr(
         ir::ExprKind::Provide {
+            base: None,
             bindings: vec![(ints, value)],
             body: block(get(strings, st)),
         },
@@ -343,6 +344,7 @@ fn a_known_inferred_residual_is_removed_by_an_outer_provider() {
     );
     let value = expr(
         ir::ExprKind::Provide {
+            base: None,
             bindings: vec![(read, provided)],
             body: block(call),
         },
@@ -408,6 +410,7 @@ fn a_provider_does_not_subtract_unknown_members_of_a_set_parameter() {
         0,
         expr(
             ir::ExprKind::Provide {
+                base: None,
                 bindings: vec![(read, provider)],
                 body: block(invoke),
             },

@@ -1,14 +1,31 @@
 //! Recoverable failures leave an escape expression through its enclosing result block.
 use super::*;
 
-pub(super) fn allocate_raises(
-    input: &ir::Program,
-    program: &mut b::Program,
-) -> HashMap<b::TypeId, b::FnId> {
-    fn collect(expression: &ir::Expr, types: &mut std::collections::HashSet<b::TypeId>) {
+pub(super) fn allocate_raises(input: &ir::Program, program: &mut b::Program) -> RaisedFunctions {
+    #[derive(Default)]
+    struct Collected {
+        errors: std::collections::HashSet<b::TypeId>,
+        empty_cause: bool,
+    }
+    impl Collected {
+        fn insert(&mut self, ty: b::TypeId) {
+            self.errors.insert(ty);
+        }
+    }
+    fn collect(expression: &ir::Expr, types: &mut Collected) {
         use ir::ExprKind as E;
         match &expression.kind {
-            E::Use { .. } => {}
+            E::Fiber {
+                op: b::FiberOp::CauseRaise,
+                args,
+                errors,
+            } if errors.is_empty() => {
+                types.empty_cause = true;
+                for argument in args {
+                    collect(argument, types);
+                }
+            }
+            E::Evidence | E::Use { .. } => {}
             E::OpCall { handler, args, .. } => {
                 collect(handler, types);
                 for argument in args {
@@ -20,7 +37,14 @@ pub(super) fn allocate_raises(
                     collect(operation, types);
                 }
             }
-            E::Provide { bindings, body } => {
+            E::Provide {
+                base,
+                bindings,
+                body,
+            } => {
+                if let Some(base) = base {
+                    collect(base, types);
+                }
                 for (_, value) in bindings {
                     collect(value, types);
                 }
@@ -66,6 +90,7 @@ pub(super) fn allocate_raises(
                 }
             }
             E::Call { args, .. }
+            | E::Fiber { args, .. }
             | E::Make { args, .. }
             | E::TraitCall { args, .. }
             | E::Builtin { args, .. }
@@ -106,7 +131,7 @@ pub(super) fn allocate_raises(
             E::Local(_) | E::Literal(_) => {}
         }
     }
-    fn block(block: &ir::Block, types: &mut std::collections::HashSet<b::TypeId>) {
+    fn block(block: &ir::Block, types: &mut Collected) {
         for statement in &block.statements {
             match statement {
                 ir::Statement::Pattern { value, .. } | ir::Statement::Expr(value) => {
@@ -115,15 +140,16 @@ pub(super) fn allocate_raises(
             }
         }
     }
-    let mut types = std::collections::HashSet::new();
+    let mut types = Collected::default();
     for function in &input.functions {
         if let Some(body) = &function.body {
             block(body, &mut types);
         }
     }
-    let mut types: Vec<_> = types.into_iter().collect();
+    let empty_cause = types.empty_cause;
+    let mut types: Vec<_> = types.errors.into_iter().collect();
     types.sort_by_key(|ty| ty.index());
-    types
+    let ordinary = types
         .into_iter()
         .map(|error_type| {
             let mut function = b::Function::new(&format!("__raise_{}", error_type.index()));
@@ -142,10 +168,83 @@ pub(super) fn allocate_raises(
             let id = program.functions.alloc(function);
             (error_type, id)
         })
-        .collect()
+        .collect();
+    let empty_cause = empty_cause.then(|| {
+        let mut function = b::Function::new("emela_infallible_cause_fail");
+        function.infallible_cause_fail = true;
+        function.ret = b::TypeId::NEVER;
+        let error = function.vars.alloc(b::VarData {
+            hint: "error".into(),
+            ty: b::TypeId::ANY,
+            repr: b::Repr::Ref,
+        });
+        function.params.push(error);
+        function.external = Some(b::External {
+            bindings: vec![b::ExternalBinding {
+                target: "emela_emb_internal".into(),
+                host: b::HostRef::Global("emela_infallible_cause_fail".into()),
+            }],
+        });
+        program.functions.alloc(function)
+    });
+    RaisedFunctions {
+        ordinary,
+        empty_cause,
+    }
+}
+
+pub(super) struct RaisedFunctions {
+    pub(super) ordinary: HashMap<b::TypeId, b::FnId>,
+    pub(super) empty_cause: Option<b::FnId>,
 }
 
 impl Context<'_> {
+    pub(super) fn raise_empty_cause(
+        &mut self,
+        builder: &mut Builder,
+        args: Vec<b::Operand>,
+    ) -> Option<b::Operand> {
+        let error = self.var("empty_cause_failure", Ty::Any);
+        let label = self.function.labels.alloc(b::LabelData {
+            hint: "empty_cause_failure".into(),
+        });
+        let raise = self.function.stmts.alloc(b::Stmt::Let {
+            dst: None,
+            value: b::Value::Fiber {
+                op: b::FiberOp::CauseRaise,
+                args,
+                on_fail: Some(b::OnFail::Break(label)),
+            },
+            on_defect: None,
+            on_suspend: None,
+        });
+        let body = self.function.seqs.alloc(b::Seq {
+            stmts: vec![raise],
+            term: b::Term::Unreachable,
+        });
+        self.statement(
+            builder,
+            b::Stmt::Block {
+                dst: Some(error),
+                label,
+                body,
+            },
+        );
+        self.value(
+            builder,
+            b::Value::Call {
+                callee: b::Callee::Direct(
+                    self.raises
+                        .empty_cause
+                        .expect("empty Cause landing was collected"),
+                ),
+                args: vec![error.into()],
+                suspends: false,
+                on_fail: None,
+            },
+            Ty::Never,
+        )
+    }
     pub(super) fn failure_edge(&self) -> b::OnFail {
         match self.escape {
             Some((error, body)) => b::OnFail::Handle { error, body },
@@ -159,7 +258,7 @@ impl Context<'_> {
         error_type: b::TypeId,
     ) {
         let call = b::Value::Call {
-            callee: b::Callee::Direct(self.raises[&error_type]),
+            callee: b::Callee::Direct(self.raises.ordinary[&error_type]),
             args: vec![error],
             suspends: false,
             on_fail: Some(self.failure_edge()),

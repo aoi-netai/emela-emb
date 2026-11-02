@@ -589,7 +589,9 @@ impl<'a> LayoutPreparation<'a> for LayoutBuilder<'a> {
 
     fn add_any_box_type(&mut self, ty: TypeId) {
         self.runtime.any_abi = true;
-        if self.type_repr(ty) == Repr::Void || matches!(self.shapes.types[ty], Type::Any) {
+        if (self.type_repr(ty) == Repr::Void && ty != TypeId::UNIT)
+            || matches!(self.shapes.types[ty], Type::Any)
+        {
             return;
         }
         self.runtime.any_box_required = true;

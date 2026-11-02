@@ -358,6 +358,7 @@ pub(super) fn prepare_frame<'a>(
             }
         }
     }
+    active.retain(|id| layouts.type_repr(function.vars[*id].ty) != Repr::Void);
     let strings = StringBufferPlan::new(
         layouts,
         function_id,

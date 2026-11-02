@@ -153,7 +153,7 @@ struct Context<'a> {
     suspending: &'a HashSet<DefinitionId>,
     current_suspends: bool,
     evidence: Option<b::VarId>,
-    raises: &'a HashMap<b::TypeId, b::FnId>,
+    raises: &'a failures::RaisedFunctions,
     structural_equality: &'a HashMap<b::TypeId, b::FnId>,
     escape: Option<(b::VarId, b::SeqId)>,
     closure_depth: usize,
@@ -251,11 +251,32 @@ impl Context<'_> {
                     result = None;
                 }
                 ir::Statement::Expr(expression) => {
+                    let first_statement = builder.statements.len();
                     result = self.expression(
                         builder,
                         expression,
                         tail && index + 1 == block.statements.len(),
                     );
+                    if index + 1 != block.statements.len() {
+                        // Only a result produced by this statement can be discarded here.
+                        // An existing local may still be used after this expression.
+                        if let Some(b::Operand::Var(variable)) = result {
+                            for &statement in &builder.statements[first_statement..] {
+                                if let b::Stmt::Let {
+                                    dst,
+                                    value: b::Value::Call { .. },
+                                    ..
+                                } = &mut self.function.stmts[statement]
+                                {
+                                    if *dst == Some(variable) {
+                                        *dst = None;
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                        result = None;
+                    }
                 }
             }
         }
@@ -269,6 +290,29 @@ impl Context<'_> {
     ) -> Option<b::Operand> {
         use ir::ExprKind as E;
         match &expression.kind {
+            E::Evidence => Some(self.current_evidence(builder).into()),
+            E::Fiber { op, args, errors } => {
+                let mut values = Vec::new();
+                for argument in args {
+                    let value = self.expression(builder, argument, false);
+                    if builder.term.is_some() {
+                        return None;
+                    }
+                    values.push(value.unwrap_or(b::Operand::Const(b::Const::Unit)));
+                }
+                if *op == b::FiberOp::CauseRaise && errors.is_empty() {
+                    return self.raise_empty_cause(builder, values);
+                }
+                self.value(
+                    builder,
+                    b::Value::Fiber {
+                        op: *op,
+                        args: values,
+                        on_fail: (!errors.is_empty()).then(|| self.failure_edge()),
+                    },
+                    expression.ty,
+                )
+            }
             E::Use { effect } => self.use_effect(builder, *effect, expression.ty),
             E::OpCall {
                 handler,
@@ -284,12 +328,20 @@ impl Context<'_> {
                 operations,
                 ..
             } => self.handler_value(builder, name, *effect, operations, expression.ty),
-            E::Provide { bindings, body } => self.provide(builder, bindings, body, tail),
+            E::Provide {
+                base,
+                bindings,
+                body,
+            } => self.provide(builder, base.as_deref(), bindings, body, tail),
             E::With { bindings, body } => {
                 self.with_expression(builder, bindings, body, expression.ty)
             }
             E::Coerce(value) => {
-                let operand = self.expression(builder, value, false)?;
+                let operand = self.expression(builder, value, false);
+                if builder.term.is_some() {
+                    return None;
+                }
+                let operand = operand.unwrap_or(b::Operand::Const(b::Const::Unit));
                 if expression.ty == value.ty {
                     return Some(operand);
                 }
@@ -1113,7 +1165,20 @@ fn literal(value: &ir::Literal) -> b::Const {
 }
 fn builtin(op: Intrinsic) -> b::Builtin {
     match op {
-        Intrinsic::StateRun => unreachable!("State.run is expanded before backend lowering"),
+        Intrinsic::StateRun
+        | Intrinsic::FiberScope
+        | Intrinsic::FiberJoin
+        | Intrinsic::FiberAwait
+        | Intrinsic::FiberInterrupt
+        | Intrinsic::FiberAttempt
+        | Intrinsic::DeferredComplete
+        | Intrinsic::DeferredAwait
+        | Intrinsic::DeferredPoll
+        | Intrinsic::CauseKind
+        | Intrinsic::CauseToString
+        | Intrinsic::CauseRaise => {
+            unreachable!("trusted structured operations are expanded before backend lowering")
+        }
         Intrinsic::Panic => b::Builtin::Panic,
         Intrinsic::Todo => b::Builtin::Todo,
         Intrinsic::Dbg => b::Builtin::Dbg,
