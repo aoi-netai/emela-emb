@@ -34,12 +34,12 @@ mod p7_evidence;
 mod p7_input;
 #[path = "p7_integration_tests.rs"]
 mod p7_integration;
+#[path = "p7_string_frame_tests.rs"]
+mod p7_string_frames;
 #[path = "service_tests.rs"]
 mod services;
 #[path = "source_builtin_tests.rs"]
 mod source_builtins;
-#[path = "p7_string_frame_tests.rs"]
-mod p7_string_frames;
 #[path = "suspend_tests.rs"]
 mod suspend;
 

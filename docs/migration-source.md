@@ -558,3 +558,7 @@ completeの一度だけの格納、空/Unit/Bool/tuple/Int64/Floatのpoll/await�
 ## P7: 標準サービスとnative C試験fixture
 
 `tests/compat/p7/native-services.c` は固定旧 `src/platform/native.c` のbyte一致コピーであり、compiler生成物を検証するC providerとしてのみ使う。platformのRust API・build planner・package依存は導入しない。Clock/Consoleの2原sourceを明示exportへ適応し、旧4096byte heap・2048byte frameとnative timerの取消/slot再利用をC両最適化で確認した。旧100回のtimer試験は1000回へ増やし、毎回のheap回収を追加した。既存の全Embedded操作試験とClock境界試験も原観測・旧容量へ照合し、[対応表](reports/p7-services-source-compat.json) に記録した。
+
+## P7: Scope原文7試験のC観測
+
+固定旧 `tests/fiber/mod.rs` の正常source7試験を `tests/p7_scope_compat.rs` へ移し、[原文hash・旧Options・C本文の対応](reports/p7-scope-source-compat.json) を保存した。子開始の順序、unstarted取消、完了通知とScope再利用、入れ子task取消、Scope地点evidenceとsibling fork、pool不足defect、String/List captureを元のC assertionで確認する。明示C export以外にsource本文を変えず、旧512byte frameとheap/fiber/task/event容量を保ち、C両最適化で成功した。
