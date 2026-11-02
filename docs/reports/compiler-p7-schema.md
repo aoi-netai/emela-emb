@@ -1,6 +1,6 @@
 # P7の独立IRと旧schemaの意味の対応
 
-このレビューは、旧対応表のschemaを機能数として数えず、旧fieldの意味が新しいどの入力・変換・計画へ移ったかを確認するためのもの。固定旧revisionは `c34c0aeefdd966d854371b3110db00a47798751d`。P5確定 `13cd313`、P6 source `1086f6a` とP7の各feature commitを参照する。後続commitの採用・最終試験より前に正本台帳を一律verifiedへ変更しない。
+このレビューは、旧対応表のschemaを機能数として数えず、旧fieldの意味が新しいどの入力・変換・計画へ移ったかを確認するためのもの。固定旧revisionは `c34c0aeefdd966d854371b3110db00a47798751d`。P6確定 `a686172` とP7の各feature commitを参照する。最終統合試験の結果は [P7検証報告](compiler-p7.md) に記録する。
 
 ## 定義・名義・外部境界
 
@@ -28,7 +28,8 @@
 | `Function.name / params / ret / body / vars / stmts / seqs / labels` | 独自Functionと型別Arena。hintは可読性の補助で、ID/型/def-use・sequenceの制御を別に検証する | 未定義ID・非支配変数・sequence cycle・引数/結果不一致の拒否、C評価順・分岐・再帰 |
 | `Function.exported / external` | `pub`と独立した明示C rootとforeign binding。export_symbolは追加した明示C alias。外部exportはprivate externalへ呼ぶ通常wrapperへ変換 | P1/P7の公開名・衝突・entry・ISR・external wrapper |
 | `Function.constant` | source const identityを保持し、静的評価またはruntime cacheへ接続。型別instanceとcanonical familyは追加metadataで結ぶ | P2 const、P7 canonical root固定点・単一初期化・defect cache・自己参照retry |
-| `Function.fails / suspends / env` | 具体failure/frame ABIとclosure environment型。normalize後もcaptureの型をcatalogへ再対応する | P4 capture、P5 task/resume、P6 fork evidence/失敗/cleanup、P7 const family |
+| `Function.fails / suspends` | 具体failure/frame ABI。sourceのerror/effect集合から失敗・中断可能性を確定し、許可された中断callだけをframe graphへ渡す | P4 failure/effect row、P5 task/resume、P6 fork evidence/失敗/cleanup、同期callerのwait拒否 |
+| `Function.env` | 既成envを持つ入力は拒否。独立closure変換がlifted関数とClosureMetadataの環境ID・capture表を生成し、capture型をcatalogへ再対応する | P7入力契約の拒否、P4 capture所有権、独立IRのclosure/function試験 |
 | `Function.defects` | 旧のcached boolは入力として要求せず、reachable primitive/builtin/runtime/termを独立planが走査してRuntimeRequirements.defectsを算出する | P1 assertion/defect、P2数値変換、結果を捨てたdefect、P6 attemptのdefect即時停止 |
 
 `FnId / VarId / StmtId / SeqId / LabelId` はそれぞれ異なる `la_arena::Idx<T>`。欠落IDを別arenaの偶然同じ整数で代用しない。`VarData.hint / repr / ty`、`LabelData.hint`、`Repr` は独自contractで保持し、logical Unit値とC storageの有無を区別する。P6のUnit→Any/fork/Deferredがこの区別を実行で確認する。
@@ -45,5 +46,9 @@
 | `Suspend.saved / state`、`Stmt::Let.on_suspend / on_defect` | callerが保存変数/state/landingを指定する旧Heap入力は拒否。独自suspend変換・control/frame planが実際のlive値と中断位置を生成する | P5生存値・再帰frame・pool不足・typed task。P7残余入力拒否を別に確認 |
 | `RuntimeOp` | ShowString/DebugPrint/Retire/Hold/Unhold等のruntime意味と、旧Heap専用残余入力を区別する | 表示/retire/ISR制御のC観測、結果破棄ShowStringの容量defect、Heap専用6種のnative/suspend入力拒否 |
 | `FiberOp` | Scope/Join/Attempt/Interrupt/Await/Deferred/Causeのtyped操作を独立validatorとruntimeへ接続 | P6正常・失敗・取消・suspend cleanup・所有値、P7 source corpusで組合せを照合 |
+
+旧 `Term::Defect` の第2field（local landing）は新Termの入力に設けない。組み込みtargetのdefectはboard hookで即時停止し、cleanup unwindしない契約を維持する。`Stmt::Let.on_defect` が残る入力も拒否する。これは旧Stage selectorの廃止とは異なり、入力検査とdefectの実行証拠を持つschemaの対応として記録する。
+
+closure内の `Value::Fiber.on_fail` も、Callと同様にHandleのerror/bodyとBreakのlabelを収集・remapする。元arenaのIDをlift先へ残さず、sourceのState/Fiber/Deferred統合試験と、IDをずらした独立IRで制御辺の保存を確認する。
 
 このレビューだけではvariant/contextの実行成功を示さない。schema fieldを共用する場合も、正本の各record/contextには対応するsourceまたはIR試験・最終実行報告を残す。表現を廃止したStage/Heap入力の対象外判定を、source機能・所有権・cleanupの対象外判定へ広げない。
