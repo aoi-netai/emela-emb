@@ -290,7 +290,26 @@ impl Context<'_> {
         use ir::ExprKind as E;
         let mut analysis = Analysis::default();
         match &expression.kind {
-            E::Literal(_) | E::Local(_) => {}
+            E::Literal(_) | E::Local(_) | E::FnRef { .. } | E::Lambda { .. } => {}
+            E::Apply { callee, args, .. } => {
+                analysis.merge(self.expression(callee, dynamic)?);
+                for argument in args {
+                    analysis.merge(self.expression(argument, dynamic)?);
+                }
+                let ty = self.resolve(backend_type(callee.ty), callee.span)?;
+                if let Type::Fn(ft) = self.catalog.core.ty(ty).clone() {
+                    if let Some(sets) = ft.sets {
+                        if let Type::Set(errors) = self.catalog.core.ty(sets.errors).clone() {
+                            for error in errors.params {
+                                let error = self.resolve(error, expression.span)?;
+                                self.require_error(error, expression.span)?;
+                                analysis.errors.insert(error);
+                                analysis.constraints.insert(error);
+                            }
+                        }
+                    }
+                }
+            }
             E::Concat(args) | E::Tuple(args) | E::Make { args, .. } | E::Builtin { args, .. } => {
                 for arg in args {
                     analysis.merge(self.expression(arg, dynamic)?);

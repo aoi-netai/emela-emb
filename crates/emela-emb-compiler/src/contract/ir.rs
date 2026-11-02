@@ -635,6 +635,59 @@ impl std::fmt::Display for Repr {
 }
 
 impl Value {
+    pub(crate) fn for_each_var_mut(&mut self, mut f: impl FnMut(&mut VarId)) {
+        fn operands(values: &mut [Operand], f: &mut impl FnMut(&mut VarId)) {
+            for value in values {
+                if let Operand::Var(variable) = value {
+                    f(variable);
+                }
+            }
+        }
+        match self {
+            Value::Const(_) | Value::FnRef(_) => {}
+            Value::Prim { args, .. }
+            | Value::Builtin { args, .. }
+            | Value::Make { args, .. }
+            | Value::Tuple(args)
+            | Value::Fiber { args, .. }
+            | Value::Runtime { args, .. } => operands(args, &mut f),
+            Value::Call { callee, args, .. } => {
+                match callee {
+                    Callee::Direct(_) => {}
+                    Callee::Indirect(v) | Callee::Op { handler: v, .. } => f(v),
+                }
+                operands(args, &mut f);
+            }
+            Value::Field { base: v, .. }
+            | Value::Tag(v)
+            | Value::TupleGet { base: v, .. }
+            | Value::ListIsEmpty(v)
+            | Value::ListHead(v)
+            | Value::ListTail(v)
+            | Value::EvLookup { ev: v, .. }
+            | Value::IsError { error: v, .. }
+            | Value::AsError { error: v, .. }
+            | Value::Coerce(v)
+            | Value::EnvGet { env: v, .. } => f(v),
+            Value::List { elems, tail } => {
+                operands(elems, &mut f);
+                if let Some(Operand::Var(v)) = tail {
+                    f(v);
+                }
+            }
+            Value::Closure(c) => c.captures.iter_mut().for_each(f),
+            Value::MakeClosure { captures, .. } => captures.iter_mut().for_each(f),
+            Value::EvExtend { base, bindings } => {
+                if let Some(v) = base {
+                    f(v);
+                }
+                for (_, v) in bindings {
+                    f(v);
+                }
+            }
+            Value::Handler { ops, .. } => ops.iter_mut().for_each(f),
+        }
+    }
     pub fn for_each_var(&self, mut f: impl FnMut(VarId)) {
         let ops = |os: &[Operand], f: &mut dyn FnMut(VarId)| {
             for o in os {

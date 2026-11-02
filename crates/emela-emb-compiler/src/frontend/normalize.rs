@@ -152,6 +152,25 @@ impl Context<'_> {
         use ir::ExprKind as E;
         match &mut expression.kind {
             E::Literal(_) | E::Local(_) => {}
+            E::FnRef { type_arguments, .. } => {
+                for argument in type_arguments {
+                    let mut ty = frontend_type(*argument);
+                    self.ty(&mut ty, expression.span)?;
+                    *argument = backend_type(ty);
+                }
+            }
+            E::Lambda { params, body, .. } => {
+                for parameter in params {
+                    self.ty(&mut parameter.ty, expression.span)?;
+                }
+                self.block(body)?;
+            }
+            E::Apply { callee, args, .. } => {
+                self.expression(callee)?;
+                for argument in args {
+                    self.expression(argument)?;
+                }
+            }
             E::List { elements, tail } => {
                 for value in elements {
                     self.expression(value)?;

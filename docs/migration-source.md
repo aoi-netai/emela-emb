@@ -7,7 +7,7 @@
 ## 採用範囲と変更
 
 - `contract/`・`semantics/`・`compiler/plan/`・`compiler/emit/`・`writer.rs` とartifact manifestの純粋処理を採用。`compiler/`を`backend/`へ移動し内部pathを変更した。
-- upstream adapter、Core/Flowのcrate・入力API、boards・platform製品・CLI・BSPは採用しない。lowerはこのrepoが所有する型付きProgramを検証し、位置・到達性・自己末尾再帰のmetadataを構築する新実装。
+- upstream adapter、Core/Flowのcrate・入力API、boards・platform製品・CLI・BSPは採用しない。lowerはこのrepoが所有する型付きProgramを検証し、位置・到達性・自己末尾再帰のmetadataを構築する。P4のclosure変換は旧変換を独自contract IR上へ適応して採用する。
 - 明示的なC export名をFunctionに追加し、既存の公開symbolを維持する。Outputには既存API用の`c_source`/`header`を保持し、複数ファイルとexportsも返す。
 - Rust 1.85を維持するため、旧backendのlet-chainを同じpatternとguardを持つmatchへ置き換えた。Unicodeの`is_multiple_of`は剰余比較へ置き換えた。
 - 後続段階用のcontract variantが未使用のため、contract/semanticsでdead_codeを許容。未接続構造をlowerで拒否し、後段コードの採用をsource機能の完成として扱わない。
@@ -351,3 +351,14 @@
 | `crates/emela-core/lib/std/set.emel` | `535f00a6ad55adf2f5d619b6b116aa3d15e56b8102eba66d15c3d5093dc2298d` | `crates/emela-emb-compiler/lib/std/set.emel` |
 
 Map.from_list/keys/valuesとSet.from_listの内部callbackを、評価順と結果の順序を保つ直接再帰helperへ置き換える。公開update/fold/map_values/filterはcallback対応のP4で供給する。回転・削除・unionの木構造アルゴリズム、Eq/Showの順序、opaque境界は保持する。
+
+## P4のclosure変換基盤
+
+固定revision `c34c0aeefdd966d854371b3110db00a47798751d` の `crates/emela-codegen-emb/src/compiler/lower/closure.rs`（元SHA-256: `2a21204cc6929cffecc3800fd3663d1d6d25e42c6891a35463dcebb7110c3dda`）を `src/backend/lower/closure.rs` へ適応した。ライセンスは上記のApache-2.0に従う。
+
+- upstreamのModule/Core/Flow依存を独自contractのProgram・Function・Arenaへ置換し、bodyの変数・label・sequence再配置とcapture metadata構築をlower内で行う。
+- 到達性は明示exportと選択entryから計算し、rootが空の場合の全関数fallbackは持ち込まない。関数値とnested closureも到達辺として追跡する。
+- parameter・loop variable・複数定義のcaptureを静的定数へ置き換えず、実際の値を環境に保存する。動的String captureはowner付きsnapshotを維持する。
+- frontendのFnRef/Lambda/Apply、具体化、評価順とUnit消去は独自実装。IR/C試験では返却関数値、generic関数参照、返却closureのString所有・解放と不正IR拒否を確認する。source接続とeffect/handler対応は別の証拠で判定する。
+
+現段階ではconst内closureを明示的に拒否する。通常の関数値成功でこの範囲を完了扱いせず、P7の汎化constと型別bridgeへ残件として引き継ぐ。

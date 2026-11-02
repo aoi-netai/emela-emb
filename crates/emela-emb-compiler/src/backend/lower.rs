@@ -6,6 +6,7 @@ use crate::contract::lowered::LoweredModule;
 use crate::{Error, ErrorKind};
 use std::collections::{HashMap, HashSet};
 
+mod closure;
 mod const_eval;
 mod error_types;
 mod failures;
@@ -67,6 +68,7 @@ pub(crate) fn lower_program(
         }
         validate_function(&program, function)?;
     }
+    let (mut program, closures) = closure::lower(&program, options)?;
     let mut const_outcomes = HashMap::new();
     let mut runtime_consts = HashSet::new();
     for (id, function) in program.functions.iter() {
@@ -200,18 +202,24 @@ pub(crate) fn lower_program(
             .iter()
             .filter(|(id, _)| function.active_statements.contains(id))
         {
-            if let Stmt::Let { value, .. } = stmt {
-                match value {
-                    Value::Call { callee: Callee::Direct(id), .. } | Value::FnRef(id) => pending.push(*id),
-                    _ => {}
-                }
+            if let Stmt::Let {
+                value:
+                    Value::Call {
+                        callee: Callee::Direct(id),
+                        ..
+                    }
+                    | Value::FnRef(id),
+                ..
+            } = stmt
+            {
+                pending.push(*id);
             }
         }
     }
     Ok(LoweredModule {
         lowered: program,
         suspensions: HashMap::new(),
-        closures: Default::default(),
+        closures,
         const_groups: vec![],
         runtime_consts,
         deferred_pool: false,
@@ -372,6 +380,32 @@ fn validate_sequence(
                 ..
             } => {
                 let result = value_type(program, f, value, &available, dst_type)?;
+                if let Value::Closure(closure) = value {
+                    let Type::Fn(ft) = program.core.ty(result) else {
+                        unreachable!("closure type was validated")
+                    };
+                    let mut nested = f.clone();
+                    nested.params = closure.params.clone();
+                    nested.ret = ft.ret;
+                    nested.fails = ft.fails;
+                    nested.suspends = ft.suspends;
+                    let parameters = closure
+                        .params
+                        .iter()
+                        .chain(&closure.captures)
+                        .copied()
+                        .collect();
+                    validate_sequence(
+                        program,
+                        &nested,
+                        closure.body,
+                        &parameters,
+                        visiting,
+                        None,
+                        &closure.params,
+                        &HashMap::new(),
+                    )?;
+                }
                 if let Value::Call {
                     on_fail: Some(edge),
                     ..

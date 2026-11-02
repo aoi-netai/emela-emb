@@ -471,6 +471,44 @@ impl Specializer {
         expression.ty = self.ty(function, expression.ty, arguments, expression.span)?;
         match &mut expression.kind {
             ir::ExprKind::Literal(_) | ir::ExprKind::Local(_) => {}
+            ir::ExprKind::FnRef {
+                target,
+                type_arguments,
+            } => {
+                let concrete = type_arguments
+                    .iter()
+                    .map(|&ty| {
+                        self.substitute(
+                            function,
+                            ty,
+                            arguments,
+                            expression.span,
+                            &mut HashMap::new(),
+                            &mut HashSet::new(),
+                            0,
+                        )
+                    })
+                    .collect::<Result<Vec<_>>>()?;
+                *target = self.instantiate(function, *target, concrete, expression.span, depth)?;
+                type_arguments.clear();
+            }
+            ir::ExprKind::Lambda { params, body, .. } => {
+                for parameter in params {
+                    parameter.ty = self.ty(function, parameter.ty, arguments, expression.span)?;
+                }
+                self.block(function, body, arguments, depth)?;
+            }
+            ir::ExprKind::Apply {
+                callee,
+                args,
+                order,
+            } => {
+                Self::order(function, expression.span, order, args.len())?;
+                self.expression(function, callee, arguments, depth)?;
+                for argument in args {
+                    self.expression(function, argument, arguments, depth)?;
+                }
+            }
             ir::ExprKind::List { elements, tail } => {
                 for value in elements {
                     self.expression(function, value, arguments, depth)?;

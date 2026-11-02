@@ -264,7 +264,10 @@ pub(super) fn validate_type(program: &Program, function: &str, ty: TypeId) -> Re
             }
             Type::Fn(ft) => {
                 if ft.suspends || ft.sets.is_some() {
-                    return Err(unsupported(function, "unresolved or suspending function value"));
+                    return Err(unsupported(
+                        function,
+                        "unresolved or suspending function value",
+                    ));
                 }
                 for &child in ft.params.iter().chain([&ft.ret]) {
                     visit(program, function, child, seen, active, indirections + 1)?;

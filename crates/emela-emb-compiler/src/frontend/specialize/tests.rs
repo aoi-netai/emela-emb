@@ -1913,3 +1913,76 @@ fn dbg_of_a_diverging_expression_does_not_require_or_evaluate_show() {
 
 #[path = "tests_generic_methods.rs"]
 mod generic_methods;
+
+#[test]
+fn generic_function_references_inside_a_lambda_lower_to_indirect_calls() {
+    let mut core = b::Definitions::default();
+    let parameter = core.types.intern(b::Type::Param(0));
+    let function_type = core.types.intern(b::Type::Fn(b::FnType {
+        params: vec![b::TypeId::INT],
+        ret: b::TypeId::INT,
+        fails: false,
+        suspends: false,
+        ev: false,
+        sets: None,
+    }));
+    let lambda_type = core.types.intern(b::Type::Fn(b::FnType {
+        params: vec![],
+        ret: b::TypeId::INT,
+        fails: false,
+        suspends: false,
+        ev: false,
+        sets: None,
+    }));
+    let value = local(0, frontend_type(parameter));
+    let mut identity = function(
+        0,
+        "identity",
+        vec![value.clone()],
+        value.ty,
+        expression(ir::ExprKind::Local(value.id), value.ty),
+    );
+    identity.type_parameters = 1;
+    let reference = expression(
+        ir::ExprKind::FnRef {
+            target: identity.id,
+            type_arguments: vec![b::TypeId::INT],
+        },
+        frontend_type(function_type),
+    );
+    let apply = expression(
+        ir::ExprKind::Apply {
+            callee: Box::new(reference),
+            args: vec![integer(42)],
+            order: vec![0],
+        },
+        ValueType::Int,
+    );
+    let lambda = expression(
+        ir::ExprKind::Lambda {
+            params: vec![],
+            captures: vec![],
+            body: block(apply),
+        },
+        frontend_type(lambda_type),
+    );
+    let answer = exported(function(
+        1,
+        "answer",
+        vec![],
+        ValueType::Int,
+        expression(
+            ir::ExprKind::Apply {
+                callee: Box::new(lambda),
+                args: vec![],
+                order: vec![],
+            },
+            ValueType::Int,
+        ),
+    ));
+    execute(ir::Program {
+        core,
+        registry: Default::default(),
+        functions: vec![identity, answer],
+    });
+}

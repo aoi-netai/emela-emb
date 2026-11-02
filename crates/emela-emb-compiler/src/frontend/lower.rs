@@ -75,6 +75,7 @@ pub(crate) fn lower(input: &ir::Program) -> b::Program {
             raises: &raises,
             structural_equality: &structural_equality,
             escape: None,
+            closure_depth: 0,
         };
         for param in &function.params {
             if param.ty == Ty::Unit {
@@ -113,6 +114,7 @@ struct Context<'a> {
     raises: &'a HashMap<b::TypeId, b::FnId>,
     structural_equality: &'a HashMap<b::TypeId, b::FnId>,
     escape: Option<(b::VarId, b::SeqId)>,
+    closure_depth: usize,
 }
 impl Context<'_> {
     fn var(&mut self, name: &str, value_type: Ty) -> b::VarId {
@@ -225,6 +227,87 @@ impl Context<'_> {
     ) -> Option<b::Operand> {
         use ir::ExprKind as E;
         match &expression.kind {
+            E::FnRef { target, .. } => {
+                self.value(builder, b::Value::FnRef(self.ids[target]), expression.ty)
+            }
+            E::Lambda {
+                params,
+                captures,
+                body,
+            } => {
+                let captured: Vec<_> = captures
+                    .iter()
+                    .filter_map(|id| match self.locals.get(id).expect("checked capture") {
+                        b::Operand::Var(var) => Some(*var),
+                        b::Operand::Const(_) => None,
+                    })
+                    .collect();
+                let saved_locals = self.locals.clone();
+                let saved_escape = self.escape.take();
+                self.closure_depth += 1;
+                let mut parameters = Vec::new();
+                for parameter in params {
+                    let value = if parameter.ty == Ty::Unit {
+                        b::Operand::Const(b::Const::Unit)
+                    } else {
+                        let var = self.var(&parameter.name, parameter.ty);
+                        parameters.push(var);
+                        b::Operand::Var(var)
+                    };
+                    self.locals.insert(parameter.id, value);
+                }
+                let body = self.block(body, true);
+                self.closure_depth -= 1;
+                self.locals = saved_locals;
+                self.escape = saved_escape;
+                let b::Type::Fn(ft) = self.core.ty(ty(expression.ty)) else {
+                    unreachable!("checked lambda type")
+                };
+                self.value(
+                    builder,
+                    b::Value::Closure(Box::new(b::Closure {
+                        params: parameters,
+                        captures: captured,
+                        body,
+                        suspends: ft.suspends,
+                    })),
+                    expression.ty,
+                )
+            }
+            E::Apply {
+                callee,
+                args,
+                order,
+            } => {
+                let b::Operand::Var(target) = self.expression(builder, callee, false)? else {
+                    unreachable!("function value is a variable")
+                };
+                let mut evaluated = Vec::new();
+                for argument in args {
+                    let value = self.expression(builder, argument, false);
+                    if builder.term.is_some() {
+                        return None;
+                    }
+                    evaluated.push(value.unwrap_or(b::Operand::Const(b::Const::Unit)));
+                }
+                let b::Type::Fn(ft) = self.core.ty(ty(callee.ty)) else {
+                    unreachable!("checked callable type")
+                };
+                self.value(
+                    builder,
+                    b::Value::Call {
+                        callee: b::Callee::Indirect(target),
+                        args: order
+                            .iter()
+                            .filter(|&&index| args[index].ty != Ty::Unit)
+                            .map(|&index| evaluated[index].clone())
+                            .collect(),
+                        suspends: ft.suspends,
+                        on_fail: ft.fails.then(|| self.failure_edge()),
+                    },
+                    expression.ty,
+                )
+            }
             E::Fail(value) => {
                 let error = self.expression(builder, value, false);
                 if builder.term.is_some() {
@@ -529,6 +612,7 @@ impl Context<'_> {
                     && *target == self.current
                     && !self.function.constant
                     && self.escape.is_none()
+                    && self.closure_depth == 0
                 {
                     builder.term = Some(b::Term::Recur(operands));
                     return None;

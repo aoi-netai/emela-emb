@@ -8,6 +8,14 @@ pub(super) fn allocate_raises(
     fn collect(expression: &ir::Expr, types: &mut std::collections::HashSet<b::TypeId>) {
         use ir::ExprKind as E;
         match &expression.kind {
+            E::FnRef { .. } => {}
+            E::Lambda { body, .. } => block(body, types),
+            E::Apply { callee, args, .. } => {
+                collect(callee, types);
+                for argument in args {
+                    collect(argument, types);
+                }
+            }
             E::List { elements, tail } => {
                 for element in elements {
                     collect(element, types);

@@ -201,6 +201,26 @@ fn maximum_local(function: &ir::Function) -> Option<usize> {
         use ir::ExprKind as E;
         match &value.kind {
             E::Local(id) => record(*id, maximum),
+            E::FnRef { .. } => {}
+            E::Lambda {
+                params,
+                captures,
+                body,
+            } => {
+                for parameter in params {
+                    record(parameter.id, maximum);
+                }
+                for capture in captures {
+                    record(*capture, maximum);
+                }
+                block(body, maximum);
+            }
+            E::Apply { callee, args, .. } => {
+                expression(callee, maximum);
+                for argument in args {
+                    expression(argument, maximum);
+                }
+            }
             E::List { elements, tail } => {
                 for value in elements {
                     expression(value, maximum);

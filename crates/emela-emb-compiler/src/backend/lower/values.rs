@@ -9,33 +9,114 @@ pub(super) fn value_type(
 ) -> Result<TypeId> {
     match value {
         Value::Const(value) => operand(f, &Operand::Const(value.clone()), available),
-        Value::FnRef(id) => {
-            let target = program.functions.iter().find_map(|(key, value)| (key == *id).then_some(value))
-                .ok_or_else(|| invalid(&f.name, "function reference ID is out of bounds"))?;
-            let Some(expected) = expected else { return Ok(TypeId::UNIT) };
-            let Type::Fn(ft) = program.core.ty(expected) else {
-                return Err(invalid(&f.name, "function reference destination is not a function value"));
+        Value::Closure(closure) => {
+            let ty = expected
+                .ok_or_else(|| invalid(&f.name, "closure needs a concrete function destination"))?;
+            let Type::Fn(ft) = program.core.ty(ty) else {
+                return Err(invalid(
+                    &f.name,
+                    "closure destination is not a function value",
+                ));
             };
             let mut params = function_parameters(ft);
-            if ft.ev { params.push(TypeId::EVIDENCE); }
-            if target.params.iter().map(|&p| variable(target, p)).collect::<Result<Vec<_>>>()? != params
-                || target.ret != ft.ret || target.fails != ft.fails || target.suspends != ft.suspends
+            if ft.ev {
+                params.push(TypeId::EVIDENCE);
+            }
+            if closure
+                .params
+                .iter()
+                .map(|&p| variable(f, p))
+                .collect::<Result<Vec<_>>>()?
+                != params
+                || closure.suspends != ft.suspends
             {
-                return Err(invalid(&f.name, "function reference type differs from its target ABI"));
+                return Err(invalid(
+                    &f.name,
+                    "closure parameters differ from its function type",
+                ));
+            }
+            let mut bindings = HashSet::new();
+            for &param in &closure.params {
+                if !bindings.insert(param) {
+                    return Err(invalid(&f.name, "closure has a duplicate parameter"));
+                }
+            }
+            for &capture in &closure.captures {
+                operand(f, &Operand::Var(capture), available)?;
+                if !bindings.insert(capture) {
+                    return Err(invalid(
+                        &f.name,
+                        "closure has a duplicate or parameter capture",
+                    ));
+                }
+            }
+            Ok(ty)
+        }
+        Value::FnRef(id) => {
+            let target = program
+                .functions
+                .iter()
+                .find_map(|(key, value)| (key == *id).then_some(value))
+                .ok_or_else(|| invalid(&f.name, "function reference ID is out of bounds"))?;
+            let Some(expected) = expected else {
+                return Ok(TypeId::UNIT);
+            };
+            let Type::Fn(ft) = program.core.ty(expected) else {
+                return Err(invalid(
+                    &f.name,
+                    "function reference destination is not a function value",
+                ));
+            };
+            let mut params = function_parameters(ft);
+            if ft.ev {
+                params.push(TypeId::EVIDENCE);
+            }
+            if target
+                .params
+                .iter()
+                .map(|&p| variable(target, p))
+                .collect::<Result<Vec<_>>>()?
+                != params
+                || target.ret != ft.ret
+                || target.fails != ft.fails
+                || target.suspends != ft.suspends
+            {
+                return Err(invalid(
+                    &f.name,
+                    "function reference type differs from its target ABI",
+                ));
             }
             Ok(expected)
         }
-        Value::Call { callee: Callee::Indirect(callee), args, suspends, on_fail } => {
+        Value::Call {
+            callee: Callee::Indirect(callee),
+            args,
+            suspends,
+            on_fail,
+        } => {
             let ty = operand(f, &Operand::Var(*callee), available)?;
             let Type::Fn(ft) = program.core.ty(ty) else {
-                return Err(invalid(&f.name, "indirect call target is not a function value"));
+                return Err(invalid(
+                    &f.name,
+                    "indirect call target is not a function value",
+                ));
             };
             if ft.fails != on_fail.is_some() || ft.suspends != *suspends {
-                return Err(invalid(&f.name, "indirect call channels differ from its function type"));
+                return Err(invalid(
+                    &f.name,
+                    "indirect call channels differ from its function type",
+                ));
             }
             let mut params = function_parameters(ft);
-            if ft.ev { params.push(TypeId::EVIDENCE); }
-            if args.len() != params.len() { return Err(invalid(&f.name, "indirect call argument count differs from its function type")); }
+            if ft.ev {
+                params.push(TypeId::EVIDENCE);
+            }
+            if args.len() != params.len() {
+                return Err(invalid(
+                    &f.name,
+                    "indirect call argument count differs from its function type",
+                ));
+            }
             for (argument, expected) in args.iter().zip(params) {
                 expect_type(f, operand(f, argument, available)?, expected)?;
             }
@@ -306,7 +387,11 @@ pub(super) fn value_type(
 }
 
 fn function_parameters(ft: &FnType) -> Vec<TypeId> {
-    ft.params.iter().copied().filter(|ty| !matches!(*ty, TypeId::UNIT | TypeId::NEVER)).collect()
+    ft.params
+        .iter()
+        .copied()
+        .filter(|ty| !matches!(*ty, TypeId::UNIT | TypeId::NEVER))
+        .collect()
 }
 
 fn arguments(

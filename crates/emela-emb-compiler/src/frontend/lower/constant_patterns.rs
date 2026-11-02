@@ -29,6 +29,14 @@ pub(super) fn allocate_structural_equality(
     fn expression(value: &ir::Expr, types: &mut HashSet<b::TypeId>) {
         use ir::ExprKind as E;
         match &value.kind {
+            E::FnRef { .. } => {}
+            E::Lambda { body, .. } => block(body, types),
+            E::Apply { callee, args, .. } => {
+                expression(callee, types);
+                for argument in args {
+                    expression(argument, types);
+                }
+            }
             E::List { elements, tail } => {
                 for element in elements {
                     expression(element, types);

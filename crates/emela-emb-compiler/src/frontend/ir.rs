@@ -99,6 +99,20 @@ pub(crate) enum ExprKind {
         index: usize,
     },
     Local(LocalId),
+    FnRef {
+        target: DefinitionId,
+        type_arguments: Vec<crate::contract::ir::TypeId>,
+    },
+    Lambda {
+        params: Vec<Local>,
+        captures: Vec<LocalId>,
+        body: Block,
+    },
+    Apply {
+        callee: Box<Expr>,
+        args: Vec<Expr>,
+        order: Vec<usize>,
+    },
     Unary {
         op: Unary,
         value: Box<Expr>,
