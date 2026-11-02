@@ -5,6 +5,61 @@ mod deferred;
 #[path = "fiber_scope_tests.rs"]
 mod scope_abi;
 
+#[test]
+fn raw_interrupt_masks_are_unit_operations_and_are_rejected_from_isr_entries() {
+    let mut f = simple();
+    let hold = binding(
+        &mut f,
+        None,
+        Value::Runtime {
+            op: RuntimeOp::Hold,
+            args: vec![],
+        },
+    );
+    let unhold = binding(
+        &mut f,
+        None,
+        Value::Runtime {
+            op: RuntimeOp::Unhold,
+            args: vec![],
+        },
+    );
+    f.seqs[f.body.unwrap()].stmts = vec![hold, unhold];
+    let p = program(vec![f]);
+    let options = Options::default();
+    let output = crate::backend::compile_program(p.clone(), &options).unwrap();
+    execute(&output, DEFECT_HARNESS, 0);
+    assert!(!output.c_source.contains("emela_frame_storage"));
+    let errors =
+        crate::backend::compile_program(p.clone(), &options.with_isr_entry("answer")).unwrap_err();
+    assert!(errors.iter().any(|error| {
+        error
+            .message
+            .contains("fiber interrupt control reachable from ISR entry")
+    }));
+    for destination in [false, true] {
+        let mut invalid = p.clone();
+        let function = invalid.functions.iter_mut().next().unwrap().1;
+        let dst = destination.then(|| variable(function, TypeId::UNIT));
+        if let Stmt::Let {
+            dst: target,
+            value: Value::Runtime { args, .. },
+            ..
+        } = &mut function.stmts[hold]
+        {
+            *target = dst;
+            if !destination {
+                args.push(Const::Unit.into());
+            }
+        }
+        assert!(lower_program(invalid).unwrap_err().iter().any(|error| {
+            error
+                .message
+                .contains("Hold/Unhold require no arguments or destination")
+        }));
+    }
+}
+
 fn function_type(p: &mut Program, params: Vec<TypeId>, ret: TypeId, fails: bool) -> TypeId {
     p.core.types.intern(Type::Fn(FnType {
         params,

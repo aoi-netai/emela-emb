@@ -548,6 +548,18 @@ pub(super) fn value_type(
             Ok(TypeId::UNIT)
         }
         Value::Runtime {
+            op: RuntimeOp::Hold | RuntimeOp::Unhold,
+            args,
+        } => {
+            if expected.is_some() || !args.is_empty() {
+                return Err(invalid(
+                    &f.name,
+                    "Hold/Unhold require no arguments or destination",
+                ));
+            }
+            Ok(TypeId::UNIT)
+        }
+        Value::Runtime {
             op: RuntimeOp::Retire,
             args,
         } => {
