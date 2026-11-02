@@ -128,6 +128,74 @@ impl Context<'_> {
         self.evidence = saved;
         result
     }
+    pub(super) fn with_expression(
+        &mut self,
+        builder: &mut Builder,
+        bindings: &[ir::WithBinding],
+        body: &ir::Block,
+        result: Ty,
+    ) -> Option<b::Operand> {
+        let Some((error, handler)) = self.escape else {
+            return self.with_bindings(builder, bindings, body, result);
+        };
+        if !bindings
+            .iter()
+            .any(|binding| binding.cleanup.is_some() || binding.retire.is_some())
+        {
+            return self.with_bindings(builder, bindings, body, result);
+        }
+        // Leave every acquired capability before entering an enclosing escape arm. A
+        // per-call Handle edge would otherwise execute that arm inside this Protect.
+        let failed = self.function.labels.alloc(b::LabelData {
+            hint: "with_failed".into(),
+        });
+        let success = self.function.labels.alloc(b::LabelData {
+            hint: "with_result".into(),
+        });
+        let landing = self.function.seqs.alloc(b::Seq {
+            stmts: vec![],
+            term: b::Term::Break {
+                label: failed,
+                value: Some(error.into()),
+            },
+        });
+        self.escape = Some((error, landing));
+        let mut protected = Builder {
+            statements: vec![],
+            term: None,
+        };
+        let value = self.with_bindings(&mut protected, bindings, body, result);
+        self.escape = Some((error, handler));
+        let protected = self.function.seqs.alloc(b::Seq {
+            stmts: protected.statements,
+            term: protected.term.unwrap_or(b::Term::Break {
+                label: success,
+                value,
+            }),
+        });
+        let failure = self.function.stmts.alloc(b::Stmt::Block {
+            dst: Some(error),
+            label: failed,
+            body: protected,
+        });
+        let mut after_cleanup = self.function.seqs[handler].clone();
+        after_cleanup.stmts.insert(0, failure);
+        let body = self.function.seqs.alloc(after_cleanup);
+        let dst = (!matches!(result, Ty::Unit | Ty::Never))
+            .then(|| self.var("with_escaped_result", result));
+        self.statement(
+            builder,
+            b::Stmt::Block {
+                dst,
+                label: success,
+                body,
+            },
+        );
+        if result == Ty::Never {
+            builder.term = Some(b::Term::Unreachable);
+        }
+        dst.map(b::Operand::Var)
+    }
     pub(super) fn with_bindings(
         &mut self,
         builder: &mut Builder,

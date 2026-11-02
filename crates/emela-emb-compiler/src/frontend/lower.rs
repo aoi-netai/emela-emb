@@ -258,7 +258,7 @@ impl Context<'_> {
             } => self.handler_value(builder, name, *effect, operations, expression.ty),
             E::Provide { bindings, body } => self.provide(builder, bindings, body, tail),
             E::With { bindings, body } => {
-                self.with_bindings(builder, bindings, body, expression.ty)
+                self.with_expression(builder, bindings, body, expression.ty)
             }
             E::Coerce(value) => {
                 let operand = self.expression(builder, value, false)?;
