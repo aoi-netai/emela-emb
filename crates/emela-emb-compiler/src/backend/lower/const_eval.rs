@@ -3,8 +3,8 @@ use std::collections::HashMap;
 
 use crate::contract::ir::Builtin;
 use crate::contract::ir::{
-    Callee, Const, FnId, Function, Operand, PrimOp, PrimTy, Program as Module, Stmt, Term, Value,
-    VarId,
+    Callee, CaseKey, Const, EnumId, FnId, Function, Operand, PrimOp, PrimTy, Program as Module,
+    Stmt, SwitchOn, Term, Type, Value, VarId,
 };
 
 use crate::semantics::unicode_grapheme::grapheme_count;
@@ -80,61 +80,183 @@ fn evaluate_body(
     active: &mut Vec<FnId>,
     fuel: &mut usize,
 ) -> Result<Outcome, &'static str> {
-    let sequence = &function.seqs[body];
-    let mut values = HashMap::new();
-    for (&param, value) in function.params.iter().zip(arguments) {
-        values.insert(param, value);
+    let mut values = function.params.iter().copied().zip(arguments).collect();
+    match evaluate_sequence(module, function, body, &mut values, active, fuel, 0)? {
+        Control::Return(outcome) => Ok(outcome),
+        Control::Yield(_) => Err("const function body yields instead of returning"),
     }
+}
 
+enum Control {
+    Yield(Const),
+    Return(Outcome),
+}
+fn evaluate_sequence(
+    module: &Module,
+    function: &Function,
+    body: crate::contract::ir::SeqId,
+    values: &mut HashMap<VarId, Const>,
+    active: &mut Vec<FnId>,
+    fuel: &mut usize,
+    depth: usize,
+) -> Result<Control, &'static str> {
+    if *fuel == 0 || depth >= 128 {
+        return Err("static const control-flow evaluation budget exhausted");
+    }
+    *fuel -= 1;
+    let sequence = &function.seqs[body];
     for &statement_id in &sequence.stmts {
-        let Stmt::Let {
-            dst,
-            value,
-            on_defect: None,
-            on_suspend: None,
-        } = &function.stmts[statement_id]
-        else {
-            return Err("const body contains unsupported control flow");
-        };
-
         if *fuel == 0 {
             return Err("static const evaluation budget exhausted");
         }
         *fuel -= 1;
-        match evaluate_value(module, value, &values, active, fuel)? {
-            Outcome::Value(value) => {
-                if let Some(dst) = dst {
-                    values.insert(*dst, value);
+        let (dst, outcome) = match &function.stmts[statement_id] {
+            Stmt::Let {
+                dst,
+                value,
+                on_defect: None,
+                on_suspend: None,
+            } => (
+                *dst,
+                evaluate_value(module, function, value, values, active, fuel)?,
+            ),
+            Stmt::If {
+                dst,
+                cond,
+                then,
+                else_,
+            } => {
+                let Const::Bool(condition) = operand_value(cond, values)? else {
+                    return Err("const If condition is not Bool");
+                };
+                let branch = if condition { *then } else { *else_ };
+                match evaluate_sequence(module, function, branch, values, active, fuel, depth + 1)?
+                {
+                    Control::Yield(value) => (*dst, Outcome::Value(value)),
+                    control => return Ok(control),
                 }
             }
-            outcome => return Ok(outcome),
+            Stmt::Switch {
+                dst,
+                on,
+                cases,
+                default,
+            } => {
+                let key = match on {
+                    SwitchOn::Tag(base) => {
+                        CaseKey::Variant(unit_enum_tag(module, function, *base, values)?)
+                    }
+                    SwitchOn::Lit(base) => {
+                        CaseKey::Lit(operand_value(&Operand::Var(*base), values)?)
+                    }
+                };
+                let branch = cases
+                    .iter()
+                    .find(|case| case.key == key)
+                    .map(|case| case.body)
+                    .or(*default)
+                    .ok_or("const Switch has no matching case")?;
+                match evaluate_sequence(module, function, branch, values, active, fuel, depth + 1)?
+                {
+                    Control::Yield(value) => (*dst, Outcome::Value(value)),
+                    control => return Ok(control),
+                }
+            }
+            _ => return Err("const body contains unsupported control flow"),
+        };
+        match outcome {
+            Outcome::Value(value) => {
+                if let Some(dst) = dst {
+                    values.insert(dst, value);
+                }
+            }
+            outcome => return Ok(Control::Return(outcome)),
         }
     }
-
-    match &sequence.term {
-        Term::Return(None) => Ok(Outcome::Value(Const::Unit)),
-        Term::Return(Some(operand)) => Ok(Outcome::Value(operand_value(operand, &values)?)),
+    Ok(match &sequence.term {
+        Term::Return(value) => Control::Return(Outcome::Value(
+            value
+                .as_ref()
+                .map(|value| operand_value(value, values))
+                .transpose()?
+                .unwrap_or(Const::Unit),
+        )),
+        Term::Yield(value) => Control::Yield(
+            value
+                .as_ref()
+                .map(|value| operand_value(value, values))
+                .transpose()?
+                .unwrap_or(Const::Unit),
+        ),
         Term::Defect(operand) => {
-            let Const::String(message) = operand_value(operand, &values)? else {
+            let Const::String(message) = operand_value(operand, values)? else {
                 return Err("const defect message is not a String");
             };
-            Ok(Outcome::Defect {
+            Control::Return(Outcome::Defect {
                 kind: defect_kind(&message),
                 message,
             })
         }
-        _ => Err("const body has an unsupported terminator"),
+        _ => return Err("const body has an unsupported terminator"),
+    })
+}
+
+fn unit_enum(module: &Module, id: EnumId) -> bool {
+    // The existing backend ABI represents only this closed, payload-free shape
+    // as an i32. Other enum values keep their normal runtime const path.
+    let enumeration = &module.core.enums[id];
+    !enumeration.error
+        && !enumeration.external
+        && !enumeration.variants.is_empty()
+        && enumeration
+            .variants
+            .iter()
+            .all(|variant| variant.tys.is_empty())
+}
+fn unit_enum_tag(
+    module: &Module,
+    function: &Function,
+    base: VarId,
+    values: &HashMap<VarId, Const>,
+) -> Result<usize, &'static str> {
+    let Type::Enum(id, _) = module.core.ty(function.vars[base].ty) else {
+        return Err("const Tag operand is not an enum");
+    };
+    if !unit_enum(module, *id) {
+        return Err("const Tag enum is not represented by a scalar tag");
     }
+    let Const::Int(tag) = operand_value(&Operand::Var(base), values)? else {
+        return Err("const Tag operand has no scalar tag");
+    };
+    usize::try_from(tag)
+        .ok()
+        .filter(|tag| *tag < module.core.enums[*id].variants.len())
+        .ok_or("const Tag value is not an enum variant")
 }
 
 fn evaluate_value(
     module: &Module,
+    function: &Function,
     value: &Value,
     values: &HashMap<VarId, Const>,
     active: &mut Vec<FnId>,
     fuel: &mut usize,
 ) -> Result<Outcome, &'static str> {
     match value {
+        Value::Make { ctor, args } if args.is_empty() && unit_enum(module, ctor.enum_id) => {
+            if ctor.variant >= module.core.enums[ctor.enum_id].variants.len() {
+                return Err("const constructor variant is invalid");
+            }
+            let tag =
+                i32::try_from(ctor.variant).map_err(|_| "const enum tag exceeds Int range")?;
+            Ok(Outcome::Value(Const::Int(tag)))
+        }
+        Value::Tag(base) => {
+            let tag = unit_enum_tag(module, function, *base, values)?;
+            Ok(Outcome::Value(Const::Int(
+                i32::try_from(tag).map_err(|_| "const enum tag exceeds Int range")?,
+            )))
+        }
         Value::Const(value) => Ok(Outcome::Value(value.clone())),
         Value::Prim { op, ty, args } => {
             let args = args

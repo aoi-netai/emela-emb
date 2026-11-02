@@ -72,3 +72,55 @@ fn const_values_have_value_syntax_and_positioned_diagnostics() {
         assert_eq!(errors[0].source.as_deref(), Some("main.emel"));
     }
 }
+
+#[test]
+fn constant_string_ordering_and_conditional_enum_tags_fold_statically() {
+    let pairs = [
+        ("", ""),
+        ("a", "ab"),
+        ("b", "a"),
+        ("é", "z"),
+        ("a\0b", "a\0c"),
+    ];
+    let mut source = String::new();
+    let mut checks = String::new();
+    for (pair, (left, right)) in pairs.into_iter().enumerate() {
+        let quote = |value: &str| format!("{:?}", value).replace("\\0", "\\u{0}");
+        for (operator, op) in ["==", "!=", "<", "<=", ">", ">="].into_iter().enumerate() {
+            let expected = match op {
+                "==" => left == right,
+                "!=" => left != right,
+                "<" => left < right,
+                "<=" => left <= right,
+                ">" => left > right,
+                _ => left >= right,
+            };
+            source.push_str(&format!(
+                "const C{pair}_{operator} = {} {op} {}\n",
+                quote(left),
+                quote(right)
+            ));
+            checks.push_str(&format!(
+                "assert C{pair}_{operator} == {}\n",
+                if expected { "True" } else { "False" }
+            ));
+        }
+    }
+    source.push_str("const ORDER = if False { Less } else { Greater }\n@export(c, \"constant_comparisons\")\npub fn result() -> Int {\n");
+    source.push_str(&checks);
+    source.push_str("assert ORDER == Greater\n42\n}\n");
+    let output = compile(&source).unwrap();
+    assert!(!output.c_source.contains("emela_emb_string_compare("));
+    assert!(!output.c_source.contains("emela_runtime_const_"));
+    support::compile_and_run(
+        &output,
+        r#"
+#include <assert.h>
+#include <stdlib.h>
+#include "emela_embedded.h"
+#include "emela_board.h"
+_Noreturn void emela_board_defect(EmelaDefectKind kind,const char *message,uint16_t length) { (void)kind;(void)message;(void)length;abort(); }
+int main(void) { assert(constant_comparisons()==42); return 0; }
+"#,
+    );
+}
