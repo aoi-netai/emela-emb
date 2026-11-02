@@ -130,7 +130,17 @@ P1時点の`fn f() { f() }`拒否は、戻り型の自動汎化に伴って更�
 
 `tests/p2_debug.rs` の追加回帰は、todoの `TODO` kind/`not yet implemented` と動的panicの `PANIC` kind/整形messageをC hookで比較し、停止後のexternalを呼ばないことを両最適化で確認した。
 
-generic trait methodのIR具体化は `ccd0615` で検証済みで、source収集・型検査への接続を確認中。旧`release_0_24/traits.emel`のList/closure/Fiber/Causeを含む元fixture全体の実行はP6以降に残す。同期部分の成功だけで旧混在fixture・旧115関連試験・横断要件全体をverifiedにしない。
+generic trait methodのIR具体化は `ccd0615`、source収集・型検査への接続は `39f21d9` で検証した。`tests/p2_generic_methods.rs` はimplの型引数とmethod固有の型引数の順序、defaultからのgeneric呼出し、methodのbound、generic errorのfails/escapeをsource/Cへ通す。`4689729` は戻り値だけに現れるSelfを後続の利用から推論してからtraitを解決し、最後まで決まらないSelfは拒否する。constructorの入れ子の期待型は `a34aaa0` / `78be1b6` でsolverへ渡す。
+
+`46897293793f6002a9c4c7aa0707352499706a3c` の統合確認:
+
+- `cargo test --workspace --locked --offline`: 196 pass、失敗/skip 0、終了0。全C試験は`-O0`/`-O2`とも成功。
+- `cargo fmt --all --check`、`cargo clippy --workspace --all-targets --locked --offline -- -D warnings`、実Rust 1.85.0での`cargo check --workspace --all-targets --locked --offline`: すべて終了0。
+- 独立環境では当該revisionをgit archiveし、lock済みの第三者依存だけをvendor化した一時snapshotを使用。Linux Landlockで元workspaceの読取りを禁止し、clean CARGO_HOMEでworkspace build/test、CLI生成、生成Cの両最適化実行が成功。metadataの全packageはsnapshot内にあり、Emela packageはこのrepoの2 crateだけである。元workspaceへのアクセス拒否も実際に確認した。
+
+最後の旧正常入力照合で、failsを省略したgeneric関数からerror payloadの型引数をescapeへ推論する経路に未対応を発見した。明示fails版は通るが、省略版も対象であるためP2の残件として修正中。独立環境の成功だけではP2完了としない。
+
+旧`release_0_24/traits.emel`のList/closure/Fiber/Causeを含む元fixture全体の実行はP6以降に残す。同期部分の成功だけで旧混在fixture・旧115関連試験・横断要件全体をverifiedにしない。
 
 ## 最終統合の追記欄
 
