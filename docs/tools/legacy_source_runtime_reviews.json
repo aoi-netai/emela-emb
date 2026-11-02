@@ -216,18 +216,46 @@
     "frontend::unrelated_project_modules_under_embedded_remain_available": {
       "assessment": "old-frontend-only-observation",
       "observations": [
-        "resolve/typecheck accepts supplied Embedded.Local project module"
+        "Original Embedded.Local project module and main resolve/typecheck successfully, preserving both original filenames and bytes.",
+        "The new pipeline also generates C; the old observation is frontend success only."
       ],
-      "note": "The fixed old test calls check_sources and asserts diagnostics only. It has no C runtime expectation; check current module registration/typing rather than manufacture a runtime claim."
+      "note": "none; original fixture bytes and filenames unchanged",
+      "evidence_revision": "9292e9d",
+      "evidence": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p7_services.rs",
+          "symbol": "legacy_embedded_namespace_errors_and_unrelated_project_module_are_preserved"
+        }
+      ],
+      "validation": {
+        "source_check": "passed",
+        "C_generation": "passed",
+        "C_runtime": "not applicable: fixed-old frontend/artifact-only observation"
+      },
+      "original_body_hash_verified": true
     },
     "frontend::backend_board_handlers_resolve_typecheck_and_lower_with_the_default_frontend": {
       "assessment": "old-compile-and-artifact-observation",
       "observations": [
-        "BoardClock/BoardConsole resolve/typecheck/lower",
-        "compile with heap4096/frame2048",
-        "emela_clock.h and emela_console.h generated"
+        "Original BoardClock/BoardConsole source accepts and generates emela_clock.h/emela_console.h at old heap4096/frame2048.",
+        "Old concrete main becomes Options::with_entry(\"main\"); source bytes unchanged. No runtime execution was required by the fixed-old test."
       ],
-      "note": "The fixed old test does not execute C. Artifact/header presence remains an explicit obligation in addition to source acceptance."
+      "note": "none; original fixture bytes and filenames unchanged",
+      "evidence_revision": "9292e9d",
+      "evidence": [
+        {
+          "kind": "source_test",
+          "path": "crates/emela-emb-compiler/tests/p7_services.rs",
+          "symbol": "legacy_board_source_compiles_with_its_original_budget_and_service_headers"
+        }
+      ],
+      "validation": {
+        "source_check": "passed",
+        "C_generation": "passed",
+        "C_runtime": "not applicable: fixed-old frontend/artifact-only observation"
+      },
+      "original_body_hash_verified": true
     }
   },
   "active_program_assignments": {
@@ -344,6 +372,36 @@
       "revision": "89aa919",
       "path": "docs/reports/p7-cleanup-source-compat.json",
       "format": "cleanup-cases"
+    },
+    {
+      "revision": "2650f67",
+      "path": "docs/reports/p7-cause-source-compat.json",
+      "format": "raw-files"
+    },
+    {
+      "revision": "da721f2",
+      "path": "docs/reports/p7-cause-ir-seam-compat.json",
+      "format": "raw-files"
+    },
+    {
+      "revision": "c8ff094",
+      "path": "docs/reports/p7-aggregate-source-compat.json",
+      "format": "entry-programs"
+    },
+    {
+      "revision": "9292e9d",
+      "path": "docs/reports/p7-frontend-source-compat.json",
+      "format": "frontend-review"
+    },
+    {
+      "revision": "8a6a585",
+      "path": "docs/reports/p7-bytes-small-budget-compat.json",
+      "format": "raw-files"
+    },
+    {
+      "revision": "88677b6",
+      "path": "docs/reports/p7-cleanup-ir-seam-compat.json",
+      "format": "raw-files"
     }
   ]
 }

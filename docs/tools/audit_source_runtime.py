@@ -67,7 +67,8 @@ def main() -> None:
     fixture_text = args.fixtures.read_text()
     manifest = json.loads(fixture_text)
     programs = {program["id"]: program for program in manifest["programs"]}
-    corpus = {test["id"]: test for test in json.loads(args.corpus.read_text())["tests"]}
+    corpus_document = json.loads(args.corpus.read_text())
+    corpus = {test["id"]: test for test in corpus_document["tests"]}
     reviews = json.loads(args.reviews.read_text())
     reach_text = args.reach.read_text()
     reach = json.loads(reach_text)
@@ -81,6 +82,7 @@ def main() -> None:
     ledger_tests = {f"{row['target']}::{row['name']}": row for row in ledger["tests"]}
     runtime = {}
     report_records = []
+    additional_nonruntime = []
     for ref in reviews["runtime_reports"]:
         report_text = objects.read(ref["revision"], ref["path"])
         report = json.loads(report_text)
@@ -88,6 +90,24 @@ def main() -> None:
         if baseline != manifest["baseline_revision"]:
             raise ValueError("runtime report legacy baseline differs")
         report_records.append({**ref, "sha256": digest(report_text)})
+        if ref["format"] == "frontend-review":
+            for program in report["programs"]:
+                original = programs[program["id"]]
+                if program["legacy_tests"] != original["legacy_tests"]:
+                    raise ValueError("frontend review test IDs differ")
+                for file in program["files"]:
+                    expected = next(value for value in original["files"] if value["name"] == file["name"])
+                    path = "crates/emela-emb-compiler/tests/compat/legacy-corpus/" + file["fixture"]
+                    if expected["sha256"] != file["sha256"] or digest(objects.read(ref["revision"], path)) != file["sha256"]:
+                        raise ValueError("frontend review original source hash differs")
+            known_hashes = {source.get("sha256") for source in corpus_document["source_inputs"]}
+            for case in report["additional_nonruntime_legacy_cases"]:
+                old = corpus[case["legacy_test"]]
+                for file in case.get("files", []):
+                    if file["sha256"] not in known_hashes or digest(objects.read(ref["revision"], file["path"])) != file["sha256"]:
+                        raise ValueError("bundled parse source differs from the fixed input")
+                additional_nonruntime.append({**case, "legacy_classes": old["legacy_classes"], "report": ref})
+            continue
         if ref["format"] == "traits":
             entries = [{"id": report["program"], "files": [{"name": "main.emel", "fixture": report["source_path"], "sha256": report["source_sha256"]}], "legacy_tests": [test for observation in report["observations"] for test in observation["legacy_tests"]], "observations": report["observations"], "runtime_assertions": report["observations"]}]
         elif ref["format"] in ("const-rest", "integration", "entry-programs"):
@@ -122,7 +142,7 @@ def main() -> None:
             if not set(program["legacy_tests"]).issubset(original["legacy_tests"]):
                 raise ValueError(f"runtime legacy test IDs differ: {program['id']}")
             assessment = program.get("assessment", "original-body-runtime-evidence")
-            seam = program.get("post_lowering_ir_seam", program.get("GC_adaptation"))
+            seam = program.get("post_lowering_ir_seam", program.get("post_lowering_ir_seams", program.get("GC_adaptation")))
             if ref["format"] == "integration":
                 seam = program["adaptation"]
             if ref["format"] != "child-waiters":
@@ -135,6 +155,8 @@ def main() -> None:
                     if file["sha256"] != expected["sha256"] or digest(objects.read(source_revision, path)) != file["sha256"]:
                         raise ValueError(f"runtime input hash differs: {program['id']}")
                 pure = not seam
+                if program.get("C_harness_sha256") and digest(objects.read(ref["revision"], program["C_harness"])) != program["C_harness_sha256"]:
+                    raise ValueError(f"runtime C harness hash differs: {program['id']}")
                 if program.get("route") == "existing-source-observation-replacement":
                     assessment = "existing-source-C-observations-match"
                 if program["id"] == "program:5ce8d2ba40fb42a01466":
@@ -149,7 +171,7 @@ def main() -> None:
                 if len(original["files"]) != 1 or digest(unexported) != original["files"][0]["sha256"]:
                     raise ValueError(f"removing only C export does not restore original: {program['id']}")
                 pure = program["observations"]["pure_source_runtime"]
-            pipeline = "source-to-C-artifact-check" if assessment == "original-body-artifact-evidence" else "source-to-C" if pure else "source-IR-adaptation-to-C"
+            pipeline = "source-to-C-artifact-check" if assessment == "original-body-artifact-evidence" else "source-check-to-ISR-rejection" if assessment == "original-body-diagnostic-evidence" else "existing-source-C-observation-replacement" if assessment == "existing-source-C-observations-match" else "source-to-C" if pure else "source-IR-adaptation-to-C"
             evidence = {"report": ref, "assessment": assessment, "legacy_tests": program["legacy_tests"], "original_body_hash_verified": True, "pipeline": pipeline, "observations": program.get("observations", program.get("scope")), "post_lowering_ir_seam": seam, "runtime_assertions": program.get("runtime_assertions"), "direct_test": program.get("new_test", program.get("evidence")), "source_adaptation": program.get("source_adaptation", program.get("adaptation")), "configuration": {key: program[key] for key in ("options", "C_harness", "private_C_seam", "old_resource_budgets_preserved") if key in program}, "report_validation": report.get("validation", report.get("run", report.get("execution")))}
             for identifier in program["legacy_tests"]:
                 runtime.setdefault(program["id"], {})[identifier] = evidence
@@ -188,6 +210,11 @@ def main() -> None:
             "reach_snapshot": {p: reach_record(reach_programs[p]) for p in case["programs"]},
             "final_integrated_verification": "required",
         })
+    normal_ids = {case["legacy_test"] for case in cases}
+    extra_ids = {case["legacy_test"] for case in additional_nonruntime}
+    expected_extra = {identifier for identifier, case in corpus.items() if case["category"] == "source"} - normal_ids
+    if extra_ids != expected_extra:
+        raise ValueError("additional rejection/parse-only source cases differ from the fixed corpus")
     doc = {
         "schema_version": 1,
         "legacy_revision": manifest["baseline_revision"],
@@ -195,9 +222,10 @@ def main() -> None:
         "review_sha256": digest(args.reviews.read_text()),
         "reach_snapshot": {"path": str(args.reach), "sha256": digest(reach_text), "compiler_revision": reach["compiler_revision"], "probe_options": reach["probe_options"], "runtime_verified": False},
         "policy": "Every normal legacy source test is retained. Compile acceptance and C objects are not C runtime evidence. Candidate source/IR tests are partial until old assertions are matched. Shared programs and generated variants are counted separately from distinct tests.",
-        "counts": {"normal_legacy_tests": len(cases), "programs": len(programs), "assessment": dict(sorted(Counter(case["assessment"] for case in cases).items())), "families": {family["id"]: sum(family["id"] in case["families"] for case in cases) for family in reviews["families"]}, "raw_reach": dict(Counter(p["raw"]["status"] for p in reach["programs"])), "concrete_root_reviewed_issues": dict(Counter(category(root) for p in reach["programs"] for root in p["public_root_probes"] if root["status"] == "compiler-rejected"))},
+        "counts": {"normal_legacy_tests": len(cases), "programs": len(programs), "additional_nonruntime_legacy_cases": len(additional_nonruntime), "normal_cases_with_open_observations": sum(case["assessment"] == "runtime-observation-mapping-open" for case in cases), "assessment": dict(sorted(Counter(case["assessment"] for case in cases).items())), "families": {family["id"]: sum(family["id"] in case["families"] for case in cases) for family in reviews["families"]}, "raw_reach": dict(Counter(p["raw"]["status"] for p in reach["programs"])), "concrete_root_reviewed_issues": dict(Counter(category(root) for p in reach["programs"] for root in p["public_root_probes"] if root["status"] == "compiler-rejected"))},
         "families": reviews["families"],
         "runtime_reports": report_records,
+        "additional_nonruntime_legacy_cases": additional_nonruntime,
         "cases": cases,
     }
     generated = json.dumps(doc, ensure_ascii=False, indent=2) + "\n"

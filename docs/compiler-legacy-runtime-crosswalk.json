@@ -2,7 +2,7 @@
   "schema_version": 1,
   "legacy_revision": "c34c0aeefdd966d854371b3110db00a47798751d",
   "fixture_manifest_sha256": "ea5c9837539b20f9d0c639ae55c6b59c11d5bf3189c8be4d7d7f75776a6a9923",
-  "review_sha256": "a8c53d6f7f72992baf118f5183d1262a20e4865b6b4425ebf8ec7fe29a5c4f4c",
+  "review_sha256": "99b817b5c979caab6b2b93280d42f06f111c0a60a11f8867cdb1731fb7c5b7a1",
   "reach_snapshot": {
     "path": "docs/compiler-p6-source-reach.json",
     "sha256": "8efeee39e1ebf0c88e1fa37e4ae49cd79a4a25407a41835e9a551d6ea32fc8cd",
@@ -20,16 +20,16 @@
   "counts": {
     "normal_legacy_tests": 174,
     "programs": 169,
+    "additional_nonruntime_legacy_cases": 3,
+    "normal_cases_with_open_observations": 0,
     "assessment": {
-      "existing-ledger-source-replacement": 7,
-      "existing-source-C-observations-match": 8,
+      "existing-source-C-observations-match": 15,
       "old-compile-and-artifact-observation": 1,
       "old-frontend-only-observation": 1,
       "original-body-artifact-evidence": 1,
       "original-body-runtime-and-artifact-evidence": 1,
       "original-body-runtime-and-diagnostic-evidence": 1,
-      "original-body-runtime-evidence": 121,
-      "runtime-observation-mapping-open": 33
+      "original-body-runtime-evidence": 154
     },
     "families": {
       "const": 22,
@@ -339,6 +339,119 @@
       "path": "docs/reports/p7-cleanup-source-compat.json",
       "format": "cleanup-cases",
       "sha256": "c235ba0fc5ea6db4a26aac7cc8be49f8e7e4c25e4ccb2efab65754adf000d967"
+    },
+    {
+      "revision": "2650f67",
+      "path": "docs/reports/p7-cause-source-compat.json",
+      "format": "raw-files",
+      "sha256": "e8b00f0f4a8fbc06a83723cbc109312c7fcccc922415bdc3fb4059897513b6a1"
+    },
+    {
+      "revision": "da721f2",
+      "path": "docs/reports/p7-cause-ir-seam-compat.json",
+      "format": "raw-files",
+      "sha256": "5311d6d4fdf8dac7bf0a235b3e299fa1fa6e7432ea8d16b1eeba83bd413a540c"
+    },
+    {
+      "revision": "c8ff094",
+      "path": "docs/reports/p7-aggregate-source-compat.json",
+      "format": "entry-programs",
+      "sha256": "f13d2072eb7d663b67ecfb02c55f1990a2834c116c89a1e46d54e268e3ceb6f5"
+    },
+    {
+      "revision": "9292e9d",
+      "path": "docs/reports/p7-frontend-source-compat.json",
+      "format": "frontend-review",
+      "sha256": "dd3800bbba525846f7a56f053d3b4974ef151cecbabbf1af20657c5f5e7da484"
+    },
+    {
+      "revision": "8a6a585",
+      "path": "docs/reports/p7-bytes-small-budget-compat.json",
+      "format": "raw-files",
+      "sha256": "b191f85753edc33a680ac7ab2e55f662ff6ca355597ac52faf7355a63f1fce1f"
+    },
+    {
+      "revision": "88677b6",
+      "path": "docs/reports/p7-cleanup-ir-seam-compat.json",
+      "format": "raw-files",
+      "sha256": "ec9af29b6dbb7c195b6ec64bfd25d6e61c66ec84722bb833290b22e77e21e5f2"
+    }
+  ],
+  "additional_nonruntime_legacy_cases": [
+    {
+      "legacy_test": "frontend::embedded_backend_does_not_supply_the_old_std_namespace",
+      "new_test": "legacy_embedded_namespace_errors_and_unrelated_project_module_are_preserved",
+      "observation": "Original Std.Embedded.Gpio import fails with a Module diagnostic naming the missing module. Old E0205 is replaced by the independent diagnostic kind/message.",
+      "legacy_classes": [
+        "source-rejection-expectation"
+      ],
+      "report": {
+        "revision": "9292e9d",
+        "path": "docs/reports/p7-frontend-source-compat.json",
+        "format": "frontend-review"
+      }
+    },
+    {
+      "legacy_test": "frontend::embedded_backend_module_names_cannot_be_shadowed_by_project_files",
+      "new_test": "legacy_embedded_namespace_errors_and_unrelated_project_module_are_preserved",
+      "observation": "Original unimported project Embedded.Gpio file is rejected as reserved. Old E0203 is replaced by the independent Module diagnostic naming Embedded.Gpio.",
+      "legacy_classes": [
+        "source-rejection-expectation"
+      ],
+      "report": {
+        "revision": "9292e9d",
+        "path": "docs/reports/p7-frontend-source-compat.json",
+        "format": "frontend-review"
+      }
+    },
+    {
+      "legacy_test": "sources::embedded_sources_are_supplied_by_the_backend_without_shadowing_core",
+      "observation": "All six original Embedded sources are byte-identical. sources::CORE_MODULES owns each name once; frontend::modules::collect lexes/parses every bundled module on every successful compile. These tests and existing p7_services execute that path. No dependency on emela_core or upstream bundles exists.",
+      "evidence": [
+        "crates/emela-emb-compiler/src/sources.rs",
+        "crates/emela-emb-compiler/src/frontend/modules.rs",
+        "crates/emela-emb-compiler/tests/p7_services.rs"
+      ],
+      "files": [
+        {
+          "path": "crates/emela-emb-compiler/lib/embedded/board.emel",
+          "sha256": "f86e8766b31c3611547428d7078b6c47cae44c7f924e4ee1aeba3c46774de2f5",
+          "fixed_old_bytes_match": true
+        },
+        {
+          "path": "crates/emela-emb-compiler/lib/embedded/gpio.emel",
+          "sha256": "b0628f656a4e25a67f10e4db89271a1e60cba3ee3c78f6bc0d45de3946ee4cda",
+          "fixed_old_bytes_match": true
+        },
+        {
+          "path": "crates/emela-emb-compiler/lib/embedded/i2c.emel",
+          "sha256": "89f38481c5f5513fa30007a0da8bbd28089b8d258888bf3a3a71f07b18291572",
+          "fixed_old_bytes_match": true
+        },
+        {
+          "path": "crates/emela-emb-compiler/lib/embedded/peripheral.emel",
+          "sha256": "8f8c8587636a9cbbf8007e73b4e5306ffbfbf07630cfee84481805e1693278a8",
+          "fixed_old_bytes_match": true
+        },
+        {
+          "path": "crates/emela-emb-compiler/lib/embedded/spi.emel",
+          "sha256": "c39a3023e9c2258ecdcb01378011355e961b4140aa2ad11eb616e4357e1c25bc",
+          "fixed_old_bytes_match": true
+        },
+        {
+          "path": "crates/emela-emb-compiler/lib/embedded/uart.emel",
+          "sha256": "49679fa4b32535805c085c1434ed4dd0f99c50b39d83f6f79136277148dec2c5",
+          "fixed_old_bytes_match": true
+        }
+      ],
+      "legacy_classes": [
+        "source-parse-only-expectation"
+      ],
+      "report": {
+        "revision": "9292e9d",
+        "path": "docs/reports/p7-frontend-source-compat.json",
+        "format": "frontend-review"
+      }
     }
   ],
   "cases": [
@@ -380,7 +493,7 @@
         }
       ],
       "legacy_execution_configuration": null,
-      "assessment": "existing-ledger-source-replacement",
+      "assessment": "existing-source-C-observations-match",
       "manual_observation_review": null,
       "existing_ledger_decision": {
         "status": "replaced",
@@ -405,7 +518,62 @@
       "families": [
         "bytes"
       ],
-      "runtime_evidence": [],
+      "runtime_evidence": [
+        {
+          "program": "program:545fcfac2473e3be10a5",
+          "report": {
+            "revision": "8a6a585",
+            "path": "docs/reports/p7-bytes-small-budget-compat.json",
+            "format": "raw-files"
+          },
+          "assessment": "existing-source-C-observations-match",
+          "legacy_tests": [
+            "emit::bytes::bytes_captured_in_closures_and_state_keep_their_owners"
+          ],
+          "original_body_hash_verified": true,
+          "pipeline": "existing-source-C-observation-replacement",
+          "observations": {
+            "source_check": "passed",
+            "C_generation": "passed",
+            "C_runtime_O0": "passed",
+            "C_runtime_O2": "passed",
+            "heap_empty_after_each_fully_released_route": true
+          },
+          "post_lowering_ir_seam": null,
+          "runtime_assertions": [
+            "Same capturedBytes and sharedBytes source bodies preservea/NUL/b after caller overwrite, then6byte doubledBytes after sourceowner release.",
+            "Existing larger State corpus is now tested at old8192heap for1000rounds, allheapfree."
+          ],
+          "direct_test": {
+            "kind": "source_test",
+            "path": "crates/emela-emb-compiler/tests/p4_state.rs",
+            "symbol": "state_shares_owned_values_with_escaped_closures_and_reclaims_every_run"
+          },
+          "source_adaptation": "Existing broader source/C observations encompass the old input APIs and exact assertions. Original fixture hash retained for provenance; this is not an original-body runtime claim.",
+          "configuration": {},
+          "report_validation": {
+            "commands": [
+              "CARGO_PROFILE_TEST_OPT_LEVEL=1 cargo test -p emela-emb-compiler --test p3_bytes --locked --offline",
+              "CARGO_PROFILE_TEST_OPT_LEVEL=1 cargo test -p emela-emb-compiler --test p4_state --locked --offline"
+            ],
+            "passed": 8,
+            "failed": 0,
+            "ignored": 0,
+            "C_flags": [
+              "-std=c11",
+              "-Wall",
+              "-Werror"
+            ],
+            "C_optimizations": [
+              "-O0",
+              "-O2"
+            ],
+            "strict_clippy_all_targets": "passed",
+            "MSRV_1_85_all_targets": "passed",
+            "fmt_diff": "passed"
+          }
+        }
+      ],
       "active_assignments": [],
       "reach_snapshot": {
         "program:545fcfac2473e3be10a5": {
@@ -495,7 +663,7 @@
         }
       ],
       "legacy_execution_configuration": null,
-      "assessment": "existing-ledger-source-replacement",
+      "assessment": "existing-source-C-observations-match",
       "manual_observation_review": null,
       "existing_ledger_decision": {
         "status": "replaced",
@@ -520,7 +688,61 @@
       "families": [
         "bytes"
       ],
-      "runtime_evidence": [],
+      "runtime_evidence": [
+        {
+          "program": "program:e7a338aa5771b67698db",
+          "report": {
+            "revision": "8a6a585",
+            "path": "docs/reports/p7-bytes-small-budget-compat.json",
+            "format": "raw-files"
+          },
+          "assessment": "existing-source-C-observations-match",
+          "legacy_tests": [
+            "emit::bytes::bytes_dynamic_capacity_is_independent_of_string_capacity"
+          ],
+          "original_body_hash_verified": true,
+          "pipeline": "existing-source-C-observation-replacement",
+          "observations": {
+            "source_check": "passed",
+            "C_generation": "passed",
+            "C_runtime_O0": "passed",
+            "C_runtime_O2": "passed",
+            "heap_empty_after_each_fully_released_route": true
+          },
+          "post_lowering_ir_seam": null,
+          "runtime_assertions": [
+            "Old262144heap/String1, Bytes.slice(-1,100000) copiesfull70000byte view independent of Stringcapacity;3rounds exactly asold, fullheapfree."
+          ],
+          "direct_test": {
+            "kind": "source_test",
+            "path": "crates/emela-emb-compiler/tests/p3_bytes.rs",
+            "symbol": "bytes_ownership_snapshots_aliases_and_invalid_list_elements_release_every_allocation"
+          },
+          "source_adaptation": "Existing broader source/C observations encompass the old input APIs and exact assertions. Original fixture hash retained for provenance; this is not an original-body runtime claim.",
+          "configuration": {},
+          "report_validation": {
+            "commands": [
+              "CARGO_PROFILE_TEST_OPT_LEVEL=1 cargo test -p emela-emb-compiler --test p3_bytes --locked --offline",
+              "CARGO_PROFILE_TEST_OPT_LEVEL=1 cargo test -p emela-emb-compiler --test p4_state --locked --offline"
+            ],
+            "passed": 8,
+            "failed": 0,
+            "ignored": 0,
+            "C_flags": [
+              "-std=c11",
+              "-Wall",
+              "-Werror"
+            ],
+            "C_optimizations": [
+              "-O0",
+              "-O2"
+            ],
+            "strict_clippy_all_targets": "passed",
+            "MSRV_1_85_all_targets": "passed",
+            "fmt_diff": "passed"
+          }
+        }
+      ],
       "active_assignments": [],
       "reach_snapshot": {
         "program:e7a338aa5771b67698db": {
@@ -593,7 +815,7 @@
         }
       ],
       "legacy_execution_configuration": null,
-      "assessment": "existing-ledger-source-replacement",
+      "assessment": "existing-source-C-observations-match",
       "manual_observation_review": null,
       "existing_ledger_decision": {
         "status": "replaced",
@@ -618,7 +840,62 @@
       "families": [
         "bytes"
       ],
-      "runtime_evidence": [],
+      "runtime_evidence": [
+        {
+          "program": "program:738c3317d1a9dca5984d",
+          "report": {
+            "revision": "8a6a585",
+            "path": "docs/reports/p7-bytes-small-budget-compat.json",
+            "format": "raw-files"
+          },
+          "assessment": "existing-source-C-observations-match",
+          "legacy_tests": [
+            "emit::bytes::bytes_external_adapters_snapshot_borrowed_data_and_transfer_owned_data"
+          ],
+          "original_body_hash_verified": true,
+          "pipeline": "existing-source-C-observation-replacement",
+          "observations": {
+            "source_check": "passed",
+            "C_generation": "passed",
+            "C_runtime_O0": "passed",
+            "C_runtime_O2": "passed",
+            "heap_empty_after_each_fully_released_route": true
+          },
+          "post_lowering_ir_seam": null,
+          "runtime_assertions": [
+            "Old4096heap, Borrowed+Owned both preserve two sequentialstatic-buffer results1/2 and unsigned255/NUL with500repetitions each and fullheapfree.",
+            "NewOwned fixture creates its already-ownedBytes through the public exporter rather than the old private emela_external_own helper; ownership/byte observations are identical."
+          ],
+          "direct_test": {
+            "kind": "source_test",
+            "path": "crates/emela-emb-compiler/tests/p3_bytes.rs",
+            "symbol": "bytes_external_adapters_snapshot_borrowed_data_and_transfer_owned_data"
+          },
+          "source_adaptation": "Existing broader source/C observations encompass the old input APIs and exact assertions. Original fixture hash retained for provenance; this is not an original-body runtime claim.",
+          "configuration": {},
+          "report_validation": {
+            "commands": [
+              "CARGO_PROFILE_TEST_OPT_LEVEL=1 cargo test -p emela-emb-compiler --test p3_bytes --locked --offline",
+              "CARGO_PROFILE_TEST_OPT_LEVEL=1 cargo test -p emela-emb-compiler --test p4_state --locked --offline"
+            ],
+            "passed": 8,
+            "failed": 0,
+            "ignored": 0,
+            "C_flags": [
+              "-std=c11",
+              "-Wall",
+              "-Werror"
+            ],
+            "C_optimizations": [
+              "-O0",
+              "-O2"
+            ],
+            "strict_clippy_all_targets": "passed",
+            "MSRV_1_85_all_targets": "passed",
+            "fmt_diff": "passed"
+          }
+        }
+      ],
       "active_assignments": [],
       "reach_snapshot": {
         "program:738c3317d1a9dca5984d": {
@@ -836,7 +1113,7 @@
         }
       ],
       "legacy_execution_configuration": null,
-      "assessment": "existing-ledger-source-replacement",
+      "assessment": "existing-source-C-observations-match",
       "manual_observation_review": null,
       "existing_ledger_decision": {
         "status": "replaced",
@@ -861,7 +1138,62 @@
       "families": [
         "bytes"
       ],
-      "runtime_evidence": [],
+      "runtime_evidence": [
+        {
+          "program": "program:ee5ba136321c839df89e",
+          "report": {
+            "revision": "8a6a585",
+            "path": "docs/reports/p7-bytes-small-budget-compat.json",
+            "format": "raw-files"
+          },
+          "assessment": "existing-source-C-observations-match",
+          "legacy_tests": [
+            "emit::bytes::bytes_list_round_trips_and_invalid_elements_reclaim_every_allocation"
+          ],
+          "original_body_hash_verified": true,
+          "pipeline": "existing-source-C-observation-replacement",
+          "observations": {
+            "source_check": "passed",
+            "C_generation": "passed",
+            "C_runtime_O0": "passed",
+            "C_runtime_O2": "passed",
+            "heap_empty_after_each_fully_released_route": true
+          },
+          "post_lowering_ir_seam": null,
+          "runtime_assertions": [
+            "Old4096heap is now directly executed in addition tolarge-output262144corpus.",
+            "Allold0/128/255/-1/256 produceTrue and reclaim partial/full List/Byte allocations500times."
+          ],
+          "direct_test": {
+            "kind": "source_test",
+            "path": "crates/emela-emb-compiler/tests/p3_bytes.rs",
+            "symbol": "bytes_ownership_snapshots_aliases_and_invalid_list_elements_release_every_allocation"
+          },
+          "source_adaptation": "Existing broader source/C observations encompass the old input APIs and exact assertions. Original fixture hash retained for provenance; this is not an original-body runtime claim.",
+          "configuration": {},
+          "report_validation": {
+            "commands": [
+              "CARGO_PROFILE_TEST_OPT_LEVEL=1 cargo test -p emela-emb-compiler --test p3_bytes --locked --offline",
+              "CARGO_PROFILE_TEST_OPT_LEVEL=1 cargo test -p emela-emb-compiler --test p4_state --locked --offline"
+            ],
+            "passed": 8,
+            "failed": 0,
+            "ignored": 0,
+            "C_flags": [
+              "-std=c11",
+              "-Wall",
+              "-Werror"
+            ],
+            "C_optimizations": [
+              "-O0",
+              "-O2"
+            ],
+            "strict_clippy_all_targets": "passed",
+            "MSRV_1_85_all_targets": "passed",
+            "fmt_diff": "passed"
+          }
+        }
+      ],
       "active_assignments": [],
       "reach_snapshot": {
         "program:ee5ba136321c839df89e": {
@@ -943,7 +1275,7 @@
         }
       ],
       "legacy_execution_configuration": null,
-      "assessment": "existing-ledger-source-replacement",
+      "assessment": "existing-source-C-observations-match",
       "manual_observation_review": null,
       "existing_ledger_decision": {
         "status": "replaced",
@@ -968,7 +1300,63 @@
       "families": [
         "bytes"
       ],
-      "runtime_evidence": [],
+      "runtime_evidence": [
+        {
+          "program": "program:36dfa29b6881b628bddb",
+          "report": {
+            "revision": "8a6a585",
+            "path": "docs/reports/p7-bytes-small-budget-compat.json",
+            "format": "raw-files"
+          },
+          "assessment": "existing-source-C-observations-match",
+          "legacy_tests": [
+            "emit::bytes::bytes_require_a_fixed_heap_and_defect_when_its_capacity_is_exhausted"
+          ],
+          "original_body_hash_verified": true,
+          "pipeline": "existing-source-C-observation-replacement",
+          "observations": {
+            "source_check": "passed",
+            "C_generation": "passed",
+            "C_runtime_O0": "passed",
+            "C_runtime_O2": "passed",
+            "terminal_defect_observed": true,
+            "heap_observation": "Old terminal HeapExhausted observation; no successful return or reclamation claim for this route."
+          },
+          "post_lowering_ir_seam": null,
+          "runtime_assertions": [
+            "Equivalent Bytes.encode_utf8 source allocation rejects heap0 before emission.",
+            "Old128heap plus1024byte input terminates in HeapExhausted; newexistingdiscard source also proves discardedallocation retains that check. OldC discards make return; no owningvalue is expected after terminaldefect."
+          ],
+          "direct_test": {
+            "kind": "source_test",
+            "path": "crates/emela-emb-compiler/tests/p3_bytes.rs",
+            "symbol": "bytes_owned_results_require_a_heap_even_when_the_result_is_discarded"
+          },
+          "source_adaptation": "Existing broader source/C observations encompass the old input APIs and exact assertions. Original fixture hash retained for provenance; this is not an original-body runtime claim.",
+          "configuration": {},
+          "report_validation": {
+            "commands": [
+              "CARGO_PROFILE_TEST_OPT_LEVEL=1 cargo test -p emela-emb-compiler --test p3_bytes --locked --offline",
+              "CARGO_PROFILE_TEST_OPT_LEVEL=1 cargo test -p emela-emb-compiler --test p4_state --locked --offline"
+            ],
+            "passed": 8,
+            "failed": 0,
+            "ignored": 0,
+            "C_flags": [
+              "-std=c11",
+              "-Wall",
+              "-Werror"
+            ],
+            "C_optimizations": [
+              "-O0",
+              "-O2"
+            ],
+            "strict_clippy_all_targets": "passed",
+            "MSRV_1_85_all_targets": "passed",
+            "fmt_diff": "passed"
+          }
+        }
+      ],
       "active_assignments": [],
       "reach_snapshot": {
         "program:36dfa29b6881b628bddb": {
@@ -1041,7 +1429,7 @@
         }
       ],
       "legacy_execution_configuration": null,
-      "assessment": "existing-ledger-source-replacement",
+      "assessment": "existing-source-C-observations-match",
       "manual_observation_review": null,
       "existing_ledger_decision": {
         "status": "replaced",
@@ -1066,7 +1454,63 @@
       "families": [
         "bytes"
       ],
-      "runtime_evidence": [],
+      "runtime_evidence": [
+        {
+          "program": "program:831e8ca3bfd2e879fe38",
+          "report": {
+            "revision": "8a6a585",
+            "path": "docs/reports/p7-bytes-small-budget-compat.json",
+            "format": "raw-files"
+          },
+          "assessment": "existing-source-C-observations-match",
+          "legacy_tests": [
+            "emit::bytes::bytes_returns_lists_and_aliases_preserve_ownership_and_release_the_heap"
+          ],
+          "original_body_hash_verified": true,
+          "pipeline": "existing-source-C-observation-replacement",
+          "observations": {
+            "source_check": "passed",
+            "C_generation": "passed",
+            "C_runtime_O0": "passed",
+            "C_runtime_O2": "passed",
+            "heap_empty_after_each_fully_released_route": true
+          },
+          "post_lowering_ir_seam": null,
+          "runtime_assertions": [
+            "Old4096heap/String1 is now directly executed in addition tolarge-output262144corpus.",
+            "Alloldmake/copy/slice/concat/List aliases, callerinput overwrite, returnedvalues surviving sourceownerrelease and borrowed0/128/255 snapshot match;500fullheapfree rounds.",
+            "BroaderexistingC additionallyreads retainedList head andchecksowning return."
+          ],
+          "direct_test": {
+            "kind": "source_test",
+            "path": "crates/emela-emb-compiler/tests/p3_bytes.rs",
+            "symbol": "bytes_ownership_snapshots_aliases_and_invalid_list_elements_release_every_allocation"
+          },
+          "source_adaptation": "Existing broader source/C observations encompass the old input APIs and exact assertions. Original fixture hash retained for provenance; this is not an original-body runtime claim.",
+          "configuration": {},
+          "report_validation": {
+            "commands": [
+              "CARGO_PROFILE_TEST_OPT_LEVEL=1 cargo test -p emela-emb-compiler --test p3_bytes --locked --offline",
+              "CARGO_PROFILE_TEST_OPT_LEVEL=1 cargo test -p emela-emb-compiler --test p4_state --locked --offline"
+            ],
+            "passed": 8,
+            "failed": 0,
+            "ignored": 0,
+            "C_flags": [
+              "-std=c11",
+              "-Wall",
+              "-Werror"
+            ],
+            "C_optimizations": [
+              "-O0",
+              "-O2"
+            ],
+            "strict_clippy_all_targets": "passed",
+            "MSRV_1_85_all_targets": "passed",
+            "fmt_diff": "passed"
+          }
+        }
+      ],
       "active_assignments": [],
       "reach_snapshot": {
         "program:831e8ca3bfd2e879fe38": {
@@ -1654,7 +2098,7 @@
         }
       ],
       "legacy_execution_configuration": null,
-      "assessment": "existing-ledger-source-replacement",
+      "assessment": "existing-source-C-observations-match",
       "manual_observation_review": null,
       "existing_ledger_decision": {
         "status": "replaced",
@@ -1679,7 +2123,62 @@
       "families": [
         "bytes"
       ],
-      "runtime_evidence": [],
+      "runtime_evidence": [
+        {
+          "program": "program:e002041e4a426285da18",
+          "report": {
+            "revision": "8a6a585",
+            "path": "docs/reports/p7-bytes-small-budget-compat.json",
+            "format": "raw-files"
+          },
+          "assessment": "existing-source-C-observations-match",
+          "legacy_tests": [
+            "emit::bytes::discarded_bytes_still_check_capacity_and_release_owned_results"
+          ],
+          "original_body_hash_verified": true,
+          "pipeline": "existing-source-C-observation-replacement",
+          "observations": {
+            "source_check": "passed",
+            "C_generation": "passed",
+            "C_runtime_O0": "passed",
+            "C_runtime_O2": "passed",
+            "heap_empty_after_each_fully_released_route": true
+          },
+          "post_lowering_ir_seam": null,
+          "runtime_assertions": [
+            "Discarded Bytes.encode_utf8 retains HeapExhausted atold128heap/1024byte input (existingterminaltest).",
+            "Newadditionalold256heap run checks1000abc inputs fullyreclaimed. Source body is the same unusedencode followed byUnit."
+          ],
+          "direct_test": {
+            "kind": "source_test",
+            "path": "crates/emela-emb-compiler/tests/p3_bytes.rs",
+            "symbol": "bytes_ownership_snapshots_aliases_and_invalid_list_elements_release_every_allocation"
+          },
+          "source_adaptation": "Existing broader source/C observations encompass the old input APIs and exact assertions. Original fixture hash retained for provenance; this is not an original-body runtime claim.",
+          "configuration": {},
+          "report_validation": {
+            "commands": [
+              "CARGO_PROFILE_TEST_OPT_LEVEL=1 cargo test -p emela-emb-compiler --test p3_bytes --locked --offline",
+              "CARGO_PROFILE_TEST_OPT_LEVEL=1 cargo test -p emela-emb-compiler --test p4_state --locked --offline"
+            ],
+            "passed": 8,
+            "failed": 0,
+            "ignored": 0,
+            "C_flags": [
+              "-std=c11",
+              "-Wall",
+              "-Werror"
+            ],
+            "C_optimizations": [
+              "-O0",
+              "-O2"
+            ],
+            "strict_clippy_all_targets": "passed",
+            "MSRV_1_85_all_targets": "passed",
+            "fmt_diff": "passed"
+          }
+        }
+      ],
       "active_assignments": [],
       "reach_snapshot": {
         "program:e002041e4a426285da18": {
@@ -3405,7 +3904,7 @@
             "emit::const_runtime::external::pure_external_opaque_const_memoizes_the_board_handle_without_heap"
           ],
           "original_body_hash_verified": true,
-          "pipeline": "source-to-C",
+          "pipeline": "existing-source-C-observation-replacement",
           "observations": [
             "旧bare external Token/TOKEN初期化とpub readを包含",
             "Borrowed/Owned×NULL/nonNULL×1000回、pointer identityとhost1回",
@@ -4859,7 +5358,7 @@
             "emit::const_runtime::polymorphic_const_opaque_handles_forward_one_pointer_abi_and_one_initialization"
           ],
           "original_body_hash_verified": true,
-          "pipeline": "source-to-C",
+          "pipeline": "existing-source-C-observation-replacement",
           "observations": [
             "旧Handle[Int]/Handle[String]の共有family・pointer ABIと単一初期化を包含",
             "Borrowedに加えOwned、非NULLに加えNULL、各1000回、heapなし"
@@ -5092,7 +5591,7 @@
             "emit::const_runtime::rejects_runtime_const_reachable_from_isr_but_preserves_static_fold"
           ],
           "original_body_hash_verified": true,
-          "pipeline": "source-to-C",
+          "pipeline": "source-check-to-ISR-rejection",
           "observations": [
             "旧ISR入口read/外部fixture_seed許可でもruntime const initializationを拒否",
             "static40+2はEmelaConstState/heapを出さず1000回42"
@@ -7931,7 +8430,7 @@
             "emit::embedded_peripherals::clock::clock_sleep_notifies_then_resumes_through_the_main_scheduler"
           ],
           "original_body_hash_verified": true,
-          "pipeline": "source-to-C",
+          "pipeline": "existing-source-C-observation-replacement",
           "observations": [
             "Same Clock.sleep body and every original C assertion; syntax whitespace/C alias differ only.",
             "Full oldOptions8192heap/String96/peripheral4/fiber4/frame12x2048/task2/event2/deferred1 preserved.",
@@ -8262,13 +8761,51 @@
         }
       ],
       "legacy_execution_configuration": null,
-      "assessment": "runtime-observation-mapping-open",
+      "assessment": "original-body-runtime-evidence",
       "manual_observation_review": null,
       "existing_ledger_decision": null,
       "families": [
         "aggregate-and-integration"
       ],
-      "runtime_evidence": [],
+      "runtime_evidence": [
+        {
+          "program": "program:c3c4cdd26e1efbbfdf88",
+          "report": {
+            "revision": "c8ff094",
+            "path": "docs/reports/p7-aggregate-source-compat.json",
+            "format": "entry-programs"
+          },
+          "assessment": "original-body-runtime-evidence",
+          "legacy_tests": [
+            "emit::fiber::aggregate::deferred_complete_poll_and_await_share_owned_string_aggregates_past_scope_end"
+          ],
+          "original_body_hash_verified": true,
+          "pipeline": "source-to-C",
+          "observations": null,
+          "post_lowering_ir_seam": null,
+          "runtime_assertions": null,
+          "direct_test": {
+            "kind": "source_test",
+            "path": "crates/emela-emb-compiler/tests/p7_aggregate_compat.rs",
+            "symbol": "deferred_complete_poll_and_await_share_owned_string_aggregates_past_scope_end"
+          },
+          "source_adaptation": "Original body with explicit C exports only. Original C observations and capacities preserved; C symbol/type/release IDs follow the generated header. No post-lowering IR mutation.",
+          "configuration": {
+            "options": "Options::default().with_heap_bytes(4096).with_fiber_capacity(8).with_frame_capacity(24).with_frame_bytes(768).with_string_capacity(64).with_deferred_capacity(1)",
+            "C_harness": "crates/emela-emb-compiler/tests/compat/p7/concurrency/deferred_complete_poll_and_await_share_owned_string_aggregates_past_scope_end.c"
+          },
+          "report_validation": {
+            "status": "passed",
+            "legacy_test_count": 12,
+            "new_test_count": 13,
+            "C_optimizations": [
+              "-O0",
+              "-O2"
+            ],
+            "notes": "13 original-source C variants passed with the exact legacy heap/frame/pool budgets after ownership flags were packed; P5 suspend6 and P7 payload3 also passed on the integrated revision."
+          }
+        }
+      ],
       "active_assignments": [],
       "reach_snapshot": {
         "program:c3c4cdd26e1efbbfdf88": {
@@ -8382,13 +8919,51 @@
         }
       ],
       "legacy_execution_configuration": null,
-      "assessment": "runtime-observation-mapping-open",
+      "assessment": "original-body-runtime-evidence",
       "manual_observation_review": null,
       "existing_ledger_decision": null,
       "families": [
         "aggregate-and-integration"
       ],
-      "runtime_evidence": [],
+      "runtime_evidence": [
+        {
+          "program": "program:ac90e395370d309144f0",
+          "report": {
+            "revision": "c8ff094",
+            "path": "docs/reports/p7-aggregate-source-compat.json",
+            "format": "entry-programs"
+          },
+          "assessment": "original-body-runtime-evidence",
+          "legacy_tests": [
+            "emit::fiber::aggregate::native_closure_captures_string_tuple_enum_and_list_after_factory_stack_returns"
+          ],
+          "original_body_hash_verified": true,
+          "pipeline": "source-to-C",
+          "observations": null,
+          "post_lowering_ir_seam": null,
+          "runtime_assertions": null,
+          "direct_test": {
+            "kind": "source_test",
+            "path": "crates/emela-emb-compiler/tests/p7_aggregate_compat.rs",
+            "symbol": "native_closure_captures_string_tuple_enum_and_list_after_factory_stack_returns"
+          },
+          "source_adaptation": "Original body with explicit C exports only. Original C observations and capacities preserved; C symbol/type/release IDs follow the generated header. No post-lowering IR mutation.",
+          "configuration": {
+            "options": "options().with_string_capacity(64).with_frame_bytes(768)",
+            "C_harness": "crates/emela-emb-compiler/tests/compat/p7/concurrency/native_closure_captures_string_tuple_enum_and_list_after_factory_stack_returns.c"
+          },
+          "report_validation": {
+            "status": "passed",
+            "legacy_test_count": 12,
+            "new_test_count": 13,
+            "C_optimizations": [
+              "-O0",
+              "-O2"
+            ],
+            "notes": "13 original-source C variants passed with the exact legacy heap/frame/pool budgets after ownership flags were packed; P5 suspend6 and P7 payload3 also passed on the integrated revision."
+          }
+        }
+      ],
       "active_assignments": [],
       "reach_snapshot": {
         "program:ac90e395370d309144f0": {
@@ -8579,13 +9154,88 @@
         }
       ],
       "legacy_execution_configuration": null,
-      "assessment": "runtime-observation-mapping-open",
+      "assessment": "original-body-runtime-evidence",
       "manual_observation_review": null,
       "existing_ledger_decision": null,
       "families": [
         "aggregate-and-integration"
       ],
-      "runtime_evidence": [],
+      "runtime_evidence": [
+        {
+          "program": "program:158234f97251d7d95674",
+          "report": {
+            "revision": "c8ff094",
+            "path": "docs/reports/p7-aggregate-source-compat.json",
+            "format": "entry-programs"
+          },
+          "assessment": "original-body-runtime-evidence",
+          "legacy_tests": [
+            "emit::fiber::aggregate::native_string_enum_producers_use_owned_backing_and_heapless_borrowed_tuples_stay_borrowed"
+          ],
+          "original_body_hash_verified": true,
+          "pipeline": "source-to-C",
+          "observations": null,
+          "post_lowering_ir_seam": null,
+          "runtime_assertions": null,
+          "direct_test": {
+            "kind": "source_test",
+            "path": "crates/emela-emb-compiler/tests/p7_aggregate_compat.rs",
+            "symbol": "native_string_enum_producers_use_owned_backing_and_heapless_borrowed_tuples_stay_borrowed_borrowed"
+          },
+          "source_adaptation": "Original body with explicit C exports only. Original C observations and capacities preserved; C symbol/type/release IDs follow the generated header. No post-lowering IR mutation.",
+          "configuration": {
+            "options": "Options::default()",
+            "C_harness": "crates/emela-emb-compiler/tests/compat/p7/concurrency/native_string_enum_producers_use_owned_backing_and_heapless_borrowed_tuples_stay_borrowed_borrowed.c"
+          },
+          "report_validation": {
+            "status": "passed",
+            "legacy_test_count": 12,
+            "new_test_count": 13,
+            "C_optimizations": [
+              "-O0",
+              "-O2"
+            ],
+            "notes": "13 original-source C variants passed with the exact legacy heap/frame/pool budgets after ownership flags were packed; P5 suspend6 and P7 payload3 also passed on the integrated revision."
+          }
+        },
+        {
+          "program": "program:660953efd0834142cd9a",
+          "report": {
+            "revision": "c8ff094",
+            "path": "docs/reports/p7-aggregate-source-compat.json",
+            "format": "entry-programs"
+          },
+          "assessment": "original-body-runtime-evidence",
+          "legacy_tests": [
+            "emit::fiber::aggregate::native_string_enum_producers_use_owned_backing_and_heapless_borrowed_tuples_stay_borrowed"
+          ],
+          "original_body_hash_verified": true,
+          "pipeline": "source-to-C",
+          "observations": null,
+          "post_lowering_ir_seam": null,
+          "runtime_assertions": null,
+          "direct_test": {
+            "kind": "source_test",
+            "path": "crates/emela-emb-compiler/tests/p7_aggregate_compat.rs",
+            "symbol": "native_string_enum_producers_use_owned_backing_and_heapless_borrowed_tuples_stay_borrowed_owned"
+          },
+          "source_adaptation": "Original body with explicit C exports only. Original C observations and capacities preserved; C symbol/type/release IDs follow the generated header. No post-lowering IR mutation.",
+          "configuration": {
+            "options": "Options::default().with_heap_bytes(256)",
+            "C_harness": "crates/emela-emb-compiler/tests/compat/p7/concurrency/native_string_enum_producers_use_owned_backing_and_heapless_borrowed_tuples_stay_borrowed_owned.c"
+          },
+          "report_validation": {
+            "status": "passed",
+            "legacy_test_count": 12,
+            "new_test_count": 13,
+            "C_optimizations": [
+              "-O0",
+              "-O2"
+            ],
+            "notes": "13 original-source C variants passed with the exact legacy heap/frame/pool budgets after ownership flags were packed; P5 suspend6 and P7 payload3 also passed on the integrated revision."
+          }
+        }
+      ],
       "active_assignments": [],
       "reach_snapshot": {
         "program:158234f97251d7d95674": {
@@ -8694,13 +9344,51 @@
         }
       ],
       "legacy_execution_configuration": null,
-      "assessment": "runtime-observation-mapping-open",
+      "assessment": "original-body-runtime-evidence",
       "manual_observation_review": null,
       "existing_ledger_decision": null,
       "families": [
         "aggregate-and-integration"
       ],
-      "runtime_evidence": [],
+      "runtime_evidence": [
+        {
+          "program": "program:ac90e395370d309144f0",
+          "report": {
+            "revision": "c8ff094",
+            "path": "docs/reports/p7-aggregate-source-compat.json",
+            "format": "entry-programs"
+          },
+          "assessment": "original-body-runtime-evidence",
+          "legacy_tests": [
+            "emit::fiber::aggregate::string_aggregates_own_borrowed_inputs_and_native_results_across_suspend_and_cancellation"
+          ],
+          "original_body_hash_verified": true,
+          "pipeline": "source-to-C",
+          "observations": null,
+          "post_lowering_ir_seam": null,
+          "runtime_assertions": null,
+          "direct_test": {
+            "kind": "source_test",
+            "path": "crates/emela-emb-compiler/tests/p7_aggregate_compat.rs",
+            "symbol": "string_aggregates_own_borrowed_inputs_and_native_results_across_suspend_and_cancellation"
+          },
+          "source_adaptation": "Original body with explicit C exports only. Original C observations and capacities preserved; C symbol/type/release IDs follow the generated header. No post-lowering IR mutation.",
+          "configuration": {
+            "options": "options().with_string_capacity(64).with_frame_bytes(768)",
+            "C_harness": "crates/emela-emb-compiler/tests/compat/p7/concurrency/string_aggregates_own_borrowed_inputs_and_native_results_across_suspend_and_cancellation.c"
+          },
+          "report_validation": {
+            "status": "passed",
+            "legacy_test_count": 12,
+            "new_test_count": 13,
+            "C_optimizations": [
+              "-O0",
+              "-O2"
+            ],
+            "notes": "13 original-source C variants passed with the exact legacy heap/frame/pool budgets after ownership flags were packed; P5 suspend6 and P7 payload3 also passed on the integrated revision."
+          }
+        }
+      ],
       "active_assignments": [],
       "reach_snapshot": {
         "program:ac90e395370d309144f0": {
@@ -8850,13 +9538,51 @@
         }
       ],
       "legacy_execution_configuration": null,
-      "assessment": "runtime-observation-mapping-open",
+      "assessment": "original-body-runtime-evidence",
       "manual_observation_review": null,
       "existing_ledger_decision": null,
       "families": [
         "aggregate-and-integration"
       ],
-      "runtime_evidence": [],
+      "runtime_evidence": [
+        {
+          "program": "program:ac90e395370d309144f0",
+          "report": {
+            "revision": "c8ff094",
+            "path": "docs/reports/p7-aggregate-source-compat.json",
+            "format": "entry-programs"
+          },
+          "assessment": "original-body-runtime-evidence",
+          "legacy_tests": [
+            "emit::fiber::aggregate::suspended_child_captures_and_scope_results_keep_string_aggregates_until_last_release"
+          ],
+          "original_body_hash_verified": true,
+          "pipeline": "source-to-C",
+          "observations": null,
+          "post_lowering_ir_seam": null,
+          "runtime_assertions": null,
+          "direct_test": {
+            "kind": "source_test",
+            "path": "crates/emela-emb-compiler/tests/p7_aggregate_compat.rs",
+            "symbol": "suspended_child_captures_and_scope_results_keep_string_aggregates_until_last_release"
+          },
+          "source_adaptation": "Original body with explicit C exports only. Original C observations and capacities preserved; C symbol/type/release IDs follow the generated header. No post-lowering IR mutation.",
+          "configuration": {
+            "options": "options().with_string_capacity(64).with_frame_bytes(768)",
+            "C_harness": "crates/emela-emb-compiler/tests/compat/p7/concurrency/suspended_child_captures_and_scope_results_keep_string_aggregates_until_last_release.c"
+          },
+          "report_validation": {
+            "status": "passed",
+            "legacy_test_count": 12,
+            "new_test_count": 13,
+            "C_optimizations": [
+              "-O0",
+              "-O2"
+            ],
+            "notes": "13 original-source C variants passed with the exact legacy heap/frame/pool budgets after ownership flags were packed; P5 suspend6 and P7 payload3 also passed on the integrated revision."
+          }
+        }
+      ],
       "active_assignments": [],
       "reach_snapshot": {
         "program:ac90e395370d309144f0": {
@@ -9006,13 +9732,51 @@
         }
       ],
       "legacy_execution_configuration": null,
-      "assessment": "runtime-observation-mapping-open",
+      "assessment": "original-body-runtime-evidence",
       "manual_observation_review": null,
       "existing_ledger_decision": null,
       "families": [
         "aggregate-and-integration"
       ],
-      "runtime_evidence": [],
+      "runtime_evidence": [
+        {
+          "program": "program:314587c327ffac8b616b",
+          "report": {
+            "revision": "c8ff094",
+            "path": "docs/reports/p7-aggregate-source-compat.json",
+            "format": "entry-programs"
+          },
+          "assessment": "original-body-runtime-evidence",
+          "legacy_tests": [
+            "emit::fiber::aggregate_abi::both_propagates_managed_failure_from_aggregate_callbacks_and_reclaims_its_sibling"
+          ],
+          "original_body_hash_verified": true,
+          "pipeline": "source-to-C",
+          "observations": null,
+          "post_lowering_ir_seam": null,
+          "runtime_assertions": null,
+          "direct_test": {
+            "kind": "source_test",
+            "path": "crates/emela-emb-compiler/tests/p7_aggregate_compat.rs",
+            "symbol": "both_propagates_managed_failure_from_aggregate_callbacks_and_reclaims_its_sibling"
+          },
+          "source_adaptation": "Original body with explicit C exports only. Original C observations and capacities preserved; C symbol/type/release IDs follow the generated header. No post-lowering IR mutation.",
+          "configuration": {
+            "options": "options().with_heap_bytes(4096).with_string_capacity(64).with_frame_bytes(2048)",
+            "C_harness": "crates/emela-emb-compiler/tests/compat/p7/concurrency/both_propagates_managed_failure_from_aggregate_callbacks_and_reclaims_its_sibling.c"
+          },
+          "report_validation": {
+            "status": "passed",
+            "legacy_test_count": 12,
+            "new_test_count": 13,
+            "C_optimizations": [
+              "-O0",
+              "-O2"
+            ],
+            "notes": "13 original-source C variants passed with the exact legacy heap/frame/pool budgets after ownership flags were packed; P5 suspend6 and P7 payload3 also passed on the integrated revision."
+          }
+        }
+      ],
       "active_assignments": [],
       "reach_snapshot": {
         "program:314587c327ffac8b616b": {
@@ -9147,13 +9911,51 @@
         }
       ],
       "legacy_execution_configuration": null,
-      "assessment": "runtime-observation-mapping-open",
+      "assessment": "original-body-runtime-evidence",
       "manual_observation_review": null,
       "existing_ledger_decision": null,
       "families": [
         "aggregate-and-integration"
       ],
-      "runtime_evidence": [],
+      "runtime_evidence": [
+        {
+          "program": "program:01353e00d829543bae73",
+          "report": {
+            "revision": "c8ff094",
+            "path": "docs/reports/p7-aggregate-source-compat.json",
+            "format": "entry-programs"
+          },
+          "assessment": "original-body-runtime-evidence",
+          "legacy_tests": [
+            "emit::fiber::aggregate_abi::both_returns_nested_string_aggregates_and_cancels_pending_children_without_leaks"
+          ],
+          "original_body_hash_verified": true,
+          "pipeline": "source-to-C",
+          "observations": null,
+          "post_lowering_ir_seam": null,
+          "runtime_assertions": null,
+          "direct_test": {
+            "kind": "source_test",
+            "path": "crates/emela-emb-compiler/tests/p7_aggregate_compat.rs",
+            "symbol": "both_returns_nested_string_aggregates_and_cancels_pending_children_without_leaks"
+          },
+          "source_adaptation": "Original body with explicit C exports only. Original C observations and capacities preserved; C symbol/type/release IDs follow the generated header. No post-lowering IR mutation.",
+          "configuration": {
+            "options": "options().with_heap_bytes(4096).with_string_capacity(64).with_frame_bytes(1024)",
+            "C_harness": "crates/emela-emb-compiler/tests/compat/p7/concurrency/both_returns_nested_string_aggregates_and_cancels_pending_children_without_leaks.c"
+          },
+          "report_validation": {
+            "status": "passed",
+            "legacy_test_count": 12,
+            "new_test_count": 13,
+            "C_optimizations": [
+              "-O0",
+              "-O2"
+            ],
+            "notes": "13 original-source C variants passed with the exact legacy heap/frame/pool budgets after ownership flags were packed; P5 suspend6 and P7 payload3 also passed on the integrated revision."
+          }
+        }
+      ],
       "active_assignments": [],
       "reach_snapshot": {
         "program:01353e00d829543bae73": {
@@ -9270,13 +10072,51 @@
         }
       ],
       "legacy_execution_configuration": null,
-      "assessment": "runtime-observation-mapping-open",
+      "assessment": "original-body-runtime-evidence",
       "manual_observation_review": null,
       "existing_ledger_decision": null,
       "families": [
         "aggregate-and-integration"
       ],
-      "runtime_evidence": [],
+      "runtime_evidence": [
+        {
+          "program": "program:01353e00d829543bae73",
+          "report": {
+            "revision": "c8ff094",
+            "path": "docs/reports/p7-aggregate-source-compat.json",
+            "format": "entry-programs"
+          },
+          "assessment": "original-body-runtime-evidence",
+          "legacy_tests": [
+            "emit::fiber::aggregate_abi::handler_resume_accepts_a_string_enum_and_reclaims_it_when_cancelled_in_either_wait"
+          ],
+          "original_body_hash_verified": true,
+          "pipeline": "source-to-C",
+          "observations": null,
+          "post_lowering_ir_seam": null,
+          "runtime_assertions": null,
+          "direct_test": {
+            "kind": "source_test",
+            "path": "crates/emela-emb-compiler/tests/p7_aggregate_compat.rs",
+            "symbol": "handler_resume_accepts_a_string_enum_and_reclaims_it_when_cancelled_in_either_wait"
+          },
+          "source_adaptation": "Original body with explicit C exports only. Original C observations and capacities preserved; C symbol/type/release IDs follow the generated header. No post-lowering IR mutation.",
+          "configuration": {
+            "options": "options().with_heap_bytes(4096).with_string_capacity(64).with_frame_bytes(1024)",
+            "C_harness": "crates/emela-emb-compiler/tests/compat/p7/concurrency/handler_resume_accepts_a_string_enum_and_reclaims_it_when_cancelled_in_either_wait.c"
+          },
+          "report_validation": {
+            "status": "passed",
+            "legacy_test_count": 12,
+            "new_test_count": 13,
+            "C_optimizations": [
+              "-O0",
+              "-O2"
+            ],
+            "notes": "13 original-source C variants passed with the exact legacy heap/frame/pool budgets after ownership flags were packed; P5 suspend6 and P7 payload3 also passed on the integrated revision."
+          }
+        }
+      ],
       "active_assignments": [],
       "reach_snapshot": {
         "program:01353e00d829543bae73": {
@@ -9393,7 +10233,7 @@
         }
       ],
       "legacy_execution_configuration": null,
-      "assessment": "runtime-observation-mapping-open",
+      "assessment": "original-body-runtime-evidence",
       "manual_observation_review": null,
       "existing_ledger_decision": {
         "status": "pending",
@@ -9404,7 +10244,45 @@
       "families": [
         "aggregate-and-integration"
       ],
-      "runtime_evidence": [],
+      "runtime_evidence": [
+        {
+          "program": "program:01353e00d829543bae73",
+          "report": {
+            "revision": "c8ff094",
+            "path": "docs/reports/p7-aggregate-source-compat.json",
+            "format": "entry-programs"
+          },
+          "assessment": "original-body-runtime-evidence",
+          "legacy_tests": [
+            "emit::fiber::aggregate_abi::scope_returns_string_enum_exits_after_success_or_interruption_and_frame_reuse"
+          ],
+          "original_body_hash_verified": true,
+          "pipeline": "source-to-C",
+          "observations": null,
+          "post_lowering_ir_seam": null,
+          "runtime_assertions": null,
+          "direct_test": {
+            "kind": "source_test",
+            "path": "crates/emela-emb-compiler/tests/p7_aggregate_compat.rs",
+            "symbol": "scope_returns_string_enum_exits_after_success_or_interruption_and_frame_reuse"
+          },
+          "source_adaptation": "Original body with explicit C exports only. Original C observations and capacities preserved; C symbol/type/release IDs follow the generated header. No post-lowering IR mutation.",
+          "configuration": {
+            "options": "options().with_heap_bytes(4096).with_string_capacity(64).with_frame_bytes(1024)",
+            "C_harness": "crates/emela-emb-compiler/tests/compat/p7/concurrency/scope_returns_string_enum_exits_after_success_or_interruption_and_frame_reuse.c"
+          },
+          "report_validation": {
+            "status": "passed",
+            "legacy_test_count": 12,
+            "new_test_count": 13,
+            "C_optimizations": [
+              "-O0",
+              "-O2"
+            ],
+            "notes": "13 original-source C variants passed with the exact legacy heap/frame/pool budgets after ownership flags were packed; P5 suspend6 and P7 payload3 also passed on the integrated revision."
+          }
+        }
+      ],
       "active_assignments": [],
       "reach_snapshot": {
         "program:01353e00d829543bae73": {
@@ -9521,7 +10399,7 @@
         }
       ],
       "legacy_execution_configuration": null,
-      "assessment": "runtime-observation-mapping-open",
+      "assessment": "original-body-runtime-evidence",
       "manual_observation_review": null,
       "existing_ledger_decision": {
         "status": "pending",
@@ -9532,7 +10410,73 @@
       "families": [
         "cause-attempt"
       ],
-      "runtime_evidence": [],
+      "runtime_evidence": [
+        {
+          "program": "program:487a37e912618d251aaf",
+          "report": {
+            "revision": "2650f67",
+            "path": "docs/reports/p7-cause-source-compat.json",
+            "format": "raw-files"
+          },
+          "assessment": "original-body-runtime-evidence",
+          "legacy_tests": [
+            "emit::fiber::attempt::attempt_captures_sync_failure_and_returns_owned_cause"
+          ],
+          "original_body_hash_verified": true,
+          "pipeline": "source-to-C",
+          "observations": {
+            "source_check": "passed",
+            "C_generation": "passed",
+            "C_runtime_O0": "passed",
+            "C_runtime_O2": "passed",
+            "iterations": 1000,
+            "terminal_defect": false,
+            "heap_empty_after_each_fully_released_route": true
+          },
+          "post_lowering_ir_seam": null,
+          "runtime_assertions": [
+            "Alternating success41+1 and typed Boom failure both return42."
+          ],
+          "direct_test": {
+            "kind": "source_test",
+            "path": "crates/emela-emb-compiler/tests/p7_cause_compat.rs",
+            "symbol": "attempt_captures_sync_failure_and_returns_owned_cause"
+          },
+          "source_adaptation": "Original fixture bytes preserved; only explicit C exports added. Old public C symbol suffixes adapted, no post-source IR mutation.",
+          "configuration": {
+            "options": {
+              "heap_bytes": 1024,
+              "fiber_capacity": 8,
+              "frame_capacity": 24,
+              "frame_bytes": 512,
+              "task_capacity": 2,
+              "event_capacity": 2,
+              "task_adapter": {
+                "host_wait": "board_wait_start"
+              }
+            },
+            "C_harness": "crates/emela-emb-compiler/tests/compat/p7/cause/attempt_captures_sync_failure_and_returns_owned_cause.c"
+          },
+          "report_validation": {
+            "command": "CARGO_PROFILE_TEST_OPT_LEVEL=1 cargo test -p emela-emb-compiler --test p7_cause_compat --locked --offline",
+            "passed": 8,
+            "failed": 0,
+            "ignored": 0,
+            "C_flags": [
+              "-std=c11",
+              "-Wall",
+              "-Werror"
+            ],
+            "C_optimizations": [
+              "-O0",
+              "-O2"
+            ],
+            "strict_clippy_all_targets": "passed",
+            "MSRV_1_85_all_targets": "passed",
+            "fmt_diff": "passed"
+          }
+        }
+      ],
       "active_assignments": [],
       "reach_snapshot": {
         "program:487a37e912618d251aaf": {
@@ -9612,13 +10556,79 @@
         }
       ],
       "legacy_execution_configuration": null,
-      "assessment": "runtime-observation-mapping-open",
+      "assessment": "original-body-runtime-evidence",
       "manual_observation_review": null,
       "existing_ledger_decision": null,
       "families": [
         "cause-attempt"
       ],
-      "runtime_evidence": [],
+      "runtime_evidence": [
+        {
+          "program": "program:151d66237ba9b27b858e",
+          "report": {
+            "revision": "2650f67",
+            "path": "docs/reports/p7-cause-source-compat.json",
+            "format": "raw-files"
+          },
+          "assessment": "original-body-runtime-evidence",
+          "legacy_tests": [
+            "emit::fiber::attempt::attempt_keeps_the_embedded_policy_of_stopping_immediately_on_defect"
+          ],
+          "original_body_hash_verified": true,
+          "pipeline": "source-to-C",
+          "observations": {
+            "source_check": "passed",
+            "C_generation": "passed",
+            "C_runtime_O0": "passed",
+            "C_runtime_O2": "passed",
+            "iterations": 1,
+            "terminal_defect": true,
+            "heap_empty_after_each_fully_released_route": false
+          },
+          "post_lowering_ir_seam": null,
+          "runtime_assertions": [
+            "Panic test defect exact11byte message stops immediately; release mark99 never runs. Old process-stop observation retained, no artificial repeated-defect recovery."
+          ],
+          "direct_test": {
+            "kind": "source_test",
+            "path": "crates/emela-emb-compiler/tests/p7_cause_compat.rs",
+            "symbol": "attempt_keeps_the_embedded_policy_of_stopping_immediately_on_defect"
+          },
+          "source_adaptation": "Original fixture bytes preserved; only explicit C exports added. Old public C symbol suffixes adapted, no post-source IR mutation.",
+          "configuration": {
+            "options": {
+              "heap_bytes": 8192,
+              "fiber_capacity": 8,
+              "frame_capacity": 24,
+              "frame_bytes": 512,
+              "task_capacity": 2,
+              "event_capacity": 2,
+              "task_adapter": {
+                "host_wait": "board_wait_start"
+              }
+            },
+            "C_harness": "crates/emela-emb-compiler/tests/compat/p7/cause/attempt_keeps_the_embedded_policy_of_stopping_immediately_on_defect.c"
+          },
+          "report_validation": {
+            "command": "CARGO_PROFILE_TEST_OPT_LEVEL=1 cargo test -p emela-emb-compiler --test p7_cause_compat --locked --offline",
+            "passed": 8,
+            "failed": 0,
+            "ignored": 0,
+            "C_flags": [
+              "-std=c11",
+              "-Wall",
+              "-Werror"
+            ],
+            "C_optimizations": [
+              "-O0",
+              "-O2"
+            ],
+            "strict_clippy_all_targets": "passed",
+            "MSRV_1_85_all_targets": "passed",
+            "fmt_diff": "passed"
+          }
+        }
+      ],
       "active_assignments": [],
       "reach_snapshot": {
         "program:151d66237ba9b27b858e": {
@@ -9698,13 +10708,79 @@
         }
       ],
       "legacy_execution_configuration": null,
-      "assessment": "runtime-observation-mapping-open",
+      "assessment": "original-body-runtime-evidence",
       "manual_observation_review": null,
       "existing_ledger_decision": null,
       "families": [
         "cause-attempt"
       ],
-      "runtime_evidence": [],
+      "runtime_evidence": [
+        {
+          "program": "program:e2cf3f9e45106522dedf",
+          "report": {
+            "revision": "2650f67",
+            "path": "docs/reports/p7-cause-source-compat.json",
+            "format": "raw-files"
+          },
+          "assessment": "original-body-runtime-evidence",
+          "legacy_tests": [
+            "emit::fiber::attempt::attempt_owns_managed_success_and_releases_discarded_results"
+          ],
+          "original_body_hash_verified": true,
+          "pipeline": "source-to-C",
+          "observations": {
+            "source_check": "passed",
+            "C_generation": "passed",
+            "C_runtime_O0": "passed",
+            "C_runtime_O2": "passed",
+            "iterations": 1000,
+            "terminal_defect": false,
+            "heap_empty_after_each_fully_released_route": true
+          },
+          "post_lowering_ir_seam": null,
+          "runtime_assertions": [
+            "Discarded failure and two owning List successes reclaim every allocation; keptsuccess length2+40==42."
+          ],
+          "direct_test": {
+            "kind": "source_test",
+            "path": "crates/emela-emb-compiler/tests/p7_cause_compat.rs",
+            "symbol": "attempt_owns_managed_success_and_releases_discarded_results"
+          },
+          "source_adaptation": "Original fixture bytes preserved; only explicit C exports added. Old public C symbol suffixes adapted, no post-source IR mutation.",
+          "configuration": {
+            "options": {
+              "heap_bytes": 2048,
+              "fiber_capacity": 8,
+              "frame_capacity": 24,
+              "frame_bytes": 512,
+              "task_capacity": 2,
+              "event_capacity": 2,
+              "task_adapter": {
+                "host_wait": "board_wait_start"
+              }
+            },
+            "C_harness": "crates/emela-emb-compiler/tests/compat/p7/cause/attempt_owns_managed_success_and_releases_discarded_results.c"
+          },
+          "report_validation": {
+            "command": "CARGO_PROFILE_TEST_OPT_LEVEL=1 cargo test -p emela-emb-compiler --test p7_cause_compat --locked --offline",
+            "passed": 8,
+            "failed": 0,
+            "ignored": 0,
+            "C_flags": [
+              "-std=c11",
+              "-Wall",
+              "-Werror"
+            ],
+            "C_optimizations": [
+              "-O0",
+              "-O2"
+            ],
+            "strict_clippy_all_targets": "passed",
+            "MSRV_1_85_all_targets": "passed",
+            "fmt_diff": "passed"
+          }
+        }
+      ],
       "active_assignments": [],
       "reach_snapshot": {
         "program:e2cf3f9e45106522dedf": {
@@ -9784,13 +10860,79 @@
         }
       ],
       "legacy_execution_configuration": null,
-      "assessment": "runtime-observation-mapping-open",
+      "assessment": "original-body-runtime-evidence",
       "manual_observation_review": null,
       "existing_ledger_decision": null,
       "families": [
         "cause-attempt"
       ],
-      "runtime_evidence": [],
+      "runtime_evidence": [
+        {
+          "program": "program:fc4001cbeeb0256ac68c",
+          "report": {
+            "revision": "2650f67",
+            "path": "docs/reports/p7-cause-source-compat.json",
+            "format": "raw-files"
+          },
+          "assessment": "original-body-runtime-evidence",
+          "legacy_tests": [
+            "emit::fiber::attempt::attempt_waits_for_async_cleanup_before_catching_failure"
+          ],
+          "original_body_hash_verified": true,
+          "pipeline": "source-to-C",
+          "observations": {
+            "source_check": "passed",
+            "C_generation": "passed",
+            "C_runtime_O0": "passed",
+            "C_runtime_O2": "passed",
+            "iterations": 1000,
+            "terminal_defect": false,
+            "heap_empty_after_each_fully_released_route": true
+          },
+          "post_lowering_ir_seam": null,
+          "runtime_assertions": [
+            "Source marks1/2/3 and waits1/2; both success and typedfailure wait for asynchronous release before publishing42."
+          ],
+          "direct_test": {
+            "kind": "source_test",
+            "path": "crates/emela-emb-compiler/tests/p7_cause_compat.rs",
+            "symbol": "attempt_waits_for_async_cleanup_before_catching_failure"
+          },
+          "source_adaptation": "Original fixture bytes preserved; only explicit C exports added. Old public C symbol suffixes adapted, no post-source IR mutation.",
+          "configuration": {
+            "options": {
+              "heap_bytes": 4096,
+              "fiber_capacity": 8,
+              "frame_capacity": 24,
+              "frame_bytes": 512,
+              "task_capacity": 2,
+              "event_capacity": 2,
+              "task_adapter": {
+                "host_wait": "board_wait_start"
+              }
+            },
+            "C_harness": "crates/emela-emb-compiler/tests/compat/p7/cause/attempt_waits_for_async_cleanup_before_catching_failure.c"
+          },
+          "report_validation": {
+            "command": "CARGO_PROFILE_TEST_OPT_LEVEL=1 cargo test -p emela-emb-compiler --test p7_cause_compat --locked --offline",
+            "passed": 8,
+            "failed": 0,
+            "ignored": 0,
+            "C_flags": [
+              "-std=c11",
+              "-Wall",
+              "-Werror"
+            ],
+            "C_optimizations": [
+              "-O0",
+              "-O2"
+            ],
+            "strict_clippy_all_targets": "passed",
+            "MSRV_1_85_all_targets": "passed",
+            "fmt_diff": "passed"
+          }
+        }
+      ],
       "active_assignments": [],
       "reach_snapshot": {
         "program:fc4001cbeeb0256ac68c": {
@@ -11757,7 +12899,7 @@
         }
       ],
       "legacy_execution_configuration": null,
-      "assessment": "runtime-observation-mapping-open",
+      "assessment": "original-body-runtime-evidence",
       "manual_observation_review": null,
       "existing_ledger_decision": {
         "status": "pending",
@@ -11768,7 +12910,73 @@
       "families": [
         "cause-attempt"
       ],
-      "runtime_evidence": [],
+      "runtime_evidence": [
+        {
+          "program": "program:902e83bb72b886983dd2",
+          "report": {
+            "revision": "2650f67",
+            "path": "docs/reports/p7-cause-source-compat.json",
+            "format": "raw-files"
+          },
+          "assessment": "original-body-runtime-evidence",
+          "legacy_tests": [
+            "emit::fiber::cause::cause_kind_reads_failure_without_consuming_the_cause"
+          ],
+          "original_body_hash_verified": true,
+          "pipeline": "source-to-C",
+          "observations": {
+            "source_check": "passed",
+            "C_generation": "passed",
+            "C_runtime_O0": "passed",
+            "C_runtime_O2": "passed",
+            "iterations": 1000,
+            "terminal_defect": false,
+            "heap_empty_after_each_fully_released_route": true
+          },
+          "post_lowering_ir_seam": null,
+          "runtime_assertions": [
+            "Discarded first Cause.kind leaves cause alive for second Fail kind match returning42."
+          ],
+          "direct_test": {
+            "kind": "source_test",
+            "path": "crates/emela-emb-compiler/tests/p7_cause_compat.rs",
+            "symbol": "cause_kind_reads_failure_without_consuming_the_cause"
+          },
+          "source_adaptation": "Original fixture bytes preserved; only explicit C exports added. Old public C symbol suffixes adapted, no post-source IR mutation.",
+          "configuration": {
+            "options": {
+              "heap_bytes": 1024,
+              "fiber_capacity": 8,
+              "frame_capacity": 24,
+              "frame_bytes": 512,
+              "task_capacity": 2,
+              "event_capacity": 2,
+              "task_adapter": {
+                "host_wait": "board_wait_start"
+              }
+            },
+            "C_harness": "crates/emela-emb-compiler/tests/compat/p7/cause/cause_kind_reads_failure_without_consuming_the_cause.c"
+          },
+          "report_validation": {
+            "command": "CARGO_PROFILE_TEST_OPT_LEVEL=1 cargo test -p emela-emb-compiler --test p7_cause_compat --locked --offline",
+            "passed": 8,
+            "failed": 0,
+            "ignored": 0,
+            "C_flags": [
+              "-std=c11",
+              "-Wall",
+              "-Werror"
+            ],
+            "C_optimizations": [
+              "-O0",
+              "-O2"
+            ],
+            "strict_clippy_all_targets": "passed",
+            "MSRV_1_85_all_targets": "passed",
+            "fmt_diff": "passed"
+          }
+        }
+      ],
       "active_assignments": [],
       "reach_snapshot": {
         "program:902e83bb72b886983dd2": {
@@ -11848,7 +13056,7 @@
         }
       ],
       "legacy_execution_configuration": null,
-      "assessment": "runtime-observation-mapping-open",
+      "assessment": "original-body-runtime-evidence",
       "manual_observation_review": null,
       "existing_ledger_decision": {
         "status": "pending",
@@ -11859,7 +13067,73 @@
       "families": [
         "cause-attempt"
       ],
-      "runtime_evidence": [],
+      "runtime_evidence": [
+        {
+          "program": "program:fb2aa71c1044bb6ef15e",
+          "report": {
+            "revision": "2650f67",
+            "path": "docs/reports/p7-cause-source-compat.json",
+            "format": "raw-files"
+          },
+          "assessment": "original-body-runtime-evidence",
+          "legacy_tests": [
+            "emit::fiber::cause::cause_raise_preserves_the_error_and_runs_native_cleanup_before_escape"
+          ],
+          "original_body_hash_verified": true,
+          "pipeline": "source-to-C",
+          "observations": {
+            "source_check": "passed",
+            "C_generation": "passed",
+            "C_runtime_O0": "passed",
+            "C_runtime_O2": "passed",
+            "iterations": 1000,
+            "terminal_defect": false,
+            "heap_empty_after_each_fully_released_route": true
+          },
+          "post_lowering_ir_seam": null,
+          "runtime_assertions": [
+            "Rethrow preserves typed Boom42 and invokes native resource release exactly once before outerescape."
+          ],
+          "direct_test": {
+            "kind": "source_test",
+            "path": "crates/emela-emb-compiler/tests/p7_cause_compat.rs",
+            "symbol": "cause_raise_preserves_the_error_and_runs_native_cleanup_before_escape"
+          },
+          "source_adaptation": "Original fixture bytes preserved; only explicit C exports added. Old public C symbol suffixes adapted, no post-source IR mutation.",
+          "configuration": {
+            "options": {
+              "heap_bytes": 1024,
+              "fiber_capacity": 8,
+              "frame_capacity": 24,
+              "frame_bytes": 512,
+              "task_capacity": 2,
+              "event_capacity": 2,
+              "task_adapter": {
+                "host_wait": "board_wait_start"
+              }
+            },
+            "C_harness": "crates/emela-emb-compiler/tests/compat/p7/cause/cause_raise_preserves_the_error_and_runs_native_cleanup_before_escape.c"
+          },
+          "report_validation": {
+            "command": "CARGO_PROFILE_TEST_OPT_LEVEL=1 cargo test -p emela-emb-compiler --test p7_cause_compat --locked --offline",
+            "passed": 8,
+            "failed": 0,
+            "ignored": 0,
+            "C_flags": [
+              "-std=c11",
+              "-Wall",
+              "-Werror"
+            ],
+            "C_optimizations": [
+              "-O0",
+              "-O2"
+            ],
+            "strict_clippy_all_targets": "passed",
+            "MSRV_1_85_all_targets": "passed",
+            "fmt_diff": "passed"
+          }
+        }
+      ],
       "active_assignments": [],
       "reach_snapshot": {
         "program:fb2aa71c1044bb6ef15e": {
@@ -11939,7 +13213,7 @@
         }
       ],
       "legacy_execution_configuration": null,
-      "assessment": "runtime-observation-mapping-open",
+      "assessment": "original-body-runtime-evidence",
       "manual_observation_review": null,
       "existing_ledger_decision": {
         "status": "pending",
@@ -11950,7 +13224,73 @@
       "families": [
         "cause-attempt"
       ],
-      "runtime_evidence": [],
+      "runtime_evidence": [
+        {
+          "program": "program:22fce5f6553a191ca752",
+          "report": {
+            "revision": "2650f67",
+            "path": "docs/reports/p7-cause-source-compat.json",
+            "format": "raw-files"
+          },
+          "assessment": "original-body-runtime-evidence",
+          "legacy_tests": [
+            "emit::fiber::cause::cause_to_string_uses_error_show_and_caller_output_buffer"
+          ],
+          "original_body_hash_verified": true,
+          "pipeline": "source-to-C",
+          "observations": {
+            "source_check": "passed",
+            "C_generation": "passed",
+            "C_runtime_O0": "passed",
+            "C_runtime_O2": "passed",
+            "iterations": 1000,
+            "terminal_defect": false,
+            "heap_empty_after_each_fully_released_route": true
+          },
+          "post_lowering_ir_seam": null,
+          "runtime_assertions": [
+            "Owned Cause contains Int32MIN; exact error: Boom(n: -2147483648) is returned in the caller256byte buffer."
+          ],
+          "direct_test": {
+            "kind": "source_test",
+            "path": "crates/emela-emb-compiler/tests/p7_cause_compat.rs",
+            "symbol": "cause_to_string_uses_error_show_and_caller_output_buffer"
+          },
+          "source_adaptation": "Original fixture bytes preserved; only explicit C exports added. Old public C symbol suffixes adapted, no post-source IR mutation.",
+          "configuration": {
+            "options": {
+              "heap_bytes": 2048,
+              "fiber_capacity": 8,
+              "frame_capacity": 24,
+              "frame_bytes": 512,
+              "task_capacity": 2,
+              "event_capacity": 2,
+              "task_adapter": {
+                "host_wait": "board_wait_start"
+              }
+            },
+            "C_harness": "crates/emela-emb-compiler/tests/compat/p7/cause/cause_to_string_uses_error_show_and_caller_output_buffer.c"
+          },
+          "report_validation": {
+            "command": "CARGO_PROFILE_TEST_OPT_LEVEL=1 cargo test -p emela-emb-compiler --test p7_cause_compat --locked --offline",
+            "passed": 8,
+            "failed": 0,
+            "ignored": 0,
+            "C_flags": [
+              "-std=c11",
+              "-Wall",
+              "-Werror"
+            ],
+            "C_optimizations": [
+              "-O0",
+              "-O2"
+            ],
+            "strict_clippy_all_targets": "passed",
+            "MSRV_1_85_all_targets": "passed",
+            "fmt_diff": "passed"
+          }
+        }
+      ],
       "active_assignments": [],
       "reach_snapshot": {
         "program:22fce5f6553a191ca752": {
@@ -12047,13 +13387,88 @@
         }
       ],
       "legacy_execution_configuration": null,
-      "assessment": "runtime-observation-mapping-open",
+      "assessment": "original-body-runtime-evidence",
       "manual_observation_review": null,
       "existing_ledger_decision": null,
       "families": [
         "cause-attempt"
       ],
-      "runtime_evidence": [],
+      "runtime_evidence": [
+        {
+          "program": "program:46dc34d9a56eaa8cb857",
+          "report": {
+            "revision": "da721f2",
+            "path": "docs/reports/p7-cause-ir-seam-compat.json",
+            "format": "raw-files"
+          },
+          "assessment": "original-body-runtime-evidence",
+          "legacy_tests": [
+            "emit::fiber::cause::failed_empty_cause_raised_in_cleanup_returns_to_its_failing_scope"
+          ],
+          "original_body_hash_verified": true,
+          "pipeline": "source-IR-adaptation-to-C",
+          "observations": {
+            "source_check": "passed",
+            "C_generation": "passed",
+            "C_runtime_O0": "passed",
+            "C_runtime_O2": "passed",
+            "iterations": 1000,
+            "heap_empty_after_each": true,
+            "pure_source_runtime": false
+          },
+          "post_lowering_ir_seam": {
+            "name": "protect_cleanup_call",
+            "path": "crates/emela-emb-compiler/src/backend/lower/p7_source_seams.rs",
+            "fixed_old_path": "crates/emela-codegen-emb/tests/fiber/interrupt.rs",
+            "fixed_old_line": 251,
+            "algorithm": "Same exactcount1 transform: the finalcleanupCall moves into Protect cleanup. Required EvExtend/EvLookup dependency prefix is hoisted in original order, body Yield result is kept through a fresh typed destination.",
+            "adaptation": "Independent Program/arenas replace Module. Existing variable repr is copied; ConstInt result uses I32. Old letchain is nested if for MSRV1.85."
+          },
+          "runtime_assertions": [
+            "Empty-row FailureCause raised synchronously or afterthirdwait in cleanup reaches the failingScope and preserves Boom42; NULLoutput/stale task/mark1then2/fullheapfree."
+          ],
+          "direct_test": {
+            "kind": "source_test",
+            "path": "crates/emela-emb-compiler/src/backend/lower/p7_cause_source_seam_tests.rs",
+            "symbol": "failed_empty_cause_raised_in_cleanup_returns_to_its_failing_scope"
+          },
+          "source_adaptation": "Fixture original bytes preserved; explicit C exports only. Normal independent frontend pipeline completes before applying the explicit fixed-old IR test adaptation. Not pure-source-only runtime evidence.",
+          "configuration": {
+            "options": {
+              "heap_bytes": 4096,
+              "fiber_capacity": 8,
+              "frame_capacity": 24,
+              "frame_bytes": 512,
+              "task_capacity": 3,
+              "event_capacity": 3,
+              "task_adapter": {
+                "host_wait": "board_wait_start"
+              }
+            },
+            "C_harness": "crates/emela-emb-compiler/tests/compat/p7/cause/failed_empty_cause_raised_in_cleanup_returns_to_its_failing_scope.c"
+          },
+          "report_validation": {
+            "command": "CARGO_PROFILE_TEST_OPT_LEVEL=1 cargo test -p emela-emb-compiler --lib p7_cause_source_seams --locked --offline",
+            "passed": 2,
+            "program_variants": 4,
+            "failed": 0,
+            "ignored": 0,
+            "C_flags": [
+              "-std=c11",
+              "-Wall",
+              "-Wextra",
+              "-Werror"
+            ],
+            "C_optimizations": [
+              "-O0",
+              "-O2"
+            ],
+            "strict_clippy_all_targets": "passed",
+            "MSRV_1_85_all_targets": "passed",
+            "fmt_diff": "passed"
+          }
+        }
+      ],
       "active_assignments": [],
       "reach_snapshot": {
         "program:46dc34d9a56eaa8cb857": {
@@ -12163,13 +13578,236 @@
           }
         ]
       },
-      "assessment": "runtime-observation-mapping-open",
+      "assessment": "original-body-runtime-evidence",
       "manual_observation_review": null,
       "existing_ledger_decision": null,
       "families": [
         "cause-attempt"
       ],
-      "runtime_evidence": [],
+      "runtime_evidence": [
+        {
+          "program": "program:365026ebd97818c119c3",
+          "report": {
+            "revision": "da721f2",
+            "path": "docs/reports/p7-cause-ir-seam-compat.json",
+            "format": "raw-files"
+          },
+          "assessment": "original-body-runtime-evidence",
+          "legacy_tests": [
+            "emit::fiber::cause::interruption_raised_by_cleanup_replaces_a_body_failure"
+          ],
+          "original_body_hash_verified": true,
+          "pipeline": "source-IR-adaptation-to-C",
+          "observations": {
+            "source_check": "passed",
+            "C_generation": "passed",
+            "C_runtime_O0": "passed",
+            "C_runtime_O2": "passed",
+            "iterations": 1000,
+            "heap_empty_after_each": true,
+            "pure_source_runtime": false
+          },
+          "post_lowering_ir_seam": {
+            "name": "protect_cleanup_call",
+            "path": "crates/emela-emb-compiler/src/backend/lower/p7_source_seams.rs",
+            "fixed_old_path": "crates/emela-codegen-emb/tests/fiber/interrupt.rs",
+            "fixed_old_line": 251,
+            "algorithm": "Same exactcount1 transform: the finalcleanupCall moves into Protect cleanup. Required EvExtend/EvLookup dependency prefix is hoisted in original order, body Yield result is kept through a fresh typed destination.",
+            "adaptation": "Independent Program/arenas replace Module. Existing variable repr is copied; ConstInt result uses I32. Old letchain is nested if for MSRV1.85."
+          },
+          "runtime_assertions": [
+            "Interruption raised by cleanup replaces the bodyBoomfailure, skipsmark99 and errorhandler mark3, waits whenprotectedmode1 is asynchronous, still runs Resource release mark2, result42 or NULLoutput unchanged; Cause and frameheapfree."
+          ],
+          "direct_test": {
+            "kind": "source_test",
+            "path": "crates/emela-emb-compiler/src/backend/lower/p7_cause_source_seam_tests.rs",
+            "symbol": "interruption_raised_by_cleanup_replaces_a_body_failure"
+          },
+          "source_adaptation": "Fixture original bytes preserved; explicit C exports only. Normal independent frontend pipeline completes before applying the explicit fixed-old IR test adaptation. Not pure-source-only runtime evidence.",
+          "configuration": {
+            "options": {
+              "heap_bytes": 4096,
+              "fiber_capacity": 8,
+              "frame_capacity": 24,
+              "frame_bytes": 512,
+              "task_capacity": 3,
+              "event_capacity": 3,
+              "task_adapter": {
+                "host_wait": "board_wait_start"
+              }
+            },
+            "C_harness": "crates/emela-emb-compiler/tests/compat/p7/cause/interruption_raised_by_cleanup_replaces_a_body_failure.c"
+          },
+          "report_validation": {
+            "command": "CARGO_PROFILE_TEST_OPT_LEVEL=1 cargo test -p emela-emb-compiler --lib p7_cause_source_seams --locked --offline",
+            "passed": 2,
+            "program_variants": 4,
+            "failed": 0,
+            "ignored": 0,
+            "C_flags": [
+              "-std=c11",
+              "-Wall",
+              "-Wextra",
+              "-Werror"
+            ],
+            "C_optimizations": [
+              "-O0",
+              "-O2"
+            ],
+            "strict_clippy_all_targets": "passed",
+            "MSRV_1_85_all_targets": "passed",
+            "fmt_diff": "passed"
+          }
+        },
+        {
+          "program": "program:595e65424d0f6b93c750",
+          "report": {
+            "revision": "da721f2",
+            "path": "docs/reports/p7-cause-ir-seam-compat.json",
+            "format": "raw-files"
+          },
+          "assessment": "original-body-runtime-evidence",
+          "legacy_tests": [
+            "emit::fiber::cause::interruption_raised_by_cleanup_replaces_a_body_failure"
+          ],
+          "original_body_hash_verified": true,
+          "pipeline": "source-IR-adaptation-to-C",
+          "observations": {
+            "source_check": "passed",
+            "C_generation": "passed",
+            "C_runtime_O0": "passed",
+            "C_runtime_O2": "passed",
+            "iterations": 1000,
+            "heap_empty_after_each": true,
+            "pure_source_runtime": false
+          },
+          "post_lowering_ir_seam": {
+            "name": "protect_cleanup_call",
+            "path": "crates/emela-emb-compiler/src/backend/lower/p7_source_seams.rs",
+            "fixed_old_path": "crates/emela-codegen-emb/tests/fiber/interrupt.rs",
+            "fixed_old_line": 251,
+            "algorithm": "Same exactcount1 transform: the finalcleanupCall moves into Protect cleanup. Required EvExtend/EvLookup dependency prefix is hoisted in original order, body Yield result is kept through a fresh typed destination.",
+            "adaptation": "Independent Program/arenas replace Module. Existing variable repr is copied; ConstInt result uses I32. Old letchain is nested if for MSRV1.85."
+          },
+          "runtime_assertions": [
+            "Interruption raised by cleanup replaces the bodyBoomfailure, skipsmark99 and errorhandler mark3, waits whenprotectedmode1 is asynchronous, still runs Resource release mark2, result42 or NULLoutput unchanged; Cause and frameheapfree."
+          ],
+          "direct_test": {
+            "kind": "source_test",
+            "path": "crates/emela-emb-compiler/src/backend/lower/p7_cause_source_seam_tests.rs",
+            "symbol": "interruption_raised_by_cleanup_replaces_a_body_failure"
+          },
+          "source_adaptation": "Fixture original bytes preserved; explicit C exports only. Normal independent frontend pipeline completes before applying the explicit fixed-old IR test adaptation. Not pure-source-only runtime evidence.",
+          "configuration": {
+            "options": {
+              "heap_bytes": 4096,
+              "fiber_capacity": 8,
+              "frame_capacity": 24,
+              "frame_bytes": 512,
+              "task_capacity": 3,
+              "event_capacity": 3,
+              "task_adapter": {
+                "host_wait": "board_wait_start"
+              }
+            },
+            "C_harness": "crates/emela-emb-compiler/tests/compat/p7/cause/interruption_raised_by_cleanup_replaces_a_body_failure.c"
+          },
+          "report_validation": {
+            "command": "CARGO_PROFILE_TEST_OPT_LEVEL=1 cargo test -p emela-emb-compiler --lib p7_cause_source_seams --locked --offline",
+            "passed": 2,
+            "program_variants": 4,
+            "failed": 0,
+            "ignored": 0,
+            "C_flags": [
+              "-std=c11",
+              "-Wall",
+              "-Wextra",
+              "-Werror"
+            ],
+            "C_optimizations": [
+              "-O0",
+              "-O2"
+            ],
+            "strict_clippy_all_targets": "passed",
+            "MSRV_1_85_all_targets": "passed",
+            "fmt_diff": "passed"
+          }
+        },
+        {
+          "program": "program:7297d3dd83b075ef0fb0",
+          "report": {
+            "revision": "da721f2",
+            "path": "docs/reports/p7-cause-ir-seam-compat.json",
+            "format": "raw-files"
+          },
+          "assessment": "original-body-runtime-evidence",
+          "legacy_tests": [
+            "emit::fiber::cause::interruption_raised_by_cleanup_replaces_a_body_failure"
+          ],
+          "original_body_hash_verified": true,
+          "pipeline": "source-IR-adaptation-to-C",
+          "observations": {
+            "source_check": "passed",
+            "C_generation": "passed",
+            "C_runtime_O0": "passed",
+            "C_runtime_O2": "passed",
+            "iterations": 1000,
+            "heap_empty_after_each": true,
+            "pure_source_runtime": false
+          },
+          "post_lowering_ir_seam": {
+            "name": "protect_cleanup_call",
+            "path": "crates/emela-emb-compiler/src/backend/lower/p7_source_seams.rs",
+            "fixed_old_path": "crates/emela-codegen-emb/tests/fiber/interrupt.rs",
+            "fixed_old_line": 251,
+            "algorithm": "Same exactcount1 transform: the finalcleanupCall moves into Protect cleanup. Required EvExtend/EvLookup dependency prefix is hoisted in original order, body Yield result is kept through a fresh typed destination.",
+            "adaptation": "Independent Program/arenas replace Module. Existing variable repr is copied; ConstInt result uses I32. Old letchain is nested if for MSRV1.85."
+          },
+          "runtime_assertions": [
+            "Interruption raised by cleanup replaces the bodyBoomfailure, skipsmark99 and errorhandler mark3, waits whenprotectedmode1 is asynchronous, still runs Resource release mark2, result42 or NULLoutput unchanged; Cause and frameheapfree."
+          ],
+          "direct_test": {
+            "kind": "source_test",
+            "path": "crates/emela-emb-compiler/src/backend/lower/p7_cause_source_seam_tests.rs",
+            "symbol": "interruption_raised_by_cleanup_replaces_a_body_failure"
+          },
+          "source_adaptation": "Fixture original bytes preserved; explicit C exports only. Normal independent frontend pipeline completes before applying the explicit fixed-old IR test adaptation. Not pure-source-only runtime evidence.",
+          "configuration": {
+            "options": {
+              "heap_bytes": 4096,
+              "fiber_capacity": 8,
+              "frame_capacity": 24,
+              "frame_bytes": 512,
+              "task_capacity": 3,
+              "event_capacity": 3,
+              "task_adapter": {
+                "host_wait": "board_wait_start"
+              }
+            },
+            "C_harness": "crates/emela-emb-compiler/tests/compat/p7/cause/interruption_raised_by_cleanup_replaces_a_body_failure.c"
+          },
+          "report_validation": {
+            "command": "CARGO_PROFILE_TEST_OPT_LEVEL=1 cargo test -p emela-emb-compiler --lib p7_cause_source_seams --locked --offline",
+            "passed": 2,
+            "program_variants": 4,
+            "failed": 0,
+            "ignored": 0,
+            "C_flags": [
+              "-std=c11",
+              "-Wall",
+              "-Wextra",
+              "-Werror"
+            ],
+            "C_optimizations": [
+              "-O0",
+              "-O2"
+            ],
+            "strict_clippy_all_targets": "passed",
+            "MSRV_1_85_all_targets": "passed",
+            "fmt_diff": "passed"
+          }
+        }
+      ],
       "active_assignments": [],
       "reach_snapshot": {
         "program:365026ebd97818c119c3": {
@@ -12364,13 +14002,80 @@
         }
       ],
       "legacy_execution_configuration": null,
-      "assessment": "runtime-observation-mapping-open",
+      "assessment": "original-body-runtime-evidence",
       "manual_observation_review": null,
       "existing_ledger_decision": null,
       "families": [
         "cause-attempt"
       ],
-      "runtime_evidence": [],
+      "runtime_evidence": [
+        {
+          "program": "program:895a9eae3b9139e79bf7",
+          "report": {
+            "revision": "2650f67",
+            "path": "docs/reports/p7-cause-source-compat.json",
+            "format": "raw-files"
+          },
+          "assessment": "original-body-runtime-evidence",
+          "legacy_tests": [
+            "emit::fiber::cause::raised_interruption_crosses_sync_calls_and_attempt_without_becoming_a_value"
+          ],
+          "original_body_hash_verified": true,
+          "pipeline": "source-to-C",
+          "observations": {
+            "source_check": "passed",
+            "C_generation": "passed",
+            "C_runtime_O0": "passed",
+            "C_runtime_O2": "passed",
+            "iterations": 1000,
+            "terminal_defect": false,
+            "heap_empty_after_each_fully_released_route": true
+          },
+          "post_lowering_ir_seam": null,
+          "runtime_assertions": [
+            "Make owns emptyrow Interrupt Cause across scope/fiber recycling; display is exact interrupted.",
+            "Sync and asyncbounce through Attempt preserve interruption control, skipmark99, run Inner/Outer releases1/2 then3; return42 and reject stale task completion."
+          ],
+          "direct_test": {
+            "kind": "source_test",
+            "path": "crates/emela-emb-compiler/tests/p7_cause_compat.rs",
+            "symbol": "raised_interruption_crosses_sync_calls_and_attempt_without_becoming_a_value"
+          },
+          "source_adaptation": "Original fixture bytes preserved; only explicit C exports added. Old public C symbol suffixes adapted, no post-source IR mutation.",
+          "configuration": {
+            "options": {
+              "heap_bytes": 8192,
+              "fiber_capacity": 10,
+              "frame_capacity": 24,
+              "frame_bytes": 512,
+              "task_capacity": 2,
+              "event_capacity": 2,
+              "task_adapter": {
+                "host_wait": "board_wait_start"
+              }
+            },
+            "C_harness": "crates/emela-emb-compiler/tests/compat/p7/cause/raised_interruption_crosses_sync_calls_and_attempt_without_becoming_a_value.c"
+          },
+          "report_validation": {
+            "command": "CARGO_PROFILE_TEST_OPT_LEVEL=1 cargo test -p emela-emb-compiler --test p7_cause_compat --locked --offline",
+            "passed": 8,
+            "failed": 0,
+            "ignored": 0,
+            "C_flags": [
+              "-std=c11",
+              "-Wall",
+              "-Werror"
+            ],
+            "C_optimizations": [
+              "-O0",
+              "-O2"
+            ],
+            "strict_clippy_all_targets": "passed",
+            "MSRV_1_85_all_targets": "passed",
+            "fmt_diff": "passed"
+          }
+        }
+      ],
       "active_assignments": [],
       "reach_snapshot": {
         "program:895a9eae3b9139e79bf7": {
@@ -13980,13 +15685,70 @@
         }
       ],
       "legacy_execution_configuration": null,
-      "assessment": "runtime-observation-mapping-open",
+      "assessment": "original-body-runtime-evidence",
       "manual_observation_review": null,
       "existing_ledger_decision": null,
       "families": [
         "cleanup-interruption-notes"
       ],
-      "runtime_evidence": [],
+      "runtime_evidence": [
+        {
+          "program": "program:334221286a172894b8cb",
+          "report": {
+            "revision": "88677b6",
+            "path": "docs/reports/p7-cleanup-ir-seam-compat.json",
+            "format": "raw-files"
+          },
+          "assessment": "original-body-runtime-evidence",
+          "legacy_tests": [
+            "emit::fiber::failure::masked_cleanup_can_await_the_failed_child_before_scope_error_propagates"
+          ],
+          "original_body_hash_verified": true,
+          "pipeline": "source-IR-adaptation-to-C",
+          "observations": {
+            "source_check": "passed",
+            "C_generation": "passed",
+            "C_runtime_O0": "passed",
+            "C_runtime_O2": "passed",
+            "pure_source_runtime": false,
+            "iterations": 1000,
+            "heap_empty_after_each": true
+          },
+          "post_lowering_ir_seam": [
+            "protect_cleanup_call"
+          ],
+          "runtime_assertions": [
+            "n>=1 && n<=2",
+            "!joined && marks++==0",
+            "n==2 && marks++==!joined",
+            "waits==2",
+            "emela_task_complete_int(tasks[0],0)",
+            "emela_scheduler_run(1)",
+            "result==42 && marks==2-joined && !emela_task_complete_int(tasks[1],0)"
+          ],
+          "direct_test": {
+            "kind": "source_to_ir_seam_test",
+            "path": "crates/emela-emb-compiler/src/backend/lower/p7_cleanup_source_seam_tests.rs",
+            "symbol": "masked_cleanup_can_await_the_failed_child_before_scope_error_propagates"
+          },
+          "source_adaptation": "original corpus source bytes + explicit C exports only; normal frontend pipeline first, then only the named exact old post-source IR seam(s).",
+          "configuration": {
+            "options": {
+              "heap_bytes": 8192,
+              "fiber_capacity": 8,
+              "frame_capacity": 24,
+              "frame_bytes": 512,
+              "task_capacity": 2,
+              "event_capacity": 2,
+              "task_adapters": {
+                "host_wait": "board_wait_start"
+              }
+            },
+            "C_harness": "crates/emela-emb-compiler/tests/compat/p7/cleanup/masked_cleanup_can_await_the_failed_child_before_scope_error_propagates.c"
+          },
+          "report_validation": null
+        }
+      ],
       "active_assignments": [],
       "reach_snapshot": {
         "program:334221286a172894b8cb": {
@@ -14804,13 +16566,51 @@
         }
       ],
       "legacy_execution_configuration": null,
-      "assessment": "runtime-observation-mapping-open",
+      "assessment": "original-body-runtime-evidence",
       "manual_observation_review": null,
       "existing_ledger_decision": null,
       "families": [
         "aggregate-and-integration"
       ],
-      "runtime_evidence": [],
+      "runtime_evidence": [
+        {
+          "program": "program:fce8a13404a3ab9ab16c",
+          "report": {
+            "revision": "c8ff094",
+            "path": "docs/reports/p7-aggregate-source-compat.json",
+            "format": "entry-programs"
+          },
+          "assessment": "original-body-runtime-evidence",
+          "legacy_tests": [
+            "emit::fiber::function_aggregate::failing_indirect_aggregate_calls_release_discarded_successes_and_preserve_string_errors"
+          ],
+          "original_body_hash_verified": true,
+          "pipeline": "source-to-C",
+          "observations": null,
+          "post_lowering_ir_seam": null,
+          "runtime_assertions": null,
+          "direct_test": {
+            "kind": "source_test",
+            "path": "crates/emela-emb-compiler/tests/p7_aggregate_compat.rs",
+            "symbol": "failing_indirect_aggregate_calls_release_discarded_successes_and_preserve_string_errors"
+          },
+          "source_adaptation": "Original body with explicit C exports only. Original C observations and capacities preserved; C symbol/type/release IDs follow the generated header. No post-lowering IR mutation.",
+          "configuration": {
+            "options": "Options::default().with_heap_bytes(2048).with_string_capacity(64)",
+            "C_harness": "crates/emela-emb-compiler/tests/compat/p7/concurrency/failing_indirect_aggregate_calls_release_discarded_successes_and_preserve_string_errors.c"
+          },
+          "report_validation": {
+            "status": "passed",
+            "legacy_test_count": 12,
+            "new_test_count": 13,
+            "C_optimizations": [
+              "-O0",
+              "-O2"
+            ],
+            "notes": "13 original-source C variants passed with the exact legacy heap/frame/pool budgets after ownership flags were packed; P5 suspend6 and P7 payload3 also passed on the integrated revision."
+          }
+        }
+      ],
       "active_assignments": [],
       "reach_snapshot": {
         "program:fce8a13404a3ab9ab16c": {
@@ -14890,13 +16690,51 @@
         }
       ],
       "legacy_execution_configuration": null,
-      "assessment": "runtime-observation-mapping-open",
+      "assessment": "original-body-runtime-evidence",
       "manual_observation_review": null,
       "existing_ledger_decision": null,
       "families": [
         "aggregate-and-integration"
       ],
-      "runtime_evidence": [],
+      "runtime_evidence": [
+        {
+          "program": "program:927b8a0eea79b7bd9ced",
+          "report": {
+            "revision": "c8ff094",
+            "path": "docs/reports/p7-aggregate-source-compat.json",
+            "format": "entry-programs"
+          },
+          "assessment": "original-body-runtime-evidence",
+          "legacy_tests": [
+            "emit::fiber::function_aggregate::heapless_callbacks_accept_and_return_aggregates_containing_function_values"
+          ],
+          "original_body_hash_verified": true,
+          "pipeline": "source-to-C",
+          "observations": null,
+          "post_lowering_ir_seam": null,
+          "runtime_assertions": null,
+          "direct_test": {
+            "kind": "source_test",
+            "path": "crates/emela-emb-compiler/tests/p7_aggregate_compat.rs",
+            "symbol": "heapless_callbacks_accept_and_return_aggregates_containing_function_values"
+          },
+          "source_adaptation": "Original body with explicit C exports only. Original C observations and capacities preserved; C symbol/type/release IDs follow the generated header. No post-lowering IR mutation.",
+          "configuration": {
+            "options": "Options::default()",
+            "C_harness": "crates/emela-emb-compiler/tests/compat/p7/concurrency/heapless_callbacks_accept_and_return_aggregates_containing_function_values.c"
+          },
+          "report_validation": {
+            "status": "passed",
+            "legacy_test_count": 12,
+            "new_test_count": 13,
+            "C_optimizations": [
+              "-O0",
+              "-O2"
+            ],
+            "notes": "13 original-source C variants passed with the exact legacy heap/frame/pool budgets after ownership flags were packed; P5 suspend6 and P7 payload3 also passed on the integrated revision."
+          }
+        }
+      ],
       "active_assignments": [],
       "reach_snapshot": {
         "program:927b8a0eea79b7bd9ced": {
@@ -14976,13 +16814,51 @@
         }
       ],
       "legacy_execution_configuration": null,
-      "assessment": "runtime-observation-mapping-open",
+      "assessment": "original-body-runtime-evidence",
       "manual_observation_review": null,
       "existing_ledger_decision": null,
       "families": [
         "aggregate-and-integration"
       ],
-      "runtime_evidence": [],
+      "runtime_evidence": [
+        {
+          "program": "program:4be591d3835e38a1021a",
+          "report": {
+            "revision": "c8ff094",
+            "path": "docs/reports/p7-aggregate-source-compat.json",
+            "format": "entry-programs"
+          },
+          "assessment": "original-body-runtime-evidence",
+          "legacy_tests": [
+            "emit::fiber::function_aggregate::native_aggregate_callbacks_own_results_after_captures_and_arguments_are_released"
+          ],
+          "original_body_hash_verified": true,
+          "pipeline": "source-to-C",
+          "observations": null,
+          "post_lowering_ir_seam": null,
+          "runtime_assertions": null,
+          "direct_test": {
+            "kind": "source_test",
+            "path": "crates/emela-emb-compiler/tests/p7_aggregate_compat.rs",
+            "symbol": "native_aggregate_callbacks_own_results_after_captures_and_arguments_are_released"
+          },
+          "source_adaptation": "Original body with explicit C exports only. Original C observations and capacities preserved; C symbol/type/release IDs follow the generated header. No post-lowering IR mutation.",
+          "configuration": {
+            "options": "Options::default().with_heap_bytes(2048).with_string_capacity(64)",
+            "C_harness": "crates/emela-emb-compiler/tests/compat/p7/concurrency/native_aggregate_callbacks_own_results_after_captures_and_arguments_are_released.c"
+          },
+          "report_validation": {
+            "status": "passed",
+            "legacy_test_count": 12,
+            "new_test_count": 13,
+            "C_optimizations": [
+              "-O0",
+              "-O2"
+            ],
+            "notes": "13 original-source C variants passed with the exact legacy heap/frame/pool budgets after ownership flags were packed; P5 suspend6 and P7 payload3 also passed on the integrated revision."
+          }
+        }
+      ],
       "active_assignments": [],
       "reach_snapshot": {
         "program:4be591d3835e38a1021a": {
@@ -15999,13 +17875,72 @@
         }
       ],
       "legacy_execution_configuration": null,
-      "assessment": "runtime-observation-mapping-open",
+      "assessment": "original-body-runtime-evidence",
       "manual_observation_review": null,
       "existing_ledger_decision": null,
       "families": [
         "cleanup-interruption-notes"
       ],
-      "runtime_evidence": [],
+      "runtime_evidence": [
+        {
+          "program": "program:8730c7e21e8995b3ae3d",
+          "report": {
+            "revision": "88677b6",
+            "path": "docs/reports/p7-cleanup-ir-seam-compat.json",
+            "format": "raw-files"
+          },
+          "assessment": "original-body-runtime-evidence",
+          "legacy_tests": [
+            "emit::fiber::interrupt::interrupted_cleanup_can_close_a_nested_scope_and_wait_for_its_child_release"
+          ],
+          "original_body_hash_verified": true,
+          "pipeline": "source-IR-adaptation-to-C",
+          "observations": {
+            "source_check": "passed",
+            "C_generation": "passed",
+            "C_runtime_O0": "passed",
+            "C_runtime_O2": "passed",
+            "pure_source_runtime": false,
+            "iterations": 1000,
+            "heap_empty_after_each": true
+          },
+          "post_lowering_ir_seam": [
+            "protect_cleanup_call"
+          ],
+          "runtime_assertions": [
+            "n == ++order",
+            "n >= 1 && n <= 3",
+            "count == 2 && order == 2 && !emela_fiber_done(f)",
+            "emela_task_complete_int(tasks[1], 2)",
+            "count == 3 && order == 2 && !emela_task_complete_int(tasks[0], 0)",
+            "emela_task_complete_int(tasks[2], 3)",
+            "emela_scheduler_run(1)",
+            "value == 42 && order == 5"
+          ],
+          "direct_test": {
+            "kind": "source_to_ir_seam_test",
+            "path": "crates/emela-emb-compiler/src/backend/lower/p7_cleanup_source_seam_tests.rs",
+            "symbol": "interrupted_cleanup_can_close_a_nested_scope_and_wait_for_its_child_release"
+          },
+          "source_adaptation": "original corpus source bytes + explicit C exports only; normal frontend pipeline first, then only the named exact old post-source IR seam(s).",
+          "configuration": {
+            "options": {
+              "heap_bytes": 8192,
+              "fiber_capacity": 8,
+              "frame_capacity": 48,
+              "frame_bytes": 512,
+              "task_capacity": 2,
+              "event_capacity": 2,
+              "task_adapters": {
+                "host_wait": "board_wait_start"
+              },
+              "deferred_capacity": 1
+            },
+            "C_harness": "crates/emela-emb-compiler/tests/compat/p7/cleanup/interrupted_cleanup_can_close_a_nested_scope_and_wait_for_its_child_release.c"
+          },
+          "report_validation": null
+        }
+      ],
       "active_assignments": [],
       "reach_snapshot": {
         "program:8730c7e21e8995b3ae3d": {
@@ -16068,13 +18003,67 @@
         }
       ],
       "legacy_execution_configuration": null,
-      "assessment": "runtime-observation-mapping-open",
+      "assessment": "original-body-runtime-evidence",
       "manual_observation_review": null,
       "existing_ledger_decision": null,
       "families": [
         "cleanup-interruption-notes"
       ],
-      "runtime_evidence": [],
+      "runtime_evidence": [
+        {
+          "program": "program:4c249f507854486bc050",
+          "report": {
+            "revision": "88677b6",
+            "path": "docs/reports/p7-cleanup-ir-seam-compat.json",
+            "format": "raw-files"
+          },
+          "assessment": "original-body-runtime-evidence",
+          "legacy_tests": [
+            "emit::fiber::interrupt::interrupted_cleanup_can_wait_on_a_deferred_completed_by_a_sibling"
+          ],
+          "original_body_hash_verified": true,
+          "pipeline": "source-IR-adaptation-to-C",
+          "observations": {
+            "source_check": "passed",
+            "C_generation": "passed",
+            "C_runtime_O0": "passed",
+            "C_runtime_O2": "passed",
+            "pure_source_runtime": false,
+            "iterations": 1000,
+            "heap_empty_after_each": true
+          },
+          "post_lowering_ir_seam": [
+            "protect_cleanup_call"
+          ],
+          "runtime_assertions": [
+            "n == ++order",
+            "emela_scheduler_run(1)",
+            "value == 42 && order == 4"
+          ],
+          "direct_test": {
+            "kind": "source_to_ir_seam_test",
+            "path": "crates/emela-emb-compiler/src/backend/lower/p7_cleanup_source_seam_tests.rs",
+            "symbol": "interrupted_cleanup_can_wait_on_a_deferred_completed_by_a_sibling"
+          },
+          "source_adaptation": "original corpus source bytes + explicit C exports only; normal frontend pipeline first, then only the named exact old post-source IR seam(s).",
+          "configuration": {
+            "options": {
+              "heap_bytes": 8192,
+              "fiber_capacity": 8,
+              "frame_capacity": 48,
+              "frame_bytes": 512,
+              "task_capacity": 2,
+              "event_capacity": 2,
+              "task_adapters": {
+                "host_wait": "board_wait_start"
+              },
+              "deferred_capacity": 3
+            },
+            "C_harness": "crates/emela-emb-compiler/tests/compat/p7/cleanup/interrupted_cleanup_can_wait_on_a_deferred_completed_by_a_sibling.c"
+          },
+          "report_validation": null
+        }
+      ],
       "active_assignments": [],
       "reach_snapshot": {
         "program:4c249f507854486bc050": {
@@ -16933,13 +18922,67 @@
         }
       ],
       "legacy_execution_configuration": null,
-      "assessment": "runtime-observation-mapping-open",
+      "assessment": "original-body-runtime-evidence",
       "manual_observation_review": null,
       "existing_ledger_decision": null,
       "families": [
         "cleanup-interruption-notes"
       ],
-      "runtime_evidence": [],
+      "runtime_evidence": [
+        {
+          "program": "program:831d3a7aac5dd763cddb",
+          "report": {
+            "revision": "88677b6",
+            "path": "docs/reports/p7-cleanup-ir-seam-compat.json",
+            "format": "raw-files"
+          },
+          "assessment": "original-body-runtime-evidence",
+          "legacy_tests": [
+            "emit::fiber::interrupt::self_interrupt_unwinds_the_body_and_is_deferred_inside_cleanup"
+          ],
+          "original_body_hash_verified": true,
+          "pipeline": "source-IR-adaptation-to-C",
+          "observations": {
+            "source_check": "passed",
+            "C_generation": "passed",
+            "C_runtime_O0": "passed",
+            "C_runtime_O2": "passed",
+            "pure_source_runtime": false,
+            "iterations": 1000,
+            "heap_empty_after_each": true
+          },
+          "post_lowering_ir_seam": [
+            "protect_cleanup_call"
+          ],
+          "runtime_assertions": [
+            "n == ++order",
+            "emela_scheduler_run(1)",
+            "value == 42 && order == 4"
+          ],
+          "direct_test": {
+            "kind": "source_to_ir_seam_test",
+            "path": "crates/emela-emb-compiler/src/backend/lower/p7_cleanup_source_seam_tests.rs",
+            "symbol": "self_interrupt_unwinds_the_body_and_is_deferred_inside_cleanup"
+          },
+          "source_adaptation": "original corpus source bytes + explicit C exports only; normal frontend pipeline first, then only the named exact old post-source IR seam(s).",
+          "configuration": {
+            "options": {
+              "heap_bytes": 8192,
+              "fiber_capacity": 8,
+              "frame_capacity": 24,
+              "frame_bytes": 512,
+              "task_capacity": 2,
+              "event_capacity": 2,
+              "task_adapters": {
+                "host_wait": "board_wait_start"
+              },
+              "deferred_capacity": 2
+            },
+            "C_harness": "crates/emela-emb-compiler/tests/compat/p7/cleanup/self_interrupt_unwinds_the_body_and_is_deferred_inside_cleanup.c"
+          },
+          "report_validation": null
+        }
+      ],
       "active_assignments": [],
       "reach_snapshot": {
         "program:831d3a7aac5dd763cddb": {
@@ -18039,13 +20082,72 @@
         }
       ],
       "legacy_execution_configuration": null,
-      "assessment": "runtime-observation-mapping-open",
+      "assessment": "original-body-runtime-evidence",
       "manual_observation_review": null,
       "existing_ledger_decision": null,
       "families": [
         "cleanup-interruption-notes"
       ],
-      "runtime_evidence": [],
+      "runtime_evidence": [
+        {
+          "program": "program:1e5e03e21947542798b3",
+          "report": {
+            "revision": "88677b6",
+            "path": "docs/reports/p7-cleanup-ir-seam-compat.json",
+            "format": "raw-files"
+          },
+          "assessment": "original-body-runtime-evidence",
+          "legacy_tests": [
+            "emit::fiber::notes::later_failures_are_ordered_owned_notes_shared_by_rethrown_causes"
+          ],
+          "original_body_hash_verified": true,
+          "pipeline": "source-IR-adaptation-to-C",
+          "observations": {
+            "source_check": "passed",
+            "C_generation": "passed",
+            "C_runtime_O0": "passed",
+            "C_runtime_O2": "passed",
+            "pure_source_runtime": false,
+            "iterations": 1000,
+            "heap_empty_after_each": true
+          },
+          "post_lowering_ir_seam": [
+            "hold_late"
+          ],
+          "runtime_assertions": [
+            "n>=1 && n<=4",
+            "count==4",
+            "emela_task_complete_int(tasks[order[n]-1],0)",
+            "n==2 ? emela_fiber_done(f) : !emela_fiber_done(f)",
+            "!emela_task_complete_int(tasks[3],0)",
+            "emela_scheduler_run(1)",
+            "text.data==buffer && text.length==length && memcmp(text.data,expected,length)==0",
+            "emela_export_caught_4(again)==order[0]",
+            "test_heap_empty()"
+          ],
+          "direct_test": {
+            "kind": "source_to_ir_seam_test",
+            "path": "crates/emela-emb-compiler/src/backend/lower/p7_cleanup_source_seam_tests.rs",
+            "symbol": "later_failures_are_ordered_owned_notes_shared_by_rethrown_causes"
+          },
+          "source_adaptation": "original corpus source bytes + explicit C exports only; normal frontend pipeline first, then only the named exact old post-source IR seam(s).",
+          "configuration": {
+            "options": {
+              "heap_bytes": 4096,
+              "fiber_capacity": 8,
+              "frame_capacity": 48,
+              "frame_bytes": 512,
+              "task_capacity": 4,
+              "event_capacity": 4,
+              "task_adapters": {
+                "host_wait": "board_wait_start"
+              }
+            },
+            "C_harness": "crates/emela-emb-compiler/tests/compat/p7/cleanup/later_failures_are_ordered_owned_notes_shared_by_rethrown_causes.c"
+          },
+          "report_validation": null
+        }
+      ],
       "active_assignments": [],
       "reach_snapshot": {
         "program:1e5e03e21947542798b3": {
@@ -18194,13 +20296,67 @@
         }
       ],
       "legacy_execution_configuration": null,
-      "assessment": "runtime-observation-mapping-open",
+      "assessment": "original-body-runtime-evidence",
       "manual_observation_review": null,
       "existing_ledger_decision": null,
       "families": [
         "cleanup-interruption-notes"
       ],
-      "runtime_evidence": [],
+      "runtime_evidence": [
+        {
+          "program": "program:1e5e03e21947542798b3",
+          "report": {
+            "revision": "88677b6",
+            "path": "docs/reports/p7-cleanup-ir-seam-compat.json",
+            "format": "raw-files"
+          },
+          "assessment": "original-body-runtime-evidence",
+          "legacy_tests": [
+            "emit::fiber::notes::note_display_checks_the_callers_remaining_capacity"
+          ],
+          "original_body_hash_verified": true,
+          "pipeline": "source-IR-adaptation-to-C",
+          "observations": {
+            "source_check": "passed",
+            "C_generation": "passed",
+            "C_runtime_O0": "passed",
+            "C_runtime_O2": "passed",
+            "pure_source_runtime": false,
+            "iterations": 1,
+            "heap_empty_after_each": false
+          },
+          "post_lowering_ir_seam": [
+            "hold_late"
+          ],
+          "runtime_assertions": [
+            "n>=1 && n<=4",
+            "expected_defect && k==EMELA_DEFECT_STRING_CAPACITY && n==24 && memcmp(m,\"string capacity exceeded\",24)==0",
+            "emela_task_complete_int(tasks[i],0)",
+            "emela_fiber_done(f) && cause"
+          ],
+          "direct_test": {
+            "kind": "source_to_ir_seam_test",
+            "path": "crates/emela-emb-compiler/src/backend/lower/p7_cleanup_source_seam_tests.rs",
+            "symbol": "note_display_checks_the_callers_remaining_capacity"
+          },
+          "source_adaptation": "original corpus source bytes + explicit C exports only; normal frontend pipeline first, then only the named exact old post-source IR seam(s).",
+          "configuration": {
+            "options": {
+              "heap_bytes": 8192,
+              "fiber_capacity": 8,
+              "frame_capacity": 48,
+              "frame_bytes": 512,
+              "task_capacity": 4,
+              "event_capacity": 4,
+              "task_adapters": {
+                "host_wait": "board_wait_start"
+              }
+            },
+            "C_harness": "crates/emela-emb-compiler/tests/compat/p7/cleanup/note_display_checks_the_callers_remaining_capacity.c"
+          },
+          "report_validation": null
+        }
+      ],
       "active_assignments": [],
       "reach_snapshot": {
         "program:1e5e03e21947542798b3": {
@@ -18359,9 +20515,9 @@
         {
           "program": "program:b351d40891e80eb8b8ec",
           "report": {
-            "revision": "888b821",
-            "path": "docs/reports/p6-child-waiters-compat.json",
-            "format": "child-waiters"
+            "revision": "88677b6",
+            "path": "docs/reports/p7-cleanup-ir-seam-compat.json",
+            "format": "raw-files"
           },
           "assessment": "original-body-runtime-evidence",
           "legacy_tests": [
@@ -18374,39 +20530,43 @@
             "C_generation": "passed",
             "C_runtime_O0": "passed",
             "C_runtime_O2": "passed",
-            "iterations_per_optimization": 1000,
-            "heap_empty_after_each_iteration": true,
             "pure_source_runtime": false,
-            "expected_result": null,
-            "assertions": [
-              "first failure alternates between Boom(1) and Boom(3)",
-              "root waits for second held child after first failure",
-              "late failure is rendered as another-fiber-failed note after the first error",
-              "cancelled task 2/4 completions are stale",
-              "returned cause is released after exact Show text comparison"
-            ]
+            "iterations": 1000,
+            "heap_empty_after_each": true
           },
-          "post_lowering_ir_seam": {
-            "target": "late",
-            "operation": "RuntimeOp::Hold",
-            "position": "first statement of the function body",
-            "matches_fixed_legacy_test": true
+          "post_lowering_ir_seam": [
+            "hold_late"
+          ],
+          "runtime_assertions": [
+            "n>=1 && n<=4",
+            "count==4",
+            "emela_task_complete_int(tasks[first-1],0)",
+            "!emela_fiber_done(f)",
+            "emela_task_complete_int(tasks[second-1],0)",
+            "emela_scheduler_run(1)",
+            "cause && !emela_task_complete_int(tasks[1],0) && !emela_task_complete_int(tasks[3],0)",
+            "text.length==length && memcmp(text.data,expected,length)==0",
+            "test_heap_empty()"
+          ],
+          "direct_test": {
+            "kind": "source_to_ir_seam_test",
+            "path": "crates/emela-emb-compiler/src/backend/lower/p7_cleanup_source_seam_tests.rs",
+            "symbol": "failures_from_cancelled_nested_scopes_become_notes_of_the_outer_first_failure"
           },
-          "runtime_assertions": null,
-          "direct_test": null,
-          "source_adaptation": null,
+          "source_adaptation": "original corpus source bytes + explicit C exports only; normal frontend pipeline first, then only the named exact old post-source IR seam(s).",
           "configuration": {
             "options": {
               "heap_bytes": 8192,
-              "frame_capacity": 48,
-              "frame_bytes": 1024,
               "fiber_capacity": 10,
+              "frame_capacity": 48,
+              "frame_bytes": 512,
               "task_capacity": 4,
               "event_capacity": 4,
-              "task_adapter": {
+              "task_adapters": {
                 "host_wait": "board_wait_start"
               }
-            }
+            },
+            "C_harness": "crates/emela-emb-compiler/tests/compat/p7/cleanup/failures_from_cancelled_nested_scopes_become_notes_of_the_outer_first_failure.c"
           },
           "report_validation": null
         }
@@ -18480,13 +20640,73 @@
         }
       ],
       "legacy_execution_configuration": null,
-      "assessment": "runtime-observation-mapping-open",
+      "assessment": "original-body-runtime-evidence",
       "manual_observation_review": null,
       "existing_ledger_decision": null,
       "families": [
         "cleanup-interruption-notes"
       ],
-      "runtime_evidence": [],
+      "runtime_evidence": [
+        {
+          "program": "program:2cd74addf09373c7f082",
+          "report": {
+            "revision": "88677b6",
+            "path": "docs/reports/p7-cleanup-ir-seam-compat.json",
+            "format": "raw-files"
+          },
+          "assessment": "original-body-runtime-evidence",
+          "legacy_tests": [
+            "emit::fiber::overlap::nested_scope_failure_survives_external_interruption_before_and_after_failure"
+          ],
+          "original_body_hash_verified": true,
+          "pipeline": "source-IR-adaptation-to-C",
+          "observations": {
+            "source_check": "passed",
+            "C_generation": "passed",
+            "C_runtime_O0": "passed",
+            "C_runtime_O2": "passed",
+            "pure_source_runtime": false,
+            "iterations": 1000,
+            "heap_empty_after_each": true
+          },
+          "post_lowering_ir_seam": [
+            "hold_late"
+          ],
+          "runtime_assertions": [
+            "n>=1 && n<=4",
+            "n==++order",
+            "count==3",
+            "emela_task_complete_int(tasks[first-1],0)",
+            "emela_task_complete_int(tasks[second-1],0)",
+            "count==4 && order==1 && !emela_fiber_done(f)",
+            "emela_task_complete_int(tasks[3],0)",
+            "emela_scheduler_run(1)",
+            "result==42 && order==3 && !emela_task_complete_int(tasks[1],0)",
+            "test_heap_empty()"
+          ],
+          "direct_test": {
+            "kind": "source_to_ir_seam_test",
+            "path": "crates/emela-emb-compiler/src/backend/lower/p7_cleanup_source_seam_tests.rs",
+            "symbol": "nested_scope_failure_survives_external_interruption_before_and_after_failure"
+          },
+          "source_adaptation": "original corpus source bytes + explicit C exports only; normal frontend pipeline first, then only the named exact old post-source IR seam(s).",
+          "configuration": {
+            "options": {
+              "heap_bytes": 4096,
+              "fiber_capacity": 10,
+              "frame_capacity": 48,
+              "frame_bytes": 512,
+              "task_capacity": 4,
+              "event_capacity": 4,
+              "task_adapters": {
+                "host_wait": "board_wait_start"
+              }
+            },
+            "C_harness": "crates/emela-emb-compiler/tests/compat/p7/cleanup/nested_scope_failure_survives_external_interruption_before_and_after_failure.c"
+          },
+          "report_validation": null
+        }
+      ],
       "active_assignments": [],
       "reach_snapshot": {
         "program:2cd74addf09373c7f082": {
@@ -18567,13 +20787,77 @@
         }
       ],
       "legacy_execution_configuration": null,
-      "assessment": "runtime-observation-mapping-open",
+      "assessment": "original-body-runtime-evidence",
       "manual_observation_review": null,
       "existing_ledger_decision": null,
       "families": [
         "cleanup-interruption-notes"
       ],
-      "runtime_evidence": [],
+      "runtime_evidence": [
+        {
+          "program": "program:cb40e719f5376662f92f",
+          "report": {
+            "revision": "88677b6",
+            "path": "docs/reports/p7-cleanup-ir-seam-compat.json",
+            "format": "raw-files"
+          },
+          "assessment": "original-body-runtime-evidence",
+          "legacy_tests": [
+            "emit::fiber::overlap::settled_nested_scope_failures_keep_their_notes_when_cleanup_raises_interrupt"
+          ],
+          "original_body_hash_verified": true,
+          "pipeline": "source-IR-adaptation-to-C",
+          "observations": {
+            "source_check": "passed",
+            "C_generation": "passed",
+            "C_runtime_O0": "passed",
+            "C_runtime_O2": "passed",
+            "pure_source_runtime": false,
+            "iterations": 1000,
+            "heap_empty_after_each": true
+          },
+          "post_lowering_ir_seam": [
+            "protect_cleanup_call",
+            "hold_late"
+          ],
+          "runtime_assertions": [
+            "n>=1 && n<=5",
+            "n==++order",
+            "count==2",
+            "emela_task_complete_int(tasks[4],0)",
+            "emela_scheduler_run(1)",
+            "count==3",
+            "emela_task_complete_int(tasks[first-1],0)",
+            "!emela_fiber_done(f) && order==2",
+            "emela_task_complete_int(tasks[second-1],0)",
+            "emela_scheduler_run(1)",
+            "!emela_task_complete_int(tasks[2],0)",
+            "text.length==length && memcmp(text.data,expected,length)==0",
+            "test_heap_empty()"
+          ],
+          "direct_test": {
+            "kind": "source_to_ir_seam_test",
+            "path": "crates/emela-emb-compiler/src/backend/lower/p7_cleanup_source_seam_tests.rs",
+            "symbol": "settled_nested_scope_failures_keep_their_notes_when_cleanup_raises_interrupt"
+          },
+          "source_adaptation": "original corpus source bytes + explicit C exports only; normal frontend pipeline first, then only the named exact old post-source IR seam(s).",
+          "configuration": {
+            "options": {
+              "heap_bytes": 8192,
+              "fiber_capacity": 10,
+              "frame_capacity": 48,
+              "frame_bytes": 512,
+              "task_capacity": 3,
+              "event_capacity": 3,
+              "task_adapters": {
+                "host_wait": "board_wait_start"
+              }
+            },
+            "C_harness": "crates/emela-emb-compiler/tests/compat/p7/cleanup/settled_nested_scope_failures_keep_their_notes_when_cleanup_raises_interrupt.c"
+          },
+          "report_validation": null
+        }
+      ],
       "active_assignments": [],
       "reach_snapshot": {
         "program:cb40e719f5376662f92f": {
@@ -19227,13 +21511,71 @@
         }
       ],
       "legacy_execution_configuration": null,
-      "assessment": "runtime-observation-mapping-open",
+      "assessment": "original-body-runtime-evidence",
       "manual_observation_review": null,
       "existing_ledger_decision": null,
       "families": [
         "cleanup-interruption-notes"
       ],
-      "runtime_evidence": [],
+      "runtime_evidence": [
+        {
+          "program": "program:49e9df0f81ebe9dcca13",
+          "report": {
+            "revision": "88677b6",
+            "path": "docs/reports/p7-cleanup-ir-seam-compat.json",
+            "format": "raw-files"
+          },
+          "assessment": "original-body-runtime-evidence",
+          "legacy_tests": [
+            "emit::fiber::payload::scope_causes_and_notes_keep_string_payloads_after_frames_and_scopes_end"
+          ],
+          "original_body_hash_verified": true,
+          "pipeline": "source-IR-adaptation-to-C",
+          "observations": {
+            "source_check": "passed",
+            "C_generation": "passed",
+            "C_runtime_O0": "passed",
+            "C_runtime_O2": "passed",
+            "pure_source_runtime": false,
+            "iterations": 1000,
+            "heap_empty_after_each": true
+          },
+          "post_lowering_ir_seam": [
+            "hold_late"
+          ],
+          "runtime_assertions": [
+            "n >= 1 && n <= 4",
+            "count == 4",
+            "emela_task_complete_int(tasks[order[n]-1], 0)",
+            "emela_fiber_done(f) && !emela_task_complete_int(tasks[3], 0)",
+            "emela_scheduler_run(1)",
+            "shown.length == length && memcmp(shown.data, expected, length) == 0",
+            "payload.owner && payload.length == 1 && payload.data[0] == '0' + order[0]",
+            "test_heap_empty()"
+          ],
+          "direct_test": {
+            "kind": "source_to_ir_seam_test",
+            "path": "crates/emela-emb-compiler/src/backend/lower/p7_cleanup_source_seam_tests.rs",
+            "symbol": "scope_causes_and_notes_keep_string_payloads_after_frames_and_scopes_end"
+          },
+          "source_adaptation": "original corpus source bytes + explicit C exports only; normal frontend pipeline first, then only the named exact old post-source IR seam(s).",
+          "configuration": {
+            "options": {
+              "heap_bytes": 4096,
+              "fiber_capacity": 8,
+              "frame_capacity": 48,
+              "frame_bytes": 768,
+              "task_capacity": 4,
+              "event_capacity": 4,
+              "task_adapters": {
+                "host_wait": "board_wait_start"
+              }
+            },
+            "C_harness": "crates/emela-emb-compiler/tests/compat/p7/cleanup/scope_causes_and_notes_keep_string_payloads_after_frames_and_scopes_end.c"
+          },
+          "report_validation": null
+        }
+      ],
       "active_assignments": [],
       "reach_snapshot": {
         "program:49e9df0f81ebe9dcca13": {
@@ -20385,13 +22727,74 @@
         }
       ],
       "legacy_execution_configuration": null,
-      "assessment": "runtime-observation-mapping-open",
+      "assessment": "original-body-runtime-evidence",
       "manual_observation_review": null,
       "existing_ledger_decision": null,
       "families": [
         "cleanup-interruption-notes"
       ],
-      "runtime_evidence": [],
+      "runtime_evidence": [
+        {
+          "program": "program:2ac6f38771693a3b32e2",
+          "report": {
+            "revision": "88677b6",
+            "path": "docs/reports/p7-cleanup-ir-seam-compat.json",
+            "format": "raw-files"
+          },
+          "assessment": "original-body-runtime-evidence",
+          "legacy_tests": [
+            "emit::fiber::task_failure::external_failure_payload_survives_suspending_cleanup_and_later_interruption"
+          ],
+          "original_body_hash_verified": true,
+          "pipeline": "source-IR-adaptation-to-C",
+          "observations": {
+            "source_check": "passed",
+            "C_generation": "passed",
+            "C_runtime_O0": "passed",
+            "C_runtime_O2": "passed",
+            "pure_source_runtime": false,
+            "iterations": 1000,
+            "heap_empty_after_each": true
+          },
+          "post_lowering_ir_seam": [
+            "external_request",
+            "private_C_cancel"
+          ],
+          "runtime_assertions": [
+            "n==99",
+            "n==2",
+            "emela_task_fail(request,produce,&c,release)",
+            "produced==1&&released==1&&!marks&&!emela_fiber_done(f)&&!test_heap_empty()",
+            "!emela_fiber_done(f)",
+            "emela_task_complete_int(cleanup,0)",
+            "emela_fiber_done(f)&&marks==1",
+            "result==((i%3&&!(i%2))?5:-1)&&test_heap_empty()"
+          ],
+          "direct_test": {
+            "kind": "source_to_ir_seam_test",
+            "path": "crates/emela-emb-compiler/src/backend/lower/p7_cleanup_source_seam_tests.rs",
+            "symbol": "external_failure_payload_survives_suspending_cleanup_and_later_interruption"
+          },
+          "source_adaptation": "original corpus source bytes + explicit C exports only; normal frontend pipeline first, then only the named exact old post-source IR seam(s).",
+          "configuration": {
+            "options": {
+              "heap_bytes": 4096,
+              "fiber_capacity": 8,
+              "frame_capacity": 24,
+              "frame_bytes": 1536,
+              "task_capacity": 2,
+              "event_capacity": 2,
+              "task_adapters": {
+                "host_wait": "board_wait_start",
+                "host_request": "board_request_start"
+              },
+              "string_capacity": 256
+            },
+            "C_harness": "crates/emela-emb-compiler/tests/compat/p7/cleanup/external_failure_payload_survives_suspending_cleanup_and_later_interruption.c"
+          },
+          "report_validation": null
+        }
+      ],
       "active_assignments": [],
       "reach_snapshot": {
         "program:2ac6f38771693a3b32e2": {
@@ -20561,13 +22964,97 @@
         }
       ],
       "legacy_execution_configuration": null,
-      "assessment": "runtime-observation-mapping-open",
+      "assessment": "original-body-runtime-evidence",
       "manual_observation_review": null,
       "existing_ledger_decision": null,
       "families": [
         "cleanup-interruption-notes"
       ],
-      "runtime_evidence": [],
+      "runtime_evidence": [
+        {
+          "program": "program:2ac6f38771693a3b32e2",
+          "report": {
+            "revision": "88677b6",
+            "path": "docs/reports/p7-cleanup-ir-seam-compat.json",
+            "format": "raw-files"
+          },
+          "assessment": "original-body-runtime-evidence",
+          "legacy_tests": [
+            "emit::fiber::task_failure::external_failures_own_borrowed_strings_and_lists_across_escape_attempt_scope_and_cancel"
+          ],
+          "original_body_hash_verified": true,
+          "pipeline": "source-IR-adaptation-to-C",
+          "observations": {
+            "source_check": "passed",
+            "C_generation": "passed",
+            "C_runtime_O0": "passed",
+            "C_runtime_O2": "passed",
+            "pure_source_runtime": false,
+            "iterations": 1000,
+            "heap_empty_after_each": true
+          },
+          "post_lowering_ir_seam": [
+            "external_request",
+            "private_C_cancel"
+          ],
+          "runtime_assertions": [
+            "locked",
+            "n==1 && !isr && !locked",
+            "!isr && !locked",
+            "!isr && !locked",
+            "emela_task_fail(request,produce,c,release)",
+            "!emela_task_fail(request,produce,c,release)",
+            "!emela_task_complete_int(request,99)",
+            "!produced && !released",
+            "emela_fiber_done(f)&&result==5&&produced==1&&released==1&&marks==1",
+            "test_heap_empty()",
+            "emela_fiber_done(f)&&produced==1&&released==1",
+            "text.length==strlen(expected)&&!memcmp(text.data,expected,text.length)",
+            "test_heap_empty()",
+            "emela_fiber_done(f)&&result==3&&produced==1&&released==1",
+            "test_heap_empty()",
+            "!produced&&!released",
+            "!test_heap_empty()",
+            "emela_fiber_done(f)&&!produced&&released==1&&marks==1&&result==-1",
+            "test_heap_empty()",
+            "!emela_task_fail(request,produce,&c,release)",
+            "emela_fiber_done(f)&&!emela_task_fail(request,produce,&c,release)",
+            "test_heap_empty()",
+            "emela_task_complete_int(request,42)",
+            "emela_fiber_done(f)&&result==42&&marks==1",
+            "test_heap_empty()",
+            "!emela_task_fail(plain,produce,&c,release)",
+            "emela_task_complete_int(plain,42)",
+            "result==42",
+            "!emela_task_fail((EmelaTask){{UINT32_MAX,0}},produce,&c,release)",
+            "!emela_task_fail(request,NULL,&c,release)",
+            "!produced&&!released&&test_heap_empty()"
+          ],
+          "direct_test": {
+            "kind": "source_to_ir_seam_test",
+            "path": "crates/emela-emb-compiler/src/backend/lower/p7_cleanup_source_seam_tests.rs",
+            "symbol": "external_failures_own_borrowed_strings_and_lists_across_escape_attempt_scope_and_cancel"
+          },
+          "source_adaptation": "original corpus source bytes + explicit C exports only; normal frontend pipeline first, then only the named exact old post-source IR seam(s).",
+          "configuration": {
+            "options": {
+              "heap_bytes": 4096,
+              "fiber_capacity": 8,
+              "frame_capacity": 24,
+              "frame_bytes": 1536,
+              "task_capacity": 2,
+              "event_capacity": 2,
+              "task_adapters": {
+                "host_wait": "board_wait_start",
+                "host_request": "board_request_start"
+              },
+              "string_capacity": 256
+            },
+            "C_harness": "crates/emela-emb-compiler/tests/compat/p7/cleanup/external_failures_own_borrowed_strings_and_lists_across_escape_attempt_scope_and_cancel.c"
+          },
+          "report_validation": null
+        }
+      ],
       "active_assignments": [],
       "reach_snapshot": {
         "program:2ac6f38771693a3b32e2": {
@@ -20899,7 +23386,7 @@
             "emit::owned::returned_list_owns_formatted_strings_after_the_producer_stack_returns"
           ],
           "original_body_hash_verified": true,
-          "pipeline": "source-to-C",
+          "pipeline": "existing-source-C-observation-replacement",
           "observations": {
             "source_check": "passed",
             "C_generation": "passed",
@@ -22656,7 +25143,7 @@
             "emit::string_comparison::owned_string_views_compare_without_allocating_or_changing_ownership"
           ],
           "original_body_hash_verified": true,
-          "pipeline": "source-to-C",
+          "pipeline": "existing-source-C-observation-replacement",
           "observations": {
             "source_check": "passed",
             "C_generation": "passed",
@@ -22936,7 +25423,7 @@
             "emit::string_comparison::source_comparisons_are_heapless_and_allow_isr_and_constant_space_tail_loops"
           ],
           "original_body_hash_verified": true,
-          "pipeline": "source-to-C",
+          "pipeline": "existing-source-C-observation-replacement",
           "observations": {
             "source_check": "passed",
             "C_generation": "passed",
@@ -24991,11 +27478,24 @@
       "manual_observation_review": {
         "assessment": "old-compile-and-artifact-observation",
         "observations": [
-          "BoardClock/BoardConsole resolve/typecheck/lower",
-          "compile with heap4096/frame2048",
-          "emela_clock.h and emela_console.h generated"
+          "Original BoardClock/BoardConsole source accepts and generates emela_clock.h/emela_console.h at old heap4096/frame2048.",
+          "Old concrete main becomes Options::with_entry(\"main\"); source bytes unchanged. No runtime execution was required by the fixed-old test."
         ],
-        "note": "The fixed old test does not execute C. Artifact/header presence remains an explicit obligation in addition to source acceptance."
+        "note": "none; original fixture bytes and filenames unchanged",
+        "evidence_revision": "9292e9d",
+        "evidence": [
+          {
+            "kind": "source_test",
+            "path": "crates/emela-emb-compiler/tests/p7_services.rs",
+            "symbol": "legacy_board_source_compiles_with_its_original_budget_and_service_headers"
+          }
+        ],
+        "validation": {
+          "source_check": "passed",
+          "C_generation": "passed",
+          "C_runtime": "not applicable: fixed-old frontend/artifact-only observation"
+        },
+        "original_body_hash_verified": true
       },
       "existing_ledger_decision": null,
       "families": [
@@ -25056,9 +27556,24 @@
       "manual_observation_review": {
         "assessment": "old-frontend-only-observation",
         "observations": [
-          "resolve/typecheck accepts supplied Embedded.Local project module"
+          "Original Embedded.Local project module and main resolve/typecheck successfully, preserving both original filenames and bytes.",
+          "The new pipeline also generates C; the old observation is frontend success only."
         ],
-        "note": "The fixed old test calls check_sources and asserts diagnostics only. It has no C runtime expectation; check current module registration/typing rather than manufacture a runtime claim."
+        "note": "none; original fixture bytes and filenames unchanged",
+        "evidence_revision": "9292e9d",
+        "evidence": [
+          {
+            "kind": "source_test",
+            "path": "crates/emela-emb-compiler/tests/p7_services.rs",
+            "symbol": "legacy_embedded_namespace_errors_and_unrelated_project_module_are_preserved"
+          }
+        ],
+        "validation": {
+          "source_check": "passed",
+          "C_generation": "passed",
+          "C_runtime": "not applicable: fixed-old frontend/artifact-only observation"
+        },
+        "original_body_hash_verified": true
       },
       "existing_ledger_decision": null,
       "families": [
