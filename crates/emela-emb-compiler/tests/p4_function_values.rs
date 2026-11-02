@@ -121,8 +121,7 @@ fn function_value_bounds_and_call_shapes_are_checked() {
 
 #[test]
 fn later_calls_resolve_bounded_function_constructor_and_trait_references() {
-    let output = compile(
-        r#"
+    let source = r#"
 type Ordered[A: Ord](value: A)
 fn keep[A: Ord](value: A) -> A { value }
 fn relay[A: Ord](value: A) -> A {
@@ -139,9 +138,14 @@ pub fn run() -> Int {
   assert show(42) == "42"
   relay(constructor(f(42)).value)
 }
-"#,
+"#;
+    let output = compile_sources(
+        &[Source::new("main.emel", source)],
+        "main.emel",
+        &Options::default().with_heap_bytes(8192),
     )
     .unwrap_or_else(|errors| panic!("delayed reference bounds rejected: {errors:#?}"));
+    let output = heap::with_heap_audit(output);
     support::compile_and_run(
         &output,
         r#"
@@ -150,8 +154,9 @@ pub fn run() -> Int {
 #include <stdlib.h>
 #include "emela_embedded.h"
 #include "emela_board.h"
+int test_heap_empty(void);
 _Noreturn void emela_board_defect(EmelaDefectKind k,const char*m,uint16_t n){fprintf(stderr,"defect %d: %.*s\n",k,n,m);abort();}
-int main(void){assert(deferred_bounds()==42);return 0;}
+int main(void){for(int i=0;i<1000;i++){assert(deferred_bounds()==42);assert(test_heap_empty());}return 0;}
 "#,
     );
 }
