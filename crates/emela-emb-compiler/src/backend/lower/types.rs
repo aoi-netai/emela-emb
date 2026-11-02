@@ -185,7 +185,8 @@ pub(super) fn validate_type(program: &Program, function: &str, ty: TypeId) -> Re
         function: &str,
         ty: TypeId,
         seen: &mut HashSet<TypeId>,
-        active: &mut HashSet<TypeId>,
+        active: &mut HashMap<TypeId, usize>,
+        indirections: usize,
     ) -> Result<()> {
         if ty.index() >= program.core.types.len() {
             return Err(invalid(function, "type ID is out of bounds"));
@@ -193,21 +194,31 @@ pub(super) fn validate_type(program: &Program, function: &str, ty: TypeId) -> Re
         if seen.contains(&ty) {
             return Ok(());
         }
-        if !active.insert(ty) {
-            return Err(unsupported(function, "recursive value type"));
+        if let Some(&entered) = active.get(&ty) {
+            return if indirections > entered {
+                // Recursive enum and List edges are represented by owned heap pointers.
+                Ok(())
+            } else {
+                Err(invalid(
+                    function,
+                    "value type has an unguarded structural cycle",
+                ))
+            };
         }
+        active.insert(ty, indirections);
         match program.core.ty(ty) {
             Type::Int
             | Type::Int64
             | Type::Float
             | Type::Bool
             | Type::String
+            | Type::Bytes
             | Type::Unit
             | Type::Never
             | Type::Any => {}
             Type::Tuple(fields) => {
                 for &field in fields {
-                    visit(program, function, field, seen, active)?;
+                    visit(program, function, field, seen, active, indirections)?;
                 }
             }
             Type::Enum(id, args) => {
@@ -224,13 +235,16 @@ pub(super) fn validate_type(program: &Program, function: &str, ty: TypeId) -> Re
                     ));
                 }
                 for &arg in args {
-                    visit(program, function, arg, seen, active)?;
+                    visit(program, function, arg, seen, active, indirections + 1)?;
                 }
                 for variant in 0..definition.variants.len() {
                     for field in enum_fields(program, function, ty, variant)? {
-                        visit(program, function, field, seen, active)?;
+                        visit(program, function, field, seen, active, indirections + 1)?;
                     }
                 }
+            }
+            Type::List(element) => {
+                visit(program, function, *element, seen, active, indirections + 1)?
             }
             _ => return Err(unsupported(function, "value type")),
         }
@@ -243,7 +257,8 @@ pub(super) fn validate_type(program: &Program, function: &str, ty: TypeId) -> Re
         function,
         ty,
         &mut HashSet::new(),
-        &mut HashSet::new(),
+        &mut HashMap::new(),
+        0,
     )
 }
 
