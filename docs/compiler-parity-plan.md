@@ -1,6 +1,7 @@
 # 旧fork相当の独立コンパイラーへ到達する7段階の実装計画
 
-作成日: 2026-11-02（JST）  
+作成日: 2026-11-02（JST）
+
 状態: 実装を開始。各段階の完了は対応表と検証結果で判定する。最小C生成のS0〜S6は完了済み。
 
 本書の旧試験名は移植対象の参照であり、今回の調査での実行結果ではない。今回は構成・コード・試験資産を読み、計画を作成した。
@@ -322,7 +323,7 @@ C compilerを必須試験環境へ用意し、未導入やskipを成功として
 
 ## 8. ブランチ・commit・並行作業
 
-段階ごとの作業ブランチは `feat/compiler-01-base`〜`feat/compiler-07-completion` を候補とし、直前段階の確定した成果を基点にする。最小実装のPRが未mergeの場合も、その成果を失わない基点を選ぶ。mergeやpushを計画の実施に暗黙で含めない。
+段階ごとの作業ブランチは `feat/compiler-01-base`〜`feat/compiler-07-completion` を候補とし、直前段階の確定した成果を基点にする。最小実装のPRが未mergeの場合も、その成果を失わない基点を選ぶ。今回の実装ではユーザーの明示依頼に従い `gh stack` で段階ごとのPRを作成し、必要なpushを行う。mergeは行わない。
 
 各段階内では機能単位で日本語commitを作る。例えばP1は、再利用元と対応台帳、独立contract/semanticsの採用、plan/emit/runtimeの採用、frontendの名前解決、型・制御、source接続とC実行、CLI/APIの接続を分ける。まとまった既存コードの採用commitには出自を記録し、その後の適応変更と区別する。途中commitもbuild可能にし、追跡可能な粒度を保つ。
 
@@ -332,13 +333,13 @@ P1完了後は小さな入力例の採否を毎回決め直さず、この7段�
 
 ## 9. 参照資料
 
-- [最小C生成の完了計画](MINIMAL_C_PLAN.md)
-- [初期299commit・7段階stackと段階分離の履歴](IMPLEMENTATION_HISTORY.md) — 旧Flow連携方針は採用せず、導入順とcommit粒度を参考にする。
-- [旧compilerの構成](../../../tmp_branch/ecosystem/crates/emela-codegen-emb/src/compiler/README.md)
-- [旧compilerの実装範囲](../../../tmp_branch/ecosystem/crates/emela-codegen-emb/docs/implementation.md)
-- [旧生成物の契約](../../../tmp_branch/ecosystem/crates/emela-codegen-emb/docs/artifact-contract.md)
-- [旧frontend試験helper](../../../tmp_branch/ecosystem/crates/emela-codegen-emb/tests/support/frontend.rs)
+- [最小C生成の検証結果](minimal-c-experiment.md)
+- ローカル調査記録 `.local/plan/IMPLEMENTATION_HISTORY.md` — 旧Flow連携方針は採用せず、導入順とcommit粒度を参考にする。Git管理対象の計画・終了条件は本書と対応台帳を正本とする。
+- 旧compilerの構成: 旧forkの `crates/emela-codegen-emb/src/compiler/README.md`（第2節の固定revision）
+- 旧compilerの実装範囲: 旧forkの `crates/emela-codegen-emb/docs/implementation.md`（第2節の固定revision）
+- 旧生成物の契約: 旧forkの `crates/emela-codegen-emb/docs/artifact-contract.md`（第2節の固定revision）
+- 旧frontend試験helper: 旧forkの `crates/emela-codegen-emb/tests/support/frontend.rs`（第2節の固定revision）
 - [取り込み済みの旧機能・試験inventory](reference/legacy-flow/flow-backend-inventory.md)
 - [対応表に基づく終了条件](compiler-coverage.md) と [新repoの移行台帳](compiler-coverage.json)
 
-上記の旧checkoutへのリンクは閲覧用であり、移植元は第2節のrevisionで確定する。本書は `.local` 内の実装計画。固定参照・台帳・終了条件はtrackedな文書に移し、実装開始時にはコードの出自・target制約と対応試験も追加する。
+旧forkの参照は移植元の説明であり、ビルド・試験の依存ではない。移植元は第2節のrevisionで確定する。本書・固定参照・台帳・終了条件をGit管理し、実装時にはコードの出自・target制約と対応試験も追加する。
