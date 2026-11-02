@@ -132,8 +132,8 @@ pub(crate) fn lower_program(
             .flat_map(|group| group.specializations.iter().copied()),
     );
     failures::normalize(&mut program);
-    // Calls, checked builtins, string rendering and List construction retain effects
-    // when unused. Temporary destinations let ownership release their results.
+    // Calls and checked values retain allocation and validation behavior when unused.
+    // Temporary destinations release returned data, handlers and evidence immediately.
     let mut discarded_results: HashMap<FnId, HashSet<VarId>> = HashMap::new();
     let mut discarded = Vec::new();
     for (function_id, function) in program.functions.iter() {
@@ -151,6 +151,9 @@ pub(crate) fn lower_program(
                     Value::Builtin { .. }
                     | Value::List { .. }
                     | Value::Call { .. }
+                    | Value::Handler { .. }
+                    | Value::EvExtend { .. }
+                    | Value::EvLookup { .. }
                     | Value::Runtime {
                         op: RuntimeOp::ShowString,
                         ..

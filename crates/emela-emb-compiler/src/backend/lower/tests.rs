@@ -18,10 +18,14 @@ mod isr;
 mod memory;
 #[path = "p7_binding_tests.rs"]
 mod p7_bindings;
+#[path = "p7_contract_tests.rs"]
+mod p7_contract;
 #[path = "p7_data_tests.rs"]
 mod p7_data;
 #[path = "p7_discarded_tests.rs"]
 mod p7_discarded;
+#[path = "p7_evidence_tests.rs"]
+mod p7_evidence;
 #[path = "p7_input_tests.rs"]
 mod p7_input;
 #[path = "service_tests.rs"]
@@ -1407,4 +1411,19 @@ fn unit_enum_uses_the_scalar_tag_representation() {
     p.functions.alloc(f);
     let output = crate::backend::compile_program(p, &Options::default()).unwrap();
     execute(&output, DEFECT_HARNESS, 0);
+}
+
+fn audit_owned_heap(output: &mut Output) {
+    if !output.c_source.contains("emela_heap_storage") {
+        output
+            .files
+            .iter_mut()
+            .find(|file| file.path == "emela_embedded.c")
+            .unwrap()
+            .contents
+            .push_str("\nint test_heap_empty(void){return 1;}\n");
+        return;
+    }
+    output.files.iter_mut().find(|file| file.path == "emela_embedded.c").unwrap().contents.push_str(
+        "\nint test_heap_empty(void){for(unsigned char*p=emela_heap_storage;emela_heap_initialized&&p<emela_heap_end();){emela_heap_block*b=(emela_heap_block*)(void*)p;if(!b->is_free)return 0;p+=b->size;}return 1;}\n");
 }
