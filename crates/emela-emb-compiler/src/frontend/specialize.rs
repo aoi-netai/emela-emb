@@ -328,6 +328,46 @@ impl Specializer {
             )
         })?;
         function.signature.ret = Some(self.ty(&source, ret, args, source.span)?);
+        for error_type in function
+            .signature
+            .sets
+            .errors
+            .iter_mut()
+            .chain(&mut function.signature.sets.error_constraints)
+        {
+            *error_type = self.substitute(
+                &source,
+                *error_type,
+                args,
+                source.span,
+                &mut HashMap::new(),
+                &mut HashSet::new(),
+                0,
+            )?;
+            let valid = match self.core.types.types.get(error_type.index()) {
+                Some(b::Type::Enum(id, _)) => self
+                    .core
+                    .enums
+                    .iter()
+                    .any(|(key, definition)| key == *id && definition.error),
+                _ => false,
+            };
+            if !valid {
+                return Err(diagnostic(
+                    &source,
+                    source.span,
+                    "failure type parameter must be a concrete error type",
+                ));
+            }
+        }
+        function.signature.sets.errors.sort_by_key(|ty| ty.index());
+        function.signature.sets.errors.dedup();
+        function
+            .signature
+            .sets
+            .error_constraints
+            .sort_by_key(|ty| ty.index());
+        function.signature.sets.error_constraints.dedup();
         for local in &mut function.params {
             local.ty = self.ty(&source, local.ty, args, source.span)?;
         }
@@ -453,7 +493,8 @@ impl Specializer {
                     self.expression(function, value, arguments, depth)?;
                 }
             }
-            ir::ExprKind::Field { base, .. }
+            ir::ExprKind::Fail(base)
+            | ir::ExprKind::Field { base, .. }
             | ir::ExprKind::Unary { value: base, .. }
             | ir::ExprKind::Assert(base)
             | ir::ExprKind::Tag(base) => self.expression(function, base, arguments, depth)?,
@@ -470,6 +511,17 @@ impl Specializer {
                 self.expression(function, condition, arguments, depth)?;
                 self.block(function, then, arguments, depth)?;
                 self.block(function, else_, arguments, depth)?;
+            }
+            ir::ExprKind::Escape { value, error, arms } => {
+                self.expression(function, value, arguments, depth)?;
+                error.ty = self.ty(function, error.ty, arguments, expression.span)?;
+                for arm in arms {
+                    self.pattern(function, &mut arm.pattern, arguments)?;
+                    if let Some(guard) = &mut arm.guard {
+                        self.expression(function, guard, arguments, depth)?;
+                    }
+                    self.expression(function, &mut arm.value, arguments, depth)?;
+                }
             }
             ir::ExprKind::Match { value, arms } => {
                 self.expression(function, value, arguments, depth)?;

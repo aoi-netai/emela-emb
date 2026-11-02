@@ -5,7 +5,10 @@ use super::{
     types::ValueType as Ty,
 };
 use crate::{contract::ir as b, sources::Intrinsic};
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
+
+#[path = "lower/failures.rs"]
+mod failures;
 
 pub(crate) fn lower(input: &ir::Program) -> b::Program {
     let mut program = b::Program {
@@ -18,14 +21,12 @@ pub(crate) fn lower(input: &ir::Program) -> b::Program {
     let mut ids = HashMap::new();
     for function in &input.functions {
         if function.intrinsic.is_none() {
-            debug_assert!(
-                function.signature.sets.errors.is_empty()
-                    && function.signature.sets.effects.is_empty()
-            );
+            debug_assert!(function.signature.sets.effects.is_empty());
             debug_assert!(function.derivation.is_none());
             debug_assert!(function.origin.is_none() || function.constant);
             let mut target = b::Function::new(&function.name);
             target.constant = function.constant;
+            target.fails = !function.signature.sets.errors.is_empty();
             target.exported = function.exported;
             target.export_symbol = function
                 .exported
@@ -43,6 +44,12 @@ pub(crate) fn lower(input: &ir::Program) -> b::Program {
             ids.insert(function.id, program.functions.alloc(target));
         }
     }
+    let raises = failures::allocate_raises(input, &mut program);
+    let failing: HashSet<_> = input
+        .functions
+        .iter()
+        .filter_map(|function| (!function.signature.sets.errors.is_empty()).then_some(function.id))
+        .collect();
     let intrinsics = input
         .functions
         .iter()
@@ -61,6 +68,9 @@ pub(crate) fn lower(input: &ir::Program) -> b::Program {
             intrinsics: &intrinsics,
             locals: HashMap::new(),
             core: &program.core,
+            failing: &failing,
+            raises: &raises,
+            escape: None,
         };
         for param in &function.params {
             if param.ty == Ty::Unit {
@@ -94,6 +104,9 @@ struct Context<'a> {
     intrinsics: &'a HashMap<DefinitionId, Intrinsic>,
     locals: HashMap<LocalId, b::Operand>,
     core: &'a b::Definitions,
+    failing: &'a HashSet<DefinitionId>,
+    raises: &'a HashMap<b::TypeId, b::FnId>,
+    escape: Option<(b::VarId, b::SeqId)>,
 }
 impl Context<'_> {
     fn var(&mut self, name: &str, value_type: Ty) -> b::VarId {
@@ -202,6 +215,17 @@ impl Context<'_> {
     ) -> Option<b::Operand> {
         use ir::ExprKind as E;
         match &expression.kind {
+            E::Fail(value) => {
+                let error = self.expression(builder, value, false);
+                if builder.term.is_some() {
+                    return None;
+                }
+                self.raise(builder, error.expect("checked error value"), ty(value.ty));
+                None
+            }
+            E::Escape { value, error, arms } => {
+                self.escape_expression(builder, value, error, arms, expression.ty)
+            }
             E::TraitCall { .. } => {
                 unreachable!("trait methods are resolved before backend lowering")
             }
@@ -461,7 +485,11 @@ impl Context<'_> {
                     .iter()
                     .filter_map(|&index| evaluated[index].clone())
                     .collect();
-                if tail && *target == self.current && !self.function.constant {
+                if tail
+                    && *target == self.current
+                    && !self.function.constant
+                    && self.escape.is_none()
+                {
                     builder.term = Some(b::Term::Recur(operands));
                     return None;
                 }
@@ -474,7 +502,7 @@ impl Context<'_> {
                         callee: b::Callee::Direct(self.ids[target]),
                         args: operands,
                         suspends: false,
-                        on_fail: None,
+                        on_fail: self.failing.contains(target).then(|| self.failure_edge()),
                     },
                 };
                 self.value(builder, value, expression.ty)
@@ -577,6 +605,31 @@ impl Context<'_> {
                 }
             }
             P::Constructor { ctor, fields } => {
+                let value = if let b::Operand::Var(error) = value {
+                    if self.function.vars[error].ty == b::TypeId::ANY {
+                        let condition = self.pattern_value(
+                            steps,
+                            b::Value::IsError {
+                                error,
+                                enum_id: ctor.enum_id,
+                            },
+                            Ty::Bool,
+                        );
+                        steps.push(PatternStep::Test(condition));
+                        self.pattern_value(
+                            steps,
+                            b::Value::AsError {
+                                error,
+                                enum_id: ctor.enum_id,
+                            },
+                            pattern.ty,
+                        )
+                    } else {
+                        b::Operand::Var(error)
+                    }
+                } else {
+                    value
+                };
                 let base = match value {
                     b::Operand::Var(var) => var,
                     b::Operand::Const(value) => {
@@ -720,6 +773,7 @@ fn ty(value: Ty) -> b::TypeId {
         Ty::Bool => b::TypeId::BOOL,
         Ty::Unit => b::TypeId::UNIT,
         Ty::Never => b::TypeId::NEVER,
+        Ty::Any => b::TypeId::ANY,
         Ty::Compound(id) => id,
     }
 }
@@ -728,7 +782,7 @@ fn repr(value: Ty, core: &b::Definitions) -> b::Repr {
         Ty::Int | Ty::Bool => b::Repr::I32,
         Ty::Int64 => b::Repr::I64,
         Ty::Float => b::Repr::F64,
-        Ty::String => b::Repr::Ref,
+        Ty::String | Ty::Any => b::Repr::Ref,
         Ty::Unit | Ty::Never => b::Repr::Void,
         Ty::Compound(id) => match core.ty(id) {
             b::Type::Enum(id, _)

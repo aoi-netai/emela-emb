@@ -994,3 +994,270 @@ fn generic_trait_calls_instantiate_default_methods_with_the_concrete_self_type()
         functions: vec![implementation, default, generic_call, answer],
     });
 }
+
+fn error_definition(core: &mut b::Definitions, name: &str) -> (b::EnumId, b::TypeId) {
+    let id = core.enums.alloc(b::EnumDef {
+        name: name.into(),
+        params: 0,
+        variants: vec![b::VariantDef {
+            name: name.into(),
+            fields: b::VariantFields::Positional(1),
+            tys: vec![b::TypeId::INT],
+        }],
+        error: true,
+        external: false,
+    });
+    let ty = core.types.intern(b::Type::Enum(id, vec![]));
+    (id, ty)
+}
+fn error_value(id: b::EnumId, ty: b::TypeId, value: i32) -> ir::Expr {
+    expression(
+        ir::ExprKind::Make {
+            ctor: b::CtorRef {
+                enum_id: id,
+                variant: 0,
+            },
+            args: vec![integer(value)],
+            order: vec![0],
+        },
+        frontend_type(ty),
+    )
+}
+fn error_arm(id: b::EnumId, ty: b::TypeId, binding: usize, value: ir::Expr) -> ir::Arm {
+    ir::Arm {
+        pattern: ir::Pattern {
+            kind: ir::PatternKind::Constructor {
+                ctor: b::CtorRef {
+                    enum_id: id,
+                    variant: 0,
+                },
+                fields: vec![ir::Pattern {
+                    kind: ir::PatternKind::Bind(local(binding, ValueType::Int)),
+                    ty: ValueType::Int,
+                    span: span(),
+                }],
+            },
+            ty: frontend_type(ty),
+            span: span(),
+        },
+        guard: None,
+        value,
+    }
+}
+#[test]
+fn escape_leaves_the_whole_expression_before_later_calls_execute() {
+    let mut core = b::Definitions::default();
+    let (error, error_ty) = error_definition(&mut core, "Written");
+    let mut bad = function(
+        0,
+        "bad",
+        vec![],
+        ValueType::Int,
+        expression(
+            ir::ExprKind::Fail(Box::new(error_value(error, error_ty, 7))),
+            ValueType::Never,
+        ),
+    );
+    bad.signature.sets.errors = vec![error_ty];
+    let mut after = function(1, "after", vec![], ValueType::Int, integer(1));
+    after.body.as_mut().unwrap().statements.insert(
+        0,
+        ir::Statement::Expr(expression(
+            ir::ExprKind::Assert(Box::new(expression(
+                ir::ExprKind::Literal(ir::Literal::Bool(false)),
+                ValueType::Bool,
+            ))),
+            ValueType::Unit,
+        )),
+    );
+    let value = expression(
+        ir::ExprKind::Binary {
+            op: Binary::Add,
+            left: Box::new(call(0, vec![], vec![], ValueType::Int)),
+            right: Box::new(call(1, vec![], vec![], ValueType::Int)),
+        },
+        ValueType::Int,
+    );
+    let recovered = expression(
+        ir::ExprKind::Binary {
+            op: Binary::Add,
+            left: Box::new(expression(
+                ir::ExprKind::Local(ir::LocalId(11)),
+                ValueType::Int,
+            )),
+            right: Box::new(integer(35)),
+        },
+        ValueType::Int,
+    );
+    let escaped = expression(
+        ir::ExprKind::Escape {
+            value: Box::new(value),
+            error: local(10, ValueType::Any),
+            arms: vec![error_arm(error, error_ty, 11, recovered)],
+        },
+        ValueType::Int,
+    );
+    let answer = exported(function(2, "answer", vec![], ValueType::Int, escaped));
+    execute(ir::Program {
+        core,
+        registry: Default::default(),
+        functions: vec![bad, after, answer],
+    });
+}
+#[test]
+fn local_fail_and_nested_escape_handlers_propagate_to_the_outer_scope() {
+    let mut core = b::Definitions::default();
+    let (first, first_ty) = error_definition(&mut core, "First");
+    let (second, second_ty) = error_definition(&mut core, "Second");
+    let fail_first = expression(
+        ir::ExprKind::Fail(Box::new(error_value(first, first_ty, 7))),
+        ValueType::Never,
+    );
+    let fail_second = expression(
+        ir::ExprKind::Fail(Box::new(error_value(second, second_ty, 42))),
+        ValueType::Never,
+    );
+    let inner = expression(
+        ir::ExprKind::Escape {
+            value: Box::new(fail_first),
+            error: local(10, ValueType::Any),
+            arms: vec![error_arm(first, first_ty, 11, fail_second)],
+        },
+        ValueType::Int,
+    );
+    let outer = expression(
+        ir::ExprKind::Escape {
+            value: Box::new(inner),
+            error: local(20, ValueType::Any),
+            arms: vec![error_arm(
+                second,
+                second_ty,
+                21,
+                expression(ir::ExprKind::Local(ir::LocalId(21)), ValueType::Int),
+            )],
+        },
+        ValueType::Int,
+    );
+    let answer = exported(function(0, "answer", vec![], ValueType::Int, outer));
+    execute(ir::Program {
+        core,
+        registry: Default::default(),
+        functions: vec![answer],
+    });
+}
+#[test]
+fn generic_error_constraints_are_substituted_and_non_errors_are_rejected() {
+    let mut core = b::Definitions::default();
+    let (error, error_ty) = error_definition(&mut core, "Typed");
+    let parameter = core.types.intern(b::Type::Param(0));
+    let generic = frontend_type(parameter);
+    let mut throw = function(
+        0,
+        "throw",
+        vec![local(0, generic)],
+        ValueType::Never,
+        expression(
+            ir::ExprKind::Fail(Box::new(expression(
+                ir::ExprKind::Local(ir::LocalId(0)),
+                generic,
+            ))),
+            ValueType::Never,
+        ),
+    );
+    throw.type_parameters = 1;
+    throw.signature.sets.errors = vec![parameter];
+    throw.signature.sets.error_constraints = vec![parameter];
+    let thrown = call(
+        0,
+        vec![error_value(error, error_ty, 42)],
+        vec![error_ty],
+        ValueType::Never,
+    );
+    let escaped = expression(
+        ir::ExprKind::Escape {
+            value: Box::new(thrown),
+            error: local(10, ValueType::Any),
+            arms: vec![error_arm(
+                error,
+                error_ty,
+                11,
+                expression(ir::ExprKind::Local(ir::LocalId(11)), ValueType::Int),
+            )],
+        },
+        ValueType::Int,
+    );
+    let answer = exported(function(1, "answer", vec![], ValueType::Int, escaped));
+    let input = ir::Program {
+        core,
+        registry: Default::default(),
+        functions: vec![throw, answer],
+    };
+    execute(input.clone());
+    let mut invalid = input;
+    let ir::Statement::Expr(ir::Expr {
+        kind: ir::ExprKind::Escape { value, .. },
+        ..
+    }) = &mut invalid.functions[1].body.as_mut().unwrap().statements[0]
+    else {
+        panic!()
+    };
+    let ir::ExprKind::Call {
+        args,
+        type_arguments,
+        ..
+    } = &mut value.kind
+    else {
+        panic!()
+    };
+    args[0] = integer(42);
+    type_arguments[0] = b::TypeId::INT;
+    assert!(
+        specialize(invalid).unwrap_err()[0]
+            .message
+            .contains("concrete error type")
+    );
+}
+
+#[test]
+fn unmatched_guarded_errors_propagate_without_reentering_the_same_escape() {
+    let mut core = b::Definitions::default();
+    let (error, error_ty) = error_definition(&mut core, "Guarded");
+    let mut arm = error_arm(error, error_ty, 11, integer(0));
+    arm.guard = Some(expression(
+        ir::ExprKind::Literal(ir::Literal::Bool(false)),
+        ValueType::Bool,
+    ));
+    let failing = expression(
+        ir::ExprKind::Fail(Box::new(error_value(error, error_ty, 42))),
+        ValueType::Never,
+    );
+    let inner = expression(
+        ir::ExprKind::Escape {
+            value: Box::new(failing),
+            error: local(10, ValueType::Any),
+            arms: vec![arm],
+        },
+        ValueType::Int,
+    );
+    let mut partial = function(0, "partial", vec![], ValueType::Int, inner);
+    partial.signature.sets.errors = vec![error_ty];
+    let outer = expression(
+        ir::ExprKind::Escape {
+            value: Box::new(call(0, vec![], vec![], ValueType::Int)),
+            error: local(20, ValueType::Any),
+            arms: vec![error_arm(
+                error,
+                error_ty,
+                21,
+                expression(ir::ExprKind::Local(ir::LocalId(21)), ValueType::Int),
+            )],
+        },
+        ValueType::Int,
+    );
+    let answer = exported(function(1, "answer", vec![], ValueType::Int, outer));
+    execute(ir::Program {
+        core,
+        registry: Default::default(),
+        functions: vec![partial, answer],
+    });
+}

@@ -35,6 +35,17 @@ pub(crate) fn normalize(
             for parameter in &mut function.signature.params {
                 context.ty(parameter, function.span)?;
             }
+            for error in function
+                .signature
+                .sets
+                .errors
+                .iter_mut()
+                .chain(&mut function.signature.sets.error_constraints)
+            {
+                let mut ty = frontend_type(*error);
+                context.ty(&mut ty, function.span)?;
+                *error = backend_type(ty);
+            }
             if let Some(ret) = &mut function.signature.ret {
                 context.ty(ret, function.span)?;
             }
@@ -133,7 +144,8 @@ impl Context<'_> {
                     self.expression(value)?;
                 }
             }
-            E::Unary { value, .. }
+            E::Fail(value)
+            | E::Unary { value, .. }
             | E::Assert(value)
             | E::Field { base: value, .. }
             | E::Tag(value) => self.expression(value)?,
@@ -175,6 +187,17 @@ impl Context<'_> {
                 self.block(else_)?;
             }
             E::Block(block) => self.block(block)?,
+            E::Escape { value, error, arms } => {
+                self.expression(value)?;
+                self.ty(&mut error.ty, expression.span)?;
+                for arm in arms {
+                    self.pattern(&mut arm.pattern)?;
+                    if let Some(guard) = &mut arm.guard {
+                        self.expression(guard)?;
+                    }
+                    self.expression(&mut arm.value)?;
+                }
+            }
             E::Match { value, arms } => {
                 self.expression(value)?;
                 for arm in arms {

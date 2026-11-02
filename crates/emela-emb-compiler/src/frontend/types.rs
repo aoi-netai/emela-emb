@@ -9,6 +9,7 @@ pub(crate) enum ValueType {
     String,
     Unit,
     Never,
+    Any,
     Compound(crate::contract::ir::TypeId),
 }
 impl ValueType {
@@ -29,13 +30,15 @@ impl fmt::Display for ValueType {
             Self::String => "String",
             Self::Unit => "()",
             Self::Never => "Never",
+            Self::Any => "EmelaError",
             Self::Compound(_) => unreachable!(),
         })
     }
 }
 #[derive(Clone, Debug, Default, PartialEq, Eq)]
 pub(crate) struct InvocationSets {
-    pub errors: Vec<String>,
+    pub errors: Vec<crate::contract::ir::TypeId>,
+    pub error_constraints: Vec<crate::contract::ir::TypeId>,
     pub effects: Vec<String>,
 }
 #[derive(Clone, Debug)]

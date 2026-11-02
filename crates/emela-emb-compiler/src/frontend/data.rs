@@ -361,6 +361,7 @@ pub(crate) fn backend_type(ty: Ty) -> b::TypeId {
         Ty::String => b::TypeId::STRING,
         Ty::Unit => b::TypeId::UNIT,
         Ty::Never => b::TypeId::NEVER,
+        Ty::Any => b::TypeId::ANY,
         Ty::Compound(id) => id,
     }
 }
@@ -373,6 +374,7 @@ pub(crate) fn frontend_type(ty: b::TypeId) -> Ty {
         b::TypeId::STRING => Ty::String,
         b::TypeId::UNIT => Ty::Unit,
         b::TypeId::NEVER => Ty::Never,
+        b::TypeId::ANY => Ty::Any,
         _ => Ty::Compound(ty),
     }
 }

@@ -59,6 +59,12 @@ pub(crate) struct Expr {
 pub(crate) enum ExprKind {
     Literal(Literal),
     Concat(Vec<Expr>),
+    Fail(Box<Expr>),
+    Escape {
+        value: Box<Expr>,
+        error: Local,
+        arms: Vec<Arm>,
+    },
     Tag(Box<Expr>),
     Builtin {
         op: crate::contract::ir::Builtin,
