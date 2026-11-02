@@ -17,7 +17,7 @@ fn compile_source(source: &str, options: &Options) -> Output {
 fn bytes_views_keep_u32_lengths_and_unsigned_elements_without_a_heap() {
     let output = compile_source(
         include_str!("compat/p3/bytes-views.emel"),
-        &Options::default(),
+        &Options::default().with_isr_entry("size"),
     );
     assert!(!output.c_source.contains("emela_heap_storage"));
     compile_and_run(
