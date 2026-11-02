@@ -1,6 +1,6 @@
 # P6構造化並行処理の検証報告（実装中）
 
-P5確定版 `13cd313` を基点に、Scope/Fiber/Deferred/Causeと取消・cleanupを接続する。固定旧forkは `c34c0aeefdd966d854371b3110db00a47798751d`。現時点では独自IRの基盤を統合しており、標準source接続と最終検証は継続中。
+P5確定版 `13cd313` を基点に、Scope/Fiber/Deferred/Causeと取消・cleanupを接続する。固定旧forkは `c34c0aeefdd966d854371b3110db00a47798751d`。独自IR基盤と標準source接続を統合し、取消・combinatorのsource回帰と最終検証を継続中。
 
 ## 統合した基盤
 
@@ -17,8 +17,12 @@ P5確定版 `13cd313` を基点に、Scope/Fiber/Deferred/Causeと取消・clean
 
 source revision `d4b9b23` の `cargo test -p emela-emb-compiler --lib --locked --offline` は213 pass、失敗/ignore 0。独自IRの正常C経路は `cc -std=c11 -Wall -Werror -O0` / `-O2` で成功し、所有権を伴う経路は1000回反復・全heap回収を確認する。ログは `.local/experiment/p6-unit-boxing-lib.log`。
 
-直前の `90eb956` は209 pass。strict ClippyはsourceでEvidence/Fiberをまだ構築していないためdead_codeで失敗した。抑制属性は追加せず、標準sourceの合成経路を接続した後に再確認する。
+直前の `90eb956` は209 pass。source接続前のstrict ClippyはEvidence/Fiber未構築のdead_codeで失敗したが、抑制属性を追加せず標準sourceを接続して解消した。
+
+`1086f6a` はStd.Fiber/Deferred/Causeの固定source、名義型のrow kind推論、Scope省略推論・子Scope供給、Cause/Exitのphantom row ABI射影を接続する。`p6_concurrency.rs` の2試験は通常のRust test profileで成功した。Scope/Fork/Join/Deferred、Unit child/Deferred、Attempt/Cause分類・表示・再送出の7exportをC両最適化・各1000回の全heap回収で確認し、Scope戻り型のhandle逸出と集合kind等7不正sourceを拒否した。
+
+同revisionのstrict Clippy全target・実Rust1.85全target check・fmt/diffは成功、警告0。全workspace回帰は実行中で、Rust側は `CARGO_PROFILE_TEST_OPT_LEVEL=1` を使う。C側の必須両最適化は同じ。ログは `.local/experiment/p6-source-{initial,clippy,msrv}.log` と `p6-workspace-initial.log`。
 
 ## 残る完了条件
 
-Std.Fiber/Deferred/Causeのtrusted source合成、Scopeの戻り型と集合制約を正式branchへ統合する。sourceから正常・失敗・取消・中断cleanup・所有値の再開と不正入力の拒否を確認し、最終sourceの全workspace・strict Clippy・実Rust1.85・独立環境検証を行う。台帳はそれらの証拠に基づいて更新し、独自IRの成功だけでsource対応を完了扱いにしない。
+sourceから取消・中断cleanup・lexical provider・入れ子Scope・標準combinatorの回帰を追加し、最終sourceの全workspace・strict Clippy・実Rust1.85・独立環境検証を行う。台帳はそれらの証拠に基づいて更新し、独自IRの成功だけでsource対応を完了扱いにしない。
