@@ -1,0 +1,114 @@
+@export(c, "add32")
+pub fn add32(a: Int, b: Int) -> Int { a + b }
+@export(c, "sub32")
+pub fn sub32(a: Int, b: Int) -> Int { a - b }
+@export(c, "mul32")
+pub fn mul32(a: Int, b: Int) -> Int { a * b }
+@export(c, "neg32")
+pub fn neg32(a: Int) -> Int { -a }
+@export(c, "div32")
+pub fn div32(a: Int, b: Int) -> Int { a / b }
+@export(c, "rem32")
+pub fn rem32(a: Int, b: Int) -> Int { a % b }
+@export(c, "add64")
+pub fn add64(a: Int64, b: Int64) -> Int64 { a + b }
+@export(c, "sub64")
+pub fn sub64(a: Int64, b: Int64) -> Int64 { a - b }
+@export(c, "mul64")
+pub fn mul64(a: Int64, b: Int64) -> Int64 { a * b }
+@export(c, "neg64")
+pub fn neg64(a: Int64) -> Int64 { -a }
+@export(c, "div64")
+pub fn div64(a: Int64, b: Int64) -> Int64 { a / b }
+@export(c, "rem64")
+pub fn rem64(a: Int64, b: Int64) -> Int64 { a % b }
+@export(c, "bits32")
+pub fn bits32(a: Int, b: Int) -> Int { Int.bit_not(Int.bit_xor(Int.bit_or(Int.bit_and(a, b), 1), b)) }
+@export(c, "bits64")
+pub fn bits64(a: Int64, b: Int64) -> Int64 { Int64.bit_not(Int64.bit_xor(Int64.bit_or(Int64.bit_and(a, b), 1), b)) }
+@export(c, "left32")
+pub fn left32(a: Int, n: Int) -> Int { Int.shift_left(a, n) }
+@export(c, "right32")
+pub fn right32(a: Int, n: Int) -> Int { Int.shift_right(a, n) }
+@export(c, "unsigned32")
+pub fn unsigned32(a: Int, n: Int) -> Int { Int.shift_right_unsigned(a, n) }
+@export(c, "left64")
+pub fn left64(a: Int64, n: Int) -> Int64 { Int64.shift_left(a, n) }
+@export(c, "right64")
+pub fn right64(a: Int64, n: Int) -> Int64 { Int64.shift_right(a, n) }
+@export(c, "unsigned64")
+pub fn unsigned64(a: Int64, n: Int) -> Int64 { Int64.shift_right_unsigned(a, n) }
+@export(c, "min32")
+pub fn min32() -> Int { Int.MIN }
+@export(c, "max32")
+pub fn max32() -> Int { Int.MAX }
+@export(c, "min64")
+pub fn min64() -> Int64 { Int64.MIN }
+@export(c, "max64")
+pub fn max64() -> Int64 { Int64.MAX }
+@export(c, "float_arithmetic")
+pub fn float_arithmetic(a: Float, b: Float) -> Float { -(a + b) * 2.0 / 4.0 }
+@export(c, "unit_value")
+pub fn unit_value() -> Unit { () }
+@export(c, "eq32")
+pub fn eq32(a: Int, b: Int) -> Bool { a == b }
+@export(c, "ne32")
+pub fn ne32(a: Int, b: Int) -> Bool { a != b }
+@export(c, "lt32")
+pub fn lt32(a: Int, b: Int) -> Bool { a < b }
+@export(c, "le32")
+pub fn le32(a: Int, b: Int) -> Bool { a <= b }
+@export(c, "gt32")
+pub fn gt32(a: Int, b: Int) -> Bool { a > b }
+@export(c, "ge32")
+pub fn ge32(a: Int, b: Int) -> Bool { a >= b }
+@export(c, "eq64")
+pub fn eq64(a: Int64, b: Int64) -> Bool { a == b }
+@export(c, "ne64")
+pub fn ne64(a: Int64, b: Int64) -> Bool { a != b }
+@export(c, "lt64")
+pub fn lt64(a: Int64, b: Int64) -> Bool { a < b }
+@export(c, "le64")
+pub fn le64(a: Int64, b: Int64) -> Bool { a <= b }
+@export(c, "gt64")
+pub fn gt64(a: Int64, b: Int64) -> Bool { a > b }
+@export(c, "ge64")
+pub fn ge64(a: Int64, b: Int64) -> Bool { a >= b }
+@export(c, "eqf")
+pub fn eqf(a: Float, b: Float) -> Bool { a == b }
+@export(c, "nef")
+pub fn nef(a: Float, b: Float) -> Bool { a != b }
+@export(c, "ltf")
+pub fn ltf(a: Float, b: Float) -> Bool { a < b }
+@export(c, "lef")
+pub fn lef(a: Float, b: Float) -> Bool { a <= b }
+@export(c, "gtf")
+pub fn gtf(a: Float, b: Float) -> Bool { a > b }
+@export(c, "gef")
+pub fn gef(a: Float, b: Float) -> Bool { a >= b }
+@export(c, "addf")
+pub fn addf(a: Float, b: Float) -> Float { a + b }
+@export(c, "subf")
+pub fn subf(a: Float, b: Float) -> Float { a - b }
+@export(c, "mulf")
+pub fn mulf(a: Float, b: Float) -> Float { a * b }
+@export(c, "divf")
+pub fn divf(a: Float, b: Float) -> Float { a / b }
+@export(c, "remf")
+pub fn remf(a: Float, b: Float) -> Float { a % b }
+@export(c, "band32")
+pub fn band32(a: Int, b: Int) -> Int { Int.bit_and(a, b) }
+@export(c, "bor32")
+pub fn bor32(a: Int, b: Int) -> Int { Int.bit_or(a, b) }
+@export(c, "bxor32")
+pub fn bxor32(a: Int, b: Int) -> Int { Int.bit_xor(a, b) }
+@export(c, "bnot32")
+pub fn bnot32(a: Int) -> Int { Int.bit_not(a) }
+@export(c, "band64")
+pub fn band64(a: Int64, b: Int64) -> Int64 { Int64.bit_and(a, b) }
+@export(c, "bor64")
+pub fn bor64(a: Int64, b: Int64) -> Int64 { Int64.bit_or(a, b) }
+@export(c, "bxor64")
+pub fn bxor64(a: Int64, b: Int64) -> Int64 { Int64.bit_xor(a, b) }
+@export(c, "bnot64")
+pub fn bnot64(a: Int64) -> Int64 { Int64.bit_not(a) }

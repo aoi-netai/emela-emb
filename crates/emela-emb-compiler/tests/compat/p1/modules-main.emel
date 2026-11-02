@@ -1,0 +1,14 @@
+# Calls resolve to declarations in Math, preserving the caller's local binding.
+import Math.{add, total, swap}
+@external(c, "board_increment")
+fn board_increment(n: Int) -> Int
+fn hidden(n: Int) -> Int { board_increment(n) }
+@export(c, "answer")
+pub fn answer() -> Int {
+  value = add(20, 21)
+  value = hidden(value)
+  assert value == 42
+  assert total(1000000, 0) == 1000000
+  assert swap(1000001, 7, 42) == 42
+  if value == 42 { value } else { 0 }
+}
