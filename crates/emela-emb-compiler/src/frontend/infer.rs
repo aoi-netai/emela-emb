@@ -4,7 +4,6 @@
 //! Identity is determined by the explicit `metas` registry, never by an index range.
 //! Source declarations must create rigid parameters through `register_rigid_parameter`;
 //! a late rigid declaration cannot silently reuse an inference parameter's identity.
-#![allow(dead_code)] // The checker adopts this independent solver in the next integration commit.
 
 use crate::contract::ir::{FnSets, Type, TypeId, TypeTable};
 use std::collections::{HashMap, HashSet};
@@ -77,6 +76,7 @@ struct Meta {
 /// Quantified parameters are rigid, freshly allocated catalog entries. They are not
 /// mutable inference variables and remain stable when the solver continues checking.
 #[derive(Debug, Clone)]
+#[allow(dead_code)] // Explicit declaration schemes currently use direct rigid substitution.
 pub(crate) struct Scheme {
     pub(crate) ty: TypeId,
     pub(crate) params: Vec<TypeId>,
@@ -141,6 +141,7 @@ impl Solver {
     }
     /// The catalog has u32 IDs, so exhausting the usize parameter namespace is unreachable
     /// before its own allocation limit. `try_fresh` exposes the explicit boundary check.
+    #[allow(dead_code)] // Kept for the checker's inferred top-level scheme integration.
     pub(crate) fn fresh(&mut self, types: &mut TypeTable, constraint: Constraint) -> TypeId {
         self.try_fresh(types, constraint)
             .expect("type parameter allocation stays within the catalog limit")
@@ -278,10 +279,10 @@ impl Solver {
         if actual == expected || actual == TypeId::NEVER {
             return Ok(());
         }
-        if self.metas.contains_key(&actual) {
+        if self.is_meta(actual) {
             return self.bind(types, actual, expected);
         }
-        if self.metas.contains_key(&expected) {
+        if self.is_meta(expected) {
             return self.bind(types, expected, actual);
         }
         match (Self::node(types, actual)?, Self::node(types, expected)?) {
@@ -349,7 +350,7 @@ impl Solver {
         if variable == target {
             return Ok(());
         }
-        let constraint = self.metas[&variable].constraint;
+        let constraint = self.constraint(variable).expect("registered variable");
         if let Some(other) = self.metas.get_mut(&target) {
             other.constraint = other.constraint.merge(constraint);
             self.metas
@@ -468,6 +469,7 @@ impl Solver {
         })?;
         Ok(types.intern(node))
     }
+    #[allow(dead_code)] // Kept for the checker's inferred top-level scheme integration.
     pub(crate) fn generalize(
         &mut self,
         types: &mut TypeTable,
@@ -511,6 +513,7 @@ impl Solver {
             constraints,
         })
     }
+    #[allow(dead_code)] // Kept for the checker's inferred top-level scheme integration.
     pub(crate) fn instantiate(&mut self, types: &mut TypeTable, scheme: &Scheme) -> Result<TypeId> {
         if scheme.params.len() != scheme.constraints.len() {
             return Err(error(
