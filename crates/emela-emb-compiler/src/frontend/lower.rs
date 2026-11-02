@@ -286,19 +286,24 @@ impl Context<'_> {
                     expression.ty,
                 )
             }
-            E::Call { target, args } => {
-                let mut operands = Vec::new();
+            E::Call {
+                target,
+                args,
+                order,
+            } => {
+                let mut evaluated = Vec::new();
                 for argument in args {
                     let value = self.expression(builder, argument, false);
                     if builder.term.is_some() {
                         return None;
                     }
-                    // Unit has no C parameter, but evaluating its source expression can
-                    // still call externals or stop execution. Erase only the resulting value.
-                    if argument.ty != Ty::Unit {
-                        operands.push(value.expect("non-Unit checked argument"));
-                    }
+                    // Evaluate even Unit arguments before omitting their C values.
+                    evaluated.push(value);
                 }
+                let operands = order
+                    .iter()
+                    .filter_map(|&index| evaluated[index].clone())
+                    .collect();
                 if tail && *target == self.current {
                     builder.term = Some(b::Term::Recur(operands));
                     return None;

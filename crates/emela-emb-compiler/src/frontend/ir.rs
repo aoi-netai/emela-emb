@@ -66,6 +66,7 @@ pub(crate) enum ExprKind {
     Call {
         target: DefinitionId,
         args: Vec<Expr>,
+        order: Vec<usize>,
     },
     If {
         condition: Box<Expr>,

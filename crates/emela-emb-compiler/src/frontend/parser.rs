@@ -386,12 +386,28 @@ impl<'t, 's> Parser<'t, 's> {
                 self.newlines();
                 let mut args = Vec::new();
                 while self.current().kind != K::RParen {
-                    if matches!(self.current().kind, K::Name(_)) && self.peek(1).kind == K::Colon {
-                        return Err(
-                            self.error(DiagnosticKind::Unsupported, "named arguments require P2")
-                        );
-                    }
-                    args.push(self.expr(0, true)?);
+                    let label = if matches!(self.current().kind, K::Name(_))
+                        && self.peek(1).kind == K::Colon
+                    {
+                        let name = self.lower_name("expected argument label")?;
+                        self.advance();
+                        self.newlines();
+                        Some(name)
+                    } else {
+                        None
+                    };
+                    let value = if matches!(self.current().kind, K::Comma | K::RParen) {
+                        let Some(label) = &label else {
+                            return Err(self.error(DiagnosticKind::Syntax, "expected argument"));
+                        };
+                        Expr {
+                            kind: ExprKind::Name(vec![label.clone()]),
+                            span: label.span,
+                        }
+                    } else {
+                        self.expr(0, true)?
+                    };
+                    args.push(Argument { label, value });
                     self.newlines();
                     if !self.take(K::Comma) {
                         break;

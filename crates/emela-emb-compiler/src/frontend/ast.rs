@@ -83,7 +83,7 @@ pub(crate) enum ExprKind {
     },
     Call {
         callee: Box<Expr>,
-        args: Vec<Expr>,
+        args: Vec<Argument>,
     },
     If {
         condition: Box<Expr>,
@@ -122,4 +122,10 @@ impl Binary {
             Self::Eq | Self::Ne | Self::Lt | Self::Le | Self::Gt | Self::Ge
         )
     }
+}
+
+#[derive(Clone, Debug)]
+pub(crate) struct Argument {
+    pub label: Option<Text>,
+    pub value: Expr,
 }

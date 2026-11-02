@@ -593,6 +593,7 @@ impl Checker {
                             kind: ir::ExprKind::Call {
                                 target,
                                 args: vec![value],
+                                order: vec![0],
                             },
                             ty: Ty::String,
                             span: part.span,
@@ -658,7 +659,13 @@ impl Checker {
                     A::Call { callee, args } => (callee.as_ref().clone(), args.clone()),
                     _ => (right.as_ref().clone(), Vec::new()),
                 };
-                args.insert(0, left.as_ref().clone());
+                args.insert(
+                    0,
+                    ast::Argument {
+                        label: None,
+                        value: left.as_ref().clone(),
+                    },
+                );
                 return self.expr(
                     module,
                     &ast::Expr {
@@ -758,7 +765,68 @@ impl Checker {
                     ));
                 };
                 let signature = self.definitions[id.0].signature.clone();
-                if args.len() != signature.params.len() {
+                let params = self.definitions[id.0].ast.params.clone();
+                let mut order = vec![usize::MAX; params.len()];
+                let mut named = false;
+                let mut checked = Vec::new();
+                for (index, argument) in args.iter().enumerate() {
+                    let parameter = if let Some(label) = &argument.label {
+                        named = true;
+                        params
+                            .iter()
+                            .position(|p| p.name.value == label.value)
+                            .ok_or_else(|| {
+                                self.error(
+                                    module,
+                                    DK::Type,
+                                    label.span,
+                                    format!("unknown argument label '{}'", label.value),
+                                )
+                            })?
+                    } else {
+                        if named {
+                            return Err(self.error(
+                                module,
+                                DK::Type,
+                                argument.value.span,
+                                "positional arguments must precede named arguments",
+                            ));
+                        }
+                        if index >= params.len() {
+                            return Err(self.error(
+                                module,
+                                DK::Type,
+                                span,
+                                format!(
+                                    "function '{}' expects {} arguments, found {}",
+                                    self.definitions[id.0].name,
+                                    params.len(),
+                                    args.len()
+                                ),
+                            ));
+                        }
+                        index
+                    };
+                    if order[parameter] != usize::MAX {
+                        return Err(self.error(
+                            module,
+                            DK::Type,
+                            argument.value.span,
+                            format!(
+                                "argument '{}' is supplied more than once",
+                                params[parameter].name.value
+                            ),
+                        ));
+                    }
+                    order[parameter] = index;
+                    checked.push(self.expr(
+                        module,
+                        &argument.value,
+                        locals,
+                        Some(signature.params[parameter]),
+                    )?);
+                }
+                if order.contains(&usize::MAX) {
                     return Err(self.error(
                         module,
                         DK::Type,
@@ -766,14 +834,10 @@ impl Checker {
                         format!(
                             "function '{}' expects {} arguments, found {}",
                             self.definitions[id.0].name,
-                            signature.params.len(),
+                            params.len(),
                             args.len()
                         ),
                     ));
-                }
-                let mut checked = Vec::new();
-                for (arg, expected) in args.iter().zip(&signature.params) {
-                    checked.push(self.expr(module, arg, locals, Some(*expected))?);
                 }
                 let ret = match signature.ret {
                     Some(ret) => ret,
@@ -783,6 +847,7 @@ impl Checker {
                     ir::ExprKind::Call {
                         target: id,
                         args: checked,
+                        order,
                     },
                     ret,
                 )

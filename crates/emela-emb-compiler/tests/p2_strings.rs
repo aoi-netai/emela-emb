@@ -142,3 +142,41 @@ fn string_rejections_keep_original_interpolation_positions() {
     let errors = emela_emb_compiler::compile(source).unwrap_err();
     assert_eq!(&source[errors[0].span.start..errors[0].span.end], "missing");
 }
+
+#[test]
+fn named_arguments_shorthand_and_tail_calls_preserve_written_evaluation_order() {
+    let source = r#"
+@external(c, "record")
+fn record(value: Int) -> Int
+fn compose(a: Int, b: Int, c: Int) -> Int { a * 100 + b * 10 + c }
+fn swap(a: Int, b: Int, count: Int) -> Int {
+  if count == 0 { a } else { swap(count: count - 1, b: a, a: b) }
+}
+@export(c, "named")
+pub fn named() -> Int {
+  c = 3
+  assert compose(c: record(3), a: record(1), b: record(2)) == 123
+  assert compose(1, b: 2, c:) == 123
+  assert (1 |> Int.shift_left(by: 2)) == 4
+  swap(1, 2, 1000001)
+}
+"#;
+    execute(
+        compile(source, Options::default()),
+        &format!(
+            "{BOARD}\nstatic int sequence; int32_t record(int32_t value) {{ sequence = sequence * 10 + value; return value; }}\nint main(void) {{ assert(named() == 2); assert(sequence == 312); return 0; }}"
+        ),
+        0,
+    );
+    for call in [
+        "compose(z: 1, b: 2, c: 3)",
+        "compose(1, a: 2, c: 3)",
+        "compose(a: 1, 2, 3)",
+        "compose(a: 1)",
+    ] {
+        let source = format!(
+            "fn compose(a: Int, b: Int, c: Int) -> Int {{ a + b + c }}\nfn main() -> Int {{ {call} }}"
+        );
+        assert!(emela_emb_compiler::compile(&source).is_err(), "{source}");
+    }
+}
