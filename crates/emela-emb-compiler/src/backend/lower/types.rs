@@ -103,6 +103,68 @@ fn validate_declared_type(
     Ok(())
 }
 
+/// Materialize substituted field types before any stage indexes the shared catalog.
+/// IDs already supplied by the frontend remain stable because interning only appends.
+pub(super) fn normalize_catalog(program: &mut Program) -> Result<()> {
+    let mut pending: Vec<_> = program
+        .functions
+        .iter()
+        .flat_map(|(_, f)| std::iter::once(f.ret).chain(f.vars.iter().map(|(_, var)| var.ty)))
+        .collect();
+    let mut seen = HashSet::new();
+    while let Some(ty) = pending.pop() {
+        if !seen.insert(ty) {
+            continue;
+        }
+        if seen.len() > 16384 {
+            return Err(unsupported("<module>", "expanding concrete type graph"));
+        }
+        if ty.index() >= program.core.types.len() {
+            return Err(invalid("<module>", "type ID is out of bounds"));
+        }
+        match program.core.types[ty].clone() {
+            Type::Tuple(fields) => pending.extend(fields),
+            Type::Enum(id, args) => {
+                let definition = program
+                    .core
+                    .enums
+                    .iter()
+                    .find_map(|(key, value)| (key == id).then_some(value))
+                    .ok_or_else(|| invalid("<module>", "enum ID is out of bounds"))?;
+                if definition.params != args.len() {
+                    return Err(invalid(
+                        "<module>",
+                        "enum type argument count differs from declaration",
+                    ));
+                }
+                for &arg in &args {
+                    validate_declared_type(
+                        program,
+                        "<module>",
+                        arg,
+                        usize::MAX,
+                        &mut HashSet::new(),
+                    )?;
+                }
+                let fields: Vec<_> = definition
+                    .variants
+                    .iter()
+                    .flat_map(|variant| variant.tys.iter().copied())
+                    .collect();
+                pending.extend(args.iter().copied());
+                pending.extend(
+                    fields
+                        .into_iter()
+                        .map(|field| program.core.types.subst(field, &args)),
+                );
+            }
+            Type::List(element) | Type::Cell(element) => pending.push(element),
+            _ => {}
+        }
+    }
+    Ok(())
+}
+
 pub(super) fn validate_type(program: &Program, function: &str, ty: TypeId) -> Result<()> {
     fn visit(
         program: &Program,

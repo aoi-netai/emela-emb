@@ -36,6 +36,7 @@ pub(crate) fn lower_program(
     options: &crate::Options,
 ) -> Result<LoweredModule> {
     types::validate_catalog(&program)?;
+    types::normalize_catalog(&mut program)?;
     let mut symbols = HashSet::new();
     for (id, function) in program.functions.iter() {
         if function.exported {
@@ -249,6 +250,28 @@ fn validate_function(program: &Program, f: &Function) -> Result<()> {
         variable(f, param)?;
         if !available.insert(param) {
             return Err(invalid(&f.name, "duplicate parameter"));
+        }
+    }
+    if let Some(kind) = f.derivation {
+        let valid = !f.exported
+            && f.external.is_some()
+            && f.body.is_none()
+            && !f.fails
+            && !f.suspends
+            && !f.constant
+            && match kind {
+                crate::DerivedOperation::Eq => {
+                    f.params.len() == 2
+                        && f.vars[f.params[0]].ty == f.vars[f.params[1]].ty
+                        && f.ret == TypeId::BOOL
+                }
+                crate::DerivedOperation::Show => f.params.len() == 1 && f.ret == TypeId::STRING,
+            };
+        if !valid {
+            return Err(invalid(
+                &f.name,
+                "derived operation has an invalid signature or body",
+            ));
         }
     }
     match (&f.external, f.body) {
