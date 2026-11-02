@@ -180,7 +180,7 @@ static inline EMELA_UNUSED emela_frame *emela_frame_push(emela_fiber *fiber, siz
   fiber->top = frame;
   return frame;
 }
-static void emela_frame_return(emela_fiber *fiber) {
+static inline EMELA_UNUSED void emela_frame_return(emela_fiber *fiber) {
   emela_frame *frame = fiber->top;
   if (frame == NULL) emela_scheduler_invalid();
   if (frame->drop != NULL) frame->drop(frame);

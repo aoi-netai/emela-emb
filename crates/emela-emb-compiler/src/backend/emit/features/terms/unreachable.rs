@@ -36,6 +36,7 @@ pub(in crate::backend::emit) fn emit_suspend(
     let Node::Unreachable = node else {
         unreachable!("frame state dispatch")
     };
+    writer.line("(void)fiber;");
     writer.line("emela_scheduler_invalid();");
     Ok(())
 }

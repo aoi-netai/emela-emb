@@ -14,9 +14,11 @@ fn empty_effect(p: &mut Program) -> (EffectId, TypeId) {
 
 #[test]
 fn discarded_handler_and_evidence_constructors_release_before_the_next_statement() {
-    for construct_handler in [false, true] {
+    for kind in ["handler", "extend", "chars"] {
+        let construct_handler = kind == "handler";
         let mut p = program(vec![]);
         let (effect, ht) = empty_effect(&mut p);
+        p.core.types.intern(Type::List(TypeId::STRING));
         let mut inspect = Function::new("inspect_live");
         inspect.external = Some(External {
             bindings: vec![ExternalBinding {
@@ -39,7 +41,12 @@ fn discarded_handler_and_evidence_constructors_release_before_the_next_statement
         let left = variable(&mut f, TypeId::INT);
         let zero = variable(&mut f, TypeId::BOOL);
         let less = variable(&mut f, TypeId::INT);
-        let value = if construct_handler {
+        let value = if kind == "chars" {
+            Value::Builtin {
+                op: Builtin::StringChars,
+                args: vec![Const::String("aβ".into()).into()],
+            }
+        } else if construct_handler {
             Value::Handler {
                 name: "Empty".into(),
                 effect,
@@ -117,7 +124,7 @@ fn discarded_handler_and_evidence_constructors_release_before_the_next_statement
             .unwrap();
         file.contents = file.contents.replace(
             "live!=EXPECTED",
-            if construct_handler {
+            if kind != "extend" {
                 "live!=0"
             } else {
                 "live!=1"
