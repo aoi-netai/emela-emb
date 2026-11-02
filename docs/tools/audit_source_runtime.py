@@ -70,6 +70,14 @@ def main() -> None:
     corpus_document = json.loads(args.corpus.read_text())
     corpus = {test["id"]: test for test in corpus_document["tests"]}
     reviews = json.loads(args.reviews.read_text())
+    final_verification = reviews.get("final_integrated_verification", "required")
+    if isinstance(final_verification, dict):
+        report = json.loads(Path(final_verification["report"]).read_text())
+        if (not report["standalone"]["passed"]
+                or report["standalone"]["tests_failed"]
+                or report["standalone"]["tests_ignored"]
+                or report["source_revision"] != final_verification["source_revision"]):
+            raise ValueError("final standalone report does not confirm the reviewed source snapshot")
     reach_text = args.reach.read_text()
     reach = json.loads(reach_text)
     if reach["fixture_manifest_sha256"] != digest(fixture_text):
@@ -208,7 +216,7 @@ def main() -> None:
             "runtime_evidence": relevant,
             "active_assignments": [{"program": p, **reviews["active_program_assignments"][p]} for p in case["programs"] if p in reviews["active_program_assignments"]],
             "reach_snapshot": {p: reach_record(reach_programs[p]) for p in case["programs"]},
-            "final_integrated_verification": "required",
+            "final_integrated_verification": final_verification,
         })
     normal_ids = {case["legacy_test"] for case in cases}
     extra_ids = {case["legacy_test"] for case in additional_nonruntime}
@@ -225,6 +233,7 @@ def main() -> None:
         "counts": {"normal_legacy_tests": len(cases), "programs": len(programs), "additional_nonruntime_legacy_cases": len(additional_nonruntime), "normal_cases_with_open_observations": sum(case["assessment"] == "runtime-observation-mapping-open" for case in cases), "assessment": dict(sorted(Counter(case["assessment"] for case in cases).items())), "families": {family["id"]: sum(family["id"] in case["families"] for case in cases) for family in reviews["families"]}, "raw_reach": dict(Counter(p["raw"]["status"] for p in reach["programs"])), "concrete_root_reviewed_issues": dict(Counter(category(root) for p in reach["programs"] for root in p["public_root_probes"] if root["status"] == "compiler-rejected"))},
         "families": reviews["families"],
         "runtime_reports": report_records,
+        "final_integrated_verification": final_verification,
         "additional_nonruntime_legacy_cases": additional_nonruntime,
         "cases": cases,
     }

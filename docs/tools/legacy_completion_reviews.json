@@ -3,8 +3,9 @@
   "policy": "Candidate evidence and reviewer assignments only. No ledger status is promoted by this file. Owner checkpoints require final integration and execution review.",
   "source_execution_reports": [
     {
-      "revision": "f8ac2aa",
-      "path": "docs/reports/p7-generic-const-compat.json"
+      "revision": "baseline",
+      "path": "docs/reports/p7-generic-const-compat.json",
+      "original_report_revision": "f8ac2aa"
     }
   ],
   "groups": [
@@ -46,14 +47,16 @@
       "note": "Global plus Named/File/Bundled Import metadata each preserve the read_number C symbol and return42, exactly as the old IR-only test. c046065 executes all four 1000 times and checks 4000 C calls; no external source syntax or file/bundle read is introduced.",
       "candidate_evidence": [
         {
-          "revision": "c046065",
+          "revision": "baseline",
           "path": "crates/emela-emb-compiler/src/backend/lower/p7_binding_tests.rs",
-          "kind": "ir_test"
+          "kind": "ir_test",
+          "original_report_revision": "c046065"
         },
         {
-          "revision": "c046065",
+          "revision": "baseline",
           "path": "docs/reports/compiler-p7-binding-metadata.md",
-          "kind": "run_report"
+          "kind": "run_report",
+          "original_report_revision": "c046065"
         }
       ]
     },
@@ -67,14 +70,16 @@
       "note": "Old normal IR allows discarded Runtime ShowString and checks StringCapacity for abc at capacity3. New backend rejected it as no String destination. db98ac2 adds this runtime operation to discarded-result temporaries and reproduces the full old C effect after 1000 valid a inputs, at both optimization modes.",
       "candidate_evidence": [
         {
-          "revision": "db98ac2",
+          "revision": "baseline",
           "path": "crates/emela-emb-compiler/src/backend/lower/p7_discarded_tests.rs",
-          "kind": "ir_test"
+          "kind": "ir_test",
+          "original_report_revision": "db98ac2"
         },
         {
-          "revision": "db98ac2",
+          "revision": "baseline",
           "path": "docs/reports/compiler-p7-discarded-show.md",
-          "kind": "run_report"
+          "kind": "run_report",
+          "original_report_revision": "db98ac2"
         }
       ]
     },
@@ -96,21 +101,24 @@
       "note": "Reviewed the fixed-old bodies and preserved every old C assertion in two independent IR tests: named payload 7/42, Some/None tags/payload 42, Boxed[Int64] field73, payload/nullary tags, tuple Int64/Unit/Bool f0=91/f2=True and discarded Unit projection, Int/Int64 min/max/default literal switches, enum outputs71/82 and nullary3/5, invalidtag7 NoMatch kind/message. C11 Wall/Werror O0/O2 and 1000 normal repetitions passed at 902175f. The old IR-only scope is preserved; authoritative ledger status remains unchanged pending adoption.",
       "candidate_evidence": [
         {
-          "revision": "902175f",
+          "revision": "baseline",
           "path": "crates/emela-emb-compiler/src/backend/lower/p7_data_tests.rs",
           "symbol": "legacy_inline_layouts_preserve_generic_fields_tags_and_unit_positions_at_the_c_boundary",
-          "kind": "ir_test"
+          "kind": "ir_test",
+          "original_report_revision": "902175f"
         },
         {
-          "revision": "902175f",
+          "revision": "baseline",
           "path": "crates/emela-emb-compiler/src/backend/lower/p7_data_tests.rs",
           "symbol": "legacy_literal_and_enum_switches_cover_numeric_extremes_and_reject_invalid_tags",
-          "kind": "ir_test"
+          "kind": "ir_test",
+          "original_report_revision": "902175f"
         },
         {
-          "revision": "902175f",
+          "revision": "baseline",
           "path": "docs/reports/compiler-p7-ir-data.md",
-          "kind": "run_report"
+          "kind": "run_report",
+          "original_report_revision": "902175f"
         }
       ]
     },
@@ -145,24 +153,28 @@
           "kind": "run_report"
         },
         {
-          "revision": "cb56194",
+          "revision": "baseline",
           "path": "crates/emela-emb-compiler/tests/p6_concurrency.rs",
-          "kind": "source_test"
+          "kind": "source_test",
+          "original_report_revision": "cb56194"
         },
         {
-          "revision": "cb56194",
+          "revision": "baseline",
           "path": "crates/emela-emb-compiler/tests/p6_scope_lifecycle.rs",
-          "kind": "source_test"
+          "kind": "source_test",
+          "original_report_revision": "cb56194"
         },
         {
-          "revision": "cb56194",
+          "revision": "baseline",
           "path": "crates/emela-emb-compiler/tests/p6_child_waiters.rs",
-          "kind": "source_test"
+          "kind": "source_test",
+          "original_report_revision": "cb56194"
         },
         {
-          "revision": "cb56194",
+          "revision": "baseline",
           "path": "crates/emela-emb-compiler/src/backend/lower/fiber_tests.rs",
-          "kind": "ir_test"
+          "kind": "ir_test",
+          "original_report_revision": "cb56194"
         }
       ]
     },
@@ -234,19 +246,22 @@
           "kind": "source_test"
         },
         {
-          "revision": "f8ac2aa",
+          "revision": "baseline",
           "path": "crates/emela-emb-compiler/tests/p7_legacy_generic_consts.rs",
-          "kind": "source_test"
+          "kind": "source_test",
+          "original_report_revision": "f8ac2aa"
         },
         {
-          "revision": "f8ac2aa",
+          "revision": "baseline",
           "path": "crates/emela-emb-compiler/tests/p7_generic_consts.rs",
-          "kind": "source_test"
+          "kind": "source_test",
+          "original_report_revision": "f8ac2aa"
         },
         {
-          "revision": "f8ac2aa",
+          "revision": "baseline",
           "path": "docs/reports/p7-generic-const-compat.json",
-          "kind": "run_report"
+          "kind": "run_report",
+          "original_report_revision": "f8ac2aa"
         },
         {
           "path": "crates/emela-emb-compiler/src/backend/lower/tests.rs",
@@ -278,14 +293,16 @@
       "note": "Review Emela names versus C aliases, direct-exported external wrapper normalization, Unit/Never positions, caller buffers, Borrowed/Owned success/error boundaries and named/file/bundled binding metadata. Bare external type constructor/pattern/field rejection is a separate source obligation.",
       "candidate_evidence": [
         {
-          "revision": "0bc2668",
+          "revision": "baseline",
           "path": "crates/emela-emb-compiler/tests/p7_external_values.rs",
-          "kind": "source_test"
+          "kind": "source_test",
+          "original_report_revision": "0bc2668"
         },
         {
-          "revision": "c0f351d",
+          "revision": "baseline",
           "path": "crates/emela-emb-compiler/tests/p7_external_types.rs",
-          "kind": "source_test"
+          "kind": "source_test",
+          "original_report_revision": "c0f351d"
         },
         {
           "path": "crates/emela-emb-compiler/tests/p3_bytes.rs",
@@ -310,14 +327,16 @@
       "note": "The source checkpoint checks aliases, actual adapter allowlist symbols, reachable heap/dynamic/recursive/runtime-const rejection and static/borrowed values. Raw CellNew/Get/Set and Hold/Unhold need their own input evidence; a source language capability is not made N/A by a rejected raw operation.",
       "candidate_evidence": [
         {
-          "revision": "ac756a7",
+          "revision": "baseline",
           "path": "crates/emela-emb-compiler/tests/p7_isr.rs",
-          "kind": "source_test"
+          "kind": "source_test",
+          "original_report_revision": "ac756a7"
         },
         {
-          "revision": "ac756a7",
+          "revision": "baseline",
           "path": "crates/emela-emb-compiler/src/backend/lower/isr_tests.rs",
-          "kind": "ir_test"
+          "kind": "ir_test",
+          "original_report_revision": "ac756a7"
         }
       ]
     },
@@ -332,14 +351,16 @@
       "note": "Root provides six Embedded modules and 23 Board service symbols. Source/C checkpoint covers capacity/length/element bounds, owned receive lists, failure, Clock scheduling and Console NUL. The five legacy normal Embedded source cases still require explicit semantic correspondence in the source corpus manifest.",
       "candidate_evidence": [
         {
-          "revision": "2f2dc53",
+          "revision": "baseline",
           "path": "crates/emela-emb-compiler/tests/p7_services.rs",
-          "kind": "source_test"
+          "kind": "source_test",
+          "original_report_revision": "2f2dc53"
         },
         {
-          "revision": "2f2dc53",
+          "revision": "baseline",
           "path": "crates/emela-emb-compiler/tests/compat/p7/embedded-harness.c",
-          "kind": "C_harness"
+          "kind": "C_harness",
+          "original_report_revision": "2f2dc53"
         }
       ]
     },
@@ -369,9 +390,10 @@
       "note": "All eight old rejected source builtins require source lowering plus C observation and raw residual rejection. None may be excluded as N/A. Check discarded results, bounded output and hook text separately from name discovery.",
       "candidate_evidence": [
         {
-          "revision": "40f34c0",
+          "revision": "baseline",
           "path": "crates/emela-emb-compiler/src/backend/lower/source_builtin_tests.rs",
-          "kind": "source_and_ir_test"
+          "kind": "source_and_ir_test",
+          "original_report_revision": "40f34c0"
         },
         {
           "path": "crates/emela-emb-compiler/tests/p2_debug.rs",
@@ -408,14 +430,16 @@
       "note": "The new Program has no Stage selector. Private contract still defines Unwind/MakeClosure/EnvGet/Dup/Drop/OnFail::Handle: input validation rejects some residuals, while Handle is type/graph-checked then normalized to Block/Break. Review these actual contracts individually and name the replacement for required ownership, closures, error landing, cleanup and source locations. Keep every old test/context decision explicit; do not infer N/A from an assumed absence or propagate it from a parent schema.",
       "candidate_evidence": [
         {
-          "revision": "bf750f7",
+          "revision": "baseline",
           "path": "crates/emela-emb-compiler/src/backend/lower/p7_input_tests.rs",
-          "kind": "ir_test"
+          "kind": "ir_test",
+          "original_report_revision": "bf750f7"
         },
         {
-          "revision": "bf750f7",
+          "revision": "baseline",
           "path": "docs/reports/compiler-p7-input-residuals.md",
-          "kind": "run_report"
+          "kind": "run_report",
+          "original_report_revision": "bf750f7"
         },
         {
           "path": "crates/emela-emb-compiler/src/contract/ir.rs",
@@ -569,9 +593,10 @@
           "kind": "ir_test"
         },
         {
-          "revision": "70f2a13",
+          "revision": "baseline",
           "path": "crates/emela-emb-compiler/tests/p7_record_updates.rs",
-          "kind": "source_test"
+          "kind": "source_test",
+          "original_report_revision": "70f2a13"
         }
       ]
     },
@@ -698,19 +723,22 @@
       "note": "The 115 ledger tests are not the complete old corpus. The saved index covers 488 tests and independent fixtures cover all 174 normal-source tests as 169 programs. P4 reach survey: raw compile 49, backend rejection after typecheck 2, other rejection 118; concrete root C emission 81/95 and C objects 80/95; no link/runtime execution was claimed. Re-run after P5/P6/P7 integration and migrate each original C expectation/Options/Flow adapter explicitly.",
       "candidate_evidence": [
         {
-          "revision": "41cff76",
+          "revision": "baseline",
           "path": "docs/compiler-legacy-source-reach.json",
-          "kind": "reach_survey"
+          "kind": "reach_survey",
+          "original_report_revision": "41cff76"
         },
         {
-          "revision": "5eeace7",
+          "revision": "baseline",
           "path": "crates/emela-emb-compiler/tests/compat/legacy-corpus/manifest.json",
-          "kind": "fixture_manifest"
+          "kind": "fixture_manifest",
+          "original_report_revision": "5eeace7"
         },
         {
-          "revision": "41cff76",
+          "revision": "baseline",
           "path": "docs/reports/compiler-p7-corpus.md",
-          "kind": "review"
+          "kind": "review",
+          "original_report_revision": "41cff76"
         }
       ]
     },

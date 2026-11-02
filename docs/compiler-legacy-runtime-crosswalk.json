@@ -2,7 +2,7 @@
   "schema_version": 1,
   "legacy_revision": "c34c0aeefdd966d854371b3110db00a47798751d",
   "fixture_manifest_sha256": "ea5c9837539b20f9d0c639ae55c6b59c11d5bf3189c8be4d7d7f75776a6a9923",
-  "review_sha256": "99b817b5c979caab6b2b93280d42f06f111c0a60a11f8867cdb1731fb7c5b7a1",
+  "review_sha256": "b7136d338b876de33e1914ab3d768100599ebbbcaed24cc76793095af196a849",
   "reach_snapshot": {
     "path": "docs/compiler-p6-source-reach.json",
     "sha256": "8efeee39e1ebf0c88e1fa37e4ae49cd79a4a25407a41835e9a551d6ea32fc8cd",
@@ -239,144 +239,168 @@
   ],
   "runtime_reports": [
     {
-      "revision": "f8ac2aa",
+      "revision": "3df747bab4860657c4218a7e90ae41712820a508",
       "path": "docs/reports/p7-generic-const-compat.json",
       "format": "generic-const",
-      "sha256": "e983fcd1115122c5fdd948434656783330b5374387cd31756c99ef2b07cb53dd"
+      "original_report_revision": "f8ac2aa",
+      "sha256": "fd61387300e31d25e7a3184ce548a61fcde809247372c243b615f4e3089e3f96"
     },
     {
-      "revision": "888b821",
+      "revision": "3df747bab4860657c4218a7e90ae41712820a508",
       "path": "docs/reports/p6-child-waiters-compat.json",
       "format": "child-waiters",
+      "original_report_revision": "888b821",
       "sha256": "6e462d6b950884e525705d1809455295f42d0682968fd30de22e2941fba9ba35"
     },
     {
-      "revision": "406a5d6",
+      "revision": "3df747bab4860657c4218a7e90ae41712820a508",
       "path": "docs/reports/p7-const-corpus-compat.json",
       "format": "const-rest",
+      "original_report_revision": "406a5d6",
       "sha256": "7d3946e7681a4d447c51f87a6a17afbf51f41c10ee030ee780f9442cb9d66ed9"
     },
     {
-      "revision": "b1a83f1",
+      "revision": "3df747bab4860657c4218a7e90ae41712820a508",
       "path": "docs/reports/p7-legacy-traits-compat.json",
       "format": "traits",
+      "original_report_revision": "b1a83f1",
       "sha256": "3ad3317ec158ebcd570d447e0232eedb8920818c2e3c96760dcada2bef3b654a"
     },
     {
-      "revision": "8677ff1",
+      "revision": "3df747bab4860657c4218a7e90ae41712820a508",
       "path": "docs/reports/p7-legacy-helpers-collections-compat.json",
       "format": "raw-files",
+      "original_report_revision": "8677ff1",
       "sha256": "21c2b32d42be068c6d7aa1636f52cc88c8b832fcc23e4b6a4c12d9f21509e11b"
     },
     {
-      "revision": "0cb01f9",
-      "path": "docs/reports/compiler-p6-ledger-proposal.json",
+      "revision": "3df747bab4860657c4218a7e90ae41712820a508",
+      "path": "docs/reports/p6-lifecycle-source-compat.json",
       "format": "lifecycle",
-      "sha256": "144779e37290ba3de1373620ccf459db7a2f13d94b03344cbaea6de08e499d26"
+      "original_report_revision": "0cb01f9",
+      "sha256": "10dfc5d640f78404028176bd62f8cbe8532a25e98d6af0d987c8567c8c2983f9"
     },
     {
-      "revision": "9998b3c",
+      "revision": "3df747bab4860657c4218a7e90ae41712820a508",
       "path": "docs/reports/p7-concurrency-corpus-compat.json",
       "format": "source-cases",
+      "original_report_revision": "9998b3c",
       "sha256": "7455dfa82439f6314603b4db1445a50c52be9583d59c9454aa008343862107f4"
     },
     {
-      "revision": "1c1912a",
+      "revision": "3df747bab4860657c4218a7e90ae41712820a508",
       "path": "docs/reports/p7-integration-corpus-compat.json",
       "format": "integration",
+      "original_report_revision": "1c1912a",
       "sha256": "6ea88663f76aa86a1d1fe0f73ab657673af347f45a17229a8f713d8d97a8358d"
     },
     {
-      "revision": "31bc997",
+      "revision": "3df747bab4860657c4218a7e90ae41712820a508",
       "path": "docs/reports/p7-legacy-bytes-compat.json",
       "format": "raw-files",
+      "original_report_revision": "31bc997",
       "sha256": "811ff5926700cbb26d30bb81247307425a135bfcd069c06f01c745c53392859b"
     },
     {
-      "revision": "d2573cc",
+      "revision": "3df747bab4860657c4218a7e90ae41712820a508",
       "path": "docs/reports/p7-legacy-strings-compat.json",
       "format": "raw-files",
+      "original_report_revision": "d2573cc",
       "sha256": "0dccbbc35b148e1ab633ffdbe00d2c9bb7ff704489fb3d7be678745b9b83ecc8"
     },
     {
-      "revision": "c5f8b91",
+      "revision": "3df747bab4860657c4218a7e90ae41712820a508",
       "path": "docs/reports/p7-external-source-compat.json",
       "format": "entry-programs",
+      "original_report_revision": "c5f8b91",
       "sha256": "b589bc5efc640d6870c3943676fe5cb16c5040a38990e3063df35fcb7315c67c"
     },
     {
-      "revision": "d2d3c75",
+      "revision": "3df747bab4860657c4218a7e90ae41712820a508",
       "path": "docs/reports/p7-services-source-compat.json",
       "format": "entry-programs",
+      "original_report_revision": "d2d3c75",
       "sha256": "720589ca5243da442894d9d293a53ceca74e3f1641b6de03b21d1dd7d8d36b54"
     },
     {
-      "revision": "3e8db38",
+      "revision": "3df747bab4860657c4218a7e90ae41712820a508",
       "path": "docs/reports/p7-scope-source-compat.json",
       "format": "entry-programs",
+      "original_report_revision": "3e8db38",
       "sha256": "d104e49494964af9412ed20fe92d1c8d251b9d071bf7a1b62e03b5f0d961b993"
     },
     {
-      "revision": "44666f9",
+      "revision": "3df747bab4860657c4218a7e90ae41712820a508",
       "path": "docs/reports/p7-recursive-source-compat.json",
       "format": "raw-files",
+      "original_report_revision": "44666f9",
       "sha256": "fec9bae1dc950ad6e18c49d8a8f197a4a0fbafbf0cbc9f564a6474e45d1cacb1"
     },
     {
-      "revision": "2eaae18",
+      "revision": "3df747bab4860657c4218a7e90ae41712820a508",
       "path": "docs/reports/p7-suspend-source-compat.json",
       "format": "raw-files",
+      "original_report_revision": "2eaae18",
       "sha256": "5470d50c35ef25db38cc801ed309a1755c4ec9d3ef727ba7a5c936101430dbd8"
     },
     {
-      "revision": "301f76e",
+      "revision": "3df747bab4860657c4218a7e90ae41712820a508",
       "path": "docs/reports/p7-closures-state-source-compat.json",
       "format": "raw-files",
+      "original_report_revision": "301f76e",
       "sha256": "502c89983c5cb6647c6fa14064d171ff01532b84c44b05291080fc92c5cec92b"
     },
     {
-      "revision": "89aa919",
+      "revision": "3df747bab4860657c4218a7e90ae41712820a508",
       "path": "docs/reports/p7-cleanup-source-compat.json",
       "format": "cleanup-cases",
+      "original_report_revision": "89aa919",
       "sha256": "c235ba0fc5ea6db4a26aac7cc8be49f8e7e4c25e4ccb2efab65754adf000d967"
     },
     {
-      "revision": "2650f67",
+      "revision": "3df747bab4860657c4218a7e90ae41712820a508",
       "path": "docs/reports/p7-cause-source-compat.json",
       "format": "raw-files",
+      "original_report_revision": "2650f67",
       "sha256": "e8b00f0f4a8fbc06a83723cbc109312c7fcccc922415bdc3fb4059897513b6a1"
     },
     {
-      "revision": "da721f2",
+      "revision": "3df747bab4860657c4218a7e90ae41712820a508",
       "path": "docs/reports/p7-cause-ir-seam-compat.json",
       "format": "raw-files",
+      "original_report_revision": "da721f2",
       "sha256": "5311d6d4fdf8dac7bf0a235b3e299fa1fa6e7432ea8d16b1eeba83bd413a540c"
     },
     {
-      "revision": "c8ff094",
+      "revision": "3df747bab4860657c4218a7e90ae41712820a508",
       "path": "docs/reports/p7-aggregate-source-compat.json",
       "format": "entry-programs",
+      "original_report_revision": "c8ff094",
       "sha256": "f13d2072eb7d663b67ecfb02c55f1990a2834c116c89a1e46d54e268e3ceb6f5"
     },
     {
-      "revision": "9292e9d",
+      "revision": "3df747bab4860657c4218a7e90ae41712820a508",
       "path": "docs/reports/p7-frontend-source-compat.json",
       "format": "frontend-review",
+      "original_report_revision": "9292e9d",
       "sha256": "dd3800bbba525846f7a56f053d3b4974ef151cecbabbf1af20657c5f5e7da484"
     },
     {
-      "revision": "8a6a585",
+      "revision": "3df747bab4860657c4218a7e90ae41712820a508",
       "path": "docs/reports/p7-bytes-small-budget-compat.json",
       "format": "raw-files",
+      "original_report_revision": "8a6a585",
       "sha256": "b191f85753edc33a680ac7ab2e55f662ff6ca355597ac52faf7355a63f1fce1f"
     },
     {
-      "revision": "88677b6",
+      "revision": "3df747bab4860657c4218a7e90ae41712820a508",
       "path": "docs/reports/p7-cleanup-ir-seam-compat.json",
       "format": "raw-files",
+      "original_report_revision": "88677b6",
       "sha256": "ec9af29b6dbb7c195b6ec64bfd25d6e61c66ec84722bb833290b22e77e21e5f2"
     }
   ],
+  "final_integrated_verification": "required",
   "additional_nonruntime_legacy_cases": [
     {
       "legacy_test": "frontend::embedded_backend_does_not_supply_the_old_std_namespace",
@@ -386,9 +410,10 @@
         "source-rejection-expectation"
       ],
       "report": {
-        "revision": "9292e9d",
+        "revision": "3df747bab4860657c4218a7e90ae41712820a508",
         "path": "docs/reports/p7-frontend-source-compat.json",
-        "format": "frontend-review"
+        "format": "frontend-review",
+        "original_report_revision": "9292e9d"
       }
     },
     {
@@ -399,9 +424,10 @@
         "source-rejection-expectation"
       ],
       "report": {
-        "revision": "9292e9d",
+        "revision": "3df747bab4860657c4218a7e90ae41712820a508",
         "path": "docs/reports/p7-frontend-source-compat.json",
-        "format": "frontend-review"
+        "format": "frontend-review",
+        "original_report_revision": "9292e9d"
       }
     },
     {
@@ -448,9 +474,10 @@
         "source-parse-only-expectation"
       ],
       "report": {
-        "revision": "9292e9d",
+        "revision": "3df747bab4860657c4218a7e90ae41712820a508",
         "path": "docs/reports/p7-frontend-source-compat.json",
-        "format": "frontend-review"
+        "format": "frontend-review",
+        "original_report_revision": "9292e9d"
       }
     }
   ],
@@ -522,9 +549,10 @@
         {
           "program": "program:545fcfac2473e3be10a5",
           "report": {
-            "revision": "8a6a585",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-bytes-small-budget-compat.json",
-            "format": "raw-files"
+            "format": "raw-files",
+            "original_report_revision": "8a6a585"
           },
           "assessment": "existing-source-C-observations-match",
           "legacy_tests": [
@@ -692,9 +720,10 @@
         {
           "program": "program:e7a338aa5771b67698db",
           "report": {
-            "revision": "8a6a585",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-bytes-small-budget-compat.json",
-            "format": "raw-files"
+            "format": "raw-files",
+            "original_report_revision": "8a6a585"
           },
           "assessment": "existing-source-C-observations-match",
           "legacy_tests": [
@@ -844,9 +873,10 @@
         {
           "program": "program:738c3317d1a9dca5984d",
           "report": {
-            "revision": "8a6a585",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-bytes-small-budget-compat.json",
-            "format": "raw-files"
+            "format": "raw-files",
+            "original_report_revision": "8a6a585"
           },
           "assessment": "existing-source-C-observations-match",
           "legacy_tests": [
@@ -984,9 +1014,10 @@
         {
           "program": "program:b2f1d9d68d3fa5696d8c",
           "report": {
-            "revision": "31bc997",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-legacy-bytes-compat.json",
-            "format": "raw-files"
+            "format": "raw-files",
+            "original_report_revision": "31bc997"
           },
           "assessment": "original-body-runtime-evidence",
           "legacy_tests": [
@@ -1142,9 +1173,10 @@
         {
           "program": "program:ee5ba136321c839df89e",
           "report": {
-            "revision": "8a6a585",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-bytes-small-budget-compat.json",
-            "format": "raw-files"
+            "format": "raw-files",
+            "original_report_revision": "8a6a585"
           },
           "assessment": "existing-source-C-observations-match",
           "legacy_tests": [
@@ -1304,9 +1336,10 @@
         {
           "program": "program:36dfa29b6881b628bddb",
           "report": {
-            "revision": "8a6a585",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-bytes-small-budget-compat.json",
-            "format": "raw-files"
+            "format": "raw-files",
+            "original_report_revision": "8a6a585"
           },
           "assessment": "existing-source-C-observations-match",
           "legacy_tests": [
@@ -1458,9 +1491,10 @@
         {
           "program": "program:831e8ca3bfd2e879fe38",
           "report": {
-            "revision": "8a6a585",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-bytes-small-budget-compat.json",
-            "format": "raw-files"
+            "format": "raw-files",
+            "original_report_revision": "8a6a585"
           },
           "assessment": "existing-source-C-observations-match",
           "legacy_tests": [
@@ -1818,9 +1852,10 @@
         {
           "program": "program:0e4c492fa71240d47260",
           "report": {
-            "revision": "31bc997",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-legacy-bytes-compat.json",
-            "format": "raw-files"
+            "format": "raw-files",
+            "original_report_revision": "31bc997"
           },
           "assessment": "original-body-runtime-evidence",
           "legacy_tests": [
@@ -1956,9 +1991,10 @@
         {
           "program": "program:896c718072ff9a14cba6",
           "report": {
-            "revision": "31bc997",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-legacy-bytes-compat.json",
-            "format": "raw-files"
+            "format": "raw-files",
+            "original_report_revision": "31bc997"
           },
           "assessment": "original-body-runtime-evidence",
           "legacy_tests": [
@@ -2127,9 +2163,10 @@
         {
           "program": "program:e002041e4a426285da18",
           "report": {
-            "revision": "8a6a585",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-bytes-small-budget-compat.json",
-            "format": "raw-files"
+            "format": "raw-files",
+            "original_report_revision": "8a6a585"
           },
           "assessment": "existing-source-C-observations-match",
           "legacy_tests": [
@@ -2268,9 +2305,10 @@
         {
           "program": "program:f9a6b6eea98c9abe5d11",
           "report": {
-            "revision": "301f76e",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-closures-state-source-compat.json",
-            "format": "raw-files"
+            "format": "raw-files",
+            "original_report_revision": "301f76e"
           },
           "assessment": "original-body-runtime-evidence",
           "legacy_tests": [
@@ -2430,9 +2468,10 @@
         {
           "program": "program:e805431f1035638cad96",
           "report": {
-            "revision": "301f76e",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-closures-state-source-compat.json",
-            "format": "raw-files"
+            "format": "raw-files",
+            "original_report_revision": "301f76e"
           },
           "assessment": "original-body-runtime-evidence",
           "legacy_tests": [
@@ -2573,9 +2612,10 @@
         {
           "program": "program:45d10a963a24d47032c7",
           "report": {
-            "revision": "301f76e",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-closures-state-source-compat.json",
-            "format": "raw-files"
+            "format": "raw-files",
+            "original_report_revision": "301f76e"
           },
           "assessment": "original-body-runtime-evidence",
           "legacy_tests": [
@@ -2798,9 +2838,10 @@
         {
           "program": "program:3e99d1b04faf8e90bba0",
           "report": {
-            "revision": "44666f9",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-recursive-source-compat.json",
-            "format": "raw-files"
+            "format": "raw-files",
+            "original_report_revision": "44666f9"
           },
           "assessment": "original-body-runtime-evidence",
           "legacy_tests": [
@@ -2975,9 +3016,10 @@
         {
           "program": "program:4bd3bbef2dbb773478d2",
           "report": {
-            "revision": "44666f9",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-recursive-source-compat.json",
-            "format": "raw-files"
+            "format": "raw-files",
+            "original_report_revision": "44666f9"
           },
           "assessment": "original-body-runtime-evidence",
           "legacy_tests": [
@@ -3123,9 +3165,10 @@
         {
           "program": "program:356d9928e442971ded00",
           "report": {
-            "revision": "406a5d6",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-const-corpus-compat.json",
-            "format": "const-rest"
+            "format": "const-rest",
+            "original_report_revision": "406a5d6"
           },
           "assessment": "original-body-runtime-evidence",
           "legacy_tests": [
@@ -3259,9 +3302,10 @@
         {
           "program": "program:0e55f902c5bac78b6187",
           "report": {
-            "revision": "f8ac2aa",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-generic-const-compat.json",
-            "format": "generic-const"
+            "format": "generic-const",
+            "original_report_revision": "f8ac2aa"
           },
           "assessment": "original-body-runtime-evidence",
           "legacy_tests": [
@@ -3362,9 +3406,10 @@
         {
           "program": "program:0e55f902c5bac78b6187",
           "report": {
-            "revision": "f8ac2aa",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-generic-const-compat.json",
-            "format": "generic-const"
+            "format": "generic-const",
+            "original_report_revision": "f8ac2aa"
           },
           "assessment": "original-body-runtime-evidence",
           "legacy_tests": [
@@ -3465,9 +3510,10 @@
         {
           "program": "program:12c836689dcf8fbdefcc",
           "report": {
-            "revision": "406a5d6",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-const-corpus-compat.json",
-            "format": "const-rest"
+            "format": "const-rest",
+            "original_report_revision": "406a5d6"
           },
           "assessment": "original-body-runtime-evidence",
           "legacy_tests": [
@@ -3597,9 +3643,10 @@
         {
           "program": "program:bd83fac6076474dfdacf",
           "report": {
-            "revision": "406a5d6",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-const-corpus-compat.json",
-            "format": "const-rest"
+            "format": "const-rest",
+            "original_report_revision": "406a5d6"
           },
           "assessment": "original-body-runtime-evidence",
           "legacy_tests": [
@@ -3728,9 +3775,10 @@
         {
           "program": "program:a7326c76e24e2c628792",
           "report": {
-            "revision": "406a5d6",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-const-corpus-compat.json",
-            "format": "const-rest"
+            "format": "const-rest",
+            "original_report_revision": "406a5d6"
           },
           "assessment": "original-body-runtime-evidence",
           "legacy_tests": [
@@ -3895,9 +3943,10 @@
         {
           "program": "program:fce8e7b6b3eba553963a",
           "report": {
-            "revision": "406a5d6",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-const-corpus-compat.json",
-            "format": "const-rest"
+            "format": "const-rest",
+            "original_report_revision": "406a5d6"
           },
           "assessment": "existing-source-C-observations-match",
           "legacy_tests": [
@@ -4036,9 +4085,10 @@
         {
           "program": "program:d81aa6294c52e64c91a5",
           "report": {
-            "revision": "406a5d6",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-const-corpus-compat.json",
-            "format": "const-rest"
+            "format": "const-rest",
+            "original_report_revision": "406a5d6"
           },
           "assessment": "original-body-runtime-evidence",
           "legacy_tests": [
@@ -4206,9 +4256,10 @@
         {
           "program": "program:1e18a161ce360199a21e",
           "report": {
-            "revision": "f8ac2aa",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-generic-const-compat.json",
-            "format": "generic-const"
+            "format": "generic-const",
+            "original_report_revision": "f8ac2aa"
           },
           "assessment": "original-body-runtime-evidence",
           "legacy_tests": [
@@ -4308,9 +4359,10 @@
         {
           "program": "program:c52f04cf604c46c53d58",
           "report": {
-            "revision": "406a5d6",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-const-corpus-compat.json",
-            "format": "const-rest"
+            "format": "const-rest",
+            "original_report_revision": "406a5d6"
           },
           "assessment": "original-body-runtime-evidence",
           "legacy_tests": [
@@ -4438,9 +4490,10 @@
         {
           "program": "program:fb872bf260d3593b4367",
           "report": {
-            "revision": "406a5d6",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-const-corpus-compat.json",
-            "format": "const-rest"
+            "format": "const-rest",
+            "original_report_revision": "406a5d6"
           },
           "assessment": "original-body-runtime-evidence",
           "legacy_tests": [
@@ -4569,9 +4622,10 @@
         {
           "program": "program:fee491a366b1c1ad5051",
           "report": {
-            "revision": "406a5d6",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-const-corpus-compat.json",
-            "format": "const-rest"
+            "format": "const-rest",
+            "original_report_revision": "406a5d6"
           },
           "assessment": "original-body-runtime-evidence",
           "legacy_tests": [
@@ -4716,9 +4770,10 @@
         {
           "program": "program:2f21eb2017b3f0b1d760",
           "report": {
-            "revision": "406a5d6",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-const-corpus-compat.json",
-            "format": "const-rest"
+            "format": "const-rest",
+            "original_report_revision": "406a5d6"
           },
           "assessment": "original-body-runtime-evidence",
           "legacy_tests": [
@@ -4846,9 +4901,10 @@
         {
           "program": "program:661bd10d1eb4fcbe825b",
           "report": {
-            "revision": "406a5d6",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-const-corpus-compat.json",
-            "format": "const-rest"
+            "format": "const-rest",
+            "original_report_revision": "406a5d6"
           },
           "assessment": "original-body-runtime-evidence",
           "legacy_tests": [
@@ -4978,9 +5034,10 @@
         {
           "program": "program:82d224825b4fecc59779",
           "report": {
-            "revision": "f8ac2aa",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-generic-const-compat.json",
-            "format": "generic-const"
+            "format": "generic-const",
+            "original_report_revision": "f8ac2aa"
           },
           "assessment": "original-body-runtime-evidence",
           "legacy_tests": [
@@ -5080,9 +5137,10 @@
         {
           "program": "program:3341457f78b9863e37dd",
           "report": {
-            "revision": "406a5d6",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-const-corpus-compat.json",
-            "format": "const-rest"
+            "format": "const-rest",
+            "original_report_revision": "406a5d6"
           },
           "assessment": "original-body-runtime-evidence",
           "legacy_tests": [
@@ -5203,9 +5261,10 @@
         {
           "program": "program:4ec3db5b593e7e155054",
           "report": {
-            "revision": "f8ac2aa",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-generic-const-compat.json",
-            "format": "generic-const"
+            "format": "generic-const",
+            "original_report_revision": "f8ac2aa"
           },
           "assessment": "original-body-runtime-evidence",
           "legacy_tests": [
@@ -5235,9 +5294,10 @@
         {
           "program": "program:6509a26b86dc042348d0",
           "report": {
-            "revision": "f8ac2aa",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-generic-const-compat.json",
-            "format": "generic-const"
+            "format": "generic-const",
+            "original_report_revision": "f8ac2aa"
           },
           "assessment": "original-body-runtime-evidence",
           "legacy_tests": [
@@ -5349,9 +5409,10 @@
         {
           "program": "program:c8599a8fbf13ac6c2ec8",
           "report": {
-            "revision": "406a5d6",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-const-corpus-compat.json",
-            "format": "const-rest"
+            "format": "const-rest",
+            "original_report_revision": "406a5d6"
           },
           "assessment": "existing-source-C-observations-match",
           "legacy_tests": [
@@ -5462,9 +5523,10 @@
         {
           "program": "program:090d8d1bc5a5b8ddd694",
           "report": {
-            "revision": "f8ac2aa",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-generic-const-compat.json",
-            "format": "generic-const"
+            "format": "generic-const",
+            "original_report_revision": "f8ac2aa"
           },
           "assessment": "original-body-runtime-evidence",
           "legacy_tests": [
@@ -5582,9 +5644,10 @@
         {
           "program": "program:5ce8d2ba40fb42a01466",
           "report": {
-            "revision": "406a5d6",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-const-corpus-compat.json",
-            "format": "const-rest"
+            "format": "const-rest",
+            "original_report_revision": "406a5d6"
           },
           "assessment": "original-body-diagnostic-evidence",
           "legacy_tests": [
@@ -5625,9 +5688,10 @@
         {
           "program": "program:7eaad73bc9a9b5a9bcaa",
           "report": {
-            "revision": "406a5d6",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-const-corpus-compat.json",
-            "format": "const-rest"
+            "format": "const-rest",
+            "original_report_revision": "406a5d6"
           },
           "assessment": "original-body-runtime-evidence",
           "legacy_tests": [
@@ -5768,9 +5832,10 @@
         {
           "program": "program:9d483cae98bfe8662280",
           "report": {
-            "revision": "f8ac2aa",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-generic-const-compat.json",
-            "format": "generic-const"
+            "format": "generic-const",
+            "original_report_revision": "f8ac2aa"
           },
           "assessment": "original-body-runtime-evidence",
           "legacy_tests": [
@@ -5870,9 +5935,10 @@
         {
           "program": "program:cd203f34d6ed62e80e19",
           "report": {
-            "revision": "f8ac2aa",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-generic-const-compat.json",
-            "format": "generic-const"
+            "format": "generic-const",
+            "original_report_revision": "f8ac2aa"
           },
           "assessment": "original-body-runtime-evidence",
           "legacy_tests": [
@@ -5977,9 +6043,10 @@
         {
           "program": "program:d7d35bbc08500ea36416",
           "report": {
-            "revision": "9998b3c",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-concurrency-corpus-compat.json",
-            "format": "source-cases"
+            "format": "source-cases",
+            "original_report_revision": "9998b3c"
           },
           "assessment": "original-body-runtime-evidence",
           "legacy_tests": [
@@ -6166,9 +6233,10 @@
         {
           "program": "program:a18100d79c54375672ef",
           "report": {
-            "revision": "9998b3c",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-concurrency-corpus-compat.json",
-            "format": "source-cases"
+            "format": "source-cases",
+            "original_report_revision": "9998b3c"
           },
           "assessment": "original-body-runtime-evidence",
           "legacy_tests": [
@@ -6309,9 +6377,10 @@
         {
           "program": "program:331a2c931ce2d58cc538",
           "report": {
-            "revision": "9998b3c",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-concurrency-corpus-compat.json",
-            "format": "source-cases"
+            "format": "source-cases",
+            "original_report_revision": "9998b3c"
           },
           "assessment": "original-body-runtime-evidence",
           "legacy_tests": [
@@ -6463,9 +6532,10 @@
         {
           "program": "program:d364a88840d93693e7a1",
           "report": {
-            "revision": "9998b3c",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-concurrency-corpus-compat.json",
-            "format": "source-cases"
+            "format": "source-cases",
+            "original_report_revision": "9998b3c"
           },
           "assessment": "original-body-runtime-evidence",
           "legacy_tests": [
@@ -6671,9 +6741,10 @@
         {
           "program": "program:9c2f7bf8afd6c491518f",
           "report": {
-            "revision": "9998b3c",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-concurrency-corpus-compat.json",
-            "format": "source-cases"
+            "format": "source-cases",
+            "original_report_revision": "9998b3c"
           },
           "assessment": "original-body-artifact-evidence",
           "legacy_tests": [
@@ -6714,9 +6785,10 @@
         {
           "program": "program:f7d2e02f4b35e1f1f64f",
           "report": {
-            "revision": "9998b3c",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-concurrency-corpus-compat.json",
-            "format": "source-cases"
+            "format": "source-cases",
+            "original_report_revision": "9998b3c"
           },
           "assessment": "original-body-runtime-evidence",
           "legacy_tests": [
@@ -6895,9 +6967,10 @@
         {
           "program": "program:513af204033ab6c391db",
           "report": {
-            "revision": "9998b3c",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-concurrency-corpus-compat.json",
-            "format": "source-cases"
+            "format": "source-cases",
+            "original_report_revision": "9998b3c"
           },
           "assessment": "original-body-runtime-evidence",
           "legacy_tests": [
@@ -7047,9 +7120,10 @@
         {
           "program": "program:dd78f6f854fc5e190a80",
           "report": {
-            "revision": "9998b3c",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-concurrency-corpus-compat.json",
-            "format": "source-cases"
+            "format": "source-cases",
+            "original_report_revision": "9998b3c"
           },
           "assessment": "original-body-runtime-evidence",
           "legacy_tests": [
@@ -7219,9 +7293,10 @@
         {
           "program": "program:6bf09cbf4f33df5e9332",
           "report": {
-            "revision": "9998b3c",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-concurrency-corpus-compat.json",
-            "format": "source-cases"
+            "format": "source-cases",
+            "original_report_revision": "9998b3c"
           },
           "assessment": "original-body-runtime-evidence",
           "legacy_tests": [
@@ -7391,9 +7466,10 @@
         {
           "program": "program:2ce8270cb6507630ec58",
           "report": {
-            "revision": "9998b3c",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-concurrency-corpus-compat.json",
-            "format": "source-cases"
+            "format": "source-cases",
+            "original_report_revision": "9998b3c"
           },
           "assessment": "original-body-runtime-evidence",
           "legacy_tests": [
@@ -7554,9 +7630,10 @@
         {
           "program": "program:112331fc072b58fda27c",
           "report": {
-            "revision": "9998b3c",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-concurrency-corpus-compat.json",
-            "format": "source-cases"
+            "format": "source-cases",
+            "original_report_revision": "9998b3c"
           },
           "assessment": "original-body-runtime-evidence",
           "legacy_tests": [
@@ -7622,9 +7699,10 @@
         {
           "program": "program:884cdff6b76ad186a1ab",
           "report": {
-            "revision": "9998b3c",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-concurrency-corpus-compat.json",
-            "format": "source-cases"
+            "format": "source-cases",
+            "original_report_revision": "9998b3c"
           },
           "assessment": "original-body-runtime-evidence",
           "legacy_tests": [
@@ -7823,9 +7901,10 @@
         {
           "program": "program:4feeee010d5462bd622d",
           "report": {
-            "revision": "9998b3c",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-concurrency-corpus-compat.json",
-            "format": "source-cases"
+            "format": "source-cases",
+            "original_report_revision": "9998b3c"
           },
           "assessment": "original-body-runtime-evidence",
           "legacy_tests": [
@@ -7978,9 +8057,10 @@
         {
           "program": "program:28a6cce6abfc4186e46c",
           "report": {
-            "revision": "9998b3c",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-concurrency-corpus-compat.json",
-            "format": "source-cases"
+            "format": "source-cases",
+            "original_report_revision": "9998b3c"
           },
           "assessment": "original-body-runtime-evidence",
           "legacy_tests": [
@@ -8124,9 +8204,10 @@
         {
           "program": "program:f590f55865c7dd94150f",
           "report": {
-            "revision": "9998b3c",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-concurrency-corpus-compat.json",
-            "format": "source-cases"
+            "format": "source-cases",
+            "original_report_revision": "9998b3c"
           },
           "assessment": "original-body-runtime-evidence",
           "legacy_tests": [
@@ -8278,9 +8359,10 @@
         {
           "program": "program:31c21eecada04937f501",
           "report": {
-            "revision": "301f76e",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-closures-state-source-compat.json",
-            "format": "raw-files"
+            "format": "raw-files",
+            "original_report_revision": "301f76e"
           },
           "assessment": "original-body-runtime-evidence",
           "legacy_tests": [
@@ -8421,9 +8503,10 @@
         {
           "program": "program:7d9575dd005593b562d8",
           "report": {
-            "revision": "d2d3c75",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-services-source-compat.json",
-            "format": "entry-programs"
+            "format": "entry-programs",
+            "original_report_revision": "d2d3c75"
           },
           "assessment": "existing-source-C-observations-match",
           "legacy_tests": [
@@ -8533,9 +8616,10 @@
         {
           "program": "program:5290f0b664af9543cbf5",
           "report": {
-            "revision": "d2d3c75",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-services-source-compat.json",
-            "format": "entry-programs"
+            "format": "entry-programs",
+            "original_report_revision": "d2d3c75"
           },
           "assessment": "original-body-runtime-evidence",
           "legacy_tests": [
@@ -8645,9 +8729,10 @@
         {
           "program": "program:7e82f10b73354f97dfeb",
           "report": {
-            "revision": "c5f8b91",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-external-source-compat.json",
-            "format": "entry-programs"
+            "format": "entry-programs",
+            "original_report_revision": "c5f8b91"
           },
           "assessment": "original-body-runtime-evidence",
           "legacy_tests": [
@@ -8771,9 +8856,10 @@
         {
           "program": "program:c3c4cdd26e1efbbfdf88",
           "report": {
-            "revision": "c8ff094",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-aggregate-source-compat.json",
-            "format": "entry-programs"
+            "format": "entry-programs",
+            "original_report_revision": "c8ff094"
           },
           "assessment": "original-body-runtime-evidence",
           "legacy_tests": [
@@ -8929,9 +9015,10 @@
         {
           "program": "program:ac90e395370d309144f0",
           "report": {
-            "revision": "c8ff094",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-aggregate-source-compat.json",
-            "format": "entry-programs"
+            "format": "entry-programs",
+            "original_report_revision": "c8ff094"
           },
           "assessment": "original-body-runtime-evidence",
           "legacy_tests": [
@@ -9164,9 +9251,10 @@
         {
           "program": "program:158234f97251d7d95674",
           "report": {
-            "revision": "c8ff094",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-aggregate-source-compat.json",
-            "format": "entry-programs"
+            "format": "entry-programs",
+            "original_report_revision": "c8ff094"
           },
           "assessment": "original-body-runtime-evidence",
           "legacy_tests": [
@@ -9201,9 +9289,10 @@
         {
           "program": "program:660953efd0834142cd9a",
           "report": {
-            "revision": "c8ff094",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-aggregate-source-compat.json",
-            "format": "entry-programs"
+            "format": "entry-programs",
+            "original_report_revision": "c8ff094"
           },
           "assessment": "original-body-runtime-evidence",
           "legacy_tests": [
@@ -9354,9 +9443,10 @@
         {
           "program": "program:ac90e395370d309144f0",
           "report": {
-            "revision": "c8ff094",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-aggregate-source-compat.json",
-            "format": "entry-programs"
+            "format": "entry-programs",
+            "original_report_revision": "c8ff094"
           },
           "assessment": "original-body-runtime-evidence",
           "legacy_tests": [
@@ -9548,9 +9638,10 @@
         {
           "program": "program:ac90e395370d309144f0",
           "report": {
-            "revision": "c8ff094",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-aggregate-source-compat.json",
-            "format": "entry-programs"
+            "format": "entry-programs",
+            "original_report_revision": "c8ff094"
           },
           "assessment": "original-body-runtime-evidence",
           "legacy_tests": [
@@ -9742,9 +9833,10 @@
         {
           "program": "program:314587c327ffac8b616b",
           "report": {
-            "revision": "c8ff094",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-aggregate-source-compat.json",
-            "format": "entry-programs"
+            "format": "entry-programs",
+            "original_report_revision": "c8ff094"
           },
           "assessment": "original-body-runtime-evidence",
           "legacy_tests": [
@@ -9921,9 +10013,10 @@
         {
           "program": "program:01353e00d829543bae73",
           "report": {
-            "revision": "c8ff094",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-aggregate-source-compat.json",
-            "format": "entry-programs"
+            "format": "entry-programs",
+            "original_report_revision": "c8ff094"
           },
           "assessment": "original-body-runtime-evidence",
           "legacy_tests": [
@@ -10082,9 +10175,10 @@
         {
           "program": "program:01353e00d829543bae73",
           "report": {
-            "revision": "c8ff094",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-aggregate-source-compat.json",
-            "format": "entry-programs"
+            "format": "entry-programs",
+            "original_report_revision": "c8ff094"
           },
           "assessment": "original-body-runtime-evidence",
           "legacy_tests": [
@@ -10248,9 +10342,10 @@
         {
           "program": "program:01353e00d829543bae73",
           "report": {
-            "revision": "c8ff094",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-aggregate-source-compat.json",
-            "format": "entry-programs"
+            "format": "entry-programs",
+            "original_report_revision": "c8ff094"
           },
           "assessment": "original-body-runtime-evidence",
           "legacy_tests": [
@@ -10414,9 +10509,10 @@
         {
           "program": "program:487a37e912618d251aaf",
           "report": {
-            "revision": "2650f67",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-cause-source-compat.json",
-            "format": "raw-files"
+            "format": "raw-files",
+            "original_report_revision": "2650f67"
           },
           "assessment": "original-body-runtime-evidence",
           "legacy_tests": [
@@ -10566,9 +10662,10 @@
         {
           "program": "program:151d66237ba9b27b858e",
           "report": {
-            "revision": "2650f67",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-cause-source-compat.json",
-            "format": "raw-files"
+            "format": "raw-files",
+            "original_report_revision": "2650f67"
           },
           "assessment": "original-body-runtime-evidence",
           "legacy_tests": [
@@ -10718,9 +10815,10 @@
         {
           "program": "program:e2cf3f9e45106522dedf",
           "report": {
-            "revision": "2650f67",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-cause-source-compat.json",
-            "format": "raw-files"
+            "format": "raw-files",
+            "original_report_revision": "2650f67"
           },
           "assessment": "original-body-runtime-evidence",
           "legacy_tests": [
@@ -10870,9 +10968,10 @@
         {
           "program": "program:fc4001cbeeb0256ac68c",
           "report": {
-            "revision": "2650f67",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-cause-source-compat.json",
-            "format": "raw-files"
+            "format": "raw-files",
+            "original_report_revision": "2650f67"
           },
           "assessment": "original-body-runtime-evidence",
           "legacy_tests": [
@@ -11023,9 +11122,10 @@
         {
           "program": "program:7b0faede711596ca092e",
           "report": {
-            "revision": "9998b3c",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-concurrency-corpus-compat.json",
-            "format": "source-cases"
+            "format": "source-cases",
+            "original_report_revision": "9998b3c"
           },
           "assessment": "original-body-runtime-evidence",
           "legacy_tests": [
@@ -11177,9 +11277,10 @@
         {
           "program": "program:966e35a933bb50fec529",
           "report": {
-            "revision": "9998b3c",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-concurrency-corpus-compat.json",
-            "format": "source-cases"
+            "format": "source-cases",
+            "original_report_revision": "9998b3c"
           },
           "assessment": "original-body-runtime-evidence",
           "legacy_tests": [
@@ -11323,9 +11424,10 @@
         {
           "program": "program:238fdc7e166173ca81c5",
           "report": {
-            "revision": "9998b3c",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-concurrency-corpus-compat.json",
-            "format": "source-cases"
+            "format": "source-cases",
+            "original_report_revision": "9998b3c"
           },
           "assessment": "original-body-runtime-evidence",
           "legacy_tests": [
@@ -11493,9 +11595,10 @@
         {
           "program": "program:b283b90d26e8ee6179f2",
           "report": {
-            "revision": "9998b3c",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-concurrency-corpus-compat.json",
-            "format": "source-cases"
+            "format": "source-cases",
+            "original_report_revision": "9998b3c"
           },
           "assessment": "original-body-runtime-evidence",
           "legacy_tests": [
@@ -11689,9 +11792,10 @@
         {
           "program": "program:872b73526ae1cdeecd30",
           "report": {
-            "revision": "9998b3c",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-concurrency-corpus-compat.json",
-            "format": "source-cases"
+            "format": "source-cases",
+            "original_report_revision": "9998b3c"
           },
           "assessment": "original-body-runtime-evidence",
           "legacy_tests": [
@@ -11881,9 +11985,10 @@
         {
           "program": "program:53fc4a519e38bfa7942e",
           "report": {
-            "revision": "9998b3c",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-concurrency-corpus-compat.json",
-            "format": "source-cases"
+            "format": "source-cases",
+            "original_report_revision": "9998b3c"
           },
           "assessment": "original-body-runtime-evidence",
           "legacy_tests": [
@@ -12044,9 +12149,10 @@
         {
           "program": "program:1526bca68557f74bf094",
           "report": {
-            "revision": "9998b3c",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-concurrency-corpus-compat.json",
-            "format": "source-cases"
+            "format": "source-cases",
+            "original_report_revision": "9998b3c"
           },
           "assessment": "original-body-runtime-evidence",
           "legacy_tests": [
@@ -12111,9 +12217,10 @@
         {
           "program": "program:60f85310853803d70678",
           "report": {
-            "revision": "9998b3c",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-concurrency-corpus-compat.json",
-            "format": "source-cases"
+            "format": "source-cases",
+            "original_report_revision": "9998b3c"
           },
           "assessment": "original-body-runtime-evidence",
           "legacy_tests": [
@@ -12294,9 +12401,10 @@
         {
           "program": "program:13362f28679b3bbabd69",
           "report": {
-            "revision": "9998b3c",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-concurrency-corpus-compat.json",
-            "format": "source-cases"
+            "format": "source-cases",
+            "original_report_revision": "9998b3c"
           },
           "assessment": "original-body-runtime-evidence",
           "legacy_tests": [
@@ -12430,9 +12538,10 @@
         {
           "program": "program:fa40589ab2ec14656e19",
           "report": {
-            "revision": "9998b3c",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-concurrency-corpus-compat.json",
-            "format": "source-cases"
+            "format": "source-cases",
+            "original_report_revision": "9998b3c"
           },
           "assessment": "original-body-runtime-evidence",
           "legacy_tests": [
@@ -12602,9 +12711,10 @@
         {
           "program": "program:60bb51f1f49ec78360a2",
           "report": {
-            "revision": "9998b3c",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-concurrency-corpus-compat.json",
-            "format": "source-cases"
+            "format": "source-cases",
+            "original_report_revision": "9998b3c"
           },
           "assessment": "original-body-runtime-evidence",
           "legacy_tests": [
@@ -12756,9 +12866,10 @@
         {
           "program": "program:16849ead337634fd58fa",
           "report": {
-            "revision": "9998b3c",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-concurrency-corpus-compat.json",
-            "format": "source-cases"
+            "format": "source-cases",
+            "original_report_revision": "9998b3c"
           },
           "assessment": "original-body-runtime-evidence",
           "legacy_tests": [
@@ -12914,9 +13025,10 @@
         {
           "program": "program:902e83bb72b886983dd2",
           "report": {
-            "revision": "2650f67",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-cause-source-compat.json",
-            "format": "raw-files"
+            "format": "raw-files",
+            "original_report_revision": "2650f67"
           },
           "assessment": "original-body-runtime-evidence",
           "legacy_tests": [
@@ -13071,9 +13183,10 @@
         {
           "program": "program:fb2aa71c1044bb6ef15e",
           "report": {
-            "revision": "2650f67",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-cause-source-compat.json",
-            "format": "raw-files"
+            "format": "raw-files",
+            "original_report_revision": "2650f67"
           },
           "assessment": "original-body-runtime-evidence",
           "legacy_tests": [
@@ -13228,9 +13341,10 @@
         {
           "program": "program:22fce5f6553a191ca752",
           "report": {
-            "revision": "2650f67",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-cause-source-compat.json",
-            "format": "raw-files"
+            "format": "raw-files",
+            "original_report_revision": "2650f67"
           },
           "assessment": "original-body-runtime-evidence",
           "legacy_tests": [
@@ -13397,9 +13511,10 @@
         {
           "program": "program:46dc34d9a56eaa8cb857",
           "report": {
-            "revision": "da721f2",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-cause-ir-seam-compat.json",
-            "format": "raw-files"
+            "format": "raw-files",
+            "original_report_revision": "da721f2"
           },
           "assessment": "original-body-runtime-evidence",
           "legacy_tests": [
@@ -13588,9 +13703,10 @@
         {
           "program": "program:365026ebd97818c119c3",
           "report": {
-            "revision": "da721f2",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-cause-ir-seam-compat.json",
-            "format": "raw-files"
+            "format": "raw-files",
+            "original_report_revision": "da721f2"
           },
           "assessment": "original-body-runtime-evidence",
           "legacy_tests": [
@@ -13662,9 +13778,10 @@
         {
           "program": "program:595e65424d0f6b93c750",
           "report": {
-            "revision": "da721f2",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-cause-ir-seam-compat.json",
-            "format": "raw-files"
+            "format": "raw-files",
+            "original_report_revision": "da721f2"
           },
           "assessment": "original-body-runtime-evidence",
           "legacy_tests": [
@@ -13736,9 +13853,10 @@
         {
           "program": "program:7297d3dd83b075ef0fb0",
           "report": {
-            "revision": "da721f2",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-cause-ir-seam-compat.json",
-            "format": "raw-files"
+            "format": "raw-files",
+            "original_report_revision": "da721f2"
           },
           "assessment": "original-body-runtime-evidence",
           "legacy_tests": [
@@ -14012,9 +14130,10 @@
         {
           "program": "program:895a9eae3b9139e79bf7",
           "report": {
-            "revision": "2650f67",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-cause-source-compat.json",
-            "format": "raw-files"
+            "format": "raw-files",
+            "original_report_revision": "2650f67"
           },
           "assessment": "original-body-runtime-evidence",
           "legacy_tests": [
@@ -14201,9 +14320,10 @@
         {
           "program": "program:48cb903c8f5703bd062c",
           "report": {
-            "revision": "0cb01f9",
-            "path": "docs/reports/compiler-p6-ledger-proposal.json",
-            "format": "lifecycle"
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
+            "path": "docs/reports/p6-lifecycle-source-compat.json",
+            "format": "lifecycle",
+            "original_report_revision": "0cb01f9"
           },
           "assessment": "original-body-runtime-evidence",
           "legacy_tests": [
@@ -14323,9 +14443,10 @@
         {
           "program": "program:87aa60141422b5f9141c",
           "report": {
-            "revision": "888b821",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p6-child-waiters-compat.json",
-            "format": "child-waiters"
+            "format": "child-waiters",
+            "original_report_revision": "888b821"
           },
           "assessment": "original-body-runtime-evidence",
           "legacy_tests": [
@@ -14448,9 +14569,10 @@
         {
           "program": "program:48cb903c8f5703bd062c",
           "report": {
-            "revision": "0cb01f9",
-            "path": "docs/reports/compiler-p6-ledger-proposal.json",
-            "format": "lifecycle"
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
+            "path": "docs/reports/p6-lifecycle-source-compat.json",
+            "format": "lifecycle",
+            "original_report_revision": "0cb01f9"
           },
           "assessment": "original-body-runtime-evidence",
           "legacy_tests": [
@@ -14570,9 +14692,10 @@
         {
           "program": "program:48cb903c8f5703bd062c",
           "report": {
-            "revision": "0cb01f9",
-            "path": "docs/reports/compiler-p6-ledger-proposal.json",
-            "format": "lifecycle"
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
+            "path": "docs/reports/p6-lifecycle-source-compat.json",
+            "format": "lifecycle",
+            "original_report_revision": "0cb01f9"
           },
           "assessment": "original-body-runtime-evidence",
           "legacy_tests": [
@@ -14692,9 +14815,10 @@
         {
           "program": "program:cb86c54d554b7584458c",
           "report": {
-            "revision": "3e8db38",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-scope-source-compat.json",
-            "format": "entry-programs"
+            "format": "entry-programs",
+            "original_report_revision": "3e8db38"
           },
           "assessment": "original-body-runtime-evidence",
           "legacy_tests": [
@@ -14802,9 +14926,10 @@
         {
           "program": "program:f188261f99b265687e19",
           "report": {
-            "revision": "3e8db38",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-scope-source-compat.json",
-            "format": "entry-programs"
+            "format": "entry-programs",
+            "original_report_revision": "3e8db38"
           },
           "assessment": "original-body-runtime-evidence",
           "legacy_tests": [
@@ -14930,9 +15055,10 @@
         {
           "program": "program:b47677c76cf26174e501",
           "report": {
-            "revision": "3e8db38",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-scope-source-compat.json",
-            "format": "entry-programs"
+            "format": "entry-programs",
+            "original_report_revision": "3e8db38"
           },
           "assessment": "original-body-runtime-evidence",
           "legacy_tests": [
@@ -15058,9 +15184,10 @@
         {
           "program": "program:4faba0205310f4952601",
           "report": {
-            "revision": "89aa919",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-cleanup-source-compat.json",
-            "format": "cleanup-cases"
+            "format": "cleanup-cases",
+            "original_report_revision": "89aa919"
           },
           "assessment": "original-body-runtime-evidence",
           "legacy_tests": [
@@ -15199,9 +15326,10 @@
         {
           "program": "program:31335f307ea2977018da",
           "report": {
-            "revision": "89aa919",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-cleanup-source-compat.json",
-            "format": "cleanup-cases"
+            "format": "cleanup-cases",
+            "original_report_revision": "89aa919"
           },
           "assessment": "original-body-runtime-evidence",
           "legacy_tests": [
@@ -15352,9 +15480,10 @@
         {
           "program": "program:b0726b4f7df583de8542",
           "report": {
-            "revision": "89aa919",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-cleanup-source-compat.json",
-            "format": "cleanup-cases"
+            "format": "cleanup-cases",
+            "original_report_revision": "89aa919"
           },
           "assessment": "original-body-runtime-evidence",
           "legacy_tests": [
@@ -15538,9 +15667,10 @@
         {
           "program": "program:7968556d33a165f1715f",
           "report": {
-            "revision": "89aa919",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-cleanup-source-compat.json",
-            "format": "cleanup-cases"
+            "format": "cleanup-cases",
+            "original_report_revision": "89aa919"
           },
           "assessment": "original-body-runtime-evidence",
           "legacy_tests": [
@@ -15695,9 +15825,10 @@
         {
           "program": "program:334221286a172894b8cb",
           "report": {
-            "revision": "88677b6",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-cleanup-ir-seam-compat.json",
-            "format": "raw-files"
+            "format": "raw-files",
+            "original_report_revision": "88677b6"
           },
           "assessment": "original-body-runtime-evidence",
           "legacy_tests": [
@@ -15839,9 +15970,10 @@
         {
           "program": "program:80dc9eb2024106ce84f2",
           "report": {
-            "revision": "89aa919",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-cleanup-source-compat.json",
-            "format": "cleanup-cases"
+            "format": "cleanup-cases",
+            "original_report_revision": "89aa919"
           },
           "assessment": "original-body-runtime-evidence",
           "legacy_tests": [
@@ -15989,9 +16121,10 @@
         {
           "program": "program:9f122d9f14ec8861aefd",
           "report": {
-            "revision": "89aa919",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-cleanup-source-compat.json",
-            "format": "cleanup-cases"
+            "format": "cleanup-cases",
+            "original_report_revision": "89aa919"
           },
           "assessment": "original-body-runtime-evidence",
           "legacy_tests": [
@@ -16144,9 +16277,10 @@
         {
           "program": "program:71cbd6afa2f0a71169f2",
           "report": {
-            "revision": "89aa919",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-cleanup-source-compat.json",
-            "format": "cleanup-cases"
+            "format": "cleanup-cases",
+            "original_report_revision": "89aa919"
           },
           "assessment": "original-body-runtime-evidence",
           "legacy_tests": [
@@ -16296,9 +16430,10 @@
         {
           "program": "program:e5d1111b561ba323c6fa",
           "report": {
-            "revision": "89aa919",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-cleanup-source-compat.json",
-            "format": "cleanup-cases"
+            "format": "cleanup-cases",
+            "original_report_revision": "89aa919"
           },
           "assessment": "original-body-runtime-evidence",
           "legacy_tests": [
@@ -16449,9 +16584,10 @@
         {
           "program": "program:dec5101b69674f921c75",
           "report": {
-            "revision": "3e8db38",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-scope-source-compat.json",
-            "format": "entry-programs"
+            "format": "entry-programs",
+            "original_report_revision": "3e8db38"
           },
           "assessment": "original-body-runtime-evidence",
           "legacy_tests": [
@@ -16576,9 +16712,10 @@
         {
           "program": "program:fce8a13404a3ab9ab16c",
           "report": {
-            "revision": "c8ff094",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-aggregate-source-compat.json",
-            "format": "entry-programs"
+            "format": "entry-programs",
+            "original_report_revision": "c8ff094"
           },
           "assessment": "original-body-runtime-evidence",
           "legacy_tests": [
@@ -16700,9 +16837,10 @@
         {
           "program": "program:927b8a0eea79b7bd9ced",
           "report": {
-            "revision": "c8ff094",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-aggregate-source-compat.json",
-            "format": "entry-programs"
+            "format": "entry-programs",
+            "original_report_revision": "c8ff094"
           },
           "assessment": "original-body-runtime-evidence",
           "legacy_tests": [
@@ -16824,9 +16962,10 @@
         {
           "program": "program:4be591d3835e38a1021a",
           "report": {
-            "revision": "c8ff094",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-aggregate-source-compat.json",
-            "format": "entry-programs"
+            "format": "entry-programs",
+            "original_report_revision": "c8ff094"
           },
           "assessment": "original-body-runtime-evidence",
           "legacy_tests": [
@@ -16997,9 +17136,10 @@
         {
           "program": "program:5aaa984fe4ad33045300",
           "report": {
-            "revision": "1c1912a",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-integration-corpus-compat.json",
-            "format": "integration"
+            "format": "integration",
+            "original_report_revision": "1c1912a"
           },
           "assessment": "original-body-runtime-evidence",
           "legacy_tests": [
@@ -17145,9 +17285,10 @@
         {
           "program": "program:614925d9a7716e4eee7e",
           "report": {
-            "revision": "1c1912a",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-integration-corpus-compat.json",
-            "format": "integration"
+            "format": "integration",
+            "original_report_revision": "1c1912a"
           },
           "assessment": "original-body-runtime-evidence",
           "legacy_tests": [
@@ -17268,9 +17409,10 @@
         {
           "program": "program:fd923799a8e34d0836f6",
           "report": {
-            "revision": "89aa919",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-cleanup-source-compat.json",
-            "format": "cleanup-cases"
+            "format": "cleanup-cases",
+            "original_report_revision": "89aa919"
           },
           "assessment": "original-body-runtime-evidence",
           "legacy_tests": [
@@ -17418,9 +17560,10 @@
         {
           "program": "program:6c1d77d2e9c95bce8363",
           "report": {
-            "revision": "89aa919",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-cleanup-source-compat.json",
-            "format": "cleanup-cases"
+            "format": "cleanup-cases",
+            "original_report_revision": "89aa919"
           },
           "assessment": "original-body-runtime-evidence",
           "legacy_tests": [
@@ -17570,9 +17713,10 @@
         {
           "program": "program:e22c4125cfa6323799e0",
           "report": {
-            "revision": "89aa919",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-cleanup-source-compat.json",
-            "format": "cleanup-cases"
+            "format": "cleanup-cases",
+            "original_report_revision": "89aa919"
           },
           "assessment": "original-body-runtime-evidence",
           "legacy_tests": [
@@ -17726,9 +17870,10 @@
         {
           "program": "program:e80d4ff79a3c465f3729",
           "report": {
-            "revision": "89aa919",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-cleanup-source-compat.json",
-            "format": "cleanup-cases"
+            "format": "cleanup-cases",
+            "original_report_revision": "89aa919"
           },
           "assessment": "original-body-runtime-evidence",
           "legacy_tests": [
@@ -17885,9 +18030,10 @@
         {
           "program": "program:8730c7e21e8995b3ae3d",
           "report": {
-            "revision": "88677b6",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-cleanup-ir-seam-compat.json",
-            "format": "raw-files"
+            "format": "raw-files",
+            "original_report_revision": "88677b6"
           },
           "assessment": "original-body-runtime-evidence",
           "legacy_tests": [
@@ -18013,9 +18159,10 @@
         {
           "program": "program:4c249f507854486bc050",
           "report": {
-            "revision": "88677b6",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-cleanup-ir-seam-compat.json",
-            "format": "raw-files"
+            "format": "raw-files",
+            "original_report_revision": "88677b6"
           },
           "assessment": "original-body-runtime-evidence",
           "legacy_tests": [
@@ -18153,9 +18300,10 @@
         {
           "program": "program:e6cd435773264963126c",
           "report": {
-            "revision": "89aa919",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-cleanup-source-compat.json",
-            "format": "cleanup-cases"
+            "format": "cleanup-cases",
+            "original_report_revision": "89aa919"
           },
           "assessment": "original-body-runtime-evidence",
           "legacy_tests": [
@@ -18324,9 +18472,10 @@
         {
           "program": "program:bf38918ca2275cd0c29c",
           "report": {
-            "revision": "89aa919",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-cleanup-source-compat.json",
-            "format": "cleanup-cases"
+            "format": "cleanup-cases",
+            "original_report_revision": "89aa919"
           },
           "assessment": "original-body-runtime-evidence",
           "legacy_tests": [
@@ -18473,9 +18622,10 @@
         {
           "program": "program:fa693e57038e43257092",
           "report": {
-            "revision": "89aa919",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-cleanup-source-compat.json",
-            "format": "cleanup-cases"
+            "format": "cleanup-cases",
+            "original_report_revision": "89aa919"
           },
           "assessment": "original-body-runtime-evidence",
           "legacy_tests": [
@@ -18642,9 +18792,10 @@
         {
           "program": "program:47d46c7e6dae870c95f3",
           "report": {
-            "revision": "89aa919",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-cleanup-source-compat.json",
-            "format": "cleanup-cases"
+            "format": "cleanup-cases",
+            "original_report_revision": "89aa919"
           },
           "assessment": "original-body-runtime-evidence",
           "legacy_tests": [
@@ -18780,9 +18931,10 @@
         {
           "program": "program:d82d62e7ec5e5df31711",
           "report": {
-            "revision": "89aa919",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-cleanup-source-compat.json",
-            "format": "cleanup-cases"
+            "format": "cleanup-cases",
+            "original_report_revision": "89aa919"
           },
           "assessment": "original-body-runtime-evidence",
           "legacy_tests": [
@@ -18932,9 +19084,10 @@
         {
           "program": "program:831d3a7aac5dd763cddb",
           "report": {
-            "revision": "88677b6",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-cleanup-ir-seam-compat.json",
-            "format": "raw-files"
+            "format": "raw-files",
+            "original_report_revision": "88677b6"
           },
           "assessment": "original-body-runtime-evidence",
           "legacy_tests": [
@@ -19072,9 +19225,10 @@
         {
           "program": "program:d37b1050f30cd1272e2a",
           "report": {
-            "revision": "9998b3c",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-concurrency-corpus-compat.json",
-            "format": "source-cases"
+            "format": "source-cases",
+            "original_report_revision": "9998b3c"
           },
           "assessment": "original-body-runtime-evidence",
           "legacy_tests": [
@@ -19211,9 +19365,10 @@
         {
           "program": "program:e94548e7f90fd4ea8a0d",
           "report": {
-            "revision": "9998b3c",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-concurrency-corpus-compat.json",
-            "format": "source-cases"
+            "format": "source-cases",
+            "original_report_revision": "9998b3c"
           },
           "assessment": "original-body-runtime-evidence",
           "legacy_tests": [
@@ -19407,9 +19562,10 @@
         {
           "program": "program:ed616eb011fc05d6acbf",
           "report": {
-            "revision": "9998b3c",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-concurrency-corpus-compat.json",
-            "format": "source-cases"
+            "format": "source-cases",
+            "original_report_revision": "9998b3c"
           },
           "assessment": "original-body-runtime-evidence",
           "legacy_tests": [
@@ -19601,9 +19757,10 @@
         {
           "program": "program:5191e9bbbf54e34f3e94",
           "report": {
-            "revision": "9998b3c",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-concurrency-corpus-compat.json",
-            "format": "source-cases"
+            "format": "source-cases",
+            "original_report_revision": "9998b3c"
           },
           "assessment": "original-body-runtime-evidence",
           "legacy_tests": [
@@ -19774,9 +19931,10 @@
         {
           "program": "program:a90d0e707bff9fd0c0d9",
           "report": {
-            "revision": "9998b3c",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-concurrency-corpus-compat.json",
-            "format": "source-cases"
+            "format": "source-cases",
+            "original_report_revision": "9998b3c"
           },
           "assessment": "original-body-runtime-evidence",
           "legacy_tests": [
@@ -19920,9 +20078,10 @@
         {
           "program": "program:a5a2e1ef76d57c840f3c",
           "report": {
-            "revision": "9998b3c",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-concurrency-corpus-compat.json",
-            "format": "source-cases"
+            "format": "source-cases",
+            "original_report_revision": "9998b3c"
           },
           "assessment": "original-body-runtime-evidence",
           "legacy_tests": [
@@ -20092,9 +20251,10 @@
         {
           "program": "program:1e5e03e21947542798b3",
           "report": {
-            "revision": "88677b6",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-cleanup-ir-seam-compat.json",
-            "format": "raw-files"
+            "format": "raw-files",
+            "original_report_revision": "88677b6"
           },
           "assessment": "original-body-runtime-evidence",
           "legacy_tests": [
@@ -20306,9 +20466,10 @@
         {
           "program": "program:1e5e03e21947542798b3",
           "report": {
-            "revision": "88677b6",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-cleanup-ir-seam-compat.json",
-            "format": "raw-files"
+            "format": "raw-files",
+            "original_report_revision": "88677b6"
           },
           "assessment": "original-body-runtime-evidence",
           "legacy_tests": [
@@ -20515,9 +20676,10 @@
         {
           "program": "program:b351d40891e80eb8b8ec",
           "report": {
-            "revision": "88677b6",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-cleanup-ir-seam-compat.json",
-            "format": "raw-files"
+            "format": "raw-files",
+            "original_report_revision": "88677b6"
           },
           "assessment": "original-body-runtime-evidence",
           "legacy_tests": [
@@ -20650,9 +20812,10 @@
         {
           "program": "program:2cd74addf09373c7f082",
           "report": {
-            "revision": "88677b6",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-cleanup-ir-seam-compat.json",
-            "format": "raw-files"
+            "format": "raw-files",
+            "original_report_revision": "88677b6"
           },
           "assessment": "original-body-runtime-evidence",
           "legacy_tests": [
@@ -20797,9 +20960,10 @@
         {
           "program": "program:cb40e719f5376662f92f",
           "report": {
-            "revision": "88677b6",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-cleanup-ir-seam-compat.json",
-            "format": "raw-files"
+            "format": "raw-files",
+            "original_report_revision": "88677b6"
           },
           "assessment": "original-body-runtime-evidence",
           "legacy_tests": [
@@ -20983,9 +21147,10 @@
         {
           "program": "program:cf50ee7030b8857d1729",
           "report": {
-            "revision": "89aa919",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-cleanup-source-compat.json",
-            "format": "cleanup-cases"
+            "format": "cleanup-cases",
+            "original_report_revision": "89aa919"
           },
           "assessment": "original-body-runtime-evidence",
           "legacy_tests": [
@@ -21144,9 +21309,10 @@
         {
           "program": "program:93d5729a9fbacc7c65d7",
           "report": {
-            "revision": "89aa919",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-cleanup-source-compat.json",
-            "format": "cleanup-cases"
+            "format": "cleanup-cases",
+            "original_report_revision": "89aa919"
           },
           "assessment": "original-body-runtime-evidence",
           "legacy_tests": [
@@ -21368,9 +21534,10 @@
         {
           "program": "program:9d4cee877d9489d1ecde",
           "report": {
-            "revision": "89aa919",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-cleanup-source-compat.json",
-            "format": "cleanup-cases"
+            "format": "cleanup-cases",
+            "original_report_revision": "89aa919"
           },
           "assessment": "original-body-runtime-evidence",
           "legacy_tests": [
@@ -21521,9 +21688,10 @@
         {
           "program": "program:49e9df0f81ebe9dcca13",
           "report": {
-            "revision": "88677b6",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-cleanup-ir-seam-compat.json",
-            "format": "raw-files"
+            "format": "raw-files",
+            "original_report_revision": "88677b6"
           },
           "assessment": "original-body-runtime-evidence",
           "legacy_tests": [
@@ -21734,9 +21902,10 @@
         {
           "program": "program:b0540432a2cf66711fa5",
           "report": {
-            "revision": "89aa919",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-cleanup-source-compat.json",
-            "format": "cleanup-cases"
+            "format": "cleanup-cases",
+            "original_report_revision": "89aa919"
           },
           "assessment": "original-body-runtime-evidence",
           "legacy_tests": [
@@ -21890,9 +22059,10 @@
         {
           "program": "program:c11d71b8f845eac2eb96",
           "report": {
-            "revision": "89aa919",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-cleanup-source-compat.json",
-            "format": "cleanup-cases"
+            "format": "cleanup-cases",
+            "original_report_revision": "89aa919"
           },
           "assessment": "original-body-runtime-evidence",
           "legacy_tests": [
@@ -22050,9 +22220,10 @@
         {
           "program": "program:8a66aaa374b5eea2f0eb",
           "report": {
-            "revision": "89aa919",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-cleanup-source-compat.json",
-            "format": "cleanup-cases"
+            "format": "cleanup-cases",
+            "original_report_revision": "89aa919"
           },
           "assessment": "original-body-runtime-evidence",
           "legacy_tests": [
@@ -22199,9 +22370,10 @@
         {
           "program": "program:ded22982c5425906b209",
           "report": {
-            "revision": "89aa919",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-cleanup-source-compat.json",
-            "format": "cleanup-cases"
+            "format": "cleanup-cases",
+            "original_report_revision": "89aa919"
           },
           "assessment": "original-body-runtime-evidence",
           "legacy_tests": [
@@ -22354,9 +22526,10 @@
         {
           "program": "program:e0f622ab5e646e64e7cb",
           "report": {
-            "revision": "3e8db38",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-scope-source-compat.json",
-            "format": "entry-programs"
+            "format": "entry-programs",
+            "original_report_revision": "3e8db38"
           },
           "assessment": "original-body-runtime-evidence",
           "legacy_tests": [
@@ -22481,9 +22654,10 @@
         {
           "program": "program:eac7456a92396f46e7a2",
           "report": {
-            "revision": "3e8db38",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-scope-source-compat.json",
-            "format": "entry-programs"
+            "format": "entry-programs",
+            "original_report_revision": "3e8db38"
           },
           "assessment": "original-body-runtime-evidence",
           "legacy_tests": [
@@ -22609,9 +22783,10 @@
         {
           "program": "program:b47677c76cf26174e501",
           "report": {
-            "revision": "3e8db38",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-scope-source-compat.json",
-            "format": "entry-programs"
+            "format": "entry-programs",
+            "original_report_revision": "3e8db38"
           },
           "assessment": "original-body-runtime-evidence",
           "legacy_tests": [
@@ -22737,9 +22912,10 @@
         {
           "program": "program:2ac6f38771693a3b32e2",
           "report": {
-            "revision": "88677b6",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-cleanup-ir-seam-compat.json",
-            "format": "raw-files"
+            "format": "raw-files",
+            "original_report_revision": "88677b6"
           },
           "assessment": "original-body-runtime-evidence",
           "legacy_tests": [
@@ -22974,9 +23150,10 @@
         {
           "program": "program:2ac6f38771693a3b32e2",
           "report": {
-            "revision": "88677b6",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-cleanup-ir-seam-compat.json",
-            "format": "raw-files"
+            "format": "raw-files",
+            "original_report_revision": "88677b6"
           },
           "assessment": "original-body-runtime-evidence",
           "legacy_tests": [
@@ -23234,9 +23411,10 @@
         {
           "program": "program:2e02752865a6418a1e52",
           "report": {
-            "revision": "301f76e",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-closures-state-source-compat.json",
-            "format": "raw-files"
+            "format": "raw-files",
+            "original_report_revision": "301f76e"
           },
           "assessment": "original-body-runtime-evidence",
           "legacy_tests": [
@@ -23377,9 +23555,10 @@
         {
           "program": "program:b1c877211529f5d06063",
           "report": {
-            "revision": "d2573cc",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-legacy-strings-compat.json",
-            "format": "raw-files"
+            "format": "raw-files",
+            "original_report_revision": "d2573cc"
           },
           "assessment": "existing-source-C-observations-match",
           "legacy_tests": [
@@ -23537,9 +23716,10 @@
         {
           "program": "program:9fa3708f819ff8b76dc2",
           "report": {
-            "revision": "301f76e",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-closures-state-source-compat.json",
-            "format": "raw-files"
+            "format": "raw-files",
+            "original_report_revision": "301f76e"
           },
           "assessment": "original-body-runtime-evidence",
           "legacy_tests": [
@@ -23680,9 +23860,10 @@
         {
           "program": "program:dc3d2de098f1b7e80a21",
           "report": {
-            "revision": "b1a83f1",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-legacy-traits-compat.json",
-            "format": "traits"
+            "format": "traits",
+            "original_report_revision": "b1a83f1"
           },
           "assessment": "original-body-runtime-evidence",
           "legacy_tests": [
@@ -23955,9 +24136,10 @@
         {
           "program": "program:dc3d2de098f1b7e80a21",
           "report": {
-            "revision": "b1a83f1",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-legacy-traits-compat.json",
-            "format": "traits"
+            "format": "traits",
+            "original_report_revision": "b1a83f1"
           },
           "assessment": "original-body-runtime-evidence",
           "legacy_tests": [
@@ -24230,9 +24412,10 @@
         {
           "program": "program:5fd9a0434fc95af6ecf6",
           "report": {
-            "revision": "8677ff1",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-legacy-helpers-collections-compat.json",
-            "format": "raw-files"
+            "format": "raw-files",
+            "original_report_revision": "8677ff1"
           },
           "assessment": "original-body-runtime-evidence",
           "legacy_tests": [
@@ -24462,9 +24645,10 @@
         {
           "program": "program:ad481b3ab9e723eb715a",
           "report": {
-            "revision": "8677ff1",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-legacy-helpers-collections-compat.json",
-            "format": "raw-files"
+            "format": "raw-files",
+            "original_report_revision": "8677ff1"
           },
           "assessment": "original-body-runtime-evidence",
           "legacy_tests": [
@@ -24609,9 +24793,10 @@
         {
           "program": "program:dc3d2de098f1b7e80a21",
           "report": {
-            "revision": "b1a83f1",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-legacy-traits-compat.json",
-            "format": "traits"
+            "format": "traits",
+            "original_report_revision": "b1a83f1"
           },
           "assessment": "original-body-runtime-evidence",
           "legacy_tests": [
@@ -24884,9 +25069,10 @@
         {
           "program": "program:903a9b99cfdf07a02684",
           "report": {
-            "revision": "301f76e",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-closures-state-source-compat.json",
-            "format": "raw-files"
+            "format": "raw-files",
+            "original_report_revision": "301f76e"
           },
           "assessment": "original-body-runtime-evidence",
           "legacy_tests": [
@@ -25134,9 +25320,10 @@
         {
           "program": "program:de1b4707ec70dd24789b",
           "report": {
-            "revision": "d2573cc",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-legacy-strings-compat.json",
-            "format": "raw-files"
+            "format": "raw-files",
+            "original_report_revision": "d2573cc"
           },
           "assessment": "existing-source-C-observations-match",
           "legacy_tests": [
@@ -25414,9 +25601,10 @@
         {
           "program": "program:e220b55ef04773e1daaa",
           "report": {
-            "revision": "d2573cc",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-legacy-strings-compat.json",
-            "format": "raw-files"
+            "format": "raw-files",
+            "original_report_revision": "d2573cc"
           },
           "assessment": "existing-source-C-observations-match",
           "legacy_tests": [
@@ -25656,9 +25844,10 @@
         {
           "program": "program:b325a80621f2be6c4300",
           "report": {
-            "revision": "d2573cc",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-legacy-strings-compat.json",
-            "format": "raw-files"
+            "format": "raw-files",
+            "original_report_revision": "d2573cc"
           },
           "assessment": "original-body-runtime-evidence",
           "legacy_tests": [
@@ -25799,9 +25988,10 @@
         {
           "program": "program:c4e9d4ec96be3e5df8d9",
           "report": {
-            "revision": "2eaae18",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-suspend-source-compat.json",
-            "format": "raw-files"
+            "format": "raw-files",
+            "original_report_revision": "2eaae18"
           },
           "assessment": "original-body-runtime-evidence",
           "legacy_tests": [
@@ -25936,9 +26126,10 @@
         {
           "program": "program:1cffa4713ffb59946d7b",
           "report": {
-            "revision": "2eaae18",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-suspend-source-compat.json",
-            "format": "raw-files"
+            "format": "raw-files",
+            "original_report_revision": "2eaae18"
           },
           "assessment": "original-body-runtime-evidence",
           "legacy_tests": [
@@ -26073,9 +26264,10 @@
         {
           "program": "program:cf70ce9f702234122575",
           "report": {
-            "revision": "2eaae18",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-suspend-source-compat.json",
-            "format": "raw-files"
+            "format": "raw-files",
+            "original_report_revision": "2eaae18"
           },
           "assessment": "original-body-runtime-evidence",
           "legacy_tests": [
@@ -26209,9 +26401,10 @@
         {
           "program": "program:0a4fad3a4ccb4b06bffb",
           "report": {
-            "revision": "2eaae18",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-suspend-source-compat.json",
-            "format": "raw-files"
+            "format": "raw-files",
+            "original_report_revision": "2eaae18"
           },
           "assessment": "original-body-runtime-evidence",
           "legacy_tests": [
@@ -26344,9 +26537,10 @@
         {
           "program": "program:ceb0def2afdc33b84e2f",
           "report": {
-            "revision": "2eaae18",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-suspend-source-compat.json",
-            "format": "raw-files"
+            "format": "raw-files",
+            "original_report_revision": "2eaae18"
           },
           "assessment": "original-body-runtime-evidence",
           "legacy_tests": [
@@ -26481,9 +26675,10 @@
         {
           "program": "program:092ecc4b39a71f6fe329",
           "report": {
-            "revision": "c5f8b91",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-external-source-compat.json",
-            "format": "entry-programs"
+            "format": "entry-programs",
+            "original_report_revision": "c5f8b91"
           },
           "assessment": "original-body-runtime-evidence",
           "legacy_tests": [
@@ -26644,9 +26839,10 @@
         {
           "program": "program:729d56d2f2d29fef4139",
           "report": {
-            "revision": "c5f8b91",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-external-source-compat.json",
-            "format": "entry-programs"
+            "format": "entry-programs",
+            "original_report_revision": "c5f8b91"
           },
           "assessment": "original-body-runtime-evidence",
           "legacy_tests": [
@@ -26793,9 +26989,10 @@
         {
           "program": "program:09dfd633dcd1f95f6a18",
           "report": {
-            "revision": "301f76e",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-closures-state-source-compat.json",
-            "format": "raw-files"
+            "format": "raw-files",
+            "original_report_revision": "301f76e"
           },
           "assessment": "original-body-runtime-evidence",
           "legacy_tests": [
@@ -26953,9 +27150,10 @@
         {
           "program": "program:efd3c3bdb37863da1c8f",
           "report": {
-            "revision": "c5f8b91",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-external-source-compat.json",
-            "format": "entry-programs"
+            "format": "entry-programs",
+            "original_report_revision": "c5f8b91"
           },
           "assessment": "original-body-runtime-evidence",
           "legacy_tests": [
@@ -27153,9 +27351,10 @@
         {
           "program": "program:efd3c3bdb37863da1c8f",
           "report": {
-            "revision": "c5f8b91",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-external-source-compat.json",
-            "format": "entry-programs"
+            "format": "entry-programs",
+            "original_report_revision": "c5f8b91"
           },
           "assessment": "original-body-runtime-evidence",
           "legacy_tests": [
@@ -27346,9 +27545,10 @@
         {
           "program": "program:8f6003cb6b231900471a",
           "report": {
-            "revision": "44666f9",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-recursive-source-compat.json",
-            "format": "raw-files"
+            "format": "raw-files",
+            "original_report_revision": "44666f9"
           },
           "assessment": "original-body-artifact-evidence",
           "legacy_tests": [
@@ -27679,9 +27879,10 @@
         {
           "program": "program:c587ef1e19686afdfe06",
           "report": {
-            "revision": "301f76e",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-closures-state-source-compat.json",
-            "format": "raw-files"
+            "format": "raw-files",
+            "original_report_revision": "301f76e"
           },
           "assessment": "original-body-runtime-evidence",
           "legacy_tests": [
@@ -27822,9 +28023,10 @@
         {
           "program": "program:3bee0ac6dc33827ec422",
           "report": {
-            "revision": "301f76e",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-closures-state-source-compat.json",
-            "format": "raw-files"
+            "format": "raw-files",
+            "original_report_revision": "301f76e"
           },
           "assessment": "original-body-runtime-evidence",
           "legacy_tests": [
@@ -28005,9 +28207,10 @@
         {
           "program": "program:8e7fb878276e03451814",
           "report": {
-            "revision": "301f76e",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-closures-state-source-compat.json",
-            "format": "raw-files"
+            "format": "raw-files",
+            "original_report_revision": "301f76e"
           },
           "assessment": "original-body-runtime-evidence",
           "legacy_tests": [
@@ -28142,9 +28345,10 @@
         {
           "program": "program:b0b720ffc97055a938e9",
           "report": {
-            "revision": "d2d3c75",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-services-source-compat.json",
-            "format": "entry-programs"
+            "format": "entry-programs",
+            "original_report_revision": "d2d3c75"
           },
           "assessment": "original-body-runtime-evidence",
           "legacy_tests": [
@@ -28247,9 +28451,10 @@
         {
           "program": "program:4ddb1b72860ac525d8f2",
           "report": {
-            "revision": "d2d3c75",
+            "revision": "3df747bab4860657c4218a7e90ae41712820a508",
             "path": "docs/reports/p7-services-source-compat.json",
-            "format": "entry-programs"
+            "format": "entry-programs",
+            "original_report_revision": "d2d3c75"
           },
           "assessment": "original-body-runtime-evidence",
           "legacy_tests": [
