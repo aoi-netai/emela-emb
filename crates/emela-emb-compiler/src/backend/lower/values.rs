@@ -429,7 +429,7 @@ pub(super) fn value_type(
                 (program.core.ty(source), program.core.ty(destination))
             {
                 if from.params != to.params
-                    || from.ret != to.ret
+                    || (from.ret != to.ret && from.ret != TypeId::NEVER)
                     || (from.suspends && !to.suspends)
                     || (from.ev && !to.ev)
                     || from.sets.is_some()

@@ -593,6 +593,28 @@ pub(in crate::backend::emit) fn emit_function_coerce_adapter(
     }
     let call = format!("environment->source.call({})", args.join(", "));
     let trap = "if (checked_error.tag != 0) emela_board_defect(EMELA_DEFECT_ASSERT, \"failure in infallible coercion\", UINT16_C(30));";
+    if source_type.ret == TypeId::NEVER && !source_type.suspends {
+        writer.line(&format!("{call};"));
+        if traps_failure {
+            writer.line(trap);
+        } else if source_type.fails {
+            // A Never-returning function can still return through its failure ABI.
+            // The caller examines the error before observing this placeholder result.
+            writer.begin_block("if (emela_error_out->tag != UINT32_C(0))");
+            if destination_type.suspends || layouts.type_repr(destination_type.ret) == Repr::Void {
+                writer.ret(None);
+            } else {
+                writer.ret(Some(&format!(
+                    "({}){{0}}",
+                    layouts.c_type(destination_type.ret)
+                )));
+            }
+            writer.end_block();
+        }
+        writer.line("emela_board_defect(EMELA_DEFECT_ASSERT, \"Never-returning function returned\", UINT16_C(33));");
+        writer.end_block();
+        return;
+    }
     if destination_type.suspends {
         if source_type.suspends || layouts.type_repr(source_type.ret) == Repr::Void {
             writer.line(&format!("{call};"));

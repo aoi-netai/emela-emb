@@ -424,3 +424,111 @@ fn function_coercion_adapts_unit_erasure_evidence_and_failure_abi() {
             .contains("function coercion")
     );
 }
+
+#[test]
+fn never_returning_function_values_widen_results_without_losing_failure_channels() {
+    for fails in [false, true] {
+        let mut p = program(vec![]);
+        let bottom_type = p.core.types.intern(Type::Fn(FnType {
+            params: vec![],
+            ret: TypeId::NEVER,
+            fails,
+            suspends: false,
+            ev: false,
+            sets: None,
+        }));
+        let integer_type = p.core.types.intern(Type::Fn(FnType {
+            params: vec![],
+            ret: TypeId::INT,
+            fails,
+            suspends: false,
+            ev: false,
+            sets: None,
+        }));
+        let mut bottom = Function::new("bottom");
+        bottom.ret = TypeId::NEVER;
+        bottom.fails = fails;
+        let term = if fails {
+            let error = p.core.enums.alloc(EnumDef {
+                name: "Stopped".into(),
+                params: 0,
+                error: true,
+                external: false,
+                variants: vec![VariantDef {
+                    name: "Stopped".into(),
+                    fields: VariantFields::Unit,
+                    tys: vec![],
+                }],
+            });
+            let error_type = p.core.types.intern(Type::Enum(error, vec![]));
+            let value = reference_var(&mut bottom, error_type);
+            let make = binding(
+                &mut bottom,
+                Some(value),
+                Value::Make {
+                    ctor: CtorRef {
+                        enum_id: error,
+                        variant: 0,
+                    },
+                    args: vec![],
+                },
+            );
+            bottom.body = Some(bottom.seqs.alloc(Seq {
+                stmts: vec![make],
+                term: Term::Fail(value.into()),
+            }));
+            None
+        } else {
+            Some(Term::Defect(Const::String("bottom".into()).into()))
+        };
+        if let Some(term) = term {
+            bottom.body = Some(bottom.seqs.alloc(Seq {
+                stmts: vec![],
+                term,
+            }));
+        }
+        let bottom = p.functions.alloc(bottom);
+        let mut f = simple();
+        let source = reference_var(&mut f, bottom_type);
+        let destination = reference_var(&mut f, integer_type);
+        let result = variable(&mut f, TypeId::INT);
+        let reference = binding(&mut f, Some(source), Value::FnRef(bottom));
+        let coercion = binding(&mut f, Some(destination), Value::Coerce(source));
+        let edge = if fails {
+            let error = reference_var(&mut f, TypeId::ANY);
+            let body = f.seqs.alloc(Seq {
+                stmts: vec![],
+                term: Term::Yield(Some(Const::Int(42).into())),
+            });
+            Some(OnFail::Handle { error, body })
+        } else {
+            None
+        };
+        let call = binding(
+            &mut f,
+            Some(result),
+            Value::Call {
+                callee: Callee::Indirect(destination),
+                args: vec![],
+                suspends: false,
+                on_fail: edge,
+            },
+        );
+        f.seqs[f.body.unwrap()] = Seq {
+            stmts: vec![reference, coercion, call],
+            term: Term::Return(Some(result.into())),
+        };
+        p.functions.alloc(f);
+        let output =
+            crate::backend::compile_program(p, &Options::default().with_heap_bytes(4096)).unwrap();
+        if fails {
+            execute(&output, DEFECT_HARNESS, 0);
+        } else {
+            execute(
+                &output,
+                "#include <stdlib.h>\n#include <string.h>\n#include \"emela_embedded.h\"\n#include \"emela_board.h\"\n_Noreturn void emela_board_defect(EmelaDefectKind k,const char*m,uint16_t n){exit(k==EMELA_DEFECT_PANIC&&n==6&&memcmp(m,\"bottom\",6)==0?77:78);}\nint main(void){(void)answer();return 1;}\n",
+                77,
+            );
+        }
+    }
+}

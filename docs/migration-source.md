@@ -371,4 +371,6 @@ Handler/Evidence/operation call/RetireとCellの型・ID検証は独自lowerに�
 
 `backend/lower/handler_tests.rs` の独自IR/C試験は、heap不要の静的解決、別関数へ渡す動的evidenceとProtect cleanup、Any経由のretire後のdefect、Cell/closure/Any循環の1000回反復と全heap回収を両最適化で確認する。これはsourceのhandler/layer/init/release接続とは別の証拠とする。
 
-関数型間のCoerceは、既存plan/emitのadapter互換条件に沿って独自validatorへ接続する。引数・戻り型の変更やevidenceの消去は拒否し、Unit消去を伴うpure関数からfailure/evidence ABIへの変換をIR/C両最適化・1000回の全heap回収で確認する。
+関数型間のCoerceは、既存plan/emitのadapter互換条件に沿って独自validatorへ接続する。引数の変更、Never以外の戻り型変更、evidenceの消去は拒否し、Unit消去を伴うpure関数からfailure/evidence ABIへの変換をIR/C両最適化・1000回の全heap回収で確認する。
+
+戻り型Neverの関数値は任意の具体戻り型へ拡大できる。failure ABIだけで戻る経路には初期化済みの仮結果を返し、通常経路でNever関数が戻った場合はassert defectにする。IR/C試験ではIntへの拡大後も元のdefectと捕捉可能なfailureがそれぞれ保たれることを両最適化で確認する。

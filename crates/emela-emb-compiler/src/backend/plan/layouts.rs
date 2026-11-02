@@ -630,7 +630,7 @@ impl<'a> LayoutPreparation<'a> for LayoutBuilder<'a> {
             return Ok(());
         }
         let compatible = source_fn.params == destination_fn.params
-            && source_fn.ret == destination_fn.ret
+            && (source_fn.ret == destination_fn.ret || source_fn.ret == TypeId::NEVER)
             && (!source_fn.suspends || destination_fn.suspends)
             && source_fn.sets.is_none()
             && destination_fn.sets.is_none()
