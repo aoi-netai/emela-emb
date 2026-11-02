@@ -128,6 +128,7 @@ impl<'t, 's> Parser<'t, 's> {
         let mut params = Vec::new();
         while self.current().kind != K::RParen {
             let name = self.lower_name("expected parameter name")?;
+            self.newlines();
             if !self.take(K::Colon) {
                 return Err(self.error(
                     DiagnosticKind::Type,
@@ -150,6 +151,8 @@ impl<'t, 's> Parser<'t, 's> {
         } else {
             None
         };
+        self.continue_word("fails");
+        self.continue_word("use");
         if self.word("fails") || self.word("use") || self.word("suspend") {
             return Err(self.error(
                 DiagnosticKind::Unsupported,
@@ -344,6 +347,7 @@ impl<'t, 's> Parser<'t, 's> {
             }
             _ => return Err(self.error(DiagnosticKind::Syntax, "expected expression")),
         };
+        let mut comparison_seen = false;
         loop {
             if multiline {
                 self.newlines();
@@ -416,14 +420,13 @@ impl<'t, 's> Parser<'t, 's> {
             if precedence < min {
                 break;
             }
-            if op.comparison()
-                && matches!(&left.kind, ExprKind::Binary { op: previous, .. } if previous.comparison())
-            {
+            if op.comparison() && comparison_seen {
                 return Err(self.error(
                     DiagnosticKind::Syntax,
                     "comparison operators cannot be chained",
                 ));
             }
+            comparison_seen |= op.comparison();
             self.advance();
             let right = self.expr(precedence + 1, multiline)?;
             let span = Span::new(left.span.start, right.span.end);

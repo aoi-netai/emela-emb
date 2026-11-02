@@ -113,6 +113,17 @@ impl Checker {
     fn collect(&mut self) -> Result<(), Vec<Diagnostic>> {
         let mut errors = Vec::new();
         let mut exports = HashSet::new();
+        let entry = &self.modules.modules[self.modules.entry];
+        if entry.ast.functions.is_empty() && entry.ast.imports.is_empty() {
+            return Err(vec![
+                Diagnostic::new(
+                    DK::Syntax,
+                    Span::new(0, 0),
+                    "entry source contains no declarations",
+                )
+                .in_source(&entry.source_name),
+            ]);
+        }
         for (module_index, module) in self.modules.modules.iter().enumerate() {
             for function in &module.ast.functions {
                 let result = (|| -> Result<(), Diagnostic> {
@@ -172,9 +183,7 @@ impl Checker {
                                             "duplicate @export attribute",
                                         ));
                                     }
-                                    if module_index == self.modules.entry
-                                        && !exports.insert(symbol.value.clone())
-                                    {
+                                    if !exports.insert(symbol.value.clone()) {
                                         return Err(Diagnostic::new(
                                             DK::Export,
                                             symbol.span,
@@ -249,7 +258,7 @@ impl Checker {
                             sets: InvocationSets::default(),
                         },
                         name,
-                        exported: module_index == self.modules.entry && function.public,
+                        exported: export_symbol.is_some(),
                         export_symbol,
                         external,
                         intrinsic,
@@ -258,6 +267,30 @@ impl Checker {
                 })();
                 if let Err(error) = result {
                     errors.push(error.in_source(&module.source_name));
+                }
+            }
+        }
+        let mut external_signatures = HashMap::new();
+        for definition in &self.definitions {
+            if let Some(symbol) = &definition.external {
+                if exports.contains(symbol) {
+                    errors.push(self.error(
+                        definition.module,
+                        DK::Export,
+                        definition.ast.name.span,
+                        format!("external C symbol '{symbol}' collides with an export"),
+                    ));
+                }
+                let signature = (&definition.signature.params, definition.signature.ret);
+                if let Some(previous) = external_signatures.insert(symbol, signature) {
+                    if previous != signature {
+                        errors.push(self.error(
+                            definition.module,
+                            DK::Type,
+                            definition.ast.name.span,
+                            format!("external C symbol '{symbol}' has conflicting signatures"),
+                        ));
+                    }
                 }
             }
         }

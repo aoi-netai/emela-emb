@@ -30,7 +30,16 @@ pub(crate) fn collect(sources: &[Source<'_>], entry: &str) -> Result<Modules, Ve
     let mut source_modules = Vec::new();
     let mut errors = Vec::new();
     for (i, source) in sources.iter().enumerate() {
-        match module_name(source.name, &root) {
+        // The selected entry also supports the arbitrary filenames accepted by the original
+        // single-file API/CLI. Its source identity is preserved for diagnostics.
+        let module_name = module_name(source.name, &root).or_else(|message| {
+            if i == entry_source {
+                Ok("Main".into())
+            } else {
+                Err(message)
+            }
+        });
+        match module_name {
             Ok(name) => {
                 if CORE_MODULES.iter().any(|(core, _)| *core == name)
                     || matches!(name.as_str(), "Prelude" | "Std")

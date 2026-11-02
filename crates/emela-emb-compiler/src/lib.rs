@@ -27,6 +27,7 @@ pub fn compile(source: &str) -> Result<Output, Vec<Diagnostic>> {
 /// Compile explicit source files rooted at `entry` (one of the source names).
 ///
 /// Imports select other supplied modules; unreachable files are not parsed or typechecked.
+/// `pub` controls Emela visibility; only explicit `@export(c, "symbol")` declares a C export.
 /// The compiler never reads files, environment variables, installations or external processes.
 /// `options.with_entry(...)` independently selects the generated C entry function.
 pub fn compile_sources(

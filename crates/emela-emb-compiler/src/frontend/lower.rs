@@ -125,7 +125,7 @@ impl Context<'_> {
             term: None,
         };
         let value = self.block_into(&mut builder, block, tail);
-        let term = builder.term.unwrap_or_else(|| {
+        let term = builder.term.unwrap_or({
             if tail {
                 b::Term::Return(value)
             } else {
