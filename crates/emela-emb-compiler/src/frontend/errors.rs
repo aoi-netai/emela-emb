@@ -333,10 +333,9 @@ mod tests {
         frontend::{check, modules},
     };
     fn checked(source: &str) -> Result<ir::Program, Vec<Diagnostic>> {
-        check::check(modules::collect(
-            &[Source::new("main.emel", source)],
-            "main.emel",
-        )?)
+        let mut modules = modules::collect(&[Source::new("main.emel", source)], "main.emel")?;
+        crate::frontend::consts::expand(&mut modules)?;
+        check::check(modules)
     }
     #[test]
     fn explicit_value_signatures_are_pure_but_omitted_signatures_infer_failures() {
