@@ -4,6 +4,7 @@ pub(crate) mod constant_patterns;
 pub(crate) mod consts;
 pub(crate) mod data;
 pub(crate) mod errors;
+pub(crate) mod function_abi;
 pub(crate) mod infer;
 pub(crate) mod ir;
 pub(crate) mod lexer;

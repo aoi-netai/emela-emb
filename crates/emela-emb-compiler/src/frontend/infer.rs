@@ -308,7 +308,7 @@ impl Solver {
                         TypeErrorKind::Mismatch,
                         actual,
                         expected,
-                        "function set metadata differs",
+                        format!("function set metadata differs: {a:?} versus {b:?}"),
                     )),
                 }
             }

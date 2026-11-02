@@ -116,22 +116,32 @@ fn substitute_signature_arguments(
     let params = original
         .params
         .iter()
-        .map(|ty| data::frontend_type(core.types.subst(data::backend_type(*ty), arguments)))
+        .map(|ty| {
+            data::frontend_type(data::substitute(
+                &mut core.types,
+                data::backend_type(*ty),
+                arguments,
+            ))
+        })
         .collect();
-    let ret = original
-        .ret
-        .map(|ty| data::frontend_type(core.types.subst(data::backend_type(ty), arguments)));
+    let ret = original.ret.map(|ty| {
+        data::frontend_type(data::substitute(
+            &mut core.types,
+            data::backend_type(ty),
+            arguments,
+        ))
+    });
     let errors = original
         .sets
         .errors
         .iter()
-        .map(|ty| core.types.subst(*ty, arguments))
+        .map(|ty| data::substitute(&mut core.types, *ty, arguments))
         .collect::<Vec<_>>();
     let constraints = original
         .sets
         .error_constraints
         .iter()
-        .map(|ty| core.types.subst(*ty, arguments))
+        .map(|ty| data::substitute(&mut core.types, *ty, arguments))
         .collect();
     Signature {
         params,
@@ -168,6 +178,8 @@ fn synthetic_function(
             .collect(),
         return_type: None,
         fails: None,
+        effects: None,
+        suspends: false,
         attributes: vec![],
         body: None,
     }

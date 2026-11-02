@@ -189,7 +189,8 @@ impl Checker {
         span: Span,
     ) -> Result<(), Diagnostic> {
         for (parameter, bounds) in self.definitions[id.0].bounds.clone() {
-            let instantiated = self.catalog.core.types.subst(parameter, type_arguments);
+            let instantiated =
+                data::substitute(&mut self.catalog.core.types, parameter, type_arguments);
             let receiver = self
                 .solver
                 .resolve(&mut self.catalog.core.types, instantiated)
@@ -343,9 +344,19 @@ impl Checker {
         let params = signature
             .params
             .iter()
-            .map(|&ty| data::frontend_type(self.catalog.core.types.subst(ty, &substitutions)))
+            .map(|&ty| {
+                data::frontend_type(data::substitute(
+                    &mut self.catalog.core.types,
+                    ty,
+                    &substitutions,
+                ))
+            })
             .collect::<Vec<_>>();
-        let ret = data::frontend_type(self.catalog.core.types.subst(signature.ret, &substitutions));
+        let ret = data::frontend_type(data::substitute(
+            &mut self.catalog.core.types,
+            signature.ret,
+            &substitutions,
+        ));
         if let Some(expected) = expected {
             self.expect_type(module, ret, expected, span)?;
         }
@@ -438,7 +449,7 @@ impl Checker {
         )
     }
     #[allow(clippy::too_many_arguments)]
-    fn checked_generic_trait_call(
+    pub(super) fn checked_generic_trait_call(
         &mut self,
         module: usize,
         trait_id: TraitId,

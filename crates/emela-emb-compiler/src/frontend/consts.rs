@@ -18,6 +18,8 @@ pub(crate) fn expand(modules: &mut Modules) -> Result<(), Vec<Diagnostic>> {
                 params: Vec::new(),
                 return_type: declaration.annotation,
                 fails: None,
+                effects: Some(Vec::new()),
+                suspends: false,
                 attributes: Vec::new(),
                 body: Some(ast::Block {
                     statements: vec![ast::Statement::Expr(declaration.value)],

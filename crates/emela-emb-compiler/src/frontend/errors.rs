@@ -231,7 +231,11 @@ impl Context<'_> {
                         .in_source(self.source)
                 })
         } else {
-            Ok(self.catalog.core.types.subst(ty, arguments))
+            Ok(super::data::substitute(
+                &mut self.catalog.core.types,
+                ty,
+                arguments,
+            ))
         }
     }
     fn constrain_pattern(
@@ -365,7 +369,11 @@ impl Context<'_> {
                                 for error in summary.params {
                                     let mut arguments = vec![*self_type];
                                     arguments.extend_from_slice(method_type_arguments);
-                                    let error = self.catalog.core.types.subst(error, &arguments);
+                                    let error = super::data::substitute(
+                                        &mut self.catalog.core.types,
+                                        error,
+                                        &arguments,
+                                    );
                                     let error = self.resolve(error, expression.span)?;
                                     self.require_error(error, expression.span)?;
                                     analysis.errors.insert(error);

@@ -104,7 +104,13 @@ impl Checker {
         let arguments = self.constructor_arguments(module, &mut bindings, span)?;
         let params = raw
             .iter()
-            .map(|&ty| data::frontend_type(self.catalog.core.types.subst(ty, &arguments)))
+            .map(|&ty| {
+                data::frontend_type(data::substitute(
+                    &mut self.catalog.core.types,
+                    ty,
+                    &arguments,
+                ))
+            })
             .collect::<Vec<_>>();
         let ret = data::frontend_type(self.catalog.core.types.enum_type(ctor.enum_id, arguments));
         let ty = self.signature_type(
@@ -174,7 +180,11 @@ impl Checker {
             .collect::<Result<Vec<TypeId>, _>>()
             .map_err(|error| self.error(module, DK::Type, span, error.message))?;
         let function = self.catalog.core.types.intern(Type::Fn(signature));
-        let ty = data::frontend_type(self.catalog.core.types.subst(function, &substitutions));
+        let ty = data::frontend_type(data::substitute(
+            &mut self.catalog.core.types,
+            function,
+            &substitutions,
+        ));
         if let Some(expected) = expected {
             self.expect_type(module, ty, expected, span)?;
         }

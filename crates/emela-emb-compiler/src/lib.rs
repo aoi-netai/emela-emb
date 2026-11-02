@@ -38,7 +38,8 @@ pub fn compile_sources(
     let mut modules = frontend::modules::collect(sources, entry)?;
     frontend::consts::expand(&mut modules)?;
     let checked = frontend::check::check(modules)?;
-    let checked = frontend::specialize::specialize(checked)?;
+    let mut checked = frontend::specialize::specialize(checked)?;
+    frontend::function_abi::project(&mut checked)?;
     let lowered = frontend::lower::lower(&checked);
     backend::compile_program(lowered, options).map_err(|errors| {
         errors

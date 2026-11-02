@@ -1,7 +1,10 @@
 //! Source-owned declaration and visibility metadata over the independent concrete type catalog.
+mod function_types;
+mod substitution;
 use super::{ast, modules::Modules, types::ValueType as Ty};
 use crate::{Diagnostic, DiagnosticKind as DK, Span, contract::ir as b};
 use std::collections::{HashMap, HashSet};
+pub(crate) use substitution::substitute;
 #[derive(Clone)]
 pub(crate) struct Declaration {
     pub module: usize,
@@ -228,6 +231,9 @@ impl Catalog {
         params: &HashMap<String, usize>,
         self_type: Option<Ty>,
     ) -> Result<Ty, Diagnostic> {
+        if text.starts_with("fn(") {
+            return self.function_type(modules, module, text, span, params, self_type);
+        }
         if text == "Self" {
             if let Some(ty) = self_type {
                 return Ok(ty);
@@ -244,7 +250,7 @@ impl Catalog {
             "Float" => Some(Ty::Float),
             "Bool" => Some(Ty::Bool),
             "String" => Some(Ty::String),
-            "Unit" => Some(Ty::Unit),
+            "Unit" | "()" => Some(Ty::Unit),
             "Never" => Some(Ty::Never),
             _ => None,
         };
@@ -252,6 +258,10 @@ impl Catalog {
             return Ok(scalar);
         }
         if text.starts_with('(') && text.ends_with(')') {
+            let inner = &text[1..text.len() - 1];
+            if inner.starts_with("fn(") && split(inner).len() == 1 {
+                return self.type_text(modules, module, inner, span, params, self_type);
+            }
             let mut fields = Vec::new();
             for element in split(&text[1..text.len() - 1]) {
                 fields.push(backend_type(
@@ -417,7 +427,7 @@ impl Catalog {
             .tys
             .clone()
             .into_iter()
-            .map(|ty| frontend_type(self.core.types.subst(ty, &args)))
+            .map(|ty| frontend_type(substitute(&mut self.core.types, ty, &args)))
             .collect()
     }
 }
@@ -453,8 +463,8 @@ fn split(text: &str) -> Vec<&str> {
     let mut result = Vec::new();
     for (index, ch) in text.char_indices() {
         match ch {
-            '[' | '(' => depth += 1,
-            ']' | ')' => depth -= 1,
+            '[' | '(' | '{' => depth += 1,
+            ']' | ')' | '}' => depth -= 1,
             ',' if depth == 0 => {
                 result.push(&text[start..index]);
                 start = index + 1;

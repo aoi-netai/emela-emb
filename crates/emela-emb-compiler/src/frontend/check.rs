@@ -1,4 +1,6 @@
+mod functions;
 mod methods;
+mod references;
 mod trait_methods;
 use super::{
     ast,
@@ -69,6 +71,7 @@ struct Checker {
     current_bounds: super::traits::ParamBounds,
     current_self_type: Option<crate::contract::ir::TypeId>,
     trait_obligations: Vec<trait_methods::Obligation>,
+    closures: Vec<functions::CaptureScope>,
     solver: super::infer::Solver,
     current_parameters: HashMap<String, usize>,
     definitions: Vec<Definition>,
@@ -98,6 +101,25 @@ impl Locals {
 }
 
 pub(crate) fn check(mut modules: Modules) -> Result<ir::Program, Vec<Diagnostic>> {
+    for module in &modules.modules {
+        if let Some(span) = module
+            .ast
+            .effects
+            .first()
+            .map(|item| item.span)
+            .or_else(|| module.ast.handlers.first().map(|item| item.span))
+            .or_else(|| module.ast.layers.first().map(|item| item.span))
+        {
+            return Err(vec![
+                Diagnostic::new(
+                    DK::Unsupported,
+                    span,
+                    "effect and handler source checking is not connected yet",
+                )
+                .in_source(&module.source_name),
+            ]);
+        }
+    }
     let mut catalog = Catalog::collect(&modules)?;
     let traits = super::trait_collect::prepare(&mut modules, &mut catalog)?;
     let mut checker = Checker {
@@ -106,6 +128,7 @@ pub(crate) fn check(mut modules: Modules) -> Result<ir::Program, Vec<Diagnostic>
         current_bounds: Default::default(),
         current_self_type: None,
         trait_obligations: Vec::new(),
+        closures: Vec::new(),
         solver: super::infer::Solver::new(),
         current_parameters: HashMap::new(),
         module_definitions: vec![HashMap::new(); modules.modules.len()],
@@ -133,7 +156,7 @@ pub(crate) fn check(mut modules: Modules) -> Result<ir::Program, Vec<Diagnostic>
     checker
         .validate_method_declarations()
         .map_err(|e| vec![e])?;
-    for definition in &checker.definitions {
+    for definition in checker.definitions.clone() {
         for ty in definition
             .signature
             .params
@@ -222,6 +245,24 @@ impl Checker {
             let module = self.modules.modules[module_index].clone();
             for function in &module.ast.functions {
                 let result = (|| -> Result<(), Diagnostic> {
+                    if function.suspends {
+                        return Err(Diagnostic::new(
+                            DK::Unsupported,
+                            function.name.span,
+                            "suspend functions await continuation lowering",
+                        ));
+                    }
+                    if function
+                        .effects
+                        .as_ref()
+                        .is_some_and(|effects| !effects.is_empty())
+                    {
+                        return Err(Diagnostic::new(
+                            DK::Unsupported,
+                            function.name.span,
+                            "effect signatures await handler source checking",
+                        ));
+                    }
                     let method = self
                         .traits
                         .methods
@@ -788,6 +829,7 @@ impl Checker {
         );
         let saved_bounds = std::mem::replace(&mut self.current_bounds, definition.bounds.clone());
         let saved_self = std::mem::replace(&mut self.current_self_type, definition.self_type);
+        let saved_closures = std::mem::take(&mut self.closures);
         let body = definition
             .ast
             .body
@@ -804,6 +846,7 @@ impl Checker {
         self.current_parameters = saved_parameters;
         self.current_bounds = saved_bounds;
         self.current_self_type = saved_self;
+        self.closures = saved_closures;
         let body = body?;
         if definition.ast.return_type.is_none()
             && body.as_ref().is_some_and(|body| body.ty == Ty::Never)
@@ -961,6 +1004,31 @@ impl Checker {
             .map(|ty| self.resolve_type(module, ty, span))
             .transpose()?;
         let (kind, ty) = match &expression.kind {
+            A::Use(_) | A::With { .. } => {
+                return Err(self.error(
+                    module,
+                    DK::Unsupported,
+                    span,
+                    "function values and effects are awaiting their typed source connection",
+                ));
+            }
+            A::Lambda {
+                params,
+                return_type,
+                fails,
+                effects,
+                body,
+            } => {
+                if return_type.is_some() || fails.is_some() || effects.is_some() {
+                    return Err(self.error(
+                        module,
+                        DK::Syntax,
+                        span,
+                        "anonymous functions have only parameters and a body",
+                    ));
+                }
+                return self.lambda(module, params, body, locals, expected, span);
+            }
             A::Integer(raw) => {
                 let target = expected.filter(|t| *t == Ty::Int64).unwrap_or(Ty::Int);
                 let clean = raw.replace('_', "");
@@ -1287,15 +1355,44 @@ impl Checker {
                 )
             }
             A::Name(path) => {
+                if path.len() > 1 {
+                    let prefix = path[..path.len() - 1]
+                        .iter()
+                        .map(|item| item.value.as_str())
+                        .collect::<Vec<_>>()
+                        .join(".");
+                    if let Some(trait_id) = self.traits.find_trait(module, &prefix) {
+                        return self.trait_function_value(
+                            module,
+                            trait_id,
+                            &path.last().unwrap().value,
+                            locals,
+                            expected,
+                            span,
+                        );
+                    }
+                }
                 if let Some(local) = (path.len() == 1)
                     .then(|| locals.names.get(&path[0].value))
                     .flatten()
                 {
+                    for scope in &mut self.closures {
+                        if local.id.0 < scope.boundary {
+                            scope.captures.insert(local.id);
+                        }
+                    }
                     (ir::ExprKind::Local(local.id), local.ty)
                 } else {
                     match self.resolve(module, path)? {
                         Symbol::Constant(id) => (ir::ExprKind::Literal(id.literal()), id.ty()),
                         Symbol::Constructor(ctor) => {
+                            if !self.catalog.core.enums[ctor.enum_id].variants[ctor.variant]
+                                .tys
+                                .is_empty()
+                            {
+                                return self
+                                    .constructor_value(module, ctor, locals, expected, span);
+                            }
                             return self.construct(module, ctor, &[], locals, expected, span);
                         }
                         Symbol::Function(id) if self.definitions[id.0].ast.constant => {
@@ -1319,13 +1416,8 @@ impl Checker {
                                 span,
                             });
                         }
-                        Symbol::Function(_) => {
-                            return Err(self.error(
-                                module,
-                                DK::Unsupported,
-                                span,
-                                "function values require P4; call this function directly",
-                            ));
+                        Symbol::Function(id) => {
+                            return self.function_value(module, id, locals, expected, span);
                         }
                     }
                 }
@@ -1431,12 +1523,7 @@ impl Checker {
                     return self.method_call(module, base, name, args, locals, expected, span);
                 }
                 let A::Name(path) = &callee.kind else {
-                    return Err(self.error(
-                        module,
-                        DK::Unsupported,
-                        callee.span,
-                        "indirect calls require P4",
-                    ));
+                    return self.apply(module, callee, args, locals, expected, span);
                 };
                 if path.len() >= 2 {
                     let prefix = path[..path.len() - 1]
@@ -1457,15 +1544,7 @@ impl Checker {
                     }
                 }
                 if path.len() == 1 && locals.names.contains_key(&path[0].value) {
-                    return Err(self.error(
-                        module,
-                        DK::Type,
-                        callee.span,
-                        format!(
-                            "'{}' is a scalar binding and cannot be called",
-                            path[0].value
-                        ),
-                    ));
+                    return self.apply(module, callee, args, locals, expected, span);
                 }
                 let symbol = match self.resolve(module, path) {
                     Ok(symbol) => symbol,
@@ -1526,55 +1605,7 @@ impl Checker {
                         "a const value cannot be called",
                     ));
                 }
-                self.function(id)?;
-                let mut signature = self.definitions[id.0].signature.clone();
-                let type_arguments = (0..self.schemes.parameters[id.0].len())
-                    .map(|_| {
-                        self.solver
-                            .try_fresh(&mut self.catalog.core.types, super::infer::Constraint::Any)
-                    })
-                    .collect::<Result<Vec<_>, _>>()
-                    .map_err(|e| self.error(module, DK::Type, span, e.message))?;
-                let substitutions: HashMap<_, _> = self.schemes.parameters[id.0]
-                    .iter()
-                    .copied()
-                    .zip(type_arguments.iter().copied())
-                    .collect();
-                if !type_arguments.is_empty() {
-                    if let Some(ret) = signature.ret {
-                        let resolved = self
-                            .solver
-                            .resolve(&mut self.catalog.core.types, data::backend_type(ret))
-                            .map_err(|e| self.error(module, DK::Type, span, e.message))?;
-                        if self.solver.is_meta(resolved) {
-                            let instance = self
-                                .solver
-                                .try_fresh(
-                                    &mut self.catalog.core.types,
-                                    super::infer::Constraint::Any,
-                                )
-                                .map_err(|e| self.error(module, DK::Type, span, e.message))?;
-                            self.schemes.defer_return(
-                                id,
-                                resolved,
-                                instance,
-                                substitutions.clone(),
-                            );
-                            signature.ret = Some(data::frontend_type(instance));
-                        }
-                    }
-                }
-                for parameter in signature.params.iter_mut().chain(signature.ret.iter_mut()) {
-                    *parameter = data::frontend_type(
-                        self.solver
-                            .substitute(
-                                &mut self.catalog.core.types,
-                                data::backend_type(*parameter),
-                                &substitutions,
-                            )
-                            .map_err(|e| self.error(module, DK::Type, span, e.message))?,
-                    );
-                }
+                let (signature, type_arguments) = self.function_instance(module, id, span)?;
                 if let (Some(ret), Some(expected)) = (signature.ret, expected) {
                     self.expect_type(module, ret, expected, span)?;
                 }
@@ -1744,7 +1775,12 @@ impl Checker {
             self.expect_type(module, ty, expected, span)?;
         }
         let ty = self.resolve_type(module, ty, span)?;
-        self.validate_type_bounds(module, data::backend_type(ty), &self.current_bounds, span)?;
+        self.validate_type_bounds(
+            module,
+            data::backend_type(ty),
+            &self.current_bounds.clone(),
+            span,
+        )?;
         Ok(ir::Expr { kind, ty, span })
     }
     fn known_errors(
@@ -2203,11 +2239,11 @@ impl Checker {
                 .position(|&position| position == index)
                 .unwrap();
             let substitutions = self.constructor_arguments(module, &mut bindings, span)?;
-            let field_type = self
-                .catalog
-                .core
-                .types
-                .subst(raw_types[parameter], &substitutions);
+            let field_type = data::substitute(
+                &mut self.catalog.core.types,
+                raw_types[parameter],
+                &substitutions,
+            );
             let hint = Some(data::frontend_type(field_type));
             let value = self.expr(module, &argument.value, locals, hint)?;
             self.infer_constructor(
@@ -2242,7 +2278,7 @@ impl Checker {
         self.validate_type_bounds(
             module,
             data::backend_type(value_type),
-            &self.current_bounds,
+            &self.current_bounds.clone(),
             span,
         )?;
         Ok(ir::Expr {
@@ -2285,7 +2321,7 @@ impl Checker {
         span: Span,
     ) -> Result<(), Diagnostic> {
         let arguments = self.constructor_arguments(module, bindings, span)?;
-        let expected = self.catalog.core.types.subst(template, &arguments);
+        let expected = data::substitute(&mut self.catalog.core.types, template, &arguments);
         self.expect_type(
             module,
             data::frontend_type(actual),
