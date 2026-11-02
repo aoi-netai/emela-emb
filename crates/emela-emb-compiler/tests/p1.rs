@@ -310,3 +310,39 @@ int main(void) {{ {symbol}(); return 2; }}
         compile_and_run(&output, &harness);
     }
 }
+
+#[test]
+fn unit_arguments_preserve_side_effects_without_c_parameters() {
+    let output = source_output(
+        r#"
+@external(c, "board_mark")
+fn mark() -> ()
+@external(c, "board_take")
+fn take(n: Int) -> Int
+fn count(empty: (), n: Int) -> Int {
+  if n == 0 { 42 } else { count(empty, n - 1) }
+}
+fn helper(first: (), n: Int, last: ()) -> Int { count(first, n) }
+@export(c, "unit_arguments")
+pub fn value(ignored: ()) -> Int {
+  assert ignored == ()
+  helper(mark(), take(100000), mark())
+}
+"#,
+    );
+    assert!(output.header.contains("int32_t unit_arguments(void);"));
+    compile_and_run(
+        &output,
+        r#"
+#include <assert.h>
+#include <stdlib.h>
+#include "emela_embedded.h"
+#include "emela_board.h"
+_Noreturn void emela_board_defect(EmelaDefectKind k, const char *m, uint16_t n) { (void)k; (void)m; (void)n; abort(); }
+static int order;
+void board_mark(void) { order = order * 10 + 1; }
+int32_t board_take(int32_t n) { assert(order == 1); order = order * 10 + 2; return n; }
+int main(void) { assert(unit_arguments() == 42); assert(order == 121); return 0; }
+"#,
+    );
+}

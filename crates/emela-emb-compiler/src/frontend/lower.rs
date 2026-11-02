@@ -59,6 +59,12 @@ pub(crate) fn lower(input: &ir::Program) -> b::Program {
             locals: HashMap::new(),
         };
         for param in &function.params {
+            if param.ty == Ty::Unit {
+                context
+                    .locals
+                    .insert(param.id, b::Operand::Const(b::Const::Unit));
+                continue;
+            }
             let var = context.var(&param.name, param.ty);
             context.function.params.push(var);
             context.locals.insert(param.id, b::Operand::Var(var));
@@ -270,7 +276,11 @@ impl Context<'_> {
                     if builder.term.is_some() {
                         return None;
                     }
-                    operands.push(value.unwrap_or(b::Operand::Const(b::Const::Unit)));
+                    // Unit has no C parameter, but evaluating its source expression can
+                    // still call externals or stop execution. Erase only the resulting value.
+                    if argument.ty != Ty::Unit {
+                        operands.push(value.expect("non-Unit checked argument"));
+                    }
                 }
                 if tail && *target == self.current {
                     builder.term = Some(b::Term::Recur(operands));
