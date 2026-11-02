@@ -21,17 +21,27 @@ impl<'t, 's> Parser<'t, 's> {
     fn module(mut self) -> Result<Module, Diagnostic> {
         let mut imports = Vec::new();
         let mut functions = Vec::new();
+        let mut data = Vec::new();
         self.newlines();
         while self.current().kind != K::Eof {
             if self.word("import") {
-                if !functions.is_empty() {
+                if !functions.is_empty() || !data.is_empty() {
                     return Err(
                         self.error(DiagnosticKind::Syntax, "imports must precede declarations")
                     );
                 }
                 imports.push(self.import()?);
             } else {
-                functions.push(self.function()?);
+                let declaration = if self.word("pub") {
+                    self.peek(1).kind
+                } else {
+                    self.current().kind
+                };
+                if matches!(declaration, K::Name("type" | "enum" | "error" | "opaque")) {
+                    data.push(self.data()?);
+                } else {
+                    functions.push(self.function()?);
+                }
             }
             if !matches!(self.current().kind, K::Newline | K::Eof) {
                 return Err(self.error(
@@ -41,7 +51,11 @@ impl<'t, 's> Parser<'t, 's> {
             }
             self.newlines();
         }
-        Ok(Module { imports, functions })
+        Ok(Module {
+            imports,
+            functions,
+            data,
+        })
     }
     fn import(&mut self) -> Result<Import, Diagnostic> {
         self.advance();
@@ -125,9 +139,7 @@ impl<'t, 's> Parser<'t, 's> {
             ));
         }
         let name = self.lower_name("expected a lowercase function name")?;
-        if self.current().kind == K::LBracket {
-            return Err(self.error(DiagnosticKind::Unsupported, "type parameters require P2"));
-        }
+        let type_params = self.type_parameters()?;
         self.expect(
             K::LParen,
             "expected '(' after function name on the same line",
@@ -185,28 +197,176 @@ impl<'t, 's> Parser<'t, 's> {
         Ok(Function {
             name,
             public,
+            type_params,
             params,
             return_type,
             attributes,
             body,
         })
     }
-    fn type_name(&mut self) -> Result<Text, Diagnostic> {
-        if self.current().kind == K::LParen {
-            let start = self.current().span.start;
-            self.advance();
+    fn type_parameters(&mut self) -> Result<Vec<TypeParameter>, Diagnostic> {
+        let mut params = Vec::new();
+        if !self.take(K::LBracket) {
+            return Ok(params);
+        }
+        self.newlines();
+        while self.current().kind != K::RBracket {
+            let name = self.name("expected type parameter name")?;
             self.newlines();
-            self.expect(K::RParen, "only scalar and Unit types are supported in P1")?;
-            return Ok(Text::new("Unit", Span::new(start, self.previous_end())));
+            let mut bounds = Vec::new();
+            if self.take(K::Colon) {
+                loop {
+                    self.newlines();
+                    bounds.push(self.type_name()?);
+                    self.newlines();
+                    if !self.take(K::Plus) {
+                        break;
+                    }
+                }
+            }
+            params.push(TypeParameter { name, bounds });
+            self.newlines();
+            if !self.take(K::Comma) {
+                break;
+            }
+            self.newlines();
         }
-        let ty = self.name("expected type name on the same line")?;
-        if matches!(self.current().kind, K::LBracket | K::Dot) {
-            return Err(self.error(
-                DiagnosticKind::Unsupported,
-                "compound and qualified types require P2",
-            ));
+        self.expect(K::RBracket, "expected ']' after type parameters")?;
+        Ok(params)
+    }
+    fn type_name(&mut self) -> Result<Text, Diagnostic> {
+        let start = self.current().span.start;
+        let mut value;
+        if self.take(K::LParen) {
+            self.newlines();
+            let mut elements = Vec::new();
+            while self.current().kind != K::RParen {
+                elements.push(self.type_name()?.value);
+                self.newlines();
+                if !self.take(K::Comma) {
+                    break;
+                }
+                self.newlines();
+            }
+            self.expect(K::RParen, "expected ')' after tuple type")?;
+            value = if elements.is_empty() {
+                "Unit".into()
+            } else if elements.len() == 1 {
+                elements.remove(0)
+            } else {
+                format!("({})", elements.join(","))
+            };
+        } else {
+            value = self.name("expected type name")?.value;
+            while self.take(K::Dot) {
+                value.push('.');
+                value.push_str(&self.name("expected qualified type name")?.value);
+            }
+            if self.take(K::LBracket) {
+                self.newlines();
+                let mut args = Vec::new();
+                while self.current().kind != K::RBracket {
+                    args.push(self.type_name()?.value);
+                    self.newlines();
+                    if !self.take(K::Comma) {
+                        break;
+                    }
+                    self.newlines();
+                }
+                self.expect(K::RBracket, "expected ']' after type arguments")?;
+                value.push('[');
+                value.push_str(&args.join(","));
+                value.push(']');
+            }
         }
-        Ok(ty)
+        Ok(Text::new(value, Span::new(start, self.previous_end())))
+    }
+    fn fields(&mut self) -> Result<Vec<Field>, Diagnostic> {
+        let mut fields = Vec::new();
+        if !self.take(K::LParen) {
+            return Ok(fields);
+        }
+        self.newlines();
+        let mut named = None;
+        while self.current().kind != K::RParen {
+            let label =
+                if matches!(self.current().kind, K::Name(_)) && self.peek(1).kind == K::Colon {
+                    let label = self.lower_name("expected field name")?;
+                    self.advance();
+                    self.newlines();
+                    Some(label)
+                } else {
+                    None
+                };
+            if named.is_some_and(|n| n != label.is_some()) {
+                return Err(self.error(
+                    DiagnosticKind::Syntax,
+                    "fields must be all named or all positional",
+                ));
+            }
+            named = Some(label.is_some());
+            let ty = self.type_name()?;
+            fields.push(Field { name: label, ty });
+            self.newlines();
+            if !self.take(K::Comma) {
+                break;
+            }
+            self.newlines();
+        }
+        self.expect(K::RParen, "expected ')' after fields")?;
+        Ok(fields)
+    }
+    fn data(&mut self) -> Result<Data, Diagnostic> {
+        let public = self.take_word("pub");
+        let opaque = self.take_word("opaque");
+        let error = self.word("error");
+        let enumeration = self.word("enum");
+        if !self.take_word("type") && !self.take_word("error") && !self.take_word("enum") {
+            return Err(self.error(DiagnosticKind::Syntax, "expected type or enum after opaque"));
+        }
+        let name = self.name("expected data type name")?;
+        let params = self.type_parameters()?;
+        let variants = if enumeration {
+            self.expect(K::LBrace, "expected '{' in enum declaration")?;
+            self.newlines();
+            let mut variants = Vec::new();
+            while self.current().kind != K::RBrace {
+                let name = self.name("expected variant name")?;
+                let fields = self.fields()?;
+                variants.push(Variant { name, fields });
+                if self.take(K::Comma) || self.current().kind == K::Newline {
+                    self.newlines();
+                } else {
+                    break;
+                }
+            }
+            self.expect(K::RBrace, "expected '}' after enum variants")?;
+            variants
+        } else {
+            vec![Variant {
+                name: name.clone(),
+                fields: self.fields()?,
+            }]
+        };
+        self.continue_word("derive");
+        let mut derives = Vec::new();
+        if self.take_word("derive") {
+            loop {
+                derives.push(self.name("expected derived trait")?);
+                if !self.take(K::Comma) {
+                    break;
+                }
+            }
+        }
+        Ok(Data {
+            name,
+            public,
+            opaque,
+            error,
+            params,
+            variants,
+            derives,
+        })
     }
     fn block(&mut self) -> Result<Block, Diagnostic> {
         let start = self.current().span.start;
@@ -329,12 +489,33 @@ impl<'t, 's> Parser<'t, 's> {
                 } else {
                     let mut expression = self.expr(0, true)?;
                     self.newlines();
-                    if self.current().kind == K::Comma {
-                        return Err(self.error(DiagnosticKind::Unsupported, "tuples require P2"));
+                    if self.take(K::Comma) {
+                        let mut elements = vec![expression];
+                        self.newlines();
+                        while self.current().kind != K::RParen {
+                            elements.push(self.expr(0, true)?);
+                            self.newlines();
+                            if !self.take(K::Comma) {
+                                break;
+                            }
+                            self.newlines();
+                        }
+                        if elements.len() == 1 {
+                            return Err(self.error(
+                                DiagnosticKind::Syntax,
+                                "a tuple needs at least two elements",
+                            ));
+                        }
+                        self.expect(K::RParen, "expected ')' after tuple")?;
+                        Expr {
+                            kind: ExprKind::Tuple(elements),
+                            span: Span::new(token.span.start, self.previous_end()),
+                        }
+                    } else {
+                        self.expect(K::RParen, "expected ')' after expression")?;
+                        expression.span = Span::new(token.span.start, self.previous_end());
+                        expression
                     }
-                    self.expect(K::RParen, "expected ')' after expression")?;
-                    expression.span = Span::new(token.span.start, self.previous_end());
-                    expression
                 }
             }
             K::LBrace => {
@@ -428,11 +609,21 @@ impl<'t, 's> Parser<'t, 's> {
             if self.current().kind == K::Dot && min <= 9 {
                 self.advance();
                 let segment = self.name("expected name after '.'")?;
-                let ExprKind::Name(path) = &mut left.kind else {
-                    return Err(self.error(DiagnosticKind::Unsupported, "field access requires P2"));
+                if let ExprKind::Name(path) = &mut left.kind {
+                    if path[0].value.as_bytes()[0].is_ascii_uppercase() {
+                        left.span.end = segment.span.end;
+                        path.push(segment);
+                        continue;
+                    }
+                }
+                let span = Span::new(left.span.start, segment.span.end);
+                left = Expr {
+                    kind: ExprKind::Field {
+                        base: Box::new(left),
+                        name: segment,
+                    },
+                    span,
                 };
-                left.span.end = segment.span.end;
-                path.push(segment);
                 continue;
             }
             let Some((op, precedence)) = binary(self.current().kind) else {

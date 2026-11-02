@@ -9,6 +9,7 @@ pub(crate) enum ValueType {
     String,
     Unit,
     Never,
+    Compound(crate::contract::ir::TypeId),
 }
 impl ValueType {
     pub fn numeric(self) -> bool {
@@ -20,6 +21,9 @@ impl ValueType {
 }
 impl fmt::Display for ValueType {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        if let Self::Compound(id) = self {
+            return write!(f, "type#{}", id.index());
+        }
         f.write_str(match self {
             Self::Int => "Int",
             Self::Int64 => "Int64",
@@ -28,6 +32,7 @@ impl fmt::Display for ValueType {
             Self::String => "String",
             Self::Unit => "()",
             Self::Never => "Never",
+            Self::Compound(_) => unreachable!(),
         })
     }
 }

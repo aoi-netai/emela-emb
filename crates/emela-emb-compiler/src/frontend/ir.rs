@@ -30,6 +30,7 @@ pub(crate) struct Function {
 }
 #[derive(Clone, Debug)]
 pub(crate) struct Program {
+    pub core: crate::contract::ir::Definitions,
     pub functions: Vec<Function>,
 }
 #[derive(Clone, Debug)]
@@ -53,6 +54,17 @@ pub(crate) struct Expr {
 pub(crate) enum ExprKind {
     Literal(Literal),
     Concat(Vec<Expr>),
+    Tuple(Vec<Expr>),
+    Make {
+        ctor: crate::contract::ir::CtorRef,
+        args: Vec<Expr>,
+        order: Vec<usize>,
+    },
+    Field {
+        base: Box<Expr>,
+        ctor: crate::contract::ir::CtorRef,
+        index: usize,
+    },
     Local(LocalId),
     Unary {
         op: Unary,

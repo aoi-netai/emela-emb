@@ -1,5 +1,6 @@
 use super::{
     ast,
+    data::{self, Catalog},
     ir::{self, DefinitionId, Local, LocalId},
     modules::Modules,
     types::{InvocationSets, Signature, ValueType as Ty},
@@ -25,6 +26,7 @@ struct Definition {
 enum Symbol {
     Function(DefinitionId),
     Constant(ConstantId),
+    Constructor(crate::contract::ir::CtorRef),
 }
 #[derive(Clone, Copy)]
 enum ConstantId {
@@ -56,6 +58,7 @@ struct Scope {
 }
 struct Checker {
     modules: Modules,
+    catalog: Catalog,
     definitions: Vec<Definition>,
     module_definitions: Vec<HashMap<String, DefinitionId>>,
     scopes: Vec<Scope>,
@@ -82,7 +85,9 @@ impl Locals {
 }
 
 pub(crate) fn check(modules: Modules) -> Result<ir::Program, Vec<Diagnostic>> {
+    let catalog = Catalog::collect(&modules)?;
     let mut checker = Checker {
+        catalog,
         module_definitions: vec![HashMap::new(); modules.modules.len()],
         scopes: (0..modules.modules.len())
             .map(|_| Scope::default())
@@ -106,6 +111,7 @@ pub(crate) fn check(modules: Modules) -> Result<ir::Program, Vec<Diagnostic>> {
         return Err(errors);
     }
     Ok(ir::Program {
+        core: checker.catalog.core,
         functions: checker.checked.into_iter().flatten().collect(),
     })
 }
@@ -114,7 +120,10 @@ impl Checker {
         let mut errors = Vec::new();
         let mut exports = HashSet::new();
         let entry = &self.modules.modules[self.modules.entry];
-        if entry.ast.functions.is_empty() && entry.ast.imports.is_empty() {
+        if entry.ast.functions.is_empty()
+            && entry.ast.imports.is_empty()
+            && entry.ast.data.is_empty()
+        {
             return Err(vec![
                 Diagnostic::new(
                     DK::Syntax,
@@ -124,9 +133,17 @@ impl Checker {
                 .in_source(&entry.source_name),
             ]);
         }
-        for (module_index, module) in self.modules.modules.iter().enumerate() {
+        for module_index in 0..self.modules.modules.len() {
+            let module = self.modules.modules[module_index].clone();
             for function in &module.ast.functions {
                 let result = (|| -> Result<(), Diagnostic> {
+                    if !function.type_params.is_empty() {
+                        return Err(Diagnostic::new(
+                            DK::Unsupported,
+                            function.name.span,
+                            "generic function schemes are connected in the inference phase",
+                        ));
+                    }
                     if function.name.value == "_" {
                         return Err(Diagnostic::new(
                             DK::Name,
@@ -144,9 +161,25 @@ impl Checker {
                                 format!("duplicate parameter '{}'", param.name.value),
                             ));
                         }
-                        params.push(value_type(&param.ty)?);
+                        params.push(self.catalog.resolve_type(
+                            &self.modules,
+                            module_index,
+                            &param.ty,
+                            &HashMap::new(),
+                        )?);
                     }
-                    let ret = function.return_type.as_ref().map(value_type).transpose()?;
+                    let ret = function
+                        .return_type
+                        .as_ref()
+                        .map(|ty| {
+                            self.catalog.resolve_type(
+                                &self.modules,
+                                module_index,
+                                ty,
+                                &HashMap::new(),
+                            )
+                        })
+                        .transpose()?;
                     let mut export_symbol = None;
                     let mut external = None;
                     let mut intrinsic = None;
@@ -316,26 +349,50 @@ impl Checker {
                 };
                 if let Some(members) = &import.members {
                     for member in members {
-                        let symbol =
-                            if let Some(id) = self.module_definitions[target].get(&member.value) {
-                                if !self.definitions[id.0].ast.public {
-                                    errors.push(
-                                        Diagnostic::new(
-                                            DK::Name,
-                                            member.span,
-                                            format!(
-                                                "'{}.{}' is private",
-                                                import.path.value, member.value
-                                            ),
-                                        )
-                                        .in_source(&module.source_name),
-                                    );
+                        let symbol = if let Some(id) =
+                            self.module_definitions[target].get(&member.value)
+                        {
+                            if !self.definitions[id.0].ast.public {
+                                errors.push(
+                                    Diagnostic::new(
+                                        DK::Name,
+                                        member.span,
+                                        format!(
+                                            "'{}.{}' is private",
+                                            import.path.value, member.value
+                                        ),
+                                    )
+                                    .in_source(&module.source_name),
+                                );
+                                continue;
+                            }
+                            Some(Symbol::Function(*id))
+                        } else if let Some(constant) = constant(&import.path.value, &member.value) {
+                            Some(Symbol::Constant(constant))
+                        } else if let Some(id) = self.catalog.type_id(target, &member.value) {
+                            if !self.catalog.declaration(id).ast.public {
+                                errors.push(self.error(
+                                    index,
+                                    DK::Name,
+                                    member.span,
+                                    "imported type is private",
+                                ));
+                            }
+                            continue;
+                        } else {
+                            match self.catalog.constructor(
+                                &self.modules,
+                                index,
+                                &member.value,
+                                member.span,
+                            ) {
+                                Ok(value) => value.map(Symbol::Constructor),
+                                Err(error) => {
+                                    errors.push(error.in_source(&module.source_name));
                                     continue;
                                 }
-                                Some(Symbol::Function(*id))
-                            } else {
-                                constant(&import.path.value, &member.value).map(Symbol::Constant)
-                            };
+                            }
+                        };
                         match symbol {
                             Some(symbol) => {
                                 if self.module_definitions[index].contains_key(&member.value)
@@ -468,7 +525,10 @@ impl Checker {
                 } => {
                     let annotation = annotation
                         .as_ref()
-                        .map(value_type)
+                        .map(|ty| {
+                            self.catalog
+                                .resolve_type(&self.modules, module, ty, &HashMap::new())
+                        })
                         .transpose()
                         .map_err(|e| e.in_source(&self.modules.modules[module].source_name))?;
                     let value = self.expr(module, value, locals, annotation)?;
@@ -573,15 +633,22 @@ impl Checker {
                     if value.ty == Ty::String {
                         checked.push(value);
                     } else {
-                        let name = match value.ty {
-                            Ty::Int => "Int",
-                            Ty::Int64 => "Int64",
-                            Ty::Float => "Float",
-                            Ty::Bool => "Bool",
-                            Ty::Unit => "Unit",
-                            Ty::Never => "Unit",
-                            Ty::String => unreachable!(),
-                        };
+                        let name =
+                            match value.ty {
+                                Ty::Int => "Int",
+                                Ty::Int64 => "Int64",
+                                Ty::Float => "Float",
+                                Ty::Bool => "Bool",
+                                Ty::Unit => "Unit",
+                                Ty::Never => "Unit",
+                                Ty::String => unreachable!(),
+                                Ty::Compound(_) => return Err(self.error(
+                                    module,
+                                    DK::Unsupported,
+                                    part.span,
+                                    "data Show implementations are connected with trait checking",
+                                )),
+                            };
                         let target_module = self
                             .modules
                             .modules
@@ -602,6 +669,97 @@ impl Checker {
                 }
                 (ir::ExprKind::Concat(checked), Ty::String)
             }
+            A::Tuple(elements) => {
+                let hints =
+                    expected.and_then(|ty| match self.catalog.core.ty(data::backend_type(ty)) {
+                        crate::contract::ir::Type::Tuple(fields) => Some(
+                            fields
+                                .iter()
+                                .map(|&t| data::frontend_type(t))
+                                .collect::<Vec<_>>(),
+                        ),
+                        _ => None,
+                    });
+                if hints.as_ref().is_some_and(|h| h.len() != elements.len()) {
+                    return Err(self.error(
+                        module,
+                        DK::Type,
+                        span,
+                        "tuple arity does not match its expected type",
+                    ));
+                }
+                let mut checked = Vec::new();
+                for (index, element) in elements.iter().enumerate() {
+                    checked.push(self.expr(
+                        module,
+                        element,
+                        locals,
+                        hints.as_ref().map(|h| h[index]),
+                    )?);
+                }
+                let ty = Ty::Compound(self.catalog.core.types.intern(
+                    crate::contract::ir::Type::Tuple(
+                        checked.iter().map(|e| data::backend_type(e.ty)).collect(),
+                    ),
+                ));
+                (ir::ExprKind::Tuple(checked), ty)
+            }
+            A::Field { base, name } => {
+                let base = self.expr(module, base, locals, None)?;
+                let crate::contract::ir::Type::Enum(id, _) =
+                    self.catalog.core.ty(data::backend_type(base.ty))
+                else {
+                    return Err(self.error(
+                        module,
+                        DK::Type,
+                        name.span,
+                        "field access requires a record value",
+                    ));
+                };
+                let id = *id;
+                let declaration = self.catalog.declaration(id);
+                if declaration.ast.opaque && declaration.module != module {
+                    return Err(self.error(
+                        module,
+                        DK::Name,
+                        name.span,
+                        "opaque fields are private",
+                    ));
+                }
+                if declaration.ast.variants.len() != 1 {
+                    return Err(self.error(
+                        module,
+                        DK::Type,
+                        name.span,
+                        "enum fields must be read through a matching pattern",
+                    ));
+                }
+                let index = declaration.ast.variants[0]
+                    .fields
+                    .iter()
+                    .position(|f| f.name.as_ref().is_some_and(|n| n.value == name.value))
+                    .ok_or_else(|| {
+                        self.error(
+                            module,
+                            DK::Name,
+                            name.span,
+                            format!("unknown field '{}'", name.value),
+                        )
+                    })?;
+                let ctor = crate::contract::ir::CtorRef {
+                    enum_id: id,
+                    variant: 0,
+                };
+                let ty = self.catalog.fields(ctor, base.ty)[index];
+                (
+                    ir::ExprKind::Field {
+                        base: Box::new(base),
+                        ctor,
+                        index,
+                    },
+                    ty,
+                )
+            }
             A::Name(path) => {
                 if let Some(local) = (path.len() == 1)
                     .then(|| locals.names.get(&path[0].value))
@@ -611,6 +769,9 @@ impl Checker {
                 } else {
                     match self.resolve(module, path)? {
                         Symbol::Constant(id) => (ir::ExprKind::Literal(id.literal()), id.ty()),
+                        Symbol::Constructor(ctor) => {
+                            return self.construct(module, ctor, &[], locals, expected, span);
+                        }
                         Symbol::Function(_) => {
                             return Err(self.error(
                                 module,
@@ -720,6 +881,14 @@ impl Checker {
                         "ordering comparison requires ordered operands",
                     ));
                 }
+                if op.comparison() && matches!(left.ty, Ty::Compound(_)) {
+                    return Err(self.error(
+                        module,
+                        DK::Unsupported,
+                        span,
+                        "data equality is connected with trait checking",
+                    ));
+                }
                 let ty = if logical || op.comparison() {
                     Ty::Bool
                 } else if left.ty == Ty::Never {
@@ -756,13 +925,19 @@ impl Checker {
                         ),
                     ));
                 }
-                let Symbol::Function(id) = self.resolve(module, path)? else {
-                    return Err(self.error(
-                        module,
-                        DK::Type,
-                        callee.span,
-                        "a numeric constant cannot be called",
-                    ));
+                let id = match self.resolve(module, path)? {
+                    Symbol::Function(id) => id,
+                    Symbol::Constructor(ctor) => {
+                        return self.construct(module, ctor, args, locals, expected, span);
+                    }
+                    Symbol::Constant(_) => {
+                        return Err(self.error(
+                            module,
+                            DK::Type,
+                            callee.span,
+                            "a numeric constant cannot be called",
+                        ));
+                    }
                 };
                 let signature = self.definitions[id.0].signature.clone();
                 let params = self.definitions[id.0].ast.params.clone();
@@ -928,6 +1103,217 @@ impl Checker {
         }
         Ok(ir::Expr { kind, ty, span })
     }
+    fn construct(
+        &mut self,
+        module: usize,
+        ctor: crate::contract::ir::CtorRef,
+        args: &[ast::Argument],
+        locals: &mut Locals,
+        expected: Option<Ty>,
+        span: Span,
+    ) -> Result<ir::Expr, Diagnostic> {
+        use crate::contract::ir::{Type, TypeId};
+        let declaration = self.catalog.declaration(ctor.enum_id).clone();
+        let fields = &declaration.ast.variants[ctor.variant].fields;
+        let raw_types = self.catalog.core.enums[ctor.enum_id].variants[ctor.variant]
+            .tys
+            .clone();
+        let mut bindings = vec![None; declaration.ast.params.len()];
+        if let Some(expected) = expected {
+            if let Type::Enum(id, arguments) = self.catalog.core.ty(data::backend_type(expected)) {
+                if *id == ctor.enum_id {
+                    bindings = arguments.iter().copied().map(Some).collect();
+                }
+            }
+        }
+        let mut order = vec![usize::MAX; fields.len()];
+        let mut named = false;
+        for (index, argument) in args.iter().enumerate() {
+            let parameter = if let Some(label) = &argument.label {
+                named = true;
+                fields
+                    .iter()
+                    .position(|f| f.name.as_ref().is_some_and(|n| n.value == label.value))
+                    .ok_or_else(|| {
+                        self.error(
+                            module,
+                            DK::Type,
+                            label.span,
+                            format!("unknown constructor field '{}'", label.value),
+                        )
+                    })?
+            } else {
+                if named {
+                    return Err(self.error(
+                        module,
+                        DK::Type,
+                        argument.value.span,
+                        "positional arguments must precede named arguments",
+                    ));
+                }
+                if index >= fields.len() {
+                    return Err(self.error(
+                        module,
+                        DK::Type,
+                        span,
+                        "too many constructor arguments",
+                    ));
+                }
+                index
+            };
+            if order[parameter] != usize::MAX {
+                return Err(self.error(
+                    module,
+                    DK::Type,
+                    argument.value.span,
+                    "constructor field is supplied twice",
+                ));
+            }
+            order[parameter] = index;
+        }
+        if order.contains(&usize::MAX) {
+            return Err(self.error(
+                module,
+                DK::Type,
+                span,
+                format!(
+                    "constructor expects {} arguments, found {}",
+                    fields.len(),
+                    args.len()
+                ),
+            ));
+        }
+        for (parameter, &index) in order.iter().enumerate() {
+            if let Some(hint) = self.hint(module, &args[index].value, locals) {
+                self.infer_constructor(
+                    module,
+                    raw_types[parameter],
+                    data::backend_type(hint),
+                    &mut bindings,
+                    span,
+                )?;
+            }
+        }
+        let mut checked = Vec::new();
+        for (index, argument) in args.iter().enumerate() {
+            let parameter = order
+                .iter()
+                .position(|&position| position == index)
+                .unwrap();
+            let substitutions: Vec<_> = bindings
+                .iter()
+                .enumerate()
+                .map(|(i, ty)| ty.unwrap_or_else(|| self.catalog.core.types.intern(Type::Param(i))))
+                .collect();
+            let field_type = self
+                .catalog
+                .core
+                .types
+                .subst(raw_types[parameter], &substitutions);
+            let hint = (!self.catalog.core.types.has_param(field_type))
+                .then_some(data::frontend_type(field_type));
+            let value = self.expr(module, &argument.value, locals, hint)?;
+            self.infer_constructor(
+                module,
+                raw_types[parameter],
+                data::backend_type(value.ty),
+                &mut bindings,
+                argument.value.span,
+            )?;
+            checked.push(value);
+        }
+        let substitutions = bindings
+            .into_iter()
+            .collect::<Option<Vec<TypeId>>>()
+            .ok_or_else(|| {
+                self.error(
+                    module,
+                    DK::Type,
+                    span,
+                    "constructor type arguments cannot be inferred; add a type annotation",
+                )
+            })?;
+        let value_type = Ty::Compound(
+            self.catalog
+                .core
+                .types
+                .enum_type(ctor.enum_id, substitutions),
+        );
+        if expected.is_some_and(|expected| !value_type.compatible(expected)) {
+            return Err(self.error(
+                module,
+                DK::Type,
+                span,
+                format!(
+                    "constructor has type {value_type}, expected {}",
+                    expected.unwrap()
+                ),
+            ));
+        }
+        Ok(ir::Expr {
+            kind: ir::ExprKind::Make {
+                ctor,
+                args: checked,
+                order,
+            },
+            ty: value_type,
+            span,
+        })
+    }
+    fn infer_constructor(
+        &self,
+        module: usize,
+        template: crate::contract::ir::TypeId,
+        actual: crate::contract::ir::TypeId,
+        bindings: &mut [Option<crate::contract::ir::TypeId>],
+        span: Span,
+    ) -> Result<(), Diagnostic> {
+        use crate::contract::ir::{Type, TypeId};
+        if actual == TypeId::NEVER {
+            return Ok(());
+        }
+        match (self.catalog.core.ty(template), self.catalog.core.ty(actual)) {
+            (Type::Param(parameter), _) => {
+                if let Some(previous) = bindings[*parameter] {
+                    if previous != actual {
+                        return Err(self.error(
+                            module,
+                            DK::Type,
+                            span,
+                            "constructor fields infer different types for the same type parameter",
+                        ));
+                    }
+                } else {
+                    bindings[*parameter] = Some(actual);
+                }
+                Ok(())
+            }
+            (Type::Tuple(left), Type::Tuple(right)) if left.len() == right.len() => {
+                for (&left, &right) in left.iter().zip(right) {
+                    self.infer_constructor(module, left, right, bindings, span)?;
+                }
+                Ok(())
+            }
+            (Type::Enum(left, a), Type::Enum(right, b)) if left == right && a.len() == b.len() => {
+                for (&left, &right) in a.iter().zip(b) {
+                    self.infer_constructor(module, left, right, bindings, span)?;
+                }
+                Ok(())
+            }
+            _ if template == actual => Ok(()),
+            _ => Err(self.error(
+                module,
+                DK::Type,
+                span,
+                format!(
+                    "constructor field has type {}, expected {}",
+                    data::frontend_type(actual),
+                    data::frontend_type(template)
+                ),
+            )),
+        }
+    }
+
     fn resolve(&self, module: usize, path: &[ast::Text]) -> Result<Symbol, Diagnostic> {
         let first = &path[0];
         if path.len() == 1 {
@@ -967,6 +1353,18 @@ impl Checker {
                 }
             }
         }
+        let full_name = path
+            .iter()
+            .map(|p| p.value.as_str())
+            .collect::<Vec<_>>()
+            .join(".");
+        if let Some(ctor) = self
+            .catalog
+            .constructor(&self.modules, module, &full_name, first.span)
+            .map_err(|e| e.in_source(&self.modules.modules[module].source_name))?
+        {
+            return Ok(Symbol::Constructor(ctor));
+        }
         Err(self.error(
             module,
             DK::Name,
@@ -994,13 +1392,13 @@ impl Checker {
                 }
                 match self.resolve(module, path).ok()? {
                     Symbol::Constant(id) => Some(id.ty()),
-                    Symbol::Function(_) => None,
+                    Symbol::Function(_) | Symbol::Constructor(_) => None,
                 }
             }
             ast::ExprKind::Call { callee, .. } => match &callee.kind {
                 ast::ExprKind::Name(path) => match self.resolve(module, path).ok()? {
                     Symbol::Function(id) => self.definitions[id.0].signature.ret,
-                    Symbol::Constant(_) => None,
+                    Symbol::Constant(_) | Symbol::Constructor(_) => None,
                 },
                 _ => None,
             },
@@ -1022,22 +1420,6 @@ fn constant(module: &str, name: &str) -> Option<ConstantId> {
         ("Int64", "MIN") => Some(ConstantId::Int64Min),
         ("Int64", "MAX") => Some(ConstantId::Int64Max),
         _ => None,
-    }
-}
-fn value_type(text: &ast::Text) -> Result<Ty, Diagnostic> {
-    match text.value.as_str() {
-        "Int" => Ok(Ty::Int),
-        "Int64" => Ok(Ty::Int64),
-        "Float" => Ok(Ty::Float),
-        "Bool" => Ok(Ty::Bool),
-        "String" => Ok(Ty::String),
-        "Unit" => Ok(Ty::Unit),
-        "Never" => Ok(Ty::Never),
-        _ => Err(Diagnostic::new(
-            DK::Unsupported,
-            text.span,
-            format!("type '{}' requires a later phase", text.value),
-        )),
     }
 }
 fn valid_export_name(name: &str) -> bool {

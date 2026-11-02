@@ -18,6 +18,7 @@ impl Text {
 pub(crate) struct Module {
     pub imports: Vec<Import>,
     pub functions: Vec<Function>,
+    pub data: Vec<Data>,
 }
 #[derive(Clone, Debug)]
 pub(crate) struct Import {
@@ -28,6 +29,7 @@ pub(crate) struct Import {
 pub(crate) struct Function {
     pub name: Text,
     pub public: bool,
+    pub type_params: Vec<TypeParameter>,
     pub params: Vec<Parameter>,
     pub return_type: Option<Text>,
     pub attributes: Vec<Attribute>,
@@ -69,6 +71,11 @@ pub(crate) enum ExprKind {
     Float(String),
     String(String),
     Interpolate(Vec<Expr>),
+    Tuple(Vec<Expr>),
+    Field {
+        base: Box<Expr>,
+        name: Text,
+    },
     Bool(bool),
     Unit,
     Name(Vec<Text>),
@@ -128,4 +135,30 @@ impl Binary {
 pub(crate) struct Argument {
     pub label: Option<Text>,
     pub value: Expr,
+}
+
+#[derive(Clone, Debug)]
+pub(crate) struct TypeParameter {
+    pub name: Text,
+    pub bounds: Vec<Text>,
+}
+#[derive(Clone, Debug)]
+pub(crate) struct Data {
+    pub name: Text,
+    pub public: bool,
+    pub opaque: bool,
+    pub error: bool,
+    pub params: Vec<TypeParameter>,
+    pub variants: Vec<Variant>,
+    pub derives: Vec<Text>,
+}
+#[derive(Clone, Debug)]
+pub(crate) struct Variant {
+    pub name: Text,
+    pub fields: Vec<Field>,
+}
+#[derive(Clone, Debug)]
+pub(crate) struct Field {
+    pub name: Option<Text>,
+    pub ty: Text,
 }

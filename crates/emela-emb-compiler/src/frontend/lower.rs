@@ -9,7 +9,7 @@ use std::collections::HashMap;
 
 pub(crate) fn lower(input: &ir::Program) -> b::Program {
     let mut program = b::Program {
-        core: b::Definitions::default(),
+        core: input.core.clone(),
         functions: Default::default(),
         error_shows: vec![],
         const_function_groups: vec![],
@@ -57,6 +57,7 @@ pub(crate) fn lower(input: &ir::Program) -> b::Program {
             ids: &ids,
             intrinsics: &intrinsics,
             locals: HashMap::new(),
+            core: &program.core,
         };
         for param in &function.params {
             if param.ty == Ty::Unit {
@@ -85,12 +86,13 @@ struct Context<'a> {
     ids: &'a HashMap<DefinitionId, b::FnId>,
     intrinsics: &'a HashMap<DefinitionId, Intrinsic>,
     locals: HashMap<LocalId, b::Operand>,
+    core: &'a b::Definitions,
 }
 impl Context<'_> {
     fn var(&mut self, name: &str, value_type: Ty) -> b::VarId {
         self.function.vars.alloc(b::VarData {
             hint: name.into(),
-            repr: repr(value_type),
+            repr: repr(value_type, self.core),
             ty: ty(value_type),
         })
     }
@@ -180,6 +182,52 @@ impl Context<'_> {
     ) -> Option<b::Operand> {
         use ir::ExprKind as E;
         match &expression.kind {
+            E::Tuple(elements) => {
+                let mut values = Vec::new();
+                for element in elements {
+                    let value = self.expression(builder, element, false);
+                    if builder.term.is_some() {
+                        return None;
+                    }
+                    values.push(value.unwrap_or(b::Operand::Const(b::Const::Unit)));
+                }
+                self.value(builder, b::Value::Tuple(values), expression.ty)
+            }
+            E::Make { ctor, args, order } => {
+                let mut evaluated = Vec::new();
+                for argument in args {
+                    let value = self.expression(builder, argument, false);
+                    if builder.term.is_some() {
+                        return None;
+                    }
+                    evaluated.push(value.unwrap_or(b::Operand::Const(b::Const::Unit)));
+                }
+                self.value(
+                    builder,
+                    b::Value::Make {
+                        ctor: *ctor,
+                        args: order
+                            .iter()
+                            .map(|&index| evaluated[index].clone())
+                            .collect(),
+                    },
+                    expression.ty,
+                )
+            }
+            E::Field { base, ctor, index } => {
+                let b::Operand::Var(base) = self.expression(builder, base, false)? else {
+                    unreachable!("constructed record is bound to a variable")
+                };
+                self.value(
+                    builder,
+                    b::Value::Field {
+                        base,
+                        ctor: *ctor,
+                        index: *index,
+                    },
+                    expression.ty,
+                )
+            }
             E::Concat(parts) => {
                 let mut combined = b::Operand::Const(b::Const::String(String::new()));
                 for part in parts {
@@ -396,15 +444,27 @@ fn ty(value: Ty) -> b::TypeId {
         Ty::Bool => b::TypeId::BOOL,
         Ty::Unit => b::TypeId::UNIT,
         Ty::Never => b::TypeId::NEVER,
+        Ty::Compound(id) => id,
     }
 }
-fn repr(value: Ty) -> b::Repr {
+fn repr(value: Ty, core: &b::Definitions) -> b::Repr {
     match value {
         Ty::Int | Ty::Bool => b::Repr::I32,
         Ty::Int64 => b::Repr::I64,
         Ty::Float => b::Repr::F64,
         Ty::String => b::Repr::Ref,
         Ty::Unit | Ty::Never => b::Repr::Void,
+        Ty::Compound(id) => match core.ty(id) {
+            b::Type::Enum(id, _)
+                if !core.enums[*id].error
+                    && !core.enums[*id].external
+                    && !core.enums[*id].variants.is_empty()
+                    && core.enums[*id].variants.iter().all(|v| v.tys.is_empty()) =>
+            {
+                b::Repr::I32
+            }
+            _ => b::Repr::Ref,
+        },
     }
 }
 fn prim_ty(value: Ty) -> b::PrimTy {
