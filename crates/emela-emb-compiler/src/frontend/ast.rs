@@ -186,6 +186,7 @@ pub(crate) struct TypeParameter {
 #[derive(Clone, Debug)]
 pub(crate) struct Data {
     pub name: Text,
+    pub intrinsic: Option<Span>,
     pub public: bool,
     pub opaque: bool,
     pub error: bool,

@@ -1250,15 +1250,13 @@ fn existing_type(modules: &Modules, catalog: &Catalog, module: usize, name: &str
     ) {
         return true;
     }
-    if catalog.type_id(module, name).is_some() {
+    if catalog.type_id(module, name).is_some() || catalog.has_native_type(module, name) {
         return true;
     }
-    if modules
-        .modules
-        .iter()
-        .enumerate()
-        .any(|(index, module)| module.builtin && catalog.type_id(index, name).is_some())
-    {
+    if modules.modules.iter().enumerate().any(|(index, module)| {
+        module.builtin
+            && (catalog.type_id(index, name).is_some() || catalog.has_native_type(index, name))
+    }) {
         return true;
     }
     modules.modules[module].ast.imports.iter().any(|import| {
@@ -1267,7 +1265,9 @@ fn existing_type(modules: &Modules, catalog: &Catalog, module: usize, name: &str
             .as_ref()
             .is_some_and(|members| members.iter().any(|member| member.value == name))
             && modules.modules.iter().enumerate().any(|(index, module)| {
-                module.name == import.path.value && catalog.type_id(index, name).is_some()
+                module.name == import.path.value
+                    && (catalog.type_id(index, name).is_some()
+                        || catalog.has_native_type(index, name))
             })
     })
 }

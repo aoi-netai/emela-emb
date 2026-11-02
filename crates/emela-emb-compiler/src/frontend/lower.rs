@@ -958,5 +958,16 @@ fn builtin(op: Intrinsic) -> b::Builtin {
         Intrinsic::FloatParse => b::Builtin::FloatParse,
         Intrinsic::StringFromCodePoint => b::Builtin::StringFromCodePoint,
         Intrinsic::ListJoin => b::Builtin::StringJoin,
+        Intrinsic::StringSplit => b::Builtin::StringSplit,
+        Intrinsic::StringChars => b::Builtin::StringChars,
+        Intrinsic::StringCodePoints => b::Builtin::StringCodePoints,
+        Intrinsic::BytesFromList => b::Builtin::BytesFromList,
+        Intrinsic::BytesToList => b::Builtin::BytesToList,
+        Intrinsic::BytesSize => b::Builtin::BytesSize,
+        Intrinsic::BytesGet => b::Builtin::BytesGet,
+        Intrinsic::BytesSlice => b::Builtin::BytesSlice,
+        Intrinsic::BytesConcat => b::Builtin::BytesConcat,
+        Intrinsic::BytesEncodeUtf8 => b::Builtin::BytesEncodeUtf8,
+        Intrinsic::BytesDecodeValidUtf8 => b::Builtin::BytesDecodeValidUtf8,
     }
 }

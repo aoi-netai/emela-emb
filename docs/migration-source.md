@@ -327,3 +327,16 @@
 - List構文・型推論・pattern・具体化・lowerは独自実装。ListのEq/Ord/Showはsource implを通し、dbgだけに使うShow fallbackもcustom element実装を優先する。
 
 `tests/p3_lists.rs` はsourceから型・pattern診断、評価順、固定heap、custom Eq/Ord/Show、安定sort、dbg fallbackを実行する。Cの両最適化検証は試験helperが必須実行する。sourceで宣言されないAnyは内部のerror union/型消去とIR試験のbox/unboxとして区別し、新しい公開Any構文を追加しない。
+
+## P3のBytes・String/List境界
+
+同じ固定revisionから次の標準sourceを採用した。Apache-2.0のライセンスと旧backend runtimeの出自は上記を維持する。
+
+| 固定旧source | 元SHA-256 | 適応 |
+| --- | --- | --- |
+| `crates/emela-core/lib/std/bytes.emel` | `1d45b6c1c73373433337e65d89211abed5dea32bd21f13006511bc34e1a83d63` | `lib/std/bytes.emel`へ全同期API・UTF-8検証・hex・Eq/Ord/Showのbodyを採用。to_hex内のmap lambdaだけを同順序のtail-rec helperへ適応 |
+| `crates/emela-core/lib/core/string.emel` | `e5b1aa4151d8f39966da98b927ec138fb3e688c0b8fe5331cef908bdbadcc8ca` | split/chars/code_points/concat/joinを接続。ASCII case変換内のmap lambdaを同じcode point変換のtail-rec helperへ適応し、deprecated属性は取り込まない |
+
+`@intrinsic pub opaque type Bytes`は信頼済みStd.Bytes宣言IDからだけ`TypeId::BYTES`へ解決する。利用者の同名型、未importのStd型、不正なintrinsic型宣言はその表現を選ばない。List/Bytesのmethod sugarはreceiver型のmoduleへ接続する。
+
+`tests/p3_memory_api.rs`はsourceからString/List/Bytesの実行、UTF-8不正・範囲外byte・hexの失敗、custom型同名の分離と公開範囲を確認する。容量・所有権の大きな境界試験は別のsource/IR回帰として扱い、これら小さなAPI実行だけでP3全体を完了扱いしない。

@@ -48,6 +48,7 @@ impl<'t, 's> Parser<'t, 's> {
                 }
                 imports.push(self.import()?);
             } else {
+                let intrinsic = self.intrinsic_data_attribute()?;
                 let declaration = if self.word("pub") {
                     self.peek(1).kind
                 } else {
@@ -60,7 +61,9 @@ impl<'t, 's> Parser<'t, 's> {
                 } else if declaration == K::Name("impl") {
                     impls.push(self.implementation()?);
                 } else if matches!(declaration, K::Name("type" | "enum" | "error" | "opaque")) {
-                    data.push(self.data()?);
+                    let mut declaration = self.data()?;
+                    declaration.intrinsic = intrinsic;
+                    data.push(declaration);
                 } else {
                     functions.push(self.function()?);
                 }
@@ -81,6 +84,28 @@ impl<'t, 's> Parser<'t, 's> {
             traits,
             impls,
         })
+    }
+    fn intrinsic_data_attribute(&mut self) -> Result<Option<Span>, Diagnostic> {
+        let checkpoint = self.cursor;
+        if !self.take(K::At) || !self.word("intrinsic") {
+            self.cursor = checkpoint;
+            return Ok(None);
+        }
+        let span = self.current().span;
+        self.advance();
+        self.expect(K::Newline, "expected a line break after attribute")?;
+        self.newlines();
+        let declaration = if self.word("pub") {
+            self.peek(1).kind
+        } else {
+            self.current().kind
+        };
+        if matches!(declaration, K::Name("type" | "enum" | "error" | "opaque")) {
+            Ok(Some(span))
+        } else {
+            self.cursor = checkpoint;
+            Ok(None)
+        }
     }
     fn trait_declaration(&mut self) -> Result<TraitDeclaration, Diagnostic> {
         let public = self.take_word("pub");
@@ -568,6 +593,7 @@ impl<'t, 's> Parser<'t, 's> {
         }
         Ok(Data {
             name,
+            intrinsic: None,
             public,
             opaque,
             error,

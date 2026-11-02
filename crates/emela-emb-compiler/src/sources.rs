@@ -22,6 +22,7 @@ pub(crate) const CORE_MODULES: &[(&str, &str)] = &[
     ("String", include_str!("../lib/core/string.emel")),
     ("Bool", include_str!("../lib/core/bool.emel")),
     ("Unit", include_str!("../lib/core/unit.emel")),
+    ("Std.Bytes", include_str!("../lib/std/bytes.emel")),
 ];
 
 /// This identity is assigned only while collecting a declaration from the compiler-owned
@@ -69,6 +70,17 @@ pub(crate) enum Intrinsic {
     FloatParse,
     StringFromCodePoint,
     ListJoin,
+    StringSplit,
+    StringChars,
+    StringCodePoints,
+    BytesFromList,
+    BytesToList,
+    BytesSize,
+    BytesGet,
+    BytesSlice,
+    BytesConcat,
+    BytesEncodeUtf8,
+    BytesDecodeValidUtf8,
 }
 pub(crate) fn intrinsic(module: &str, name: &str) -> Option<Intrinsic> {
     Some(match (module, name) {
@@ -113,6 +125,17 @@ pub(crate) fn intrinsic(module: &str, name: &str) -> Option<Intrinsic> {
         ("Float", "parse_or_none") => Intrinsic::FloatParse,
         ("String", "from_code_point") => Intrinsic::StringFromCodePoint,
         ("List", "join") => Intrinsic::ListJoin,
+        ("String", "split") => Intrinsic::StringSplit,
+        ("String", "chars") => Intrinsic::StringChars,
+        ("String", "code_points") => Intrinsic::StringCodePoints,
+        ("Std.Bytes", "from_list") => Intrinsic::BytesFromList,
+        ("Std.Bytes", "to_list") => Intrinsic::BytesToList,
+        ("Std.Bytes", "size") => Intrinsic::BytesSize,
+        ("Std.Bytes", "get") => Intrinsic::BytesGet,
+        ("Std.Bytes", "slice") => Intrinsic::BytesSlice,
+        ("Std.Bytes", "concat") => Intrinsic::BytesConcat,
+        ("Std.Bytes", "encode_utf8") => Intrinsic::BytesEncodeUtf8,
+        ("Std.Bytes", "decode_valid_utf8") => Intrinsic::BytesDecodeValidUtf8,
         _ => return None,
     })
 }

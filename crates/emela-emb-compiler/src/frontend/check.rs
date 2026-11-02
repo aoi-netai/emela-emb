@@ -591,7 +591,9 @@ impl Checker {
                             Some(Symbol::Function(*id))
                         } else if let Some(constant) = constant(&import.path.value, &member.value) {
                             Some(Symbol::Constant(constant))
-                        } else if self.traits.find_trait(index, &member.value).is_some() {
+                        } else if self.traits.find_trait(index, &member.value).is_some()
+                            || self.catalog.has_native_type(target, &member.value)
+                        {
                             continue;
                         } else if let Some(id) = self.catalog.type_id(target, &member.value) {
                             if !self.catalog.declaration(id).ast.public {
