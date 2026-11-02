@@ -81,9 +81,21 @@ const導入後にも実際のRust 1.85.0で `cargo check --workspace --all-targe
 - `cargo test --workspace --locked --offline`: 141 pass、失敗/skip 0、終了0。C試験は`-O0`/`-O2`とも成功。
 - `cargo fmt --all --check` と `cargo clippy --workspace --all-targets --locked --offline -- -D warnings`: 終了0。const導入時に残っていたAST未読警告も実装の接続で解消した。
 
+## 戻り型の自動汎化と相互再帰
+
+`db9cc4c` で関数呼出しの依存を追跡し、相互再帰するcomponentの全bodyを検査してから戻り型の未確定変数を量化する。明示型パラメーターの後ろに推論したパラメーターを置き、呼出しごとに新しい変数を割り当てる。component内の再帰呼出しは共有して推論し、正規化時に関数ごとの型引数へ確定する。単相constは共有の環境に残し、自動汎化しない。
+
+`tests/p2_inference.rs` の4試験は、`None`を返す関数のInt/String別instance、forward wrapper、明示/暗黙型引数の併用、3関数の相互再帰、型引数の個数と順番が異なる相互再帰をsourceからCの両最適化で実行する。再帰先の戻り型がまだ不明な場合は、その型が判明した後に明示型引数を代入する。数値の既定型、rigidな宣言型、未使用の不正body、汎化関数のC公開拒否も検査した。
+
+P1時点の`fn f() { f() }`拒否は、戻り型の自動汎化に伴って更新した。固定旧forkの`emela-types/src/body.rs::finish`と`infer.rs::generalize_bounded`が未確定の戻り型も量化する設計に合わせ、Int/Stringの具体wrapperから生成・Cコンパイルする。停止しない関数自体は実行せず、同じ生成物の正常なexportを実行する。これを停止性の保証とは数えない。
+
+- `cargo test --workspace --locked --offline`: 145 pass、失敗/skip 0、終了0。
+- `cargo fmt --all --check` と `cargo clippy --workspace --all-targets --locked --offline -- -D warnings`: 終了0。
+- `cargo test -p emela-emb-compiler --release --test p2_inference --locked --offline`: 4 pass、失敗/skip 0、終了0。Rustのrelease buildでも同じC `-O0`/`-O2`試験が成功。
+
 ## P2の残りの確認
 
-未確定戻り型の汎化、trait/default/supertrait/derive、標準Prelude/Optionと数値parse、const patternを後続の機能別検証へ接続する。旧`release_0_24/traits.emel`は同期部分を独立fixtureへ抽出し、List/closure/Fiber/Causeを含む元fixture全体の実行はP6以降に残す。先行String成功だけで旧混在fixture・旧115関連試験・横断要件全体をverifiedにしない。
+trait/default/supertrait/derive、標準Prelude/Optionと数値parse、const patternを後続の機能別検証へ接続する。旧`release_0_24/traits.emel`は同期部分を独立fixtureへ抽出し、List/closure/Fiber/Causeを含む元fixture全体の実行はP6以降に残す。先行String成功だけで旧混在fixture・旧115関連試験・横断要件全体をverifiedにしない。
 
 ## 最終統合の追記欄
 
