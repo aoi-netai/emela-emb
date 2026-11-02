@@ -565,3 +565,5 @@ completeの一度だけの格納、空/Unit/Bool/tuple/Int64/Floatのpoll/await�
 P7の`p7_payload_compat.rs`は固定旧`tests/fiber/payload.rs`のsource3入力を保存済みcorpusから読み、exportだけを加えて旧C観測を実行する。String/Listエラーpayloadの所有、suspend cleanup、直接/間接failure、取消とstale通知を旧heap/frame 512 byteで確認する。root取消は旧試験どおり生成Cのprivate flag hookを使い、IR変更は行わない。対応は`docs/reports/p7-cleanup-source-compat.json`へ記録する。
 
 同じfailure handlerを複数箇所へ出力するとevidence検索のgoto labelが重複するため、検索をlocal scope内のwhile・NULL診断・代入へ適応した。中断frameの値fieldへ所有flagを交互に挟むpaddingも除き、error/guard/各値のflagをまとめた。field名・型と所有処理は保持し、旧List error入力のframeは544 byteから512 byteとなる。frame容量を増やす代用はせず、C両最適化の旧上限assertと1000回のheap回収を通す。
+
+`p7_failure_compat.rs`、`p7_interrupt_compat.rs`、`p7_protect_compat.rs`は、同じ固定版のfailure/interrupt/protect source21試験も旧C期待値とresource budgetで実行する。親子の失敗伝播・release待機・resume前後のfailure・error表示・古いtask通知・待機列順序・中断Causeの所有・未開始child・operation tailと中断cleanupの停止方針を観測する。P6のinterrupt FIFO入力も旧512 byte/frameのbudgetで再実行する。payloadを含むsource API側24試験は、この対応表でsource後のIR変更なしと明記する。旧試験がHold/Protect cleanup移動/失敗external置換を行う別12件は`p7-cleanup-source-seams.json`へ分離して担当間で検証し、これら24件の成功へ混ぜない。
