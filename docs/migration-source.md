@@ -381,7 +381,7 @@ Handler/Evidence/operation call/RetireとCellの型・ID検証は独自lowerに�
 
 引数はnamed argumentを含めsource順で一度ずつ評価し、成功後にCellを作る。Stateはretireせず、返却closureによる共有状態の保持を許す。公開Cell型やStd.Cell APIは追加しない。独自IR/C試験で、引数の順序、返却closureによる連続更新、1000回のheap全回収と別moduleのState identity拒否を確認した。
 
-現時点ではStd.Stateの通常source供給は未登録。effect集合・source checkerの統合後に有効化し、source/C実行を別に確認する。
+Std.Stateを通常sourceへ登録し、`tests/p4_state.rs`で返却closure、借用Stringのsnapshot、失敗payload、named argument順、異なる型のStateの入れ子、State.runの関数値をC両最適化・各1000回の全heap回収で確認する。公開Cell型やeffect付き・失敗するupdate callbackは拒否する。
 
 ## P4標準callback APIの復元
 

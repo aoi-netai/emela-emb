@@ -1,0 +1,82 @@
+import Std.State.{State}
+
+@external(c, "mark")
+fn mark(value: Int) -> Int
+@external(c, "mutate_input")
+fn mutate_input() -> Unit
+
+fn escaped(initial: Int) -> fn() -> Int {
+  (reader, _) = State.run(initial, fn() {
+    state = use State[Int]
+    fn() {
+      state.update(fn(value) { value + 1 })
+      state.get()
+    }
+  })
+  reader
+}
+
+@export(c, "state_counter")
+pub fn counter() -> Int {
+  reader = escaped(40)
+  reader() + reader()
+}
+
+@export(c, "state_owned")
+pub fn owned(text: String, expected: String) -> Bool {
+  ((saved, reader), final) = State.run(text, fn() {
+    state = use State[String]
+    saved = state.get()
+    state.update(fn(value) { String.append(value, "!") })
+    (saved, fn() { state.get() })
+  })
+  mutate_input()
+  saved == expected && final == String.append(expected, "!") && reader() == final
+}
+
+error StateFailure(value: String)
+@export(c, "state_failure")
+pub fn failure(text: String) -> Bool {
+  value = State.run(text, fn() {
+    state = use State[String]
+    state.set(String.append(state.get(), "!"))
+    fail StateFailure(state.get())
+    0
+  }) escape { StateFailure(value) -> (42, value) }
+  value == (42, String.append(text, "!"))
+}
+
+fn callback(marker: Int) -> fn() -> Int use State[Int] {
+  mark(marker + 2)
+  fn() {
+    state = use State[Int]
+    state.update(fn(value) { value + 40 })
+    state.get()
+  }
+}
+@export(c, "state_order")
+pub fn order() -> Int {
+  (value, final) = State.run(body: callback(mark(1)), initial: mark(2))
+  assert value == final
+  value
+}
+
+@export(c, "state_nested")
+pub fn nested() -> Int use {} {
+  (result, final) = State.run(1, fn() {
+    (text, _) = State.run("x", fn() {
+      (use State[Int]).update(fn(value) { value + 40 })
+      (use State[String]).update(fn(value) { String.append(value, "!") })
+      (use State[String]).get()
+    })
+    assert text == "x!"
+    (use State[Int]).get() + 1
+  })
+  assert result == 42 && final == 41
+  runner = State.run
+  assert runner(0, fn() {
+    (use State[Int]).set(42)
+    42
+  }) == (42, 42)
+  result
+}
